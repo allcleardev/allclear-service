@@ -1,0 +1,24 @@
+{
+  "environment": "local",
+
+  "trans": {
+    "driverClass": "com.mysql.jdbc.Driver",
+    "user": "allclear",
+    "password": "allclear",
+    "url": "jdbc:mysql://localhost:3306/allclear?useEncoding=true&characterEncoding=UTF-8&prepStmtCacheSize=100&prepStmtCacheSqlLimit=1024&serverTimezone=UTC",
+    "maxWaitForConnection": "1s",
+    "validationQuery": "SELECT 1",
+    "minSize": "1",
+    "maxSize": "10",
+    "checkConnectionWhileIdle": "true",
+    "checkConnectionOnBorrow": "true",
+    "defaultTransactionIsolation": "READ_COMMITTED",
+    "properties": { "hibernate.dialect": "org.hibernate.dialect.MySQL57Dialect",
+      "hibernate.dialect.storage_engine": "innodb",
+      "hibernate.show_sql": false }
+  },
+
+  "logging": { "level": "INFO",
+    "loggers": { "com.sun.jersey.api.container.filter.LoggingFilter": "INFO",
+                 "org.hibernate.engine.internal.StatisticalLoggingSessionEventListener": "WARN" } }
+}

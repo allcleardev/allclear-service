@@ -1,0 +1,13 @@
+dependencies {
+    compile "com.amazonaws:aws-java-sdk-dynamodb:${awsVersion}"
+    compile "com.amazonaws:aws-java-sdk-s3:${awsVersion}"
+    compile "com.amazonaws:aws-java-sdk-sns:${awsVersion}"
+    compile "com.amazonaws:aws-java-sdk-sqs:${awsVersion}"
+    compile "commons-io:commons-io:${commonsIOVersion}"
+    compile "io.dropwizard:dropwizard-db:${dropwizardVersion}"
+    compile "com.sun.activation:javax.activation:${javaxActivationVersion}"
+    compile "javax.xml.bind:jaxb-api:${javaxXmlBindVersion}"
+    compile "redis.clients:jedis:${jedisVersion}"
+    // compile "com.readytalk:metrics3-statsd:${readytalkVersion}"
+    compile "io.swagger:swagger-jersey2-jaxrs:${swaggerVersion}"
+}

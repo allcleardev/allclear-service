@@ -1,0 +1,137 @@
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+// Set project level properties
+mainClassName = 'app.allclear.Platform'	// Need outside of "ext" to work with the "run" task.
+
+// Add Gradle OneJar Plugin, see https://github.com/rholder/gradle-one-jar
+buildscript {
+  repositories {
+    jcenter()
+  }
+
+  dependencies {
+    classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.3'
+  }
+}
+
+test {
+  forkEvery = 50
+  maxParallelForks = 1	// Some tests share resources in AWS. DLS on 7/22/2016.
+}
+
+dependencies {
+  compile "commons-io:commons-io:${commonsIOVersion}"
+  compile "io.dropwizard:dropwizard-assets:${dropwizardVersion}"
+  compile "io.dropwizard:dropwizard-hibernate:${dropwizardVersion}"
+  compile "io.dropwizard:dropwizard-metrics:${dropwizardVersion}"
+  compile "io.dropwizard:dropwizard-migrations:${dropwizardVersion}"
+  compile "org.glassfish.jersey.media:jersey-media-multipart:${jerseyVersion}"
+  compile "org.glassfish.jersey.core:jersey-client:${jerseyVersion}"
+  compile "org.liquibase:liquibase-core:${liquibaseVersion}"
+  testCompile "org.mockito:mockito-core:${mockitoVersion}"
+  runtime "mysql:mysql-connector-java:${mysqlVersion}"
+}
+
+// Starts the server.
+run {
+  jvmArgs '-Dfile.encoding=UTF-8', '-Duser.timezone=UTC', '-Dhibernate.dialect.storage_engine=innodb'
+  args 'server', './conf/local.json'
+}
+
+// Start the application with the DEV configuration.
+task runDev(type: JavaExec, dependsOn: assemble) {
+  main = mainClassName
+  classpath run.classpath
+  jvmArgs '-Dfile.encoding=UTF-8', '-Duser.timezone=UTC', '-Dhibernate.dialect.storage_engine=innodb'
+  args 'server', './conf/dev.json'
+}
+
+// Start the application with the STAGING configuration.
+task runStage(type: JavaExec, dependsOn: assemble) {
+  main = mainClassName
+  classpath run.classpath
+  jvmArgs '-Dfile.encoding=UTF-8', '-Duser.timezone=UTC', '-Dhibernate.dialect.storage_engine=innodb'
+  args 'server', './conf/staging.json'
+}
+
+// Start the application with the PROD configuration.
+task runProd(type: JavaExec, dependsOn: assemble) {
+  main = mainClassName
+  classpath run.classpath
+  jvmArgs '-Dfile.encoding=UTF-8', '-Duser.timezone=UTC', '-Dhibernate.dialect.storage_engine=innodb'
+  args 'server', './conf/prod.json'
+}
+
+// Create DB documentation.
+task dbDocs(type: JavaExec, dependsOn: assemble) {
+  main = mainClassName
+  classpath run.classpath
+  args 'db', 'generate-docs', './conf/local.json', './db/'
+}
+
+// Drop all the DB objects and start over.
+task dbDropAll(type: JavaExec, dependsOn: assemble) {
+  main = mainClassName
+  classpath run.classpath
+  args 'db', 'drop-all', '--confirm-delete-everything', './conf/local.json'
+}
+
+// Dump the DB as a migration script to migrations.xml.
+task dbDump(type: JavaExec, dependsOn: assemble) {
+  main = mainClassName
+  classpath run.classpath
+  args 'db', 'dump', './conf/local.json'
+}
+
+// After dumping the DB, tag the DB at the current change set.
+task dbFastForward(type: JavaExec, dependsOn: assemble) {
+  main = mainClassName
+  classpath run.classpath
+  jvmArgs '-Dfile.encoding=UTF-8', '-Duser.timezone=UTC', '-Dhibernate.dialect.storage_engine=innodb'
+  // args 'db', 'fast-forward', './conf/dev.json', '--all'
+  args 'db', 'fast-forward', './conf/local.json', '--all'
+}
+
+// Run the next change-sets.
+task dbMigrate(type: JavaExec, dependsOn: assemble) {
+  main = mainClassName
+  classpath run.classpath
+  jvmArgs '-Dfile.encoding=UTF-8', '-Duser.timezone=UTC', '-Dhibernate.dialect.storage_engine=innodb'
+  // args 'db', 'migrate', './conf/dev.json'
+  args 'db', 'migrate', './conf/local.json'
+}
+
+// Run the next change-sets.
+task dbRollback(type: JavaExec, dependsOn: assemble) {
+  main = mainClassName
+  classpath run.classpath
+  args 'db', 'rollback', '--count', '1', './conf/local.json'
+}
+
+// Get the database status.
+task dbStatus(type: JavaExec, dependsOn: assemble) {
+  main = mainClassName
+  classpath run.classpath
+  args 'db', 'status', './conf/local.json'
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '6.0.1'
+}
+
+// Builds a single fat jar.
+shadowJar {
+  mergeServiceFiles()
+  exclude 'META-INF/*.DSA'
+  exclude 'META-INF/*.RSA'
+}
+
+jar {
+  manifest {
+    attributes('Main-Class': mainClassName,
+      'Implementation-Vendor': 'AllClear',
+      'Implementation-Title': 'platform-server',
+      'Implementation-Version': version)
+  }
+}

@@ -1,0 +1,16 @@
+**/bin
+**/build
+**/.classpath
+**/.gradle
+**/jmeter.log
+**/.project
+question-service-server/data
+question-service-server/db/out
+question-service-server/dump.rdb
+question-service-server/log
+**/.settings
+**/target
+*.iml
+dependency-reduced-pom.xml
+configczar/
+/build/

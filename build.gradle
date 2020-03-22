@@ -1,0 +1,75 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+
+subprojects {
+  apply plugin: 'java'
+  apply plugin: 'eclipse'
+  group = 'io.allclear'
+  version = '1.0.0'
+
+  // Use Java 12
+  sourceCompatibility = 1.12
+  targetCompatibility = 1.12
+
+  sourceSets.main.java.srcDirs = [ 'src' ]  // srcDir 'src'  // This just adds to the set of directories.
+  sourceSets.main.resources.srcDirs = [ 'res' ]
+  sourceSets.test.java.srcDirs = [ 'test' ]  // srcDir 'test'  // This just adds to the set of directories.
+  sourceSets.test.resources.srcDirs = [ 'test-res' ]
+
+  test {
+    useJUnitPlatform()
+    systemProperty 'user.timezone', 'UTC'	// Use the production environment's default time zone for all tests. DLS on 5/23/2016.
+    ignoreFailures = true		// Set FALSE to halt execution after the first unit test failure. Useful when testing up to a specific call.
+  }
+
+  ext {
+    awsVersion = '1.11.703'
+    commonsCollectionVersion = '4.4'
+    commonsIOVersion = '2.6'
+    commonsLangVersion = '3.9'
+    dropwizardVersion = '2.0.0'
+    embeddedRedisVersion = '0.6'	// For testing.
+    festVersion = '2.0M10'
+    h2Version = '1.4.200'	// For testing.
+    hibernateVersion = '5.4.10.Final'
+    jacksonVersion = '2.10.1'
+    javaxActivationVersion = '1.2.0'
+    javaxXmlBindVersion = '2.3.1'
+    jedisVersion = '3.2.0'
+    jerseyVersion = '2.29.1'
+    junitVersion = '5.5.2'
+    liquibaseVersion = '3.8.2'
+    mockitoVersion = '3.2.0'
+    mysqlVersion = '8.0.19'
+    slf4jVersion = '1.7.29'
+    swaggerVersion = '1.6.0'
+
+    HOME = System.getenv('HOME')
+  }
+
+  repositories {
+    mavenCentral()
+    maven {
+      url 'https://dl.bintray.com/readytalk/maven'
+    }
+  }
+
+  dependencies {
+    compile "org.apache.commons:commons-collections4:${commonsCollectionVersion}"
+    compile "org.apache.commons:commons-lang3:${commonsLangVersion}"
+  }
+}
+
+project(':common-service') {
+  dependencies {
+    testCompile project(':common-testing')
+  }
+}
+
+project(':platform-server') {
+  dependencies {
+    compile project(':common-service')
+    compile project(':platform-model')
+    testCompile project(':common-testing')
+  }
+}

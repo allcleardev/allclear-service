@@ -1,0 +1,2 @@
+include 'common-service', 'common-testing', 'platform-model', 'platform-server'
+

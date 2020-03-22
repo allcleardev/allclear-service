@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+
+	<changeSet id="v1.0.0_init" author="smalleyd">
+		<createTable tableName="people" remarks="Represents users of the system.">
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true" primaryKeyName="pk_people" />
+			</column>
+		</createTable>
+
+		<rollback>
+			<dropTable tableName="people" />
+		</rollback>
+	</changeSet>
+
+</databaseChangeLog>
