@@ -79,6 +79,28 @@ public class PeopleValue implements Serializable
 
 	public PeopleValue() {}
 
+	public PeopleValue(
+		final String name,
+		final String phone,
+		final boolean active)
+	{
+		this(name, phone, null, null, null, null, null, null, active);
+	}
+
+	public PeopleValue(
+		final String name,
+		final String phone,
+		final String email,
+		final String firstName,
+		final String lastName,
+		final Date dob,
+		final String statusId,
+		final String statureId,
+		final boolean active)
+	{
+		this(null, name, phone, email, firstName, lastName, dob, statusId, null, statureId, null, active, null, null, null, null, null);
+	}
+
 	public PeopleValue(final String id,
 		final String name,
 		final String phone,
@@ -145,9 +167,9 @@ public class PeopleValue implements Serializable
 			Objects.equals(statusId, v.statusId) &&
 			Objects.equals(statureId, v.statureId) &&
 			(active == v.active) &&
-			DateUtils.truncatedEquals(authAt, v.authAt, Calendar.SECOND) &&
-			DateUtils.truncatedEquals(phoneVerifiedAt, v.phoneVerifiedAt, Calendar.SECOND) &&
-			DateUtils.truncatedEquals(emailVerifiedAt, v.emailVerifiedAt, Calendar.SECOND) &&
+			((authAt == v.authAt) || DateUtils.truncatedEquals(authAt, v.authAt, Calendar.SECOND)) &&
+			((phoneVerifiedAt == v.phoneVerifiedAt) || DateUtils.truncatedEquals(phoneVerifiedAt, v.phoneVerifiedAt, Calendar.SECOND)) &&
+			((emailVerifiedAt == v.emailVerifiedAt) || DateUtils.truncatedEquals(emailVerifiedAt, v.emailVerifiedAt, Calendar.SECOND)) &&
 			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND) &&
 			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
 	}

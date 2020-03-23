@@ -33,7 +33,8 @@ import app.allclear.platform.value.PeopleValue;
 @NamedQueries({@NamedQuery(name="existsPeople", query="SELECT o.id FROM People o WHERE o.id = :id"),
 	@NamedQuery(name="findPeople", query="SELECT OBJECT(o) FROM People o WHERE o.name = :name"),
 	@NamedQuery(name="findPeopleByEmail", query="SELECT OBJECT(o) FROM People o WHERE o.email = :email"),
-	@NamedQuery(name="findPeopleByPhone", query="SELECT OBJECT(o) FROM People o WHERE o.phone = :phone")})
+	@NamedQuery(name="findPeopleByPhone", query="SELECT OBJECT(o) FROM People o WHERE o.phone = :phone"),
+	@NamedQuery(name="findActivePeopleByIdOrName", query="SELECT OBJECT(o) FROM People o WHERE ((o.id LIKE :name) OR (o.name LIKE :name)) AND o.active = TRUE ORDER BY o.name")})
 public class People implements Serializable
 {
 	private final static long serialVersionUID = 1L;
@@ -191,9 +192,9 @@ public class People implements Serializable
 			getLastName(),
 			getDob(),
 			getStatusId(),
-			PeopleStatus.VALUES.get(getStatusId()),
+			(null != getStatusId()) ? PeopleStatus.VALUES.get(getStatusId()) : null,
 			getStatureId(),
-			PeopleStature.VALUES.get(getStatureId()),
+			(null != getStatureId()) ? PeopleStature.VALUES.get(getStatureId()) : null,
 			isActive(),
 			getAuthAt(),
 			getPhoneVerifiedAt(),

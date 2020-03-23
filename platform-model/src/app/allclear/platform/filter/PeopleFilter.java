@@ -25,18 +25,27 @@ public class PeopleFilter extends QueryFilter
 	public String name = null;
 	public String phone = null;
 	public String email = null;
+	public Boolean hasEmail = null;
 	public String firstName = null;
+	public Boolean hasFirstName = null;
 	public String lastName = null;
+	public Boolean hasLastName = null;
 	public Date dob = null;
+	public Boolean hasDob = null;
 	public Date dobFrom = null;
 	public Date dobTo = null;
 	public String statusId = null;
+	public Boolean hasStatusId = null;
 	public String statureId = null;
+	public Boolean hasStatureId = null;
 	public Boolean active = null;
+	public Boolean hasAuthAt = null;
 	public Date authAtFrom = null;
 	public Date authAtTo = null;
+	public Boolean hasPhoneVerifiedAt = null;
 	public Date phoneVerifiedAtFrom = null;
 	public Date phoneVerifiedAtTo = null;
+	public Boolean hasEmailVerifiedAt = null;
 	public Date emailVerifiedAtFrom = null;
 	public Date emailVerifiedAtTo = null;
 	public Date createdAtFrom = null;
@@ -49,18 +58,27 @@ public class PeopleFilter extends QueryFilter
 	public PeopleFilter withName(final String newValue) { name = newValue; return this; }
 	public PeopleFilter withPhone(final String newValue) { phone = newValue; return this; }
 	public PeopleFilter withEmail(final String newValue) { email = newValue; return this; }
+	public PeopleFilter withHasEmail(final Boolean newValue) { hasEmail = newValue; return this; }
 	public PeopleFilter withFirstName(final String newValue) { firstName = newValue; return this; }
+	public PeopleFilter withHasFirstName(final Boolean newValue) { hasFirstName = newValue; return this; }
 	public PeopleFilter withLastName(final String newValue) { lastName = newValue; return this; }
+	public PeopleFilter withHasLastName(final Boolean newValue) { hasLastName = newValue; return this; }
 	public PeopleFilter withDob(final Date newValue) { dob = newValue; return this; }
+	public PeopleFilter withHasDob(final Boolean newValue) { hasDob = newValue; return this; }
 	public PeopleFilter withDobFrom(final Date newValue) { dobFrom = newValue; return this; }
 	public PeopleFilter withDobTo(final Date newValue) { dobTo = newValue; return this; }
 	public PeopleFilter withStatusId(final String newValue) { statusId = newValue; return this; }
+	public PeopleFilter withHasStatusId(final Boolean newValue) { hasStatusId = newValue; return this; }
 	public PeopleFilter withStatureId(final String newValue) { statureId = newValue; return this; }
+	public PeopleFilter withHasStatureId(final Boolean newValue) { hasStatureId = newValue; return this; }
 	public PeopleFilter withActive(final Boolean newValue) { active = newValue; return this; }
+	public PeopleFilter withHasAuthAt(final Boolean newValue) { hasAuthAt = newValue; return this; }
 	public PeopleFilter withAuthAtFrom(final Date newValue) { authAtFrom = newValue; return this; }
 	public PeopleFilter withAuthAtTo(final Date newValue) { authAtTo = newValue; return this; }
+	public PeopleFilter withHasPhoneVerifiedAt(final Boolean newValue) { hasPhoneVerifiedAt = newValue; return this; }
 	public PeopleFilter withPhoneVerifiedAtFrom(final Date newValue) { phoneVerifiedAtFrom = newValue; return this; }
 	public PeopleFilter withPhoneVerifiedAtTo(final Date newValue) { phoneVerifiedAtTo = newValue; return this; }
+	public PeopleFilter withHasEmailVerifiedAt(final Boolean newValue) { hasEmailVerifiedAt = newValue; return this; }
 	public PeopleFilter withEmailVerifiedAtFrom(final Date newValue) { emailVerifiedAtFrom = newValue; return this; }
 	public PeopleFilter withEmailVerifiedAtTo(final Date newValue) { emailVerifiedAtTo = newValue; return this; }
 	public PeopleFilter withCreatedAtFrom(final Date newValue) { createdAtFrom = newValue; return this; }
@@ -202,18 +220,27 @@ public class PeopleFilter extends QueryFilter
 			.append(", name: ").append(name)
 			.append(", phone: ").append(phone)
 			.append(", email: ").append(email)
+			.append(", hasEmail: ").append(hasEmail)
 			.append(", firstName: ").append(firstName)
+			.append(", hasFirstName: ").append(hasFirstName)
 			.append(", lastName: ").append(lastName)
+			.append(", hasLastName: ").append(hasLastName)
 			.append(", dob: ").append(dob)
+			.append(", hasDob: ").append(hasDob)
 			.append(", dobFrom: ").append(dobFrom)
 			.append(", dobTo: ").append(dobTo)
 			.append(", statusId: ").append(statusId)
+			.append(", hasStatusId: ").append(hasStatusId)
 			.append(", statureId: ").append(statureId)
+			.append(", hasStatureId: ").append(hasStatureId)
 			.append(", active: ").append(active)
+			.append(", hasAuthAt: ").append(hasAuthAt)
 			.append(", authAtFrom: ").append(authAtFrom)
 			.append(", authAtTo: ").append(authAtTo)
+			.append(", hasPhoneVerifiedAt: ").append(hasPhoneVerifiedAt)
 			.append(", phoneVerifiedAtFrom: ").append(phoneVerifiedAtFrom)
 			.append(", phoneVerifiedAtTo: ").append(phoneVerifiedAtTo)
+			.append(", hasEmailVerifiedAt: ").append(hasEmailVerifiedAt)
 			.append(", emailVerifiedAtFrom: ").append(emailVerifiedAtFrom)
 			.append(", emailVerifiedAtTo: ").append(emailVerifiedAtTo)
 			.append(", createdAtFrom: ").append(createdAtFrom)

@@ -2,6 +2,8 @@ package app.allclear.platform.dao;
 
 import static app.allclear.common.dao.OrderByBuilder.*;
 
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -125,10 +127,10 @@ public class PeopleDAO extends AbstractDAO<People>
 			.ensureLength("statureId", "Stature", value.statureId, PeopleValue.MAX_LEN_STATURE_ID)
 			.check();
 
-		if (!PeopleStatus.VALUES.containsKey(value.statusId))
+		if ((null != value.statusId) && (null == (value.status = PeopleStatus.VALUES.get(value.statusId))))
 			validator.add("statusId", "The Status ID '%s' is invalid.", value.statusId);
 
-		if (!PeopleStature.VALUES.containsKey(value.statureId))
+		if ((null != value.statureId) && (null == (value.stature = PeopleStature.VALUES.get(value.statureId))))
 			validator.add("statureId", "The Stature ID '%s' is invalid.", value.statureId);
 
 		// Throw exception if errors exist.
@@ -186,6 +188,7 @@ public class PeopleDAO extends AbstractDAO<People>
 	People find(final String name) { return namedQuery("findPeople").setParameter("name", name).uniqueResult(); }
 	People findByEmail(final String email) { return namedQuery("findPeopleByEmail").setParameter("email", email).uniqueResult(); }
 	People findByPhone(final String phone) { return namedQuery("findPeopleByPhone").setParameter("phone", phone).uniqueResult(); }
+	List<People> findActiveByIdOrName(final String name) { return namedQuery("findActivePeopleByIdOrName").setParameter("name", name + "%").list(); }
 
 	/** Gets a single People value by identifier.
 	 *
@@ -209,6 +212,16 @@ public class PeopleDAO extends AbstractDAO<People>
 	public PeopleValue getByIdWithException(final String id) throws ValidationException
 	{
 		return toValue(findWithException(id));
+	}
+
+	/** Gets a list of active People by wildcard ID and/or name search.
+	 * 
+	 * @param name
+	 * @return never NULL.
+	 */
+	public List<PeopleValue> getActiveByIdOrName(final String name)
+	{
+		return findActiveByIdOrName(name).stream().map(o -> o.toValue()).collect(Collectors.toList());
 	}
 
 	/** Searches the People entity based on the supplied filter.
@@ -242,22 +255,31 @@ public class PeopleDAO extends AbstractDAO<People>
 		throws ValidationException
 	{
 		return createQueryBuilder(select)
-			.addContains("id", "o.id LIKE :id", filter.id)
-			.addContains("name", "o.name LIKE :name", filter.name)
-			.addContains("phone", "o.phone LIKE :phone", filter.phone)
-			.addContains("email", "o.email LIKE :email", filter.email)
+			.addStarts("id", "o.id LIKE :id", filter.id)
+			.addStarts("name", "o.name LIKE :name", filter.name)
+			.addStarts("phone", "o.phone LIKE :phone", filter.phone)
+			.addStarts("email", "o.email LIKE :email", filter.email)
+			.addNotNull("o.email", filter.hasEmail)
 			.addContains("firstName", "o.firstName LIKE :firstName", filter.firstName)
+			.addNotNull("o.firstName", filter.hasFirstName)
 			.addContains("lastName", "o.lastName LIKE :lastName", filter.lastName)
+			.addNotNull("o.lastName", filter.hasLastName)
 			.add("dob", "o.dob = :dob", filter.dob)
+			.addNotNull("o.dob", filter.hasDob)
 			.add("dobFrom", "o.dob >= :dobFrom", filter.dobFrom)
 			.add("dobTo", "o.dob <= :dobTo", filter.dobTo)
 			.add("statusId", "o.statusId = :statusId", filter.statusId)
+			.addNotNull("o.statusId", filter.hasStatusId)
 			.add("statureId", "o.statureId = :statureId", filter.statureId)
+			.addNotNull("o.statureId", filter.hasStatureId)
 			.add("active", "o.active = :active", filter.active)
+			.addNotNull("o.authAt", filter.hasAuthAt)
 			.add("authAtFrom", "o.authAt >= :authAtFrom", filter.authAtFrom)
 			.add("authAtTo", "o.authAt <= :authAtTo", filter.authAtTo)
+			.addNotNull("o.phoneVerifiedAt", filter.hasPhoneVerifiedAt)
 			.add("phoneVerifiedAtFrom", "o.phoneVerifiedAt >= :phoneVerifiedAtFrom", filter.phoneVerifiedAtFrom)
 			.add("phoneVerifiedAtTo", "o.phoneVerifiedAt <= :phoneVerifiedAtTo", filter.phoneVerifiedAtTo)
+			.addNotNull("o.emailVerifiedAt", filter.hasEmailVerifiedAt)
 			.add("emailVerifiedAtFrom", "o.emailVerifiedAt >= :emailVerifiedAtFrom", filter.emailVerifiedAtFrom)
 			.add("emailVerifiedAtTo", "o.emailVerifiedAt <= :emailVerifiedAtTo", filter.emailVerifiedAtTo)
 			.add("createdAtFrom", "o.createdAt >= :createdAtFrom", filter.createdAtFrom)
@@ -288,7 +310,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		record.setPhoneVerifiedAt(value.phoneVerifiedAt);
 		record.setEmailVerifiedAt(value.emailVerifiedAt);
 		value.createdAt = record.getCreatedAt();
-		record.setUpdatedAt(value.updatedAt);
+		record.setUpdatedAt(value.updatedAt = new Date());
 
 		return record;
 	}
