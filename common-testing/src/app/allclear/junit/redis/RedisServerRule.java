@@ -9,8 +9,8 @@ import redis.embedded.RedisServer;
 /** JUnit external resource that manages the starting and stopping of an embedded Redis server.
  * 
  * @author smalleyd
- * @version 3.0.69
- * @since 6/12/2015
+ * @version 1.0.0
+ * @since 3/22/2020
  *
  */
 

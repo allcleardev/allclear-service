@@ -13,8 +13,8 @@ import io.dropwizard.testing.junit5.DropwizardExtension;
 /** Used in conjuction with the HibernateRule to manage the transaction on each individual test.
  * 
  * @author smalleyd
- * @version 3.0.0
- * @since 1/11/2015
+ * @version 1.0.0
+ * @since 3/22/2020
  *
  */
 
@@ -54,7 +54,7 @@ public class HibernateTransactionRule extends ExternalResource implements Dropwi
 	 * 
 	 * @param classes
 	 */
-	public HibernateTransactionRule(HibernateRule classRule)
+	public HibernateTransactionRule(final HibernateRule classRule)
 	{
 		this.classRule = classRule;
 	}
@@ -99,9 +99,9 @@ public class HibernateTransactionRule extends ExternalResource implements Dropwi
 	 * @param rule HibernateRule with SessionFactory
 	 * @param fx function to execute
 	 */
-	public static void doWork(HibernateRule rule, Consumer<Session> fx)
+	public static void doWork(final HibernateRule rule, final Consumer<Session> fx)
 	{
-		Session session = rule.getSessionFactory().openSession();
+		var session = rule.getSessionFactory().openSession();
 		try
 		{
 			ManagedSessionContext.bind(session);
@@ -122,7 +122,7 @@ public class HibernateTransactionRule extends ExternalResource implements Dropwi
 	 * @param fx function to execute
 	 * @return the result of the supplied function.
 	 */
-	public static <T> T withWork(HibernateRule rule, Function<Session, T> fx)
+	public static <T> T withWork(final HibernateRule rule, final Function<Session, T> fx)
 	{
 		var session = rule.getSessionFactory().openSession();
 		try
@@ -144,9 +144,9 @@ public class HibernateTransactionRule extends ExternalResource implements Dropwi
 	 * @param rule HibernateRule with SessionFactory
 	 * @param fx function to execute
 	 */
-	public static void doTrans(HibernateRule rule, Consumer<Session> fx)
+	public static void doTrans(final HibernateRule rule, final Consumer<Session> fx)
 	{
-		Session session = rule.getSessionFactory().openSession();
+		var session = rule.getSessionFactory().openSession();
 		Transaction trans = null;
 		try
 		{
@@ -159,7 +159,7 @@ public class HibernateTransactionRule extends ExternalResource implements Dropwi
 				log.warn("Transaction could NOT be committed. The state '{}' must be active.", trans.getStatus());
 		}
 
-		catch (Throwable ex)
+		catch (final Throwable ex)
 		{
 			if (null != trans)
 			{

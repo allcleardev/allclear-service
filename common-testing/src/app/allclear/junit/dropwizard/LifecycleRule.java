@@ -8,7 +8,6 @@ import org.jdbi.v3.core.Jdbi;
 import org.slf4j.*;
 
 import io.dropwizard.db.DataSourceFactory;
-import io.dropwizard.db.ManagedDataSource;
 import io.dropwizard.lifecycle.Managed;
 
 import io.dropwizard.testing.junit5.DropwizardExtension;
@@ -18,8 +17,8 @@ import com.codahale.metrics.MetricRegistry;
 /** JUnit external resource that mimics the Dropwizard Lifecycle manager.
  * 
  * @author smalleyd
- * @version 1.2.4
- * @since 1/4/2017
+ * @version 1.0.0
+ * @since 3/22/2020
  *
  */
 
@@ -39,9 +38,9 @@ public class LifecycleRule extends ExternalResource implements DropwizardExtensi
 	 *
 	 * @param values
 	 */
-	public void manage(Managed... values) throws Exception
+	public void manage(final Managed... values) throws Exception
 	{
-		for (Managed v : values)
+		for (var v : values)
 		{
 			v.start();
 			managed.add(v);
@@ -57,9 +56,9 @@ public class LifecycleRule extends ExternalResource implements DropwizardExtensi
 	 * @return never NULL
 	 * @throws Exception
 	 */
-	public Jdbi manageForDBI(DataSourceFactory factory, String name) throws Exception
+	public Jdbi manageForDBI(final DataSourceFactory factory, final String name) throws Exception
 	{
-		ManagedDataSource ds = factory.build(new MetricRegistry(), name);
+		var ds = factory.build(new MetricRegistry(), name);
 		ds.start();
 		managed.add(ds);
 
@@ -74,7 +73,7 @@ public class LifecycleRule extends ExternalResource implements DropwizardExtensi
 	{
 		managed.forEach(m -> {
 			try { m.stop(); }
-			catch (Exception ex) { log.error(ex.getMessage(), ex); }
+			catch (final Exception ex) { log.error(ex.getMessage(), ex); }
 		});
 	}
 }

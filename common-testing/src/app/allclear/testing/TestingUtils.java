@@ -20,8 +20,8 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 /** Class that contains static constants and helper methods for the REST tests.
  * 
  * @author smalleyd
- * @version 1.1.4
- * @since 6/13/2015
+ * @version 1.0.0
+ * @since 3/22/2020
  *
  */
 
@@ -32,7 +32,7 @@ public class TestingUtils
 	private static final DateFormat TIMESTAMP_FORMATTER_LEGACY = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 	static
 	{
-		TimeZone utc = TimeZone.getTimeZone("UTC");
+		var utc = TimeZone.getTimeZone("UTC");
 		TIMESTAMP_FORMATTER.setTimeZone(utc);
 		TIMESTAMP_FORMATTER_LEGACY.setTimeZone(utc);
 
@@ -41,11 +41,11 @@ public class TestingUtils
 			.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
 			.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		jsonMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		SimpleModule module = new SimpleModule();
+		var module = new SimpleModule();
 		module.addDeserializer(Date.class, new JsonDeserializer<Date>() {
 			@Override
 			public Date deserialize(JsonParser parser, DeserializationContext context) throws JsonProcessingException, IOException {
-				String node = parser.getCodec().readValue(parser, String.class);
+				var node = parser.getCodec().readValue(parser, String.class);
 				if (StringUtils.isEmpty(node))
 					return null;
 				try
@@ -122,7 +122,7 @@ public class TestingUtils
 	 */
 	public static <T> void incrementMap(Map<T, Long> counts, T key)
 	{
-		Long value = counts.get(key);
+		var value = counts.get(key);
 		if (null == value)
 			value = 1L;
 		else
@@ -202,7 +202,7 @@ public class TestingUtils
 		if (null == value)
 			return value;
 
-		Calendar cal = Calendar.getInstance();
+		var cal = Calendar.getInstance();
 		cal.setTime(value);
 
 		cal.set(Calendar.HOUR_OF_DAY, 0);

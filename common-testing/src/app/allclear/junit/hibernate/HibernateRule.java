@@ -20,8 +20,8 @@ import liquibase.resource.ClassLoaderResourceAccessor;
  *  and its Hibernate SessionFactory.
  * 
  * @author smalleyd
- * @version 3.0.0
- * @since 1/11/2015
+ * @version 1.0.0
+ * @since 3/22/2020
  *
  */
 
@@ -64,7 +64,7 @@ public class HibernateRule extends ExternalResource implements DropwizardExtensi
 	 * 
 	 * @param classes
 	 */
-	public HibernateRule(Class<?>... classes)
+	public HibernateRule(final Class<?>... classes)
 	{
 		this.classes = classes;
 	}
@@ -74,7 +74,7 @@ public class HibernateRule extends ExternalResource implements DropwizardExtensi
 	 * @param migrationContexts
 	 * @param classes
 	 */
-	public HibernateRule(String migrationContexts, Class<?>... classes)
+	public HibernateRule(final String migrationContexts, final Class<?>... classes)
 	{
 		this.migrationContexts = migrationContexts;
 		this.classes = classes;
@@ -85,15 +85,15 @@ public class HibernateRule extends ExternalResource implements DropwizardExtensi
 	{
 		// Create the database first since it is validated.
 		Class.forName("org.h2.Driver");
-		try (final Connection connection = DriverManager.getConnection(dbUrl))
+		try (var connection = DriverManager.getConnection(dbUrl))
 		{
-			final Liquibase migrator = new Liquibase(migrations, new ClassLoaderResourceAccessor(), new JdbcConnection(connection));
+			var migrator = new Liquibase(migrations, new ClassLoaderResourceAccessor(), new JdbcConnection(connection));
 			migrator.dropAll();
 			migrator.update(migrationContexts);
 		}
 
-		final Configuration conf = new Configuration();
-		for (final Class<?> clazz : classes)
+		var conf = new Configuration();
+		for (var clazz : classes)
 			conf.addAnnotatedClass(clazz);
 
 		conf.setProperty(AvailableSettings.DIALECT, "org.hibernate.dialect.H2Dialect");	// MySQL5InnoDBDialect");
@@ -121,11 +121,11 @@ public class HibernateRule extends ExternalResource implements DropwizardExtensi
 		try
 		{
 			Class.forName("org.h2.Driver");
-			try (final Connection connection = DriverManager.getConnection(dbUrl))
+			try (var connection = DriverManager.getConnection(dbUrl))
 			{
 				(new Liquibase("migrations.xml", new ClassLoaderResourceAccessor(), new JdbcConnection(connection))).dropAll();
 			}
 		}
-		catch (Exception ex) { ex.printStackTrace(); }
+		catch (final Exception ex) { ex.printStackTrace(); }
 	}
 }

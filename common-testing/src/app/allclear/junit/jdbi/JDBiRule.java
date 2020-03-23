@@ -2,7 +2,6 @@ package app.allclear.junit.jdbi;
 
 import org.junit.rules.ExternalResource;
 import org.jdbi.v3.core.Jdbi;
-import org.jdbi.v3.core.Handle;
 import org.jdbi.v3.core.Handles;
 import org.jdbi.v3.guava.GuavaPlugin;
 import org.jdbi.v3.sqlobject.SqlObjectPlugin;
@@ -16,8 +15,8 @@ import liquibase.resource.ClassLoaderResourceAccessor;
 /** JUnit testing rule that starts up a JJdbi connection and runs the Liquibase migrations.
  * 
  * @author smalleyd
- * @version 3.3.177
- * @since 12/20/2016
+ * @version 1.0.0
+ * @since 3/22/2020
  *
  */
 
@@ -70,7 +69,7 @@ public class JDBiRule extends ExternalResource implements DropwizardExtension
 	/** Utility method: performs a Liquibase migration with Jdbi interface. */
 	public static void migrate(final Jdbi dbi, final String migrations, final String migrationContexts) throws Exception
 	{
-		try (Handle h = dbi.open())
+		try (var h = dbi.open())
 		{
 			h.getConfig(Handles.class).setForceEndTransactions(false);	// https://github.com/jdbi/jdbi/issues/1000
 			var migrator = new Liquibase(migrations, new ClassLoaderResourceAccessor(), new JdbcConnection(h.getConnection()));
@@ -88,7 +87,7 @@ public class JDBiRule extends ExternalResource implements DropwizardExtension
 	/** Utility method: drops all the tables in a Liquibase migration. Used for clean-up. */
 	public static void dropAll(final Jdbi dbi, final String migrations) throws Exception
 	{
-		try (Handle h = dbi.open())
+		try (var h = dbi.open())
 		{
 			h.getConfig(Handles.class).setForceEndTransactions(false);	// https://github.com/jdbi/jdbi/issues/1000
 			new Liquibase(migrations, new ClassLoaderResourceAccessor(), new JdbcConnection(h.getConnection())).dropAll();
