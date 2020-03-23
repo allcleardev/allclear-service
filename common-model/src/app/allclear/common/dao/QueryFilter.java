@@ -39,7 +39,7 @@ public class QueryFilter implements Serializable
 	 * @param page
 	 * @param pageSize
 	 */
-	public QueryFilter(int page, int pageSize)
+	public QueryFilter(final int page, final int pageSize)
 	{
 		this.page = page;
 		this.pageSize = pageSize;
@@ -50,7 +50,7 @@ public class QueryFilter implements Serializable
 	 * @param sortOn
 	 * @param sortDir
 	 */
-	public QueryFilter(String sortOn, String sortDir)
+	public QueryFilter(final String sortOn, final String sortDir)
 	{
 		this.sortOn = sortOn;
 		this.sortDir = sortDir;
@@ -63,7 +63,7 @@ public class QueryFilter implements Serializable
 	 * @param sortOn
 	 * @param sortDir
 	 */
-	public QueryFilter(int page, int pageSize, String sortOn, String sortDir)
+	public QueryFilter(final int page, final int pageSize, final String sortOn, final String sortDir)
 	{
 		this.page = page;
 		this.pageSize = pageSize;

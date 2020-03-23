@@ -15,7 +15,7 @@ public class QueryFilterTest
 	@Test
 	public void testCreation()
 	{
-		QueryFilter value = new QueryFilter();
+		var value = new QueryFilter();
 		Assert.assertNotNull(value);
 		Assert.assertNull(value.page);
 		Assert.assertNull(value.pageSize);
@@ -24,7 +24,7 @@ public class QueryFilterTest
 	@Test
 	public void testProperties()
 	{
-		QueryFilter value = new QueryFilter(5, 55);
+		var value = new QueryFilter(5, 55);
 		Assert.assertNotNull(value);
 		Assert.assertNotNull(value.page);
 		Assert.assertEquals(5, value.page.intValue());
@@ -35,7 +35,7 @@ public class QueryFilterTest
 	@Test
 	public void testpage()
 	{
-		QueryFilter value = new QueryFilter();
+		var value = new QueryFilter();
 		Assert.assertNotNull(value);
 		Assert.assertNull(value.page);
 		Assert.assertNotNull(value.page());

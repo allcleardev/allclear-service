@@ -7,8 +7,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /** Class that represents the values of a JAR manifest.
  * 
  * @author smalleyd
- * @version 2.0.5
- * @since 1/19/2016
+ * @version 1.0.0
+ * @since 3/22/2020
  *
  */
 

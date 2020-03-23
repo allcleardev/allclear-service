@@ -5,8 +5,8 @@ import org.junit.*;
 /** Unit test class that verifies the ManifestValue POJO.
  * 
  * @author smalleyd
- * @version 1.3.9.11
- * @since 6/24/2019
+ * @version 1.0.0
+ * @since 3/22/2020
  *
  */
 

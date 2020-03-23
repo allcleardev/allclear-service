@@ -22,13 +22,13 @@ public class ValidationException extends RuntimeException
 	public ValidationException() { super(); }
 
 	/** Populator - provides a message. */
-	public ValidationException(String message) { super(message); }
+	public ValidationException(final String message) { super(message); }
 
 	/** Populator - provides an underlying cause. */
-	public ValidationException(Throwable cause) { super(cause); }
+	public ValidationException(final Throwable cause) { super(cause); }
 
 	/** Populator - provides a message and an underlying cause. */
-	public ValidationException(String message, Throwable cause) { super(message, cause); }
+	public ValidationException(final String message, final Throwable cause) { super(message, cause); }
 
 	/** Populator - provides a single field error.
 	 * 
