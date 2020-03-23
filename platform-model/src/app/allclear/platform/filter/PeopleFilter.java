@@ -31,6 +31,7 @@ public class PeopleFilter extends QueryFilter
 	public Date dobFrom = null;
 	public Date dobTo = null;
 	public String statusId = null;
+	public String statureId = null;
 	public Boolean active = null;
 	public Date authAtFrom = null;
 	public Date authAtTo = null;
@@ -54,6 +55,7 @@ public class PeopleFilter extends QueryFilter
 	public PeopleFilter withDobFrom(final Date newValue) { dobFrom = newValue; return this; }
 	public PeopleFilter withDobTo(final Date newValue) { dobTo = newValue; return this; }
 	public PeopleFilter withStatusId(final String newValue) { statusId = newValue; return this; }
+	public PeopleFilter withStatureId(final String newValue) { statureId = newValue; return this; }
 	public PeopleFilter withActive(final Boolean newValue) { active = newValue; return this; }
 	public PeopleFilter withAuthAtFrom(final Date newValue) { authAtFrom = newValue; return this; }
 	public PeopleFilter withAuthAtTo(final Date newValue) { authAtTo = newValue; return this; }
@@ -106,6 +108,7 @@ public class PeopleFilter extends QueryFilter
 		@param dobFrom represents the "dob" field - lower boundary.
 		@param dobTo represents the "dob" field - upper boundary.
 		@param statusId represents the "status_id" field.
+		@param statureId represents the "stature_id" field.
 		@param active represents the "active" field.
 		@param authAtFrom represents the "auth_at" field - lower boundary.
 		@param authAtTo represents the "auth_at" field - upper boundary.
@@ -128,6 +131,7 @@ public class PeopleFilter extends QueryFilter
 		final Date dobFrom,
 		final Date dobTo,
 		final String statusId,
+		final String statureId,
 		final Boolean active,
 		final Date authAtFrom,
 		final Date authAtTo,
@@ -150,6 +154,7 @@ public class PeopleFilter extends QueryFilter
 		this.dobFrom = dobFrom;
 		this.dobTo = dobTo;
 		this.statusId = statusId;
+		this.statureId = statureId;
 		this.active = active;
 		this.authAtFrom = authAtFrom;
 		this.authAtTo = authAtTo;
@@ -179,6 +184,7 @@ public class PeopleFilter extends QueryFilter
 		firstName = StringUtils.trimToNull(firstName);
 		lastName = StringUtils.trimToNull(lastName);
 		statusId = StringUtils.trimToNull(statusId);
+		statureId = StringUtils.trimToNull(statureId);
 
 		return this;
 	}
@@ -202,6 +208,7 @@ public class PeopleFilter extends QueryFilter
 			.append(", dobFrom: ").append(dobFrom)
 			.append(", dobTo: ").append(dobTo)
 			.append(", statusId: ").append(statusId)
+			.append(", statureId: ").append(statureId)
 			.append(", active: ").append(active)
 			.append(", authAtFrom: ").append(authAtFrom)
 			.append(", authAtTo: ").append(authAtTo)

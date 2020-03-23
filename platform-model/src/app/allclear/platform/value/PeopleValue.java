@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
 import app.allclear.platform.type.PeopleStatus;
+import app.allclear.platform.type.PeopleStature;
 
 /**********************************************************************************
 *
@@ -30,6 +31,7 @@ public class PeopleValue implements Serializable
 	public static final int MAX_LEN_FIRST_NAME = 32;
 	public static final int MAX_LEN_LAST_NAME = 32;
 	public static final int MAX_LEN_STATUS_ID = 1;
+	public static final int MAX_LEN_STATURE_ID = 1;
 
 	// Members
 	public String id = null;
@@ -41,6 +43,8 @@ public class PeopleValue implements Serializable
 	public Date dob = null;
 	public String statusId = null;
 	public PeopleStatus status = null;
+	public String statureId = null;
+	public PeopleStature stature = null;
 	public boolean active;
 	public Date authAt = null;
 	public Date phoneVerifiedAt = null;
@@ -58,6 +62,8 @@ public class PeopleValue implements Serializable
 	public PeopleValue withDob(final Date newValue) { dob = newValue; return this; }
 	public PeopleValue withStatusId(final String newValue) { statusId = newValue; return this; }
 	public PeopleValue withStatus(final PeopleStatus newValue) { status = newValue; return this; }
+	public PeopleValue withStatureId(final String newValue) { statureId = newValue; return this; }
+	public PeopleValue withStature(final PeopleStature newValue) { stature = newValue; return this; }
 	public PeopleValue withActive(final boolean newValue) { active = newValue; return this; }
 	public PeopleValue withAuthAt(final Date newValue) { authAt = newValue; return this; }
 	public PeopleValue withPhoneVerifiedAt(final Date newValue) { phoneVerifiedAt = newValue; return this; }
@@ -82,6 +88,8 @@ public class PeopleValue implements Serializable
 		final Date dob,
 		final String statusId,
 		final PeopleStatus status,
+		final String statureId,
+		final PeopleStature stature,
 		final boolean active,
 		final Date authAt,
 		final Date phoneVerifiedAt,
@@ -98,6 +106,8 @@ public class PeopleValue implements Serializable
 		this.dob = dob;
 		this.statusId = statusId;
 		this.status = status;
+		this.statureId = statureId;
+		this.stature = stature;
 		this.active = active;
 		this.authAt = authAt;
 		this.phoneVerifiedAt = phoneVerifiedAt;
@@ -116,6 +126,7 @@ public class PeopleValue implements Serializable
 		firstName = StringUtils.trimToNull(firstName);
 		lastName = StringUtils.trimToNull(lastName);
 		statusId = StringUtils.trimToNull(statusId);
+		statureId = StringUtils.trimToNull(statureId);
 	}
 
 	@Override
@@ -132,6 +143,7 @@ public class PeopleValue implements Serializable
 			Objects.equals(lastName, v.lastName) &&
 			DateUtils.truncatedEquals(dob, v.dob, Calendar.DATE) &&
 			Objects.equals(statusId, v.statusId) &&
+			Objects.equals(statureId, v.statureId) &&
 			(active == v.active) &&
 			DateUtils.truncatedEquals(authAt, v.authAt, Calendar.SECOND) &&
 			DateUtils.truncatedEquals(phoneVerifiedAt, v.phoneVerifiedAt, Calendar.SECOND) &&
@@ -152,6 +164,8 @@ public class PeopleValue implements Serializable
 			.append(", dob: ").append(dob)
 			.append(", statusId: ").append(statusId)
 			.append(", status: ").append(status)
+			.append(", statureId: ").append(statureId)
+			.append(", stature: ").append(stature)
 			.append(", active: ").append(active)
 			.append(", authAt: ").append(authAt)
 			.append(", phoneVerifiedAt: ").append(phoneVerifiedAt)

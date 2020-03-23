@@ -11,6 +11,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 
 import app.allclear.platform.type.PeopleStatus;
+import app.allclear.platform.type.PeopleStature;
 import app.allclear.platform.value.PeopleValue;
 
 /**********************************************************************************
@@ -29,7 +30,8 @@ import app.allclear.platform.value.PeopleValue;
 @Table(name="people",
 	uniqueConstraints={@UniqueConstraint(columnNames="name"), @UniqueConstraint(columnNames="phone"), @UniqueConstraint(columnNames="email")})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE, region="people")
-@NamedQueries({@NamedQuery(name="findPeople", query="SELECT OBJECT(o) FROM People o WHERE o.name = :name"),
+@NamedQueries({@NamedQuery(name="existsPeople", query="SELECT o.id FROM People o WHERE o.id = :id"),
+	@NamedQuery(name="findPeople", query="SELECT OBJECT(o) FROM People o WHERE o.name = :name"),
 	@NamedQuery(name="findPeopleByEmail", query="SELECT OBJECT(o) FROM People o WHERE o.email = :email"),
 	@NamedQuery(name="findPeopleByPhone", query="SELECT OBJECT(o) FROM People o WHERE o.phone = :phone")})
 public class People implements Serializable
@@ -77,6 +79,11 @@ public class People implements Serializable
 	public String statusId;
 	public void setStatusId(final String newValue) { statusId = newValue; }
 
+	@Column(name="stature_id", columnDefinition="CHAR(1)", nullable=true)
+	public String getStatureId() { return statureId; }
+	public String statureId;
+	public void setStatureId(final String newValue) { statureId = newValue; }
+
 	@Column(name="active", columnDefinition="BIT", nullable=false)
 	public boolean isActive() { return active; }
 	public boolean active;
@@ -117,6 +124,7 @@ public class People implements Serializable
 		final String lastName,
 		final Date dob,
 		final String statusId,
+		final String statureId,
 		final boolean active,
 		final Date authAt,
 		final Date phoneVerifiedAt,
@@ -131,6 +139,7 @@ public class People implements Serializable
 		this.lastName = lastName;
 		this.dob = dob;
 		this.statusId = statusId;
+		this.statureId = statureId;
 		this.active = active;
 		this.authAt = authAt;
 		this.phoneVerifiedAt = phoneVerifiedAt;
@@ -141,7 +150,8 @@ public class People implements Serializable
 	public People(final PeopleValue value)
 	{
 		this(value.id, value.name, value.phone, value.email,
-			value.firstName, value.lastName, value.dob, value.statusId,
+			value.firstName, value.lastName, value.dob,
+			value.statusId, value.statureId,
 			value.active, value.authAt, value.phoneVerifiedAt,
 			value.emailVerifiedAt, value.createdAt);
 	}
@@ -160,6 +170,7 @@ public class People implements Serializable
 			Objects.equals(lastName, v.lastName) &&
 			DateUtils.truncatedEquals(dob, v.dob, Calendar.SECOND) &&
 			Objects.equals(statusId, v.statusId) &&
+			Objects.equals(statureId, v.statureId) &&
 			(active == v.active) &&
 			DateUtils.truncatedEquals(authAt, v.authAt, Calendar.SECOND) &&
 			DateUtils.truncatedEquals(phoneVerifiedAt, v.phoneVerifiedAt, Calendar.SECOND) &&
@@ -181,6 +192,8 @@ public class People implements Serializable
 			getDob(),
 			getStatusId(),
 			PeopleStatus.VALUES.get(getStatusId()),
+			getStatureId(),
+			PeopleStature.VALUES.get(getStatureId()),
 			isActive(),
 			getAuthAt(),
 			getPhoneVerifiedAt(),

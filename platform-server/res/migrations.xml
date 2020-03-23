@@ -19,6 +19,7 @@
 			<column name="last_name" type="VARCHAR(32)" remarks="Represents the last name." />
 			<column name="dob" type="DATE" remarks="Represents the date of birth." />
 			<column name="status_id" type="CHAR(1)" remarks="Represents the status." />
+			<column name="stature_id" type="CHAR(1)" remarks="Represents the stature or level of influence." />
 			<column name="active" type="BOOLEAN" defaultValueBoolean="true" remarks="Indicates activity status.">
 				<constraints nullable="false" />
 			</column>

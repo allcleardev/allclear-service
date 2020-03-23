@@ -4,7 +4,9 @@ import static app.allclear.common.dao.OrderByBuilder.*;
 
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.*;
+import org.hibernate.id.IdentifierGenerationException;
 
 import app.allclear.common.dao.*;
 import app.allclear.common.errors.ValidationException;
@@ -13,6 +15,7 @@ import app.allclear.common.hibernate.AbstractDAO;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.filter.PeopleFilter;
 import app.allclear.platform.type.PeopleStatus;
+import app.allclear.platform.type.PeopleStature;
 import app.allclear.platform.value.PeopleValue;
 
 /**********************************************************************************
@@ -38,6 +41,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		"lastName", ASC,
 		"dob", DESC,
 		"statusId", ASC,
+		"statureId", ASC,
 		"active", DESC,
 		"authAt", DESC,
 		"phoneVerifiedAt", DESC,
@@ -50,6 +54,19 @@ public class PeopleDAO extends AbstractDAO<People>
 		super(factory);
 	}
 
+	String generateId()
+	{
+		int i = 0;
+		var id = RandomStringUtils.randomAlphanumeric(6).toUpperCase();
+		while (null != namedQuery("existsPeople", String.class).setParameter("id", id).uniqueResult())	// Find an available ID.
+		{
+			if (10 < i++) throw new IdentifierGenerationException("Failed to generate an available ID after 10 tries.");
+			id = RandomStringUtils.randomAlphanumeric(6).toUpperCase();
+		}
+
+		return id;
+	}
+
 	/** Adds a single People value.
 	 *
 	 * @param value
@@ -58,7 +75,7 @@ public class PeopleDAO extends AbstractDAO<People>
 	 */
 	public PeopleValue add(final PeopleValue value) throws ValidationException
 	{
-		return value.withId(persist(toEntity(value, _validate(value.withId(null)))).getId());
+		return value.withId(persist(toEntity(value, _validate(value.withId(generateId())))).getId());
 	}
 
 	/** Updates a single People value.
@@ -99,21 +116,40 @@ public class PeopleDAO extends AbstractDAO<People>
 
 		// Throw exception after field existence checks and before FK checks.
 		validator.ensureExistsAndLength("id", "ID", value.id, PeopleValue.MAX_LEN_ID)
-			.ensureExistsAndLength("name", "Name", value.name, PeopleValue.MAX_LEN_NAME)
-			.ensureExistsAndLength("phone", "Phone", value.phone, PeopleValue.MAX_LEN_PHONE)
-			.ensureLength("email", "Email", value.email, PeopleValue.MAX_LEN_EMAIL)
+			.ensureExistsAndLength("name", "Screen Name", value.name, PeopleValue.MAX_LEN_NAME)
+			.ensureExistsAndLength("phone", "Phone Number", value.phone, PeopleValue.MAX_LEN_PHONE)
+			.ensureLength("email", "Email Address", value.email, PeopleValue.MAX_LEN_EMAIL)
 			.ensureLength("firstName", "First Name", value.firstName, PeopleValue.MAX_LEN_FIRST_NAME)
 			.ensureLength("lastName", "Last Name", value.lastName, PeopleValue.MAX_LEN_LAST_NAME)
 			.ensureLength("statusId", "Status", value.statusId, PeopleValue.MAX_LEN_STATUS_ID)
+			.ensureLength("statureId", "Stature", value.statureId, PeopleValue.MAX_LEN_STATURE_ID)
 			.check();
 
 		if (!PeopleStatus.VALUES.containsKey(value.statusId))
 			validator.add("statusId", "The Status ID '%s' is invalid.", value.statusId);
 
+		if (!PeopleStature.VALUES.containsKey(value.statureId))
+			validator.add("statureId", "The Stature ID '%s' is invalid.", value.statureId);
+
 		// Throw exception if errors exist.
 		validator.check();
 
-		return new Object[] {  };
+		var o = find(value.name);
+		if ((null != o) && !o.getId().equals(value.id))
+			validator.add("name", "The Screen Name '%s' is already taken.", value.name);
+
+		var o2 = findByPhone(value.phone);
+		if ((null != o2) && !o2.getId().equals(value.id))
+			validator.add("email", "The Phone Number '%s' is already taken.", value.phone);
+
+		var o3 = (null != value.email) ? findByEmail(value.email) : null;
+		if ((null != o3) && !o3.getId().equals(value.id))
+			validator.add("email", "The Email Address '%s' is already taken.", value.email);
+
+		// Throw exception if errors exist.
+		validator.check();
+
+		return new Object[] { (null != o) ? o : (null != o2) ? o2 : o3 };
 	}
 
 	/** Removes a single People value.
@@ -146,6 +182,10 @@ public class PeopleDAO extends AbstractDAO<People>
 
 		return record;
 	}
+
+	People find(final String name) { return namedQuery("findPeople").setParameter("name", name).uniqueResult(); }
+	People findByEmail(final String email) { return namedQuery("findPeopleByEmail").setParameter("email", email).uniqueResult(); }
+	People findByPhone(final String phone) { return namedQuery("findPeopleByPhone").setParameter("phone", phone).uniqueResult(); }
 
 	/** Gets a single People value by identifier.
 	 *
@@ -211,7 +251,8 @@ public class PeopleDAO extends AbstractDAO<People>
 			.add("dob", "o.dob = :dob", filter.dob)
 			.add("dobFrom", "o.dob >= :dobFrom", filter.dobFrom)
 			.add("dobTo", "o.dob <= :dobTo", filter.dobTo)
-			.addContains("statusId", "o.statusId LIKE :statusId", filter.statusId)
+			.add("statusId", "o.statusId = :statusId", filter.statusId)
+			.add("statureId", "o.statureId = :statureId", filter.statureId)
 			.add("active", "o.active = :active", filter.active)
 			.add("authAtFrom", "o.authAt >= :authAtFrom", filter.authAtFrom)
 			.add("authAtTo", "o.authAt <= :authAtTo", filter.authAtTo)
@@ -241,6 +282,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		record.setLastName(value.lastName);
 		record.setDob(value.dob);
 		record.setStatusId(value.statusId);
+		record.setStatureId(value.statureId);
 		record.setActive(value.active);
 		record.setAuthAt(value.authAt);
 		record.setPhoneVerifiedAt(value.phoneVerifiedAt);
