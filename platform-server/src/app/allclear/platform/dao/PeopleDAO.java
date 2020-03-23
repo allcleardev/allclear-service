@@ -98,13 +98,13 @@ public class PeopleDAO extends AbstractDAO<People>
 		var validator = new Validator();
 
 		// Throw exception after field existence checks and before FK checks.
-		validator.ensureExistsAndLength("id", "Id", value.id, PeopleValue.MAX_LEN_ID)
+		validator.ensureExistsAndLength("id", "ID", value.id, PeopleValue.MAX_LEN_ID)
 			.ensureExistsAndLength("name", "Name", value.name, PeopleValue.MAX_LEN_NAME)
 			.ensureExistsAndLength("phone", "Phone", value.phone, PeopleValue.MAX_LEN_PHONE)
 			.ensureLength("email", "Email", value.email, PeopleValue.MAX_LEN_EMAIL)
 			.ensureLength("firstName", "First Name", value.firstName, PeopleValue.MAX_LEN_FIRST_NAME)
 			.ensureLength("lastName", "Last Name", value.lastName, PeopleValue.MAX_LEN_LAST_NAME)
-			.ensureLength("statusId", "StatusId", value.statusId, PeopleValue.MAX_LEN_STATUS_ID)
+			.ensureLength("statusId", "Status", value.statusId, PeopleValue.MAX_LEN_STATUS_ID)
 			.check();
 
 		if (!PeopleStatus.VALUES.containsKey(value.statusId))
