@@ -166,9 +166,9 @@ public class HibernateQueryBuilderTest
 	private List<Country> check(final QueryBuilder<Country> value, final String sql, final int size)
 	{
 		List<Country> records = null;
-		final boolean simple = SELECT.equals(value.select);
-		final String count = simple ? COUNT : COUNT_USER;
-		final OrderByBuilder order = simple ? ORDER : ORDER_USER;
+		var simple = SELECT.equals(value.select);
+		var count = simple ? COUNT : COUNT_USER;
+		var order = simple ? ORDER : ORDER_USER;
 
 		Assert.assertEquals("Check SQL", sql, value.build());
 		Assert.assertEquals("Check size", size, (records = value.run()).size());

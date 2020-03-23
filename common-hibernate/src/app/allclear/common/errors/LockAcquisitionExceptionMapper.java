@@ -29,7 +29,7 @@ public class LockAcquisitionExceptionMapper implements ExceptionMapper<LockAcqui
 	public LockAcquisitionExceptionMapper() { super(); }
 
 	/** ExceptionMapper method - provides the response details. */
-	public Response toResponse(LockAcquisitionException ex)
+	public Response toResponse(final LockAcquisitionException ex)
 	{
 		logger.warn(ex.getMessage(), ex);
 

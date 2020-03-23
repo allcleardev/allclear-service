@@ -51,7 +51,7 @@ public abstract class HibernateBundle<T> implements ConfiguredBundle<T>, Databas
 	}
 
 	@Override
-	public final void initialize(Bootstrap<?> bootstrap)
+	public final void initialize(final Bootstrap<?> bootstrap)
 	{
 		bootstrap.getObjectMapper().registerModule(createHibernate5Module());
 	}
@@ -68,7 +68,7 @@ public abstract class HibernateBundle<T> implements ConfiguredBundle<T>, Databas
 		return module;
 	}
 
-	abstract public PooledDataSourceFactory getReadSourceFactory(T configuration);
+	abstract public PooledDataSourceFactory getReadSourceFactory(final T configuration);
 
 	@Override
 	public final void run(final T configuration, final Environment env) throws Exception
@@ -92,21 +92,21 @@ public abstract class HibernateBundle<T> implements ConfiguredBundle<T>, Databas
 		return o;
 	}
 
-	private SessionFactory build(HibernateBundle<?> bundle,
-		Environment environment,
-		PooledDataSourceFactory dbConfig,
-		List<Class<?>> entities,
-		String name)
+	private SessionFactory build(final HibernateBundle<?> bundle,
+		final Environment environment,
+		final PooledDataSourceFactory dbConfig,
+		final List<Class<?>> entities,
+		final String name)
 	{
 		var dataSource = dbConfig.build(environment.metrics(), name);
 		return build(bundle, environment, dbConfig, dataSource, entities);
 	}
 	
-	private SessionFactory build(HibernateBundle<?> bundle,
-		Environment environment,
-		PooledDataSourceFactory dbConfig,
-		ManagedDataSource dataSource,
-		List<Class<?>> entities)
+	private SessionFactory build(final HibernateBundle<?> bundle,
+		final Environment environment,
+		final PooledDataSourceFactory dbConfig,
+		final ManagedDataSource dataSource,
+		final List<Class<?>> entities)
 	{
 		var provider = buildConnectionProvider(dataSource, dbConfig.getProperties());
 		var result = buildSessionFactory(bundle, dbConfig, provider, dbConfig.getProperties(), entities);
@@ -115,7 +115,7 @@ public abstract class HibernateBundle<T> implements ConfiguredBundle<T>, Databas
 		return result;
 	}
 	
-	private ConnectionProvider buildConnectionProvider(DataSource dataSource, Map<String, String> properties)
+	private ConnectionProvider buildConnectionProvider(final DataSource dataSource, final Map<String, String> properties)
 	{
 		var connectionProvider = new DatasourceConnectionProviderImpl();
 		connectionProvider.setDataSource(dataSource);
@@ -123,11 +123,11 @@ public abstract class HibernateBundle<T> implements ConfiguredBundle<T>, Databas
 		return connectionProvider;
 	}
 
-	private SessionFactory buildSessionFactory(HibernateBundle<?> bundle,
-		PooledDataSourceFactory dbConfig,
-		ConnectionProvider connectionProvider,
-		Map<String, String> properties,
-		List<Class<?>> entities)
+	private SessionFactory buildSessionFactory(final HibernateBundle<?> bundle,
+		final PooledDataSourceFactory dbConfig,
+		final ConnectionProvider connectionProvider,
+		final Map<String, String> properties,
+		final List<Class<?>> entities)
 	{
 		var bootstrapServiceRegistry = new BootstrapServiceRegistryBuilder().build();
 		var configuration = new Configuration(bootstrapServiceRegistry);
@@ -156,9 +156,9 @@ public abstract class HibernateBundle<T> implements ConfiguredBundle<T>, Databas
 		return configuration.buildSessionFactory(registry);
 	}
 	
-	protected void configure(Configuration configuration, ServiceRegistry registry) {}
+	protected void configure(final Configuration configuration, final ServiceRegistry registry) {}
 	
-	private void addAnnotatedClasses(Configuration configuration, Iterable<Class<?>> entities)
+	private void addAnnotatedClasses(final Configuration configuration, final Iterable<Class<?>> entities)
 	{
 		var entityClasses = new TreeSet<>();
 		for (var klass : entities)
@@ -170,9 +170,9 @@ public abstract class HibernateBundle<T> implements ConfiguredBundle<T>, Databas
 
 	public boolean isLazyLoadingEnabled() { return lazyLoadingEnabled; }
 
-	public void setLazyLoadingEnabled(boolean lazyLoadingEnabled) { this.lazyLoadingEnabled = lazyLoadingEnabled; }
+	public void setLazyLoadingEnabled(final boolean lazyLoadingEnabled) { this.lazyLoadingEnabled = lazyLoadingEnabled; }
 
 	public DualSessionFactory getSessionFactory() { return factory; }
 
-	protected void configure(org.hibernate.cfg.Configuration configuration) { }
+	protected void configure(final org.hibernate.cfg.Configuration configuration) { }
 }

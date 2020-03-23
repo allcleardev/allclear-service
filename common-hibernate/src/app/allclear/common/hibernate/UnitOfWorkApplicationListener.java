@@ -31,19 +31,20 @@ public class UnitOfWorkApplicationListener implements ApplicationEventListener
 		this.factory = factory;
 	}
 
-	private static class UnitOfWorkEventListener implements RequestEventListener {
+	private static class UnitOfWorkEventListener implements RequestEventListener
+	{
 		private ConcurrentMap<ResourceMethod, Optional<UnitOfWork>> methodMap;
 		private final UnitOfWorkAspect unitOfWorkAspect;
 
-		UnitOfWorkEventListener(ConcurrentMap<ResourceMethod, Optional<UnitOfWork>> methodMap,
-				final DualSessionFactory factory)
+		UnitOfWorkEventListener(final ConcurrentMap<ResourceMethod, Optional<UnitOfWork>> methodMap,
+			final DualSessionFactory factory)
 		{
 			this.methodMap = methodMap;
 			this.unitOfWorkAspect = new UnitOfWorkAspect(factory);
 		}
 
 		@Override
-		public void onEvent(RequestEvent event)
+		public void onEvent(final RequestEvent event)
 		{
 			var eventType = event.getType();
 			if (eventType == RequestEvent.Type.RESOURCE_METHOD_START)
@@ -55,7 +56,7 @@ public class UnitOfWorkApplicationListener implements ApplicationEventListener
 			else if (eventType == RequestEvent.Type.RESP_FILTERS_START)
 			{
 				try { unitOfWorkAspect.afterEnd(); }
-				catch (Exception e) { throw new MappableException(e); }
+				catch (Exception ex) { throw new MappableException(ex); }
 			}
 			else if (eventType == RequestEvent.Type.ON_EXCEPTION)
 				unitOfWorkAspect.onError();
@@ -63,7 +64,7 @@ public class UnitOfWorkApplicationListener implements ApplicationEventListener
 				unitOfWorkAspect.onFinish();
 		}
 
-		private static Optional<UnitOfWork> registerUnitOfWorkAnnotations(ResourceMethod method)
+		private static Optional<UnitOfWork> registerUnitOfWorkAnnotations(final ResourceMethod method)
 		{
 			var annotation = method.getInvocable().getDefinitionMethod().getAnnotation(UnitOfWork.class);
 			if (annotation == null)
@@ -74,7 +75,7 @@ public class UnitOfWorkApplicationListener implements ApplicationEventListener
 	}
 
 	@Override
-	public void onEvent(ApplicationEvent event) {}
+	public void onEvent(final ApplicationEvent event) {}
 
 	@Override
 	public RequestEventListener onRequest(final RequestEvent event)

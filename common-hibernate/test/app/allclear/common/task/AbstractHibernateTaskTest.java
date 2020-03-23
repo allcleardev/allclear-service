@@ -90,7 +90,7 @@ public class AbstractHibernateTaskTest
 	}
 
 	/** Helper method - perform Session related activities. */
-	private void doWork(Consumer<Session> fx)
+	private void doWork(final Consumer<Session> fx)
 	{
 		HibernateTransactionRule.doWork(RULE, fx);
 	}

@@ -29,7 +29,7 @@ public class LockTimeoutExceptionMapper implements ExceptionMapper<LockTimeoutEx
 	public LockTimeoutExceptionMapper() {}
 
 	/** ExceptionMapper method - provides the response details. */
-	public Response toResponse(LockTimeoutException ex)
+	public Response toResponse(final LockTimeoutException ex)
 	{
 		logger.warn(ex.getMessage(), ex);
 

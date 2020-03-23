@@ -400,35 +400,35 @@ public class NativeQueryBuilderTest
 	@Test
 	public void run_contains()
 	{
-		final List<Country> records = aggregate(create().addContains("name", "o.name LIKE :name", "Island"), 17L).run();
+		var records = aggregate(create().addContains("name", "o.name LIKE :name", "Island"), 17L).run();
 		Assert.assertEquals("Check size", 17, records.size());
 	}
 
 	@Test
 	public void run_not_null()
 	{
-		List<Country> records = aggregate(create().addNotNull("u.state_id", true, "INNER JOIN user u ON o.id = u.country_id"), 2L).run();
+		var records = aggregate(create().addNotNull("u.state_id", true, "INNER JOIN user u ON o.id = u.country_id"), 2L).run();
 		Assert.assertEquals("Check size", 2, records.size());
 	}
 
 	@Test
 	public void run_null()
 	{
-		List<Country> records = aggregate(create().addNotNull("u.state_id", false, "INNER JOIN user u ON o.id = u.country_id"), 1L).run();
+		var records = aggregate(create().addNotNull("u.state_id", false, "INNER JOIN user u ON o.id = u.country_id"), 1L).run();
 		Assert.assertEquals("Check size", 1, records.size());
 	}
 
 	@Test
 	public void run_starts()
 	{
-		List<Country> records = aggregate(create().addStarts("name", "o.name LIKE :name", "United"), 4L).run();
+		var records = aggregate(create().addStarts("name", "o.name LIKE :name", "United"), 4L).run();
 		Assert.assertEquals("Check size", 4, records.size());
 	}
 
 	@Test
 	public void run_active_with_join()
 	{
-		List<Country> records = aggregate(create().add("active", "u.active = :active", true, "INNER JOIN user u ON o.id = u.country_id"), 2L).run();
+		var records = aggregate(create().add("active", "u.active = :active", true, "INNER JOIN user u ON o.id = u.country_id"), 2L).run();
 		Assert.assertEquals("Check size", 2, records.size());
 	}
 
@@ -443,9 +443,9 @@ public class NativeQueryBuilderTest
 		Assert.assertEquals("Check alias", "o", value.alias);
 		Assert.assertEquals("Check groupBy", GROUP_BY_COUNTRY_COUNT, value.groupBy);
 
-		List<CountryCount> records = value.run();
+		var records = value.run();
 		Assert.assertEquals("Check size", 3, records.size());
-		for (CountryCount record : records)
+		for (var record : records)
 			Assert.assertEquals("Check count", 1, record.total.intValue());
 	}
 }

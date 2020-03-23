@@ -22,7 +22,7 @@ public class NativeQueryBuilder<T> extends HibernateQueryBuilder<T>
 	 * @param entity Hibernate entity within which to return each record.
 	 * @param alias FROM clause alias for the desired table to populate the entity.
 	 */
-	public NativeQueryBuilder(Session session, String select, Class<T> entity, String alias)
+	public NativeQueryBuilder(final Session session, final String select, final Class<T> entity, final String alias)
 	{
 		this(session, select, entity, alias, null);
 	}
@@ -35,7 +35,7 @@ public class NativeQueryBuilder<T> extends HibernateQueryBuilder<T>
 	 * @param alias FROM clause alias for the desired table to populate the entity.
 	 * @param groupBy GROUP BY clause - optional.
 	 */
-	public NativeQueryBuilder(Session session, String select, Class<T> entity, String alias, String groupBy)
+	public NativeQueryBuilder(final Session session, final String select, final Class<T> entity, final String alias, final String groupBy)
 	{
 		super(session, select, entity, groupBy);
 		this.alias = alias;
