@@ -60,14 +60,36 @@ subprojects {
   }
 }
 
+project(':common-model') {
+  dependencies {
+    testCompile project(':common-testing')
+  }
+}
+
 project(':common-service') {
   dependencies {
+    compile project(':common-model')
+    testCompile project(':common-testing')
+  }
+}
+
+project(':common-hibernate') {
+  dependencies {
+    compile project(':common-service')
+    testCompile project(':common-testing')
+  }
+}
+
+project(':platform-model') {
+  dependencies {
+    compile project(':common-model')
     testCompile project(':common-testing')
   }
 }
 
 project(':platform-server') {
   dependencies {
+    compile project(':common-hibernate')
     compile project(':common-service')
     compile project(':platform-model')
     testCompile project(':common-testing')

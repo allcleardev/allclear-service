@@ -1,0 +1,246 @@
+id,name,code,num_code,active
+AF,Afganistan,AFG,4,true
+AX,Åland Islands,ALA,248,true
+AL,Albania,ALB,8,true
+DZ,Algeria,DZA,12,true
+AS,American Samoa,ASM,16,true
+AD,Andorra,AND,20,true
+AO,Angola,AGO,24,true
+AI,Anguilla,AIA,660,true
+AG,Antigua & Barbuda,ATG,28,true
+AR,Argentina,ARG,32,true
+AM,Armenia,ARM,51,true
+AW,Aruba,ABW,533,true
+AU,Australia,AUS,36,true
+AT,Austria,AUT,40,true
+AZ,Azerbaijan,AZE,31,true
+BS,Bahamas,BHS,44,true
+BH,Bahrain,BHR,48,true
+BD,Bangladesh,BGD,50,true
+BB,Barbados,BRB,52,true
+BY,Belarus,BLR,112,true
+BE,Belgium,BEL,56,true
+BZ,Belize,BLZ,84,true
+BJ,Benin,BEN,204,true
+BM,Bermuda,BMU,60,true
+BT,Bhutan,BTN,64,true
+BO,Bolivia,BOL,68,true
+BQ,"Bonaire, Saint Eustatius and Saba",BES,535,true
+BA,Bosnia-Herzegovina,BIH,70,true
+BW,Botswana,BWA,72,true
+BR,Brazil,BRA,76,true
+IO,British Indian Ocean Territory,IOT,86,true
+VG,British Virgin Islands,VGB,92,true
+BN,Brunei Darussalam,BRN,96,true
+BG,Bulgaria,BGR,100,true
+BF,Burkina Faso,BFA,854,true
+BI,Burundi,BDI,108,true
+KH,Cambodia,KHM,116,true
+CM,Cameroon,CMR,120,true
+CA,Canada,CAN,124,true
+CV,Cape Verde Islands,CPV,132,true
+KY,Cayman Islands,CYM,136,true
+CF,Central African Republic,CAF,140,true
+TD,Chad,TCD,148,true
+CL,Chile,CHL,152,true
+CN,China,CHN,156,true
+CX,Christmas Island,CXR,162,true
+CC,Cocos (Keeling) Islands,CCK,166,true
+CO,Colombia,COL,170,true
+KM,Comoros,COM,174,true
+CG,Congo (Brazzaville),COG,178,true
+CD,Congo (Kinshasa),ZAR,180,true
+CK,Cook Islands,COK,184,true
+CR,Costa Rica,CRI,188,true
+HR,Croatia,HRV,191,true
+CU,Cuba,CUB,192,true
+CW,Curaçao,CUW,531,true
+CY,Cyprus,CYP,196,true
+CZ,Czech Republic,CZE,203,true
+DK,Denmark,DNK,208,true
+DJ,Djibouti,DJI,262,true
+DM,Dominica,DMA,212,true
+DO,Dominican Republic,DOM,214,true
+TL,East Timor,TLS,626,true
+EC,Ecuador,ECU,218,true
+EG,Egypt,EGY,818,true
+SV,El Salvador,SLV,222,true
+GQ,Equatorial Guinea,GNQ,226,true
+ER,Eritrea,ERI,232,true
+EE,Estonia,EST,233,true
+ET,Ethiopia,ETH,231,true
+FO,Faeroe Islands,FRO,234,true
+FK,Falkland Islands,FLK,238,true
+FJ,Fiji,FJI,242,true
+FI,Finland,FIN,246,true
+FR,France,FRA,250,true
+GF,French Guiana,GUF,254,true
+PF,French Polynesia,PYF,258,true
+TF,French Southern Territories,ATF,260,true
+GA,Gabon,GAB,266,true
+GM,Gambia,GMB,270,true
+GE,Georgia,GEO,268,true
+DE,Germany,DEU,276,true
+GH,Ghana,GHA,288,true
+GI,Gibralter,GIB,292,true
+GR,Greece,GRC,300,true
+GL,Greenland,GRL,304,true
+GD,Grenada,GRD,308,true
+GP,Guadeloupe,GLP,312,true
+GU,Guam,GUM,316,true
+GT,Guatemala,GTM,320,true
+GG,Guernsey,GGY,831,true
+GN,Guinea,GIN,324,true
+GW,Guinea-Bissau,GNB,624,true
+GY,Guyana,GUY,328,true
+HT,Haiti,HTI,332,true
+VA,Holy See,VAT,336,true
+HN,Honduras,HND,340,true
+HK,Hong Kong,HKG,344,true
+HU,Hungary,HUN,348,true
+IS,Iceland,ISL,352,true
+IN,India,IND,356,true
+ID,Indonesia,IDN,360,true
+IR,Iran,IRN,364,true
+IQ,Iraq,IRQ,368,true
+IE,Ireland,IRL,372,true
+IM,Isle of Man,IMN,833,true
+IL,Israel,ISR,376,true
+IT,Italy,ITA,380,true
+CI,Ivory Coast,CIV,384,true
+JM,Jamaica,JAM,388,true
+JP,Japan,JPN,392,true
+JE,Jersey,JEY,832,true
+JO,Jordan,JOR,400,true
+KZ,Kazakhstan,KAZ,398,true
+KE,Kenya,KEN,404,true
+KI,Kiribati,KIR,296,true
+KW,Kuwait,KWT,414,true
+KG,Kyrgyzstan,KGZ,417,true
+LA,Laos,LAO,418,true
+LV,Latvia,LVA,428,true
+LB,Lebanon,LBN,422,true
+LS,Lesotho,LSO,426,true
+LR,Liberia,LBR,430,true
+LY,Libya,LBY,434,true
+LI,Liechtenstein,LIE,438,true
+LT,Lithuania,LTU,440,true
+LU,Luxembourg,LUX,442,true
+MO,Macau,MAC,446,true
+MK,Macedonia,MKD,807,true
+MG,Madagascar,MDG,450,true
+MW,Malawi,MWI,454,true
+MY,Malaysia,MYS,458,true
+MV,Maldives,MDV,462,true
+ML,Mali,MLI,466,true
+MT,Malta,MLT,470,true
+MH,Marshall Islands,MHL,584,true
+MQ,Martinique,MTQ,474,true
+MR,Mauritania,MRT,478,true
+MU,Mauritius,MUS,480,true
+YT,Mayotte,MYT,175,true
+MX,Mexico,MEX,484,true
+FM,Micronesia,FSM,583,true
+MD,Moldova,MDA,498,true
+MC,Monaco,MCO,492,true
+MN,Mongolia,MNG,496,true
+ME,Montenegro,MNE,499,true
+MS,Montserrat,MSR,500,true
+MA,Morocco,MAR,504,true
+MZ,Mozambique,MOZ,508,true
+MM,Myanmar,MMR,104,true
+NA,Namibia,NAM,516,true
+NR,Nauru,NRU,520,true
+NP,Nepal,NPL,524,true
+AN,Netherlands Antilles,ANT,530,true
+NL,Netherlands,NLD,528,true
+NC,New Caledonia,NCL,540,true
+NZ,New Zealand,NZL,554,true
+NI,Nicaragua,NIC,558,true
+NE,Niger,NER,562,true
+NG,Nigeria,NGA,566,true
+NU,Niue,NIU,570,true
+NF,Norfolk Island,NFK,574,true
+KP,North Korea,PRK,408,true
+MP,Northern Mariana Islands,MNP,580,true
+NO,Norway,NOR,578,true
+OM,Oman,OMN,512,true
+PK,Pakistan,PAK,586,true
+PW,Palau,PLW,585,true
+PS,Palestinian Territories,PSE,275,true
+PA,Panama,PAN,591,true
+PG,Papua New Guinea,PNG,598,true
+PY,Paraguay,PRY,600,true
+PE,Peru,PER,604,true
+PH,Philippines,PHL,608,true
+PN,Pitcairn Islands,PCN,612,true
+PL,Poland,POL,616,true
+PT,Portugal,PRT,620,true
+PR,Puerto Rico,PRI,630,true
+QA,Qatar,QAT,634,true
+RO,Romania,ROU,642,true
+RU,Russia,RUS,643,true
+RW,Rwanda,RWA,646,true
+RE,Réunion,REU,638,true
+BL,Saint Barthélemy,BLM,652,true
+KN,Saint Christopher & Nevis,KNA,659,true
+SH,Saint Helena,SHN,654,true
+LC,Saint Lucia,LCA,662,true
+MF,Saint Martin,MAF,663,true
+PM,Saint Pierre & Miquelon,SPM,666,true
+VC,Saint Vincent & The Grenadines,VCT,670,true
+WS,Samoa,WSM,882,true
+SM,San Marino,SMR,674,true
+ST,Sao Tome & Principe,STP,678,true
+SA,Saudi Arabia,SAU,682,true
+SN,Senegal,SEN,686,true
+RS,Serbia,SRB,688,true
+SC,Seychelles,SYC,690,true
+SL,Sierra Leone,SLE,694,true
+SG,Singapore,SGP,702,true
+SX,Sint Maarten,SXM,534,true
+SK,Slovakia,SVK,703,true
+SI,Slovenia,SVN,705,true
+SB,Solomon Islands,SLB,90,true
+SO,Somalia,SOM,706,true
+ZA,South Africa,ZAF,710,true
+GS,South Georgia & The South Sandwish Islands,SGS,239,true
+KR,South Korea,KOR,418,true
+SS,South Sudan,SSD,0,true
+ES,Spain,ESP,724,true
+LK,Sri Lanka,LKA,144,true
+SD,Sudan,SDN,736,true
+SR,Suriname,SUR,740,true
+SZ,Swaziland,SWZ,748,true
+SE,Sweden,SWE,752,true
+CH,Switzerland,CHE,756,true
+SY,Syria,SYR,760,true
+TW,Taiwan,TWN,158,true
+TJ,Tajikistan,TJK,762,true
+TZ,Tanzania,TZA,834,true
+TH,Thailand,THA,764,true
+TG,Togo,TGO,768,true
+TK,Tokelau,TKL,772,true
+TO,Tonga,TON,776,true
+TT,Trinidad & Tobago,TTO,780,true
+TN,Tunisia,TUN,788,true
+TR,Turkey,TUR,792,true
+TM,Turkmenistan,TKM,795,true
+TC,Turks & Caicos Islands,TCA,796,true
+TV,Tuvalu,TUV,798,true
+UG,Uganda,UGA,800,true
+UA,Ukraine,UKR,804,true
+AE,United Arab Emirates,ARE,784,true
+GB,United Kingdom,GBR,826,true
+US,United States,USA,840,true
+VI,United States Virgin Islands,VIR,850,true
+UY,Uruguay,URY,858,true
+UZ,Uzbekistan,UZB,860,true
+VU,Vanuatu,VUT,548,true
+VE,Venezuela,VEN,862,true
+VN,Vietnam,VNM,704,true
+WF,Wallis & Futuna,WLF,876,true
+EH,Western Sahara,ESH,732,true
+YE,Yemen,YEM,887,true
+ZM,Zambia,ZMB,894,true
+ZW,Zimbabwe,ZWE,716,true

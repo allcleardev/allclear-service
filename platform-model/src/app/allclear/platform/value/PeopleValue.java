@@ -1,0 +1,163 @@
+package app.allclear.platform.value;
+
+import java.io.Serializable;
+import java.util.*;
+
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+
+import app.allclear.platform.type.PeopleStatus;
+
+/**********************************************************************************
+*
+*	Value object class that represents the people table.
+*
+*	@author smalleyd
+*	@version 1.0.0
+*	@since March 22, 2020
+*
+**********************************************************************************/
+
+public class PeopleValue implements Serializable
+{
+	private static final long serialVersionUID = 1L;
+
+	public static final String TABLE = "people";
+	public static final int MAX_LEN_ID = 10;
+	public static final int MAX_LEN_NAME = 64;
+	public static final int MAX_LEN_PHONE = 32;
+	public static final int MAX_LEN_EMAIL = 128;
+	public static final int MAX_LEN_FIRST_NAME = 32;
+	public static final int MAX_LEN_LAST_NAME = 32;
+	public static final int MAX_LEN_STATUS_ID = 1;
+
+	// Members
+	public String id = null;
+	public String name = null;
+	public String phone = null;
+	public String email = null;
+	public String firstName = null;
+	public String lastName = null;
+	public Date dob = null;
+	public String statusId = null;
+	public PeopleStatus status = null;
+	public boolean active;
+	public Date authAt = null;
+	public Date phoneVerifiedAt = null;
+	public Date emailVerifiedAt = null;
+	public Date createdAt = null;
+	public Date updatedAt = null;
+
+	// Mutators
+	public PeopleValue withId(final String newValue) { id = newValue; return this; }
+	public PeopleValue withName(final String newValue) { name = newValue; return this; }
+	public PeopleValue withPhone(final String newValue) { phone = newValue; return this; }
+	public PeopleValue withEmail(final String newValue) { email = newValue; return this; }
+	public PeopleValue withFirstName(final String newValue) { firstName = newValue; return this; }
+	public PeopleValue withLastName(final String newValue) { lastName = newValue; return this; }
+	public PeopleValue withDob(final Date newValue) { dob = newValue; return this; }
+	public PeopleValue withStatusId(final String newValue) { statusId = newValue; return this; }
+	public PeopleValue withStatus(final PeopleStatus newValue) { status = newValue; return this; }
+	public PeopleValue withActive(final boolean newValue) { active = newValue; return this; }
+	public PeopleValue withAuthAt(final Date newValue) { authAt = newValue; return this; }
+	public PeopleValue withPhoneVerifiedAt(final Date newValue) { phoneVerifiedAt = newValue; return this; }
+	public PeopleValue withEmailVerifiedAt(final Date newValue) { emailVerifiedAt = newValue; return this; }
+	public PeopleValue withCreatedAt(final Date newValue) { createdAt = newValue; return this; }
+	public PeopleValue withUpdatedAt(final Date newValue) { updatedAt = newValue; return this; }
+	public PeopleValue initDates()
+	{
+		this.createdAt = this.updatedAt = new Date();
+
+		return this;
+	}
+
+	public PeopleValue() {}
+
+	public PeopleValue(final String id,
+		final String name,
+		final String phone,
+		final String email,
+		final String firstName,
+		final String lastName,
+		final Date dob,
+		final String statusId,
+		final PeopleStatus status,
+		final boolean active,
+		final Date authAt,
+		final Date phoneVerifiedAt,
+		final Date emailVerifiedAt,
+		final Date createdAt,
+		final Date updatedAt)
+	{
+		this.id = id;
+		this.name = name;
+		this.phone = phone;
+		this.email = email;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.dob = dob;
+		this.statusId = statusId;
+		this.status = status;
+		this.active = active;
+		this.authAt = authAt;
+		this.phoneVerifiedAt = phoneVerifiedAt;
+		this.emailVerifiedAt = emailVerifiedAt;
+		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
+	}
+
+	/** Helper method - trims all string fields and converts empty strings to NULL. */
+	public void clean()
+	{
+		id = StringUtils.trimToNull(id);
+		name = StringUtils.trimToNull(name);
+		phone = StringUtils.trimToNull(phone);
+		email = StringUtils.trimToNull(email);
+		firstName = StringUtils.trimToNull(firstName);
+		lastName = StringUtils.trimToNull(lastName);
+		statusId = StringUtils.trimToNull(statusId);
+	}
+
+	@Override
+	public boolean equals(final Object o)
+	{
+		if (!(o instanceof PeopleValue)) return false;
+
+		var v = (PeopleValue) o;
+		return Objects.equals(id, v.id) &&
+			Objects.equals(name, v.name) &&
+			Objects.equals(phone, v.phone) &&
+			Objects.equals(email, v.email) &&
+			Objects.equals(firstName, v.firstName) &&
+			Objects.equals(lastName, v.lastName) &&
+			DateUtils.truncatedEquals(dob, v.dob, Calendar.DATE) &&
+			Objects.equals(statusId, v.statusId) &&
+			(active == v.active) &&
+			DateUtils.truncatedEquals(authAt, v.authAt, Calendar.SECOND) &&
+			DateUtils.truncatedEquals(phoneVerifiedAt, v.phoneVerifiedAt, Calendar.SECOND) &&
+			DateUtils.truncatedEquals(emailVerifiedAt, v.emailVerifiedAt, Calendar.SECOND) &&
+			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND) &&
+			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
+	}
+
+	@Override
+	public String toString()
+	{
+		return new StringBuilder("{ id: ").append(id)
+			.append(", name: ").append(name)
+			.append(", phone: ").append(phone)
+			.append(", email: ").append(email)
+			.append(", firstName: ").append(firstName)
+			.append(", lastName: ").append(lastName)
+			.append(", dob: ").append(dob)
+			.append(", statusId: ").append(statusId)
+			.append(", status: ").append(status)
+			.append(", active: ").append(active)
+			.append(", authAt: ").append(authAt)
+			.append(", phoneVerifiedAt: ").append(phoneVerifiedAt)
+			.append(", emailVerifiedAt: ").append(emailVerifiedAt)
+			.append(", createdAt: ").append(createdAt)
+			.append(", updatedAt: ").append(updatedAt)
+			.append(" }").toString();
+	}
+}

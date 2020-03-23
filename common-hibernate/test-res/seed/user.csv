@@ -1,0 +1,4 @@
+email,first_name,last_name,company_id,state_id,country_id,active
+test@jibe.com,Test,User,NULL,NY,US,true
+test+1@jibe.com,Test,One,NULL,AL,CA,true
+test+2@jibe.com,Test,Two,NULL,NULL,GB,false

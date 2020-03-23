@@ -1,0 +1,191 @@
+<HTML>
+<HEAD>
+<TITLE>Database Structure Document</TITLE>
+
+<STYLE TYPE="text/css">
+	H1, H2, TD.header { font-family: verdana,arial,helvetica,sans-serif }
+	H1 { font-size: 18pt }
+	H2 { font-size: 14pt }
+	A { font-size: 9pt }
+	TABLE { display: table; padding: 0; border-style: solid; border-width: 1px; border-color: black; width: 100% }
+	TD { display: table-cell; padding: 3; border-style: solid; border-width: 1px; border-color: black; empty-cells: show; }
+	TD.detail, TD.detail-center, TD.header { font-size: 9pt; vertical-align: text-top }
+	TD.detail { text-align: left }
+	TD.detail-center { text-align: center }
+	TD.header { text-align: center; font-weight: bold; background-color: silver }
+</STYLE>
+
+</HEAD>
+<BODY LINK="Blue" ALINK="Blue" VLINK="Blue">
+<H1>allclear</H1>
+<A NAME="Contents"><H2>Contents</H2></A>
+<TABLE CELLSPACING="0">
+<TR>
+<TD CLASS="header" COLSPAN="1">No.</TD><TD CLASS="header" COLSPAN="1">Table Name</TD><TD CLASS="header" COLSPAN="1">Comments</TD><TD CLASS="header" COLSPAN="1"># Records</TD></TR>
+<TR>
+<TD CLASS="detail">1</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOG">DATABASECHANGELOG</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">1</TD></TR>
+<TR>
+<TD CLASS="detail">2</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOGLOCK">DATABASECHANGELOGLOCK</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">1</TD></TR>
+<TR>
+<TD CLASS="detail">3</TD><TD CLASS="detail"><A HREF="#people">people</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">0</TD></TR>
+</TABLE>
+<DIV STYLE="page-break-before:always">
+<A NAME="DATABASECHANGELOG"><H2>DATABASECHANGELOG</H2></A>
+<TABLE CELLSPACING="0">
+<TR>
+<TD CLASS="header" COLSPAN="7">Columns</TD></TR>
+<TR>
+<TD CLASS="header" COLSPAN="1">No.</TD><TD CLASS="header" COLSPAN="1">Name</TD><TD CLASS="header" COLSPAN="1">Data Type</TD><TD CLASS="header" COLSPAN="1">Size</TD><TD CLASS="header" COLSPAN="1">Decimal</TD><TD CLASS="header" COLSPAN="1">Nullable</TD><TD CLASS="header" COLSPAN="1">Comments</TD></TR>
+<TR>
+<TD CLASS="detail">1</TD><TD CLASS="detail">ID</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">255</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail"></TD></TR>
+<TR>
+<TD CLASS="detail">2</TD><TD CLASS="detail">AUTHOR</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">255</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail"></TD></TR>
+<TR>
+<TD CLASS="detail">3</TD><TD CLASS="detail">FILENAME</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">255</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail"></TD></TR>
+<TR>
+<TD CLASS="detail">4</TD><TD CLASS="detail">DATEEXECUTED</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail"></TD></TR>
+<TR>
+<TD CLASS="detail">5</TD><TD CLASS="detail">ORDEREXECUTED</TD><TD CLASS="detail">INT</TD><TD CLASS="detail">10</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail"></TD></TR>
+<TR>
+<TD CLASS="detail">6</TD><TD CLASS="detail">EXECTYPE</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">10</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail"></TD></TR>
+<TR>
+<TD CLASS="detail">7</TD><TD CLASS="detail">MD5SUM</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">35</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail"></TD></TR>
+<TR>
+<TD CLASS="detail">8</TD><TD CLASS="detail">DESCRIPTION</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">255</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail"></TD></TR>
+<TR>
+<TD CLASS="detail">9</TD><TD CLASS="detail">COMMENTS</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">255</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail"></TD></TR>
+<TR>
+<TD CLASS="detail">10</TD><TD CLASS="detail">TAG</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">255</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail"></TD></TR>
+<TR>
+<TD CLASS="detail">11</TD><TD CLASS="detail">LIQUIBASE</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">20</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail"></TD></TR>
+<TR>
+<TD CLASS="detail">12</TD><TD CLASS="detail">CONTEXTS</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">255</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail"></TD></TR>
+<TR>
+<TD CLASS="detail">13</TD><TD CLASS="detail">LABELS</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">255</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail"></TD></TR>
+<TR>
+<TD CLASS="detail">14</TD><TD CLASS="detail">DEPLOYMENT_ID</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">10</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail"></TD></TR>
+</TABLE>
+<BR><TABLE CELLSPACING="0">
+<TR>
+<TD CLASS="header" COLSPAN="5">Indexes</TD></TR>
+<TR>
+<TD CLASS="detail-center" COLSPAN="5">None</TD></TR>
+</TABLE>
+<BR><TABLE CELLSPACING="0">
+<TR>
+<TD CLASS="header" COLSPAN="5">Imported Keys</TD></TR>
+<TR>
+<TD CLASS="detail-center" COLSPAN="5">None</TD></TR>
+</TABLE>
+<BR><TABLE CELLSPACING="0">
+<TR>
+<TD CLASS="header" COLSPAN="4">Exported Keys</TD></TR>
+<TR>
+<TD CLASS="detail-center" COLSPAN="4">None</TD></TR>
+</TABLE>
+<BR><A HREF="#Contents">Goto Contents</A>
+</DIV>
+<DIV STYLE="page-break-before:always">
+<A NAME="DATABASECHANGELOGLOCK"><H2>DATABASECHANGELOGLOCK</H2></A>
+<TABLE CELLSPACING="0">
+<TR>
+<TD CLASS="header" COLSPAN="7">Columns</TD></TR>
+<TR>
+<TD CLASS="header" COLSPAN="1">No.</TD><TD CLASS="header" COLSPAN="1">Name</TD><TD CLASS="header" COLSPAN="1">Data Type</TD><TD CLASS="header" COLSPAN="1">Size</TD><TD CLASS="header" COLSPAN="1">Decimal</TD><TD CLASS="header" COLSPAN="1">Nullable</TD><TD CLASS="header" COLSPAN="1">Comments</TD></TR>
+<TR>
+<TD CLASS="detail">1</TD><TD CLASS="detail">ID</TD><TD CLASS="detail">INT</TD><TD CLASS="detail">10</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail"></TD></TR>
+<TR>
+<TD CLASS="detail">2</TD><TD CLASS="detail">LOCKED</TD><TD CLASS="detail">BIT</TD><TD CLASS="detail">1</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail"></TD></TR>
+<TR>
+<TD CLASS="detail">3</TD><TD CLASS="detail">LOCKGRANTED</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail"></TD></TR>
+<TR>
+<TD CLASS="detail">4</TD><TD CLASS="detail">LOCKEDBY</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">255</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail"></TD></TR>
+</TABLE>
+<BR><TABLE CELLSPACING="0">
+<TR>
+<TD CLASS="header" COLSPAN="5">Indexes</TD></TR>
+<TR>
+<TD CLASS="header" COLSPAN="1">No.</TD><TD CLASS="header" COLSPAN="1">Name</TD><TD CLASS="header" COLSPAN="1">Unique?</TD><TD CLASS="header" COLSPAN="1">Primary Key?</TD><TD CLASS="header" COLSPAN="1">Column</TD></TR>
+<TR>
+<TD CLASS="detail">1</TD><TD CLASS="detail">PRIMARY</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">ID</TD></TR>
+</TABLE>
+<BR><TABLE CELLSPACING="0">
+<TR>
+<TD CLASS="header" COLSPAN="5">Imported Keys</TD></TR>
+<TR>
+<TD CLASS="detail-center" COLSPAN="5">None</TD></TR>
+</TABLE>
+<BR><TABLE CELLSPACING="0">
+<TR>
+<TD CLASS="header" COLSPAN="4">Exported Keys</TD></TR>
+<TR>
+<TD CLASS="detail-center" COLSPAN="4">None</TD></TR>
+</TABLE>
+<BR><A HREF="#Contents">Goto Contents</A>
+</DIV>
+<DIV STYLE="page-break-before:always">
+<A NAME="people"><H2>people</H2></A>
+<TABLE CELLSPACING="0">
+<TR>
+<TD CLASS="header" COLSPAN="7">Columns</TD></TR>
+<TR>
+<TD CLASS="header" COLSPAN="1">No.</TD><TD CLASS="header" COLSPAN="1">Name</TD><TD CLASS="header" COLSPAN="1">Data Type</TD><TD CLASS="header" COLSPAN="1">Size</TD><TD CLASS="header" COLSPAN="1">Decimal</TD><TD CLASS="header" COLSPAN="1">Nullable</TD><TD CLASS="header" COLSPAN="1">Comments</TD></TR>
+<TR>
+<TD CLASS="detail">1</TD><TD CLASS="detail">id</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">10</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail"></TD></TR>
+<TR>
+<TD CLASS="detail">2</TD><TD CLASS="detail">name</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">64</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail">Represents the login/screen name.</TD></TR>
+<TR>
+<TD CLASS="detail">3</TD><TD CLASS="detail">phone</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">32</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail">Represents the mobile phone number used for registration.</TD></TR>
+<TR>
+<TD CLASS="detail">4</TD><TD CLASS="detail">email</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">128</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the email address.</TD></TR>
+<TR>
+<TD CLASS="detail">5</TD><TD CLASS="detail">first_name</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">32</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the first name.</TD></TR>
+<TR>
+<TD CLASS="detail">6</TD><TD CLASS="detail">last_name</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">32</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the last name.</TD></TR>
+<TR>
+<TD CLASS="detail">7</TD><TD CLASS="detail">dob</TD><TD CLASS="detail">DATE</TD><TD CLASS="detail">10</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the date of birth.</TD></TR>
+<TR>
+<TD CLASS="detail">8</TD><TD CLASS="detail">status_id</TD><TD CLASS="detail">CHAR</TD><TD CLASS="detail">1</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the status.</TD></TR>
+<TR>
+<TD CLASS="detail">9</TD><TD CLASS="detail">active</TD><TD CLASS="detail">BIT</TD><TD CLASS="detail">1</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail">Indicates activity status.</TD></TR>
+<TR>
+<TD CLASS="detail">10</TD><TD CLASS="detail">auth_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the date-time when the user last authenticated.</TD></TR>
+<TR>
+<TD CLASS="detail">11</TD><TD CLASS="detail">phone_verified_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the date-time when the user phone number is verified.</TD></TR>
+<TR>
+<TD CLASS="detail">12</TD><TD CLASS="detail">email_verified_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the date-time when the user email address is verified.</TD></TR>
+<TR>
+<TD CLASS="detail">13</TD><TD CLASS="detail">created_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail">Represents the date-time when the record was created.</TD></TR>
+<TR>
+<TD CLASS="detail">14</TD><TD CLASS="detail">updated_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail">Represents the date-time when the record was last modified.</TD></TR>
+</TABLE>
+<BR><TABLE CELLSPACING="0">
+<TR>
+<TD CLASS="header" COLSPAN="5">Indexes</TD></TR>
+<TR>
+<TD CLASS="header" COLSPAN="1">No.</TD><TD CLASS="header" COLSPAN="1">Name</TD><TD CLASS="header" COLSPAN="1">Unique?</TD><TD CLASS="header" COLSPAN="1">Primary Key?</TD><TD CLASS="header" COLSPAN="1">Column</TD></TR>
+<TR>
+<TD CLASS="detail">1</TD><TD CLASS="detail">PRIMARY</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">id</TD></TR>
+<TR>
+<TD CLASS="detail">2</TD><TD CLASS="detail">unq_people_email</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">No</TD><TD CLASS="detail">email</TD></TR>
+<TR>
+<TD CLASS="detail">3</TD><TD CLASS="detail">unq_people_phone</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">No</TD><TD CLASS="detail">phone</TD></TR>
+<TR>
+<TD CLASS="detail">4</TD><TD CLASS="detail">unq_people_screen</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">No</TD><TD CLASS="detail">name</TD></TR>
+</TABLE>
+<BR><TABLE CELLSPACING="0">
+<TR>
+<TD CLASS="header" COLSPAN="5">Imported Keys</TD></TR>
+<TR>
+<TD CLASS="detail-center" COLSPAN="5">None</TD></TR>
+</TABLE>
+<BR><TABLE CELLSPACING="0">
+<TR>
+<TD CLASS="header" COLSPAN="4">Exported Keys</TD></TR>
+<TR>
+<TD CLASS="detail-center" COLSPAN="4">None</TD></TR>
+</TABLE>
+<BR><A HREF="#Contents">Goto Contents</A>
+</DIV>
+</BODY>
+</HTML>

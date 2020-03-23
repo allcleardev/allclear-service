@@ -1,5 +1,5 @@
 {
-  "environment": "local",
+  "env": "local",
 
   "trans": {
     "driverClass": "com.mysql.jdbc.Driver",

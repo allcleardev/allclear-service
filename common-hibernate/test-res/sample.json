@@ -1,0 +1,11 @@
+{
+  "dataSource": { "driverClass": "org.h2.Driver",
+                  "url": "${db.url}",
+                  "user": "${db.userName:-sa}",
+                  "password": "${db.password:-not_guessable_at_all}",
+                  "initialSize": 100,
+                  "minSize": ${db.minSize:-50},
+                  "maxSize": ${db.maxSize:-500},
+                  "checkConnectionWhileIdle": true,
+                  "checkConnectionOnBorrow": ${db.checkConnectionOnBorrow:-false} }
+}

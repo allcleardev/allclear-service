@@ -1,0 +1,9 @@
+{
+  "id": "DESC",
+  "name": "asc",
+  "code": "ASC",
+  "backgroundColor": "asc,c.background_color",
+  "foreColor": "desc,fore.color",
+  "alignmentName": "desc,a.name;INNER JOIN o.alignmentXref x,INNER JOIN x.alignment a",
+  "createdAt": "desc"
+}

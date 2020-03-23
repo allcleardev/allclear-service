@@ -2,7 +2,7 @@ apply plugin: 'application'
 apply plugin: 'com.github.johnrengelman.shadow'
 
 // Set project level properties
-mainClassName = 'app.allclear.Platform'	// Need outside of "ext" to work with the "run" task.
+mainClassName = 'app.allclear.platform.App'	// Need outside of "ext" to work with the "run" task.
 
 // Add Gradle OneJar Plugin, see https://github.com/rholder/gradle-one-jar
 buildscript {

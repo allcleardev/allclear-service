@@ -1,2 +1,2 @@
-include 'common-service', 'common-testing', 'platform-model', 'platform-server'
+include 'common-hibernate', 'common-model', 'common-service', 'common-testing', 'platform-model', 'platform-server'
 

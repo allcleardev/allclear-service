@@ -1,0 +1,4 @@
+dependencies {
+    compile "io.dropwizard:dropwizard-hibernate:${dropwizardVersion}"
+    testCompile "io.dropwizard:dropwizard-migrations:${dropwizardVersion}"
+}

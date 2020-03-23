@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+	<changeSet id="creation" author="smalleyd">
+		<createTable tableName="company">
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true" primaryKeyName="pk_company" />
+			</column>
+			<column name="name" type="VARCHAR(128)">
+				<constraints nullable="false" unique="true" uniqueConstraintName="unq_company" />
+			</column>
+			<column name="first_product" type="BOOLEAN">
+				<constraints nullable="false" />
+			</column>
+			<column name="active" type="BOOLEAN" defaultValueNumeric="1">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createTable tableName="country">
+			<column name="id" type="CHAR(2)">
+				<constraints nullable="false" primaryKey="true" primaryKeyName="pk_country" />
+			</column>
+			<column name="name" type="VARCHAR(128)">
+				<constraints nullable="false" unique="true" uniqueConstraintName="unq_country" />
+			</column>
+			<column name="code" type="CHAR(3)">
+				<constraints nullable="false" />
+			</column>
+			<column name="num_code" type="VARCHAR(3)">
+				<constraints nullable="false" />
+			</column>
+			<column name="active" type="BOOLEAN" defaultValueNumeric="1">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<createTable tableName="user">
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true" primaryKeyName="pk_user" />
+			</column>
+			<column name="email" type="VARCHAR(128)">
+				<constraints nullable="false" unique="true" uniqueConstraintName="unq_user" />
+			</column>
+			<column name="first_name" type="VARCHAR(25)">
+				<constraints nullable="false" />
+			</column>
+			<column name="last_name" type="VARCHAR(30)">
+				<constraints nullable="false" />
+			</column>
+			<column name="company_id" type="BIGINT" />
+			<column name="state_id" type="CHAR(2)" />
+			<column name="country_id" type="CHAR(2)">
+				<constraints nullable="false" />
+			</column>
+			<column name="active" type="BOOLEAN" defaultValueNumeric="1">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<addForeignKeyConstraint constraintName="fk_user_company" baseTableName="user" baseColumnNames="company_id" referencedTableName="company" referencedColumnNames="id" />
+		<addForeignKeyConstraint constraintName="fk_user_country" baseTableName="user" baseColumnNames="country_id" referencedTableName="country" referencedColumnNames="id" />
+
+		<loadData tableName="country" file="seed/country.csv">
+			<column name="id" type="STRING" />
+			<column name="name" type="STRING" />
+			<column name="code" type="STRING" />
+			<column name="num_code" type="STRING" />
+			<column name="active" type="BOOLEAN" />
+		</loadData>
+		<loadData tableName="user" file="seed/user.csv">
+			<column name="id" type="NUMERIC" />
+			<column name="email" type="STRING" />
+			<column name="first_name" type="STRING" />
+			<column name="last_name" type="STRING" />
+			<column name="company_id" type="NUMERIC" />
+			<column name="state_id" type="STRING" />
+			<column name="country_id" type="STRING" />
+			<column name="active" type="BOOLEAN" />
+		</loadData>
+	</changeSet>
+</databaseChangeLog>

@@ -1,0 +1,5 @@
+db.userName=superuser
+db.password=easy_to_guess
+db.initialSize=150
+db.minSize=75
+db.checkConnectionOnBorrow=true

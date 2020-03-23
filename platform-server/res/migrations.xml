@@ -3,8 +3,33 @@
 
 	<changeSet id="v1.0.0_init" author="smalleyd">
 		<createTable tableName="people" remarks="Represents users of the system.">
-			<column name="id" type="BIGINT" autoIncrement="true">
+			<column name="id" type="VARCHAR(10)" remarks="Represents a randomly generated alphanumeric identifier.">
 				<constraints nullable="false" primaryKey="true" primaryKeyName="pk_people" />
+			</column>
+			<column name="name" type="VARCHAR(64)" remarks="Represents the login/screen name.">
+				<constraints nullable="false" unique="true" uniqueConstraintName="unq_people_screen	" />
+			</column>
+			<column name="phone" type="VARCHAR(32)" remarks="Represents the mobile phone number used for registration.">
+				<constraints nullable="false" unique="true" uniqueConstraintName="unq_people_phone" />
+			</column>
+			<column name="email" type="VARCHAR(128)" remarks="Represents the email address.">
+				<constraints nullable="true" unique="true" uniqueConstraintName="unq_people_email" />
+			</column>
+			<column name="first_name" type="VARCHAR(32)" remarks="Represents the first name." />
+			<column name="last_name" type="VARCHAR(32)" remarks="Represents the last name." />
+			<column name="dob" type="DATE" remarks="Represents the date of birth." />
+			<column name="status_id" type="CHAR(1)" remarks="Represents the status." />
+			<column name="active" type="BOOLEAN" defaultValueBoolean="true" remarks="Indicates activity status.">
+				<constraints nullable="false" />
+			</column>
+			<column name="auth_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the user last authenticated." />
+			<column name="phone_verified_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the user phone number is verified." />
+			<column name="email_verified_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the user email address is verified." />
+			<column name="created_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was created.">
+				<constraints nullable="false" />
+			</column>
+			<column name="updated_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was last modified.">
+				<constraints nullable="false" />
 			</column>
 		</createTable>
 
