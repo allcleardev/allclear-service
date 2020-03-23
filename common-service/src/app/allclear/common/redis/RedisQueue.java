@@ -25,13 +25,13 @@ public class RedisQueue implements TaskQueue
 	 * 
 	 * @param client
 	 */
-	public RedisQueue(RedisClient client)
+	public RedisQueue(final RedisClient client)
 	{
 		this.client = client;
 	}
 
 	@Override
-	public void pushTask(String queueName, TaskRequest<?> value)
+	public void pushTask(final String queueName, final TaskRequest<?> value)
 		throws Exception
 	{
 		// Use Java serialization instead of JSON because of the TaskRequest generics.
@@ -40,11 +40,11 @@ public class RedisQueue implements TaskQueue
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> TaskRequest<T> popTask(String queueName, Class<T> clazz)
+	public <T> TaskRequest<T> popTask(final String queueName, final Class<T> clazz)
 		throws Exception
 	{
 		// Use Java deserialization instead of JSON because of the TaskRequest generics.
-		String value = client.pop(queueName);
+		var value = client.pop(queueName);
 		if (null != value)
 			return (TaskRequest<T>) deserialize(value);
 
@@ -52,15 +52,15 @@ public class RedisQueue implements TaskQueue
 	}
 
 	@Override
-	public int getQueueSize(String queueName) throws Exception
+	public int getQueueSize(final String queueName) throws Exception
 	{
 		return client.queueSize(queueName);
 	}
 
 	@Override
-	public List<TaskRequest<?>> listRequests(String queueName) throws Exception
+	public List<TaskRequest<?>> listRequests(final String queueName) throws Exception
 	{
-		List<String> values = client.list(queueName);
+		var values = client.list(queueName);
 		if (CollectionUtils.isEmpty(values))
 			return null;
 
@@ -68,10 +68,10 @@ public class RedisQueue implements TaskQueue
 	}
 
 	@Override
-	public List<TaskRequest<?>> listRequests(String queueName, int page,
+	public List<TaskRequest<?>> listRequests(final String queueName, final int page,
 		int pageSize) throws Exception
 	{
-		List<String> values = client.list(queueName, page, pageSize);
+		var values = client.list(queueName, page, pageSize);
 		if (null == values)
 			return null;
 
@@ -80,10 +80,10 @@ public class RedisQueue implements TaskQueue
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> List<TaskRequest<T>> listRequests(String queueName,
-		Class<T> clazz) throws Exception
+	public <T> List<TaskRequest<T>> listRequests(final String queueName,
+		final Class<T> clazz) throws Exception
 	{
-		List<String> values = client.list(queueName);
+		var values = client.list(queueName);
 		if (CollectionUtils.isEmpty(values))
 			return null;
 
@@ -91,17 +91,17 @@ public class RedisQueue implements TaskQueue
 	}
 
 	@Override
-	public boolean removeRequest(String queueName, String id)
+	public boolean removeRequest(final String queueName, final String id)
 	{
 		// Get the list of actual values. Needed to propertly perform the removal from the list/queue.
-		List<String> values = client.list(queueName);
+		var values = client.list(queueName);
 		if (CollectionUtils.isEmpty(values))
 			return false;
 
 		// Loop throug and, deserialize one at a time to compare the IDs. Most likely will NOT need to deserialize the entire list. DLS on 10/9/2015.
-		for (String value : values)
+		for (var value : values)
 		{
-			TaskRequest<?> request = (TaskRequest<?>) deserialize(value);
+			var request = (TaskRequest<?>) deserialize(value);
 			if (id.equals(request.id))
 			{
 				client.unqueue(queueName, value);
@@ -113,13 +113,13 @@ public class RedisQueue implements TaskQueue
 	}
 
 	@Override
-	public int clearRequests(String queueName) throws Exception
+	public int clearRequests(final String queueName) throws Exception
 	{
 		return client.unqueue(queueName);
 	}
 
 	@Override
-	public <T> int moveRequests(String fromQueue, String toQueue, Class<T> clazz) throws Exception
+	public <T> int moveRequests(final String fromQueue, final String toQueue, final Class<T> clazz) throws Exception
 	{
 		int count = 0;
 		TaskRequest<T> value = null;
@@ -134,23 +134,23 @@ public class RedisQueue implements TaskQueue
 	}
 
 	/** Helper method - serialize the class to a String. */
-	private String serialize(Serializable value) throws IOException
+	private String serialize(final Serializable value) throws IOException
 	{
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		var out = new ByteArrayOutputStream();
 		(new ObjectOutputStream(out)).writeObject(value);
 
 		return Base64.getEncoder().encodeToString(out.toByteArray());
 	}
 
 	/** Helper method - deserialize a String to a class. */
-	private Object deserialize(String value)
+	private Object deserialize(final String value)
 	{
 		// Throw Runtime so that deserialize can be used within a Lambda.
 		try
 		{
 			return (new ObjectInputStream(new ByteArrayInputStream(Base64.getDecoder().decode(value)))).readObject();
 		}
-		catch (IOException ex) { throw new RuntimeException(ex); }
-		catch (ClassNotFoundException ex) { throw new RuntimeException(ex); }
+		catch (final IOException ex) { throw new RuntimeException(ex); }
+		catch (final ClassNotFoundException ex) { throw new RuntimeException(ex); }
 	}
 }

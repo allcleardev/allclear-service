@@ -17,7 +17,7 @@ public interface TaskCallback<T>
 	 * @return TRUE if the item was successfully processed. FALSE if the item was skipped and should be put back on the back of the queue.
 	 * @throws Exception
 	 */
-	public boolean process(T request) throws Exception;
+	public boolean process(final T request) throws Exception;
 
 	/** Optional handler called after successful processing. Includes the full TaskRequest with underlying payload.
 	 *  Default implementation does not additional work.

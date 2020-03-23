@@ -47,22 +47,22 @@ public class TaskManager implements Managed, Runnable
 	public Map<String, TaskOperator<?>> getOperators() { return operators; }
 	private Map<String, TaskOperator<?>> operators = null;
 	public void addOperator(TaskOperator<?> newValue) { operators.put(newValue.name, newValue); }
-	public TaskOperator<?> removeOperator(String name) { return operators.remove(name); }
+	public TaskOperator<?> removeOperator(final String name) { return operators.remove(name); }
 
 	/** Represents the optional prefix to the queue. */
 	public String getQueuePrefix() { return queuePrefix; }
 	private String queuePrefix = "";
-	public TaskManager withQueuePrefix(String newValue) { queuePrefix = newValue; return this; }
+	public TaskManager withQueuePrefix(final String newValue) { queuePrefix = newValue; return this; }
 
 	/** Represents the duration that the thread should sleep between processing. */
 	public long getSleep() { return sleep; }
 	private long sleep = 0L;
-	public void setSleep(long newValue) { sleep = newValue; }
+	public void setSleep(final long newValue) { sleep = newValue; }
 
 	/** Represents the number of threads available to process the queue items. */
 	public int getThreads() { return threads; }
 	private int threads = 1;
-	public void setThreads(int newValue) { threads = newValue; }
+	public void setThreads(final int newValue) { threads = newValue; }
 
 	/** Represents the maximum time in seconds to delay the retry of a request. Leave open to externally configure. */
 	private long maxDelay = 60L * 60L;	// One hour.
@@ -101,7 +101,7 @@ public class TaskManager implements Managed, Runnable
 	 * @param sleep
 	 * @param operators
 	 */
-	public TaskManager(TaskQueue queue, long sleep, TaskOperator<?>...operators)
+	public TaskManager(final TaskQueue queue, final long sleep, final TaskOperator<?>...operators)
 	{
 		this(queue, sleep, 1, operators);
 	}
@@ -113,7 +113,7 @@ public class TaskManager implements Managed, Runnable
 	 * @param threads
 	 * @param operators
 	 */
-	public TaskManager(TaskQueue queue, long sleep, int threads, TaskOperator<?>...operators)
+	public TaskManager(final TaskQueue queue, final long sleep, final int threads, final TaskOperator<?>...operators)
 	{
 		this(queue, threads, operators);
 		this.sleep = sleep;
@@ -186,13 +186,13 @@ public class TaskManager implements Managed, Runnable
 	{
 		int count = 0;
 
-		for (Map.Entry<String, TaskOperator<?>> entry : operators.entrySet())
+		for (var entry : operators.entrySet())
 		{
 			// Check "available" property to ensure earliest possible exit when requested.
 			if (!available)
 				return count;
 
-			TaskOperator<?> operator = entry.getValue();
+			var operator = entry.getValue();
 			if (operator.available)	// Only one thread per instance of the TaskManager should be leveraged for a single task. Anymore could suffocate other tasks if a single task is way backed up. DLS on 8/3/2017.
 			{
 				if (noSuffocating)
@@ -210,15 +210,15 @@ public class TaskManager implements Managed, Runnable
 	public List<OperatorStats> stats()
 	{
 		return operators.entrySet().stream().map(e -> {
-			final TaskOperator<?> v = e.getValue();
+			var v = e.getValue();
 			int queueSize = 0, dlqSize = 0;
 			try
 			{
 				queueSize = queue.getQueueSize(v.name);
 				dlqSize = queue.getQueueSize(v.dlq);
 			}
-			catch (RuntimeException ex) { throw ex; }
-			catch (Exception ex) { throw new RuntimeException(ex); }
+			catch (final RuntimeException ex) { throw ex; }
+			catch (final Exception ex) { throw new RuntimeException(ex); }
 			return new OperatorStats(v.name, queueSize, dlqSize, v.successes, v.skips, v.errors);
 		})
 		.collect(Collectors.toList());
@@ -326,7 +326,7 @@ public class TaskManager implements Managed, Runnable
 			throw new ValidationException("id", "The ID field must be supplied.");
 
 		// Get the operator in order to get the expected class of the request.
-		String queueName = queueName(name);
+		var queueName = queueName(name);
 		return addRequestAndRemovePrior(queueName, request.value, request.id, getOperator_(queueName).clazz);
 	}
 
@@ -340,7 +340,7 @@ public class TaskManager implements Managed, Runnable
 			throw new ValidationException("id", "The ID field must be supplied.");
 
 		// Get the operator in order to get the expected class of the request.
-		String queueName = dlqName(name);
+		var queueName = dlqName(name);
 		return addRequestAndRemovePrior(queueName, request.value, request.id, getOperator_(queueName(name)).clazz);
 	}
 
@@ -348,7 +348,7 @@ public class TaskManager implements Managed, Runnable
 	private <T> TaskRequest<T> addRequestAndRemovePrior(final String name, final String payload, final String oldId, final Class<T> clazz) throws Exception
 	{
 		// First make sure that that the payload can be deserialized correctly.
-		TaskRequest<T> request = new TaskRequest<>(MAPPER.readValue(payload, clazz));
+		var request = new TaskRequest<>(MAPPER.readValue(payload, clazz));
 
 		// Remove the old request.
 		queue.removeRequest(name, oldId);
@@ -411,7 +411,7 @@ public class TaskManager implements Managed, Runnable
 	 */
 	public int moveRequests(final String name) throws Exception
 	{
-		TaskOperator<?> operator = getOperator(name);
+		var operator = getOperator(name);
 
 		return queue.moveRequests(operator.dlq, operator.name, operator.clazz);
 	}
@@ -419,7 +419,7 @@ public class TaskManager implements Managed, Runnable
 	/** Processes the entire queue by name. */
 	public int process(final String name) throws Exception
 	{
-		TaskOperator<?> operator = getOperator(name);
+		var operator = getOperator(name);
 
 		return process(operator, operator.clazz);
 	}
@@ -574,12 +574,12 @@ public class TaskManager implements Managed, Runnable
 
 		// Re-add skipped items.
 		if (!dlq.isEmpty())
-			for (TaskRequest<T> q : dlq)
+			for (var q : dlq)
 				queue.pushTask(operator.dlq, q);
 
 		// Move items that have exceeded their maximum tries to the DLQ. DLS on 7/14/2016.
 		if (!skipped.isEmpty())
-			for (TaskRequest<T> skip : skipped)
+			for (var skip : skipped)
 				queue.pushTask(operator.name, skip);
 
 		return count;

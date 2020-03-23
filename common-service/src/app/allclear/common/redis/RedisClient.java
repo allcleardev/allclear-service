@@ -52,10 +52,10 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 ******************************************************************************************************************/
 
 	@Override
-	public void clear() { try (Jedis cache = pool.getResource()) { cache.flushDB(); } }
+	public void clear() { try (var cache = pool.getResource()) { cache.flushDB(); } }
 
 	@Override
-	public boolean containsKey(Object key) { try (Jedis cache = pool.getResource()) { return cache.exists((String) key); } }
+	public boolean containsKey(Object key) { try (var cache = pool.getResource()) { return cache.exists((String) key); } }
 
 	@Override
 	public boolean containsValue(Object value) { return false;	/* Not implemented. */ }
@@ -64,7 +64,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	public Set<Map.Entry<String, String>> entrySet() { return Set.of(); /* NOT implemented. */ }
 
 	@Override
-	public String get(Object key) { try (Jedis cache = pool.getResource()) { return cache.get((String) key); } }
+	public String get(Object key) { try (var cache = pool.getResource()) { return cache.get((String) key); } }
 
 	@Override
 	public int hashCode() { return pool.hashCode(); }
@@ -81,17 +81,17 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	public boolean isEmpty() { return 0 == size(); }
 
 	@Override
-	public Set<String> keySet() { try (Jedis cache = pool.getResource()) { return cache.keys("*"); } }
+	public Set<String> keySet() { try (var cache = pool.getResource()) { return cache.keys("*"); } }
 
     /** Gets a set of keys by the specified search prefix.
      *
      * @param startsWith wildcard search prefix.
      * @return never NULL
      */
-    public Set<String> keys(String startsWith) { try (Jedis cache = pool.getResource()) { return cache.keys(startsWith + "*"); } }
+    public Set<String> keys(String startsWith) { try (var cache = pool.getResource()) { return cache.keys(startsWith + "*"); } }
 
 	@Override
-	public String put(String key, String value) { try (Jedis cache = pool.getResource()) { return cache.set(key, value); } }
+	public String put(String key, String value) { try (var cache = pool.getResource()) { return cache.set(key, value); } }
 
 	/** Put a key/value pair with an timeout.
 	 * 
@@ -101,7 +101,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 */
 	public String put(String key, String value, int seconds)
 	{
-		try (Jedis cache = pool.getResource()) { return cache.setex(key, seconds, value); }
+		try (var cache = pool.getResource()) { return cache.setex(key, seconds, value); }
 	}
 
 	/** Sets a new expiration value for an existing key.
@@ -112,7 +112,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 */
 	public boolean expire(String key, int seconds)
 	{
-		try (Jedis cache = pool.getResource()) { return !FAIL.equals(cache.expire(key, seconds)); }
+		try (var cache = pool.getResource()) { return !FAIL.equals(cache.expire(key, seconds)); }
 	}
 
 	/** Gets the number of seconds till expiration for the specified key.
@@ -134,13 +134,13 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 */
 	public Long ttl(String key)
 	{
-		try (Jedis cache = pool.getResource()) { return cache.ttl(key); }
+		try (var cache = pool.getResource()) { return cache.ttl(key); }
 	}
 
 	@Override
 	public void putAll(Map<? extends String, ? extends String> newValues)
 	{
-		try (Jedis cache = pool.getResource())
+		try (var cache = pool.getResource())
 		{
 			for (Map.Entry<? extends String, ? extends String> entry : newValues.entrySet())
 				cache.set(entry.getKey(), entry.getValue());
@@ -148,10 +148,10 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	}
 
 	@Override
-	public String remove(Object key) { try (Jedis cache = pool.getResource()) { return cache.del((String) key) + ""; } }
+	public String remove(Object key) { try (var cache = pool.getResource()) { return cache.del((String) key) + ""; } }
 
 	@Override
-	public int size() { try (Jedis cache = pool.getResource()) { return cache.dbSize().intValue(); } }
+	public int size() { try (var cache = pool.getResource()) { return cache.dbSize().intValue(); } }
 
 	@Override
 	public Collection<String> values() { return List.of(); /* NOT implemented. */ }
@@ -169,13 +169,13 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 */
 	public void push(String queueName, String value)
 	{
-		try (Jedis cache = pool.getResource()) { cache.rpush(queueName, value); }
+		try (var cache = pool.getResource()) { cache.rpush(queueName, value); }
 	}
 
 	/** Retrieves and removes a textual value from the specified Redis queue. */
 	public String pop(String queueName)
 	{
-		try (Jedis cache = pool.getResource()) { return cache.lpop(queueName); }
+		try (var cache = pool.getResource()) { return cache.lpop(queueName); }
 	}
 
 	/** Partially lists items from the specified Redis queue.
@@ -185,7 +185,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 */
 	public List<String> list(String queueName)
 	{
-		try (Jedis cache = pool.getResource()) { return cache.lrange(queueName, 0, queueSize(queueName) - 1); }
+		try (var cache = pool.getResource()) { return cache.lrange(queueName, 0, queueSize(queueName) - 1); }
 	}
 
 	/** Partially lists items from the specified Redis queue.
@@ -197,7 +197,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 */
 	public List<String> list(String queueName, int page, int pageSize)
 	{
-		try (Jedis cache = pool.getResource())
+		try (var cache = pool.getResource())
 		{
 			final long size = cache.llen(queueName);
 			if (0L == size)
@@ -226,7 +226,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	public int unqueue(String queueName)
 	{
 		/** The value returned from the "del" command is not the count of items in the queue. */
-		try (Jedis cache = pool.getResource())
+		try (var cache = pool.getResource())
 		{
 			int size = cache.llen(queueName).intValue();
 			if (0 == size)
@@ -247,7 +247,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	/** Removes the specified number of items from the queue that match the value. */
 	public boolean unqueue(String queueName, String value, long count)
 	{
-		try (Jedis cache = pool.getResource())
+		try (var cache = pool.getResource())
 		{
 			return (0L < cache.lrem(queueName, count, value));
 		}
@@ -260,7 +260,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 */
 	public int queueSize(String queueName)
 	{
-		try (Jedis cache = pool.getResource()) { return cache.llen(queueName).intValue(); }
+		try (var cache = pool.getResource()) { return cache.llen(queueName).intValue(); }
 	}
 
 	/*******************************************************************************************************************
@@ -276,13 +276,13 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 */
 	public void set(String key, String value)
 	{
-		try (Jedis cache = pool.getResource()) { cache.sadd(key, value); }
+		try (var cache = pool.getResource()) { cache.sadd(key, value); }
 	}
 
 	/** Gets a textual value from the specified Redis queue. */
 	public Set<String> set(String key)
 	{
-		try (Jedis cache = pool.getResource()) { return cache.smembers(key); }
+		try (var cache = pool.getResource()) { return cache.smembers(key); }
 	}
 
 	/** Gets the size of the set.
@@ -292,7 +292,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 */
 	public int setSize(String key)
 	{
-		try (Jedis cache = pool.getResource()) { return cache.scard(key).intValue(); }
+		try (var cache = pool.getResource()) { return cache.scard(key).intValue(); }
 	}
 
 	/** Removes one or more items from the specified Redis set.
@@ -302,7 +302,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 */
 	public void unset(String key, String... values)
 	{
-		try (Jedis cache = pool.getResource()) { cache.srem(key, values); }
+		try (var cache = pool.getResource()) { cache.srem(key, values); }
 	}
 
 	/*******************************************************************************************************************
@@ -319,7 +319,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 */
 	public void hash(String key, String field, String value)
 	{
-		try (Jedis cache = pool.getResource()) { cache.hset(key, field, value); }
+		try (var cache = pool.getResource()) { cache.hset(key, field, value); }
 	}
 
 	/** Gets a value from the hash/map by key and field.
@@ -330,7 +330,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 */
 	public String hash(String key, String field)
 	{
-		try (Jedis cache = pool.getResource()) { return cache.hget(key, field); }
+		try (var cache = pool.getResource()) { return cache.hget(key, field); }
 	}
 
 	/** Gets the full hash/map by the key.
@@ -340,7 +340,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 */
 	public Map<String, String> hash(String key)
 	{
-		try (Jedis cache = pool.getResource()) { return cache.hgetAll(key); }
+		try (var cache = pool.getResource()) { return cache.hgetAll(key); }
 	}
 
 	/** Gets the number of key-value pairs in the hash/map.
@@ -350,7 +350,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 */
 	public int hashSize(String key)
 	{
-		try (Jedis cache = pool.getResource()) { return cache.hlen(key).intValue(); }
+		try (var cache = pool.getResource()) { return cache.hlen(key).intValue(); }
 	}
 
 	/** Removes a key-value pairs from a hash/map.
@@ -360,7 +360,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 */
 	public void unhash(String key, String... fields)
 	{
-		try (Jedis cache = pool.getResource()) { cache.hdel(key, fields); }
+		try (var cache = pool.getResource()) { cache.hdel(key, fields); }
 	}
 
 	/*******************************************************************************************************************
@@ -376,7 +376,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 */
 	public String ping() throws Exception
 	{
-		try (Jedis cache = pool.getResource())
+		try (var cache = pool.getResource())
 		{
 			cache.ping();
 

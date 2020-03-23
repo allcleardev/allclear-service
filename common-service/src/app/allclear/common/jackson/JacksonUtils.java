@@ -182,9 +182,9 @@ public class JacksonUtils
 	 */
 	public static ObjectMapper configure(final ObjectMapper mapper)
 	{
-		mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ"));
-		mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		return mapper.enable(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature())
+		return mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ"))
+			.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+			.enable(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature())
 			.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
 			.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 			.registerModule(createDateParserModule());
@@ -197,9 +197,9 @@ public class JacksonUtils
 	 */
 	public static ObjectMapper configureMS(final ObjectMapper mapper)
 	{
-		mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"));
-		mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		return mapper.enable(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature())
+		return mapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ"))
+			.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+			.enable(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature())
 			.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
 			.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 			.registerModule(createTimestampParserModule());	// Need custom date parser for legacy UTC date formats. DLS on 5/21/2016.
@@ -212,9 +212,9 @@ public class JacksonUtils
 	 */
 	public static ObjectMapper configureDynamoDB(final ObjectMapper mapper)
 	{
-		mapper.setDateFormat(null); // Defaults to serialize as a long.
-		mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-		return mapper.enable(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature())
+		return mapper.setDateFormat(null) // Defaults to serialize as a long.
+			.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+			.enable(JsonReadFeature.ALLOW_UNESCAPED_CONTROL_CHARS.mappedFeature())
 			.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY)
 			.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
 			.registerModule(createDynamoDBParserModule());

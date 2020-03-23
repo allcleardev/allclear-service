@@ -7,8 +7,8 @@ import org.junit.*;
 /** Unit test class that verifies the SQLQueryBuilder class.
  * 
  * @author smalleyd
- * @version 1.3.5.9
- * @since 10/5/2018
+ * @version 1.0.0
+ * @since 3/22/2020
  *
  */
 

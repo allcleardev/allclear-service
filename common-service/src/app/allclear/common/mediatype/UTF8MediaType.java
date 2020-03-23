@@ -24,6 +24,7 @@ public class UTF8MediaType
     public final static String APPLICATION_OCTET_STREAM = MediaType.APPLICATION_OCTET_STREAM + "; charset=" + CHARSET;
     public final static String MULTIPART_FORM_DATA = MediaType.MULTIPART_FORM_DATA + "; charset=" + CHARSET;
     public final static String TEXT_CSV = "text/csv" + "; charset=" + CHARSET;
+    public final static String TEXT_TSV = "text/tsv" + "; charset=" + CHARSET;
     public final static String TEXT_PLAIN = MediaType.TEXT_PLAIN + "; charset=" + CHARSET;
     public final static String TEXT_XML = MediaType.TEXT_XML + "; charset=" + CHARSET;
     public final static String TEXT_HTML = MediaType.TEXT_HTML + "; charset=" + CHARSET;
@@ -37,6 +38,7 @@ public class UTF8MediaType
     public final static MediaTypeWithCharset APPLICATION_OCTET_STREAM_TYPE = type("application","octet-stream");
     public final static MediaTypeWithCharset MULTIPART_FORM_DATA_TYPE = type("multipart","form-data");
     public final static MediaTypeWithCharset TEXT_CSV_TYPE = type("text", "csv");
+    public final static MediaTypeWithCharset TEXT_TSV_TYPE = type("text", "tsv");
     public final static MediaTypeWithCharset TEXT_PLAIN_TYPE = type("text","plain");
     public final static MediaTypeWithCharset TEXT_XML_TYPE = type("text","xml");
     public final static MediaTypeWithCharset TEXT_HTML_TYPE = type("text","html");

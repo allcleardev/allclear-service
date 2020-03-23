@@ -13,8 +13,8 @@ import app.allclear.testing.TestingUtils;
 /** Unit test class that verifies the OrderByBuilder class.
  * 
  * @author smalleyd
- * @version 0.5.3
- * @since 7/13/2015
+ * @version 1.0.0
+ * @since 3/22/2020
  *
  */
 

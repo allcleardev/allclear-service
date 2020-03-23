@@ -2,6 +2,8 @@ package app.allclear.common.task;
 
 import java.io.Serializable;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /** Value object that represents the configuration properties for the background TaskManager.
  *  
  * @author smalleyd
@@ -12,24 +14,20 @@ import java.io.Serializable;
 
 public class TaskConfig implements Serializable
 {
-	/** Constant - serial version UID. */
-	public static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L;
 
-	/** Should the TaskManager run in the "test" mode? */
-	public boolean isTest() { return test; }
-	private boolean test = false;
-	public void setTest(boolean newValue) { test = newValue; }
+	public final boolean test;	// Test mode?
+	public final int sleep;	// Specifies the pause/sleep duration (seconds) between queue processing. Zero indicates no pause. Defaults to 2 seconds.
+	public final int threads;	// Number of background threads to process queue items
 
-	/** Specifies the pause/sleep duration (seconds) between queue processing.
-	 *  Zero indicates no pause. Defaults to 2 seconds.
-	 */
-	public int getSleep() { return sleep; }
 	public long getSleepInMillis() { return ((long) sleep) * 1000L; }
-	private int sleep = 2;
-	public void setSleep(int newValue) { sleep = newValue; }
 
-	/** Specifies the number of background threads available to process the queue items. */
-	public int getThreads() { return threads; }
-	private int threads = 1;
-	public void setThreads(int newValue) { threads = newValue; }
+	public TaskConfig(@JsonProperty("test") final Boolean test,
+		@JsonProperty("sleep") final Integer sleep,
+		@JsonProperty("threads") final Integer threads)
+	{
+		this.test = Boolean.TRUE.equals(test);	// Defaults to off.
+		this.sleep = (null != sleep) ? sleep : 2;
+		this.threads = (null != threads) ? threads : 1;
+	}
 }

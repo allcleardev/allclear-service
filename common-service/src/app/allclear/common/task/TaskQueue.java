@@ -18,16 +18,16 @@ public interface TaskQueue
 	 * @param queueName
 	 * @param value
 	 */
-	public void pushTask(String queueName, TaskRequest<?> value) throws Exception;
+	public void pushTask(final String queueName, final TaskRequest<?> value) throws Exception;
 
 	/** Pulls a request from the queue. */
-	public <T> TaskRequest<T> popTask(String queueName, Class<T> clazz) throws Exception;
+	public <T> TaskRequest<T> popTask(final String queueName, final Class<T> clazz) throws Exception;
 
 	/** Gets the size of the queue. */
-	public int getQueueSize(String queueName) throws Exception;
+	public int getQueueSize(final String queueName) throws Exception;
 
 	/** Lists the task requests in a queue. */
-	public List<TaskRequest<?>> listRequests(String queueName) throws Exception;
+	public List<TaskRequest<?>> listRequests(final String queueName) throws Exception;
 
 	/** Lists a subset of the task requests in a queue.
 	 * 
@@ -37,10 +37,10 @@ public interface TaskQueue
 	 * @return NULL if none found.
 	 * @throws Exception
 	 */
-	public List<TaskRequest<?>> listRequests(String queueName, int page, int pageSize) throws Exception;
+	public List<TaskRequest<?>> listRequests(final String queueName, final int page, final int pageSize) throws Exception;
 
 	/** Lists the task requests in a queue. */
-	public <T> List<TaskRequest<T>> listRequests(String queueName, Class<T> clazz) throws Exception;
+	public <T> List<TaskRequest<T>> listRequests(final String queueName, final Class<T> clazz) throws Exception;
 
 	/** Removes a single request from the specified queue.
 	 * 
@@ -48,7 +48,7 @@ public interface TaskQueue
 	 * @param id
 	 * @return TRUE if found AND removed.
 	 */
-	public boolean removeRequest(String queueName, String id);
+	public boolean removeRequest(final String queueName, final String id);
 
 	/** Completely clears the queue of all the requests.
 	 * 
@@ -56,7 +56,7 @@ public interface TaskQueue
 	 * @return number of requests removed.
 	 * @throws Exception
 	 */
-	public int clearRequests(String queueName) throws Exception;
+	public int clearRequests(final String queueName) throws Exception;
 
 	/** Moves requests from one queue to another. Used to pop DLQ requests back onto the operational queue.
 	 * 
@@ -66,5 +66,5 @@ public interface TaskQueue
 	 * @return the number of requests moved.
 	 * @throws Exception
 	 */
-	public <T> int moveRequests(String fromQueue, String toQueue, Class<T> clazz) throws Exception;
+	public <T> int moveRequests(final String fromQueue, final String toQueue, final Class<T> clazz) throws Exception;
 }

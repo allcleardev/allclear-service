@@ -16,7 +16,7 @@ public class TaskOperator<T> implements Serializable
 
 	/** Constant - DLQ prefix. */
 	public static final String DLQ = "dlq:";
-	public static String dlq(String name) { return DLQ + name; }
+	public static String dlq(final String name) { return DLQ + name; }
 
 	public String name = null;	// Represents the name of the queue from which to retrieve each item.
 	public String dlq = null;	// Represents the name of the dead letter queue to which requests that have exceeded their maximum number tries are moved.
@@ -39,7 +39,7 @@ public class TaskOperator<T> implements Serializable
 	 * @param callback
 	 * @param clazz
 	 */
-	public TaskOperator(String name, TaskCallback<T> callback, Class<T> clazz, int maxTries)
+	public TaskOperator(final String name, final TaskCallback<T> callback, final Class<T> clazz, final int maxTries)
 	{
 		this.name = name;
 		this.dlq = dlq(name);
@@ -54,7 +54,7 @@ public class TaskOperator<T> implements Serializable
 	 * @param callback
 	 * @param clazz
 	 */
-	public TaskOperator(String name, TaskCallback<T> callback, Class<T> clazz)
+	public TaskOperator(final String name, final TaskCallback<T> callback, final Class<T> clazz)
 	{
 		this(name, callback, clazz, 10);
 	}

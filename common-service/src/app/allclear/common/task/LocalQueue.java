@@ -16,10 +16,10 @@ public class LocalQueue implements TaskQueue
 	private final Map<String, Queue<TaskRequest<?>>> queues = new HashMap<>();
 
 	@Override
-	public void pushTask(String queueName, TaskRequest<?> value)
+	public void pushTask(final String queueName, final TaskRequest<?> value)
 		throws Exception
 	{
-		Queue<TaskRequest<?>> queue = queues.get(queueName);
+		var queue = queues.get(queueName);
 		if (null == queue)
 			queues.put(queueName, queue = new ConcurrentLinkedQueue<TaskRequest<?>>());
 
@@ -28,10 +28,10 @@ public class LocalQueue implements TaskQueue
 
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T> TaskRequest<T> popTask(String queueName, Class<T> clazz)
+	public <T> TaskRequest<T> popTask(final String queueName, final Class<T> clazz)
 		throws Exception
 	{
-		Queue<TaskRequest<?>> queue = queues.get(queueName);
+		var queue = queues.get(queueName);
 		if (null != queue)
 			return (TaskRequest<T>) queue.poll();
 
@@ -39,9 +39,9 @@ public class LocalQueue implements TaskQueue
 	}
 
 	@Override
-	public int getQueueSize(String queueName) throws Exception
+	public int getQueueSize(final String queueName) throws Exception
 	{
-		Queue<TaskRequest<?>> queue = queues.get(queueName);
+		var queue = queues.get(queueName);
 		if (null != queue)
 			return queue.size();
 
@@ -51,7 +51,7 @@ public class LocalQueue implements TaskQueue
 	@Override
 	public List<TaskRequest<?>> listRequests(String queueName) throws Exception
 	{
-		Queue<TaskRequest<?>> queue = queues.get(queueName);
+		var queue = queues.get(queueName);
 		if (null != queue)
 			return new LinkedList<>(queue);
 
@@ -64,7 +64,7 @@ public class LocalQueue implements TaskQueue
 		int pageSize) throws Exception
 	{
 		int size = 0;
-		List<TaskRequest<?>> queue = listRequests(queueName);
+		var queue = listRequests(queueName);
 		if ((null == queue) || (0 == (size = queue.size())))
 			return null;
 
@@ -90,7 +90,7 @@ public class LocalQueue implements TaskQueue
 	@Override
 	public boolean removeRequest(String queueName, String id)
 	{
-		Queue<TaskRequest<?>> queue = queues.get(queueName);
+		var queue = queues.get(queueName);
 		if (null == queue)
 			return false;
 
@@ -101,7 +101,7 @@ public class LocalQueue implements TaskQueue
 	public int clearRequests(String queueName) throws Exception
 	{
 		int size = 0;
-		Queue<TaskRequest<?>> queue = queues.get(queueName);
+		var queue = queues.get(queueName);
 		if ((null == queue) || (0 == (size = queue.size())))
 			return 0;
 
@@ -113,10 +113,10 @@ public class LocalQueue implements TaskQueue
 	@Override
 	public <T> int moveRequests(String fromQueue, String toQueue, Class<T> clazz) throws Exception
 	{
-		Queue<TaskRequest<?>> _from = queues.get(fromQueue);
+		var _from = queues.get(fromQueue);
 		if (null == _from)
 			throw new IllegalArgumentException("The source queue, " + fromQueue + ", is invalid.");
-		Queue<TaskRequest<?>> _to = queues.get(toQueue);
+		var _to = queues.get(toQueue);
 		if (null == _to)
 			throw new IllegalArgumentException("The destination queue, " + toQueue + ", is invalid.");
 

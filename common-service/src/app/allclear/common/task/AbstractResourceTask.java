@@ -8,7 +8,6 @@ import app.allclear.common.mediatype.UTF8MediaType;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.*;
-import javax.ws.rs.core.Response;
 
 /** Background task that provides helper methods to process the request by making a local RESTful call.
  * 
@@ -32,9 +31,9 @@ public abstract class AbstractResourceTask<T> implements TaskCallback<T>
 	 * @param path
 	 * @param title
 	 */
-	public AbstractResourceTask(int port, String path, String title)
+	public AbstractResourceTask(final int port, final String path, final String title)
 	{
-		String url = "http://localhost:" + port + "/" + path;
+		var url = "http://localhost:" + port + "/" + path;
 		log.info("Base URL: " + url);
 
 		this.resource = ClientBuilder.newClient().target(url);
@@ -47,7 +46,7 @@ public abstract class AbstractResourceTask<T> implements TaskCallback<T>
 	 * @return TRUE on success
 	 * @throws Exception
 	 */
-	public boolean doProcess(Number id) throws Exception
+	public boolean doProcess(final Number id) throws Exception
 	{
 		return doProcess(id.toString());
 	}
@@ -58,14 +57,13 @@ public abstract class AbstractResourceTask<T> implements TaskCallback<T>
 	 * @return TRUE on success
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
-	public boolean doProcess(String id) throws Exception
+	public boolean doProcess(final String id) throws Exception
 	{
-		Response response = invoke(resource.path(id).request(UTF8MediaType.APPLICATION_JSON_TYPE)).method(HttpMethod.POST);
+		var response = invoke(resource.path(id).request(UTF8MediaType.APPLICATION_JSON_TYPE)).method(HttpMethod.POST);
 		if (300 > response.getStatus())	// Success.
 			return true;	// Always return TRUE.
 
-		Map<String, Object> result = response.readEntity(Map.class);
+		var result = response.readEntity(Map.class);
 		String message = (String) result.get("message");
 		if (null == message)
 			message = String.format("Status %d - %s", response.getStatus(), response.getStatusInfo().getReasonPhrase());
@@ -79,15 +77,14 @@ public abstract class AbstractResourceTask<T> implements TaskCallback<T>
 	 * @return TRUE on success
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
-	public boolean doProcess(T value) throws Exception
+	public boolean doProcess(final T value) throws Exception
 	{
-		Response response = invoke(resource.request(UTF8MediaType.APPLICATION_JSON_TYPE)).post(Entity.entity(value, UTF8MediaType.APPLICATION_JSON_TYPE));
+		var response = invoke(resource.request(UTF8MediaType.APPLICATION_JSON_TYPE)).post(Entity.entity(value, UTF8MediaType.APPLICATION_JSON_TYPE));
 		if (300 > response.getStatus())	// Success.
 			return true;	// Always return TRUE.
 
-		Map<String, Object> result = response.readEntity(Map.class);
-		String message = (String) result.get("message");
+		var result = response.readEntity(Map.class);
+		var message = (String) result.get("message");
 		if (null == message)
 			message = String.format("Status %d - %s", response.getStatus(), response.getStatusInfo().getReasonPhrase());
 
@@ -95,7 +92,7 @@ public abstract class AbstractResourceTask<T> implements TaskCallback<T>
 	}
 
 	/** Helper method - optionally override to set application specific headers. */
-	protected Invocation.Builder invoke(Invocation.Builder builder)
+	protected Invocation.Builder invoke(final Invocation.Builder builder)
 	{
 		return builder;
 	}
