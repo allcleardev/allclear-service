@@ -57,6 +57,7 @@ subprojects {
   dependencies {
     compile "org.apache.commons:commons-collections4:${commonsCollectionVersion}"
     compile "org.apache.commons:commons-lang3:${commonsLangVersion}"
+    testCompile "org.mockito:mockito-core:${mockitoVersion}"
   }
 }
 

@@ -7,6 +7,9 @@ import io.dropwizard.db.DataSourceFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.common.ManifestUtils;
+import app.allclear.common.value.ManifestValue;
+
 /** Value object that represents the application configuration properties.
  * 
  * @author smalleyd
@@ -20,12 +23,19 @@ public class Config extends Configuration implements Serializable
 	private static final long serialVersionUID = 1L;
 
 	public final String env;
+	public final boolean disableSwagger;
 	public final DataSourceFactory trans;
+	public final ManifestValue manifest;
+
+	public String getVersion() { return manifest.version; }
 
 	public Config(@JsonProperty("env") final String env,
+		@JsonProperty("disableSwagger") final Boolean disableSwagger,
 		@JsonProperty("trans") final DataSourceFactory trans)
 	{
 		this.env = env;
 		this.trans = trans;
+		this.manifest = ManifestUtils.getInfo(getClass());
+		this.disableSwagger = Boolean.TRUE.equals(disableSwagger);
 	}
 }

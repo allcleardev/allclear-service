@@ -29,7 +29,6 @@ dependencies {
   compile "org.glassfish.jersey.media:jersey-media-multipart:${jerseyVersion}"
   compile "org.glassfish.jersey.core:jersey-client:${jerseyVersion}"
   compile "org.liquibase:liquibase-core:${liquibaseVersion}"
-  testCompile "org.mockito:mockito-core:${mockitoVersion}"
   runtime "mysql:mysql-connector-java:${mysqlVersion}"
 }
 

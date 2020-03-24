@@ -13,7 +13,7 @@ import app.allclear.common.value.ManifestValue;
 public class ManifestUtils
 {
     /** Extract Info from the class's Package, if possible. */
-    public static ManifestValue getInfo(Class<?> clazz)
+    public static ManifestValue getInfo(final Class<?> clazz)
     {
         var p = clazz.getPackage();
         var vendor = p.getImplementationVendor();
