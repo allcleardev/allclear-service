@@ -74,6 +74,12 @@ public class PeopleDAOTest
 	}
 
 	@Test
+	public void add_dupeName()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withName("ronny")));
+	}
+
+	@Test
 	public void add_missingName()
 	{
 		assertThrows(ValidationException.class, () -> dao.add(createValid().withName(null)));
@@ -83,6 +89,12 @@ public class PeopleDAOTest
 	public void add_longName()
 	{
 		assertThrows(ValidationException.class, () -> dao.add(createValid().withName(StringUtils.repeat("A", PeopleValue.MAX_LEN_NAME + 1))));
+	}
+
+	@Test
+	public void add_dupePhone()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withPhone("888-555-1000")));
 	}
 
 	@Test
