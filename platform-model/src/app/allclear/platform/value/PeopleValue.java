@@ -163,7 +163,7 @@ public class PeopleValue implements Serializable
 			Objects.equals(email, v.email) &&
 			Objects.equals(firstName, v.firstName) &&
 			Objects.equals(lastName, v.lastName) &&
-			DateUtils.truncatedEquals(dob, v.dob, Calendar.DATE) &&
+			((dob == v.dob) || DateUtils.truncatedEquals(dob, v.dob, Calendar.DATE)) &&
 			Objects.equals(statusId, v.statusId) &&
 			Objects.equals(statureId, v.statureId) &&
 			(active == v.active) &&

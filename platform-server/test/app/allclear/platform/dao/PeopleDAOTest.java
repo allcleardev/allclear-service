@@ -44,8 +44,8 @@ public class PeopleDAOTest
 	public final HibernateTransactionRule transRule = new HibernateTransactionRule(DAO_RULE);
 
 	private static PeopleDAO dao = null;
-	private static Date DOB = utc(1950, 7, 1);
-	private static Date DOB_1 = utc(1990, 7, 15);
+	private static final Date DOB = utc(1950, 7, 1);
+	private static final Date DOB_1 = utc(1990, 7, 15);
 	private static PeopleValue VALUE = null;
 
 	@BeforeAll
@@ -212,6 +212,7 @@ public class PeopleDAOTest
 	@Test
 	public void getActiveByIdOrName()
 	{
+		assertThat(dao.getActiveByIdOrName("invalid")).as("Invalid").isEmpty();
 		assertThat(dao.getActiveByIdOrName(VALUE.id.substring(0, 3))).as("By partial ID").containsExactly(VALUE);
 		assertThat(dao.getActiveByIdOrName(VALUE.name.substring(0, 3))).as("By partial name").containsExactly(VALUE);
 	}

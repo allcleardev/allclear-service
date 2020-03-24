@@ -29,6 +29,7 @@ public class TestingUtils
 {
 	public static final ObjectMapper jsonMapper = new ObjectMapper();
 	private static final long MILLISECONDS_DAY = 24L * 60L * 60L * 1000L;
+	private static final long MILLISECONDS_HOUR = 60L * 60L * 1000L;
 	private static final DateFormat TIMESTAMP_FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ");
 	private static final DateFormat TIMESTAMP_FORMATTER_LEGACY = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'");
 	static
@@ -230,6 +231,8 @@ public class TestingUtils
 
 	public static Date days(final Date value, final int i) { return days(value, (long) i); }
 	public static Date days(final Date value, final long i) { return new Date(value.getTime() + (i * MILLISECONDS_DAY)); }
-	public static Date hourAgo() { return new Date(System.currentTimeMillis() - 3600000L); }
-	public static Date hourAhead() { return new Date(System.currentTimeMillis() + 3600000L); }
+	public static Date hours(final Date value, final int i) { return days(value, (long) i); }
+	public static Date hours(final Date value, final long i) { return new Date(value.getTime() + (i * MILLISECONDS_HOUR)); }
+	public static Date hourAgo() { return new Date(System.currentTimeMillis() - MILLISECONDS_HOUR); }
+	public static Date hourAhead() { return new Date(System.currentTimeMillis() + MILLISECONDS_HOUR); }
 }
