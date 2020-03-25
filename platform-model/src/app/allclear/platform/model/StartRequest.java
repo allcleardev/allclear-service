@@ -22,7 +22,7 @@ public class StartRequest implements Serializable
 
 	public StartRequest(@JsonProperty("phone") final String phone,
 		@JsonProperty("beenTested") final Boolean beenTested,
-		@JsonProperty("haveSymptoms") final boolean haveSymptoms)
+		@JsonProperty("haveSymptoms") final Boolean haveSymptoms)
 	{
 		this.phone = phone;
 		this.beenTested = Boolean.TRUE.equals(beenTested);

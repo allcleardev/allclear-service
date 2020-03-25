@@ -68,7 +68,7 @@ public class RegistrationDAO
 	 * @param code
 	 * @return NULL if not found
 	 */
-	public StartRequest request(final String phone, final String code)
+	StartRequest request(final String phone, final String code)
 	{
 		var key = key(phone, code);
 		var map = redis.hash(key);

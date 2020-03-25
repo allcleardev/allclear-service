@@ -23,7 +23,7 @@ public class Validator
 	public static final Pattern PATTERN_LOWER_CASE = Pattern.compile("[a-z]");
 	public static final Pattern PATTERN_NUMERIC = Pattern.compile("[\\d]");
 	public static final Pattern PATTERN_PASSWORD_SYMBOLS = Pattern.compile("[\\~\\!\\@\\#\\$\\%\\^\\&\\*\\(\\)\\-\\_\\+\\=]");
-	public static final Pattern PATTERN_PHONE = Pattern.compile("[\\d\\-]");
+	public static final Pattern PATTERN_PHONE = Pattern.compile("[\\d\\-]+");
 	public static final Pattern PATTERN_UPPER_CASE = Pattern.compile("[A-Z]");
 	public static final Pattern PATTERN_PASSWORD_INVALID = Pattern.compile("[^a-zA-Z\\d\\~\\!\\@\\#\\$\\%\\^\\&\\*\\(\\)\\-\\_\\+\\=]");
 

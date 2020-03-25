@@ -1,7 +1,12 @@
 package app.allclear.common.redis;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import org.apache.commons.collections4.MapUtils;
+
+import redis.clients.jedis.Jedis;
 
 /** RedisClient implementation that uses non-remote data structures. Used for unit tests.
  * 
@@ -345,6 +350,21 @@ public class FakeRedisClient extends RedisClient
 		return maps.get(key);
 	}
 
+	/** Adds key-value pairs to a hash/map.
+	 * 
+	 * @param key
+	 * @param field
+	 * @param value
+	 */
+	@Override
+	public void hash(final String key, final Map<String, String> values)
+	{
+		if (MapUtils.isEmpty(values)) return;
+
+		var map = maps.computeIfAbsent(key, k -> new HashMap<>());
+		values.forEach((k, v) -> map.put(k, v));
+	}
+
 	/** Gets the number of key-value pairs in the hash/map.
 	 * 
 	 * @param key
@@ -370,6 +390,22 @@ public class FakeRedisClient extends RedisClient
 
 		for (var f : fields)
 			values.remove(f);
+	}
+
+	/** Runs the specified function with a Jedis cache. Used to perform multi Redis cache actions with the same connection.
+	 * 
+	 * @param <R>
+	 * @param fx
+	 * @return value of the supplied function.
+	 */
+	public <R> R operation(final Function<Jedis, R> fx)
+	{
+		@SuppressWarnings("resource") var me = this;
+		return fx.apply(new Jedis() {
+			@Override public Boolean exists(final String key) { return maps.containsKey(key); }
+			@Override public Long hset(final String key, final Map<String, String> values) { me.hash(key, values); return 1L; }
+			@Override public Long expire(final String key, final int seconds) { me.expire(key, seconds); return 1L; }
+		});
 	}
 
 	/*******************************************************************************************************************

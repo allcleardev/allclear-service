@@ -1,13 +1,16 @@
 package app.allclear.platform.dao;
 
+import static org.fest.assertions.api.Assertions.assertThat;
+
+import java.util.regex.Pattern;
+
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
-import app.allclear.common.redis.RedisClient;
-import app.allclear.common.redis.RedisConfig;
-import app.allclear.junit.redis.RedisServerRule;
+import app.allclear.common.redis.FakeRedisClient;
+import app.allclear.platform.model.StartRequest;
 
 /** Functional test class that verifies RegistrationDAO component.
  * 
@@ -21,21 +24,35 @@ import app.allclear.junit.redis.RedisServerRule;
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class RegistrationDAOTest
 {
-	public static final RedisServerRule REDIS = new RedisServerRule();
+	public static final Pattern PATTERN_CODE = Pattern.compile("[A-Z0-9]{10}");
 
-	private static RedisClient redis;
 	private static RegistrationDAO dao;
+	private static FakeRedisClient redis;
+
+	private static String code;
+	private static StartRequest request;
 
 	@BeforeAll
 	public static void up()
 	{
-		redis = new RedisClient(new RedisConfig("localhost", RedisServerRule.PORT_DEFAULT));
+		redis = new FakeRedisClient();
 		dao = new RegistrationDAO(redis);
 	}
 
-	@AfterAll
-	public static void down()
+	@Test
+	public void add()
 	{
-		redis.close();
+		assertThat(code = dao.start(new StartRequest("888-555-1000", null, null)))
+			.hasSize(10)
+			.matches(PATTERN_CODE);
+	}
+
+	@Test
+	public void check()
+	{
+		var o = dao.request("888-555-1000", code);
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertFalse(o.beenTested, "Check beenTested");
+		Assertions.assertFalse(o.haveSymptoms, "Check haveSymptoms");
 	}
 }
