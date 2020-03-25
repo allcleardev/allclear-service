@@ -19,6 +19,29 @@
       "hibernate.show_sql": false }
   },
 
+  "server": {
+    "type": "simple",
+    "registerDefaultExceptionMappers": false,
+    "connector": {
+        "type": "http",
+        "port": 8080,
+        "bindHost": null
+    },
+    "applicationContextPath": "/",
+    "adminContextPath": "/admin",
+    "requestLog": {
+        "appenders": [
+            {
+                "type": "file",
+                "currentLogFilename": "/var/log/platform-server/request.log",
+                "threshold": "ALL",
+                "archive": false,
+                "timeZone": "UTC"
+            }
+        ]
+    }
+  },
+
   "logging": { "level": "INFO",
     "loggers": { "com.sun.jersey.api.container.filter.LoggingFilter": "INFO",
                  "org.hibernate.engine.internal.StatisticalLoggingSessionEventListener": "WARN" } }

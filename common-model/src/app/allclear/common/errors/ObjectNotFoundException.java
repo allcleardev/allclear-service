@@ -8,7 +8,7 @@ package app.allclear.common.errors;
  *
  */
 
-public class ObjectNotFoundException extends Exception
+public class ObjectNotFoundException extends RuntimeException
 {
 	private static final long serialVersionUID = 1L;
 

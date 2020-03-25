@@ -79,4 +79,26 @@ public class ConfigTest
 		Assertions.assertEquals(TransactionIsolation.READ_COMMITTED, o.trans.getDefaultTransactionIsolation(), "Check trans.defaultTransactionIsolation");
 		assertThat(o.trans.getProperties()).as("Check properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect"));
 	}
+
+	@Test
+	public void test() throws Exception
+	{
+		var o = load("test");
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals("test", o.env, "Check env");
+		Assertions.assertFalse(o.disableSwagger, "Check disableSwagger");
+		Assertions.assertEquals("org.h2.Driver", o.trans.getDriverClass(), "Check trans.driverClass");
+		Assertions.assertNull(o.trans.getUser(), "Check trans.user");
+		Assertions.assertNull(o.trans.getPassword(), "Check trans.password");
+		Assertions.assertEquals("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1",  o.trans.getUrl(), "Check trans.url");
+		Assertions.assertEquals(Duration.seconds(1L), o.trans.getMaxWaitForConnection(), "Check trans.maxWaitForConnection");
+		Assertions.assertEquals(Optional.of("SELECT 1"), o.trans.getValidationQuery(), "Check trans.validationQuery");
+		Assertions.assertEquals(Optional.of(Duration.seconds(10L)), o.trans.getValidationQueryTimeout(), "Check trans.validationQueryTimeout");
+		Assertions.assertEquals(1, o.trans.getMinSize(), "Check trans.minSize");
+		Assertions.assertEquals(10, o.trans.getMaxSize(), "Check trans.maxSize");
+		Assertions.assertFalse(o.trans.getCheckConnectionWhileIdle(), "Check trans.checkConnectionWhileIdle");
+		Assertions.assertFalse(o.trans.getCheckConnectionOnBorrow(), "Check trans.checkConnectionOnBorrow");
+		Assertions.assertEquals(TransactionIsolation.READ_COMMITTED, o.trans.getDefaultTransactionIsolation(), "Check trans.defaultTransactionIsolation");
+		assertThat(o.trans.getProperties()).as("Check properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.H2Dialect"));
+	}
 }
