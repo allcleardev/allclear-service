@@ -1,0 +1,5 @@
+dependencies {
+    compile "io.dropwizard:dropwizard-core:${dropwizardVersion}"
+    testRuntime "com.sun.activation:javax.activation:${javaxActivationVersion}"
+    testRuntime "javax.xml.bind:jaxb-api:${javaxXmlBindVersion}"
+}

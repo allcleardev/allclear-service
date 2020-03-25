@@ -61,6 +61,13 @@ subprojects {
   }
 }
 
+project(':common-jersey') {
+  dependencies {
+    testCompile project(':common-model')
+    testCompile project(':common-testing')
+  }
+}
+
 project(':common-model') {
   dependencies {
     testCompile project(':common-testing')
@@ -70,6 +77,7 @@ project(':common-model') {
 project(':common-service') {
   dependencies {
     compile project(':common-model')
+    compile project(':common-jersey')
     testCompile project(':common-testing')
   }
 }
