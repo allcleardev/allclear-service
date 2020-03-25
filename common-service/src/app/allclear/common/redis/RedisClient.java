@@ -1,6 +1,8 @@
 package app.allclear.common.redis;
 
+import java.io.Closeable;
 import java.util.*;
+import java.util.function.Function;
 
 import redis.clients.jedis.*;
 
@@ -14,7 +16,7 @@ import com.codahale.metrics.health.HealthCheck;
  *
  */
 
-public class RedisClient extends HealthCheck implements Map<String, String>
+public class RedisClient extends HealthCheck implements Closeable, Map<String, String>
 {
 	/** Represents the Redis failure code. */
 	public static final Long FAIL = Long.valueOf(0L);
@@ -43,6 +45,12 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 		if (null != conf.timeout) config.setMaxWaitMillis(conf.timeout);
 
 		pool = new JedisPool(config, conf.host, conf.port, conf.ssl);
+	}
+
+	@Override
+	public void close()
+	{
+		pool.close();
 	}
 
 	/*******************************************************************************************************************
@@ -317,7 +325,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 * @param field
 	 * @param value
 	 */
-	public void hash(String key, String field, String value)
+	public void hash(final String key, final String field, final String value)
 	{
 		try (var cache = pool.getResource()) { cache.hset(key, field, value); }
 	}
@@ -328,7 +336,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 * @param field
 	 * @return NULL if not found.
 	 */
-	public String hash(String key, String field)
+	public String hash(final String key, final String field)
 	{
 		try (var cache = pool.getResource()) { return cache.hget(key, field); }
 	}
@@ -338,9 +346,20 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 * @param key
 	 * @return NULL if not found.
 	 */
-	public Map<String, String> hash(String key)
+	public Map<String, String> hash(final String key)
 	{
 		try (var cache = pool.getResource()) { return cache.hgetAll(key); }
+	}
+
+	/** Adds key-value pairs to a hash/map.
+	 * 
+	 * @param key
+	 * @param field
+	 * @param value
+	 */
+	public void hash(final String key, final Map<String, String> values)
+	{
+		try (var cache = pool.getResource()) { cache.hset(key, values); }
 	}
 
 	/** Gets the number of key-value pairs in the hash/map.
@@ -348,7 +367,7 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 * @param key
 	 * @return zero if none found.
 	 */
-	public int hashSize(String key)
+	public int hashSize(final String key)
 	{
 		try (var cache = pool.getResource()) { return cache.hlen(key).intValue(); }
 	}
@@ -358,9 +377,20 @@ public class RedisClient extends HealthCheck implements Map<String, String>
 	 * @param key
 	 * @param field
 	 */
-	public void unhash(String key, String... fields)
+	public void unhash(final String key, final String... fields)
 	{
 		try (var cache = pool.getResource()) { cache.hdel(key, fields); }
+	}
+
+	/** Runs the specified function with a Jedis cache. Used to perform multi Redis cache actions with the same connection.
+	 * 
+	 * @param <R>
+	 * @param fx
+	 * @return value of the supplied function.
+	 */
+	public <R> R operation(final Function<Jedis, R> fx)
+	{
+		try (var cache = pool.getResource()) { return fx.apply(cache); }
 	}
 
 	/*******************************************************************************************************************

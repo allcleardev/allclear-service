@@ -26,6 +26,11 @@ public class RedisConfig implements Serializable
 	public final boolean testWhileIdle;
 	public final boolean test;
 
+	public RedisConfig(final String host, final Integer port)
+	{
+		this(host, port, null, null, null, null, null);
+	}
+
 	/** Populator.
 	 * 
 	 * @param host

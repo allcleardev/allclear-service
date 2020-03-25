@@ -16,10 +16,12 @@ import redis.embedded.RedisServer;
 
 public class RedisServerRule extends ExternalResource implements DropwizardExtension
 {
+	public static final int PORT_DEFAULT = 6378;
+
 	/** Default/empty. */
 	public RedisServerRule()
 	{
-		this(6378);	// Do NOT use 6379 in case a local version is running. DLS on 6/12/2015.
+		this(PORT_DEFAULT);	// Do NOT use 6379 in case a local version is running. DLS on 6/12/2015.
 	}
 
 	/** Populator.
