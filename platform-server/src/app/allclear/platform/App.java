@@ -90,6 +90,7 @@ public class App extends Application<Config>
         jersey.register(new HeapDumpResource());
         jersey.register(new HibernateResource(factory));
 		jersey.register(new PeopleResource(peopleDao));
+		jersey.register(new TypeResource());
 
 		setupSwagger(conf, env);
 	}

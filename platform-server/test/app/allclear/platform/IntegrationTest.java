@@ -9,14 +9,16 @@ import javax.ws.rs.client.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import app.allclear.common.mediatype.UTF8MediaType;
-import app.allclear.common.value.HealthResponse;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
 import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
+
+import app.allclear.common.mediatype.UTF8MediaType;
+import app.allclear.common.value.HealthResponse;
+import app.allclear.platform.type.*;
 
 /** Integration test that starts up application.
  * 
@@ -36,6 +38,7 @@ public class IntegrationTest
 	private static WebTarget home;
 	private static WebTarget info;
 	private static WebTarget people;
+	private static WebTarget types;
 	
 	@BeforeAll
 	public static void up() throws Exception
@@ -52,6 +55,19 @@ public class IntegrationTest
 		home = ClientBuilder.newClient().target("http://127.0.0.1:" + APP.getLocalPort());
 		info = home.path("info");
 		people = home.path("people");
+		types = home.path("types");
+	}
+
+	@Test
+	public void getPeopleStatuses()
+	{
+		assertThat(request(types.path("peopleStatuses")).get(PeopleStatus[].class)).hasSize(PeopleStatus.LIST.size());
+	}
+
+	@Test
+	public void getPeopleStatures()
+	{
+		assertThat(request(types.path("peopleStatures")).get(PeopleStature[].class)).hasSize(PeopleStature.LIST.size());
 	}
 
 	@Test
