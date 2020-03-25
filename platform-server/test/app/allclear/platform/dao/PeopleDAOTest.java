@@ -18,6 +18,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
 import app.allclear.junit.hibernate.*;
+import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.platform.App;
 import app.allclear.platform.entity.People;
@@ -162,7 +163,7 @@ public class PeopleDAOTest
 	@Test
 	public void findWithException()
 	{
-		assertThrows(ValidationException.class, () -> dao.findWithException(VALUE.id + "INVALID"));
+		assertThrows(ObjectNotFoundException.class, () -> dao.findWithException(VALUE.id + "INVALID"));
 	}
 
 	@Test
@@ -218,7 +219,7 @@ public class PeopleDAOTest
 	@Test
 	public void getWithException()
 	{
-		assertThrows(ValidationException.class, () -> dao.getByIdWithException(VALUE.id + "INVALID"));
+		assertThrows(ObjectNotFoundException.class, () -> dao.getByIdWithException(VALUE.id + "INVALID"));
 	}
 
 	@Test
@@ -548,7 +549,7 @@ public class PeopleDAOTest
 	@Test
 	public void testRemove_find()
 	{
-		assertThrows(ValidationException.class, () -> dao.findWithException(VALUE.id));
+		assertThrows(ObjectNotFoundException.class, () -> dao.findWithException(VALUE.id));
 	}
 
 	/** Test removal after the search. */

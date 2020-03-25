@@ -75,6 +75,7 @@ public class TestingUtils
 	public static final int HTTP_STATUS_NO_CONTENT = Response.Status.NO_CONTENT.getStatusCode();
 	public static final int HTTP_STATUS_NOT_AUTHORIZED = Response.Status.UNAUTHORIZED.getStatusCode();
 	public static final int HTTP_STATUS_AUTHENTICATE = Response.Status.FORBIDDEN.getStatusCode();
+	public static final int HTTP_STATUS_NOT_FOUND = Response.Status.NOT_FOUND.getStatusCode();
 	public static final int HTTP_STATUS_VALIDATION_EXCEPTION = 422;
 	public static final int HTTP_STATUS_RUNTIME_EXCEPTION = 500;
 

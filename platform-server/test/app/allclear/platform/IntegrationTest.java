@@ -35,6 +35,7 @@ public class IntegrationTest
 	private static Config conf;
 	private static WebTarget home;
 	private static WebTarget info;
+	private static WebTarget people;
 	
 	@BeforeAll
 	public static void up() throws Exception
@@ -50,6 +51,13 @@ public class IntegrationTest
 
 		home = ClientBuilder.newClient().target("http://127.0.0.1:" + APP.getLocalPort());
 		info = home.path("info");
+		people = home.path("people");
+	}
+
+	@Test
+	public void getPerson()
+	{
+		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, request(people.path("INVALID")).get().getStatus());
 	}
 
 	@Test

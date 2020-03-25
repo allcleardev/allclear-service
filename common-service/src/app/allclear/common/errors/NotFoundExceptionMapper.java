@@ -24,7 +24,7 @@ public class NotFoundExceptionMapper implements ExceptionMapper<ObjectNotFoundEx
 	public NotFoundExceptionMapper() {}
 
 	@Override
-	public Response toResponse(ObjectNotFoundException ex)
+	public Response toResponse(final ObjectNotFoundException ex)
 	{
 		logger.warn(ex.getMessage(), ex);
 

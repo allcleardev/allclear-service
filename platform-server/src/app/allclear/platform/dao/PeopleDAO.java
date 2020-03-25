@@ -7,12 +7,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.hibernate.*;
+import org.hibernate.SessionFactory;
 import org.hibernate.id.IdentifierGenerationException;
 
 import app.allclear.common.dao.*;
-import app.allclear.common.errors.ValidationException;
-import app.allclear.common.errors.Validator;
+import app.allclear.common.errors.*;
 import app.allclear.common.hibernate.AbstractDAO;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.filter.PeopleFilter;
@@ -180,7 +179,7 @@ public class PeopleDAO extends AbstractDAO<People>
 	{
 		var record = get(id);
 		if (null == record)
-			throw new ValidationException("id", "Could not find the People because id '" + id + "' is invalid.");
+			throw new ObjectNotFoundException("Could not find the People because id '" + id + "' is invalid.");
 
 		return record;
 	}
