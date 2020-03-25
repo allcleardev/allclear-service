@@ -398,6 +398,7 @@ public class FakeRedisClient extends RedisClient
 	 * @param fx
 	 * @return value of the supplied function.
 	 */
+	@Override
 	public <R> R operation(final Function<Jedis, R> fx)
 	{
 		@SuppressWarnings("resource") var me = this;

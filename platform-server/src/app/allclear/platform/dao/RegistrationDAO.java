@@ -9,6 +9,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import app.allclear.common.errors.Validator;
+import app.allclear.common.errors.ValidationException;
 import app.allclear.common.jackson.JacksonUtils;
 import app.allclear.common.redis.RedisClient;
 import app.allclear.platform.model.StartRequest;
@@ -38,8 +39,9 @@ public class RegistrationDAO
 	 * 
 	 * @param request
 	 * @return the confirmation code
+	 * @throws ValidationException
 	 */
-	public String start(final StartRequest request)
+	public String start(final StartRequest request) throws ValidationException
 	{
 		new Validator().ensureLength("phone", "Phone", request.phone, 10, 32)
 			.ensurePattern("phone", "Phone", request.phone, Validator.PATTERN_PHONE)
@@ -60,6 +62,21 @@ public class RegistrationDAO
 
 			return code;
 		});
+	}
+
+	/** Confirms the phone and registration code. Retrieves the original request.
+	 * 
+	 * @param phone
+	 * @param code
+	 * @return never NULL.
+	 * @throws ValidationException if the phone and/or registration code are invalid.
+	 */
+	public StartRequest confirm(final String phone, final String code) throws ValidationException
+	{
+		var o = request(phone, code);
+		if (null == o) throw new ValidationException("code", "The supplied code is invalid.");
+
+		return o;
 	}
 
 	/** Gets the original start request based on the phone number and registration confirmation code.
