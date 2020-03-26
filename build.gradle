@@ -7,9 +7,9 @@ subprojects {
   group = 'io.allclear'
   version = '1.0.0'
 
-  // Use Java 12
-  sourceCompatibility = 1.12
-  targetCompatibility = 1.12
+  // Use Java 11 - Azure does not support JDK12.
+  sourceCompatibility = 1.11
+  targetCompatibility = 1.11
 
   sourceSets.main.java.srcDirs = [ 'src' ]  // srcDir 'src'  // This just adds to the set of directories.
   sourceSets.main.resources.srcDirs = [ 'res' ]
