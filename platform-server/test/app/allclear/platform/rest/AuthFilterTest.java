@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -114,6 +115,11 @@ public class AuthFilterTest
 	public void success(final String path, final String sessionId) throws Exception
 	{
 		auth.filter(context(path, sessionId));
+
+		if (StringUtils.isEmpty(sessionId))
+			Assertions.assertNull(dao.current());
+		else
+			Assertions.assertEquals(sessionId, dao.current().id);
 	}
 
 	private ContainerRequestContext context(final String path, final String sessionId)
