@@ -32,10 +32,15 @@ public class SessionValue implements Serializable
 	public final Date lastAccessedAt;
 	public final Date createdAt;
 
+	// Accessors
+	public int seconds() { return (int) (duration / 1000L); }
+
 	// Mutators
 	public SessionValue accessed()
 	{
-		lastAccessedAt.setTime(System.currentTimeMillis());
+		var now = System.currentTimeMillis();
+		expiresAt.setTime(now + duration);
+		lastAccessedAt.setTime(now);
 
 		return this;
 	}

@@ -144,7 +144,16 @@ public class FakeRedisClient extends RedisClient
 	public void putAll(Map<? extends String, ? extends String> newValues) { map.putAll(newValues); }
 
 	@Override
-	public String remove(Object key) { return map.remove((String) key); }
+	public String remove(Object key)
+	{
+		var v = map.remove(key);
+		if (null != v) return v;
+
+		var vv = maps.remove(key);
+		if (null != vv) return vv.toString();
+
+		return null;
+	}
 
 	@Override
 	public int size()
@@ -403,9 +412,13 @@ public class FakeRedisClient extends RedisClient
 	{
 		@SuppressWarnings("resource") var me = this;
 		return fx.apply(new Jedis() {
+			@Override public Long del(final String key) { me.remove(key); return 1L; }
 			@Override public Boolean exists(final String key) { return maps.containsKey(key); }
-			@Override public Long hset(final String key, final Map<String, String> values) { me.hash(key, values); return 1L; }
 			@Override public Long expire(final String key, final int seconds) { me.expire(key, seconds); return 1L; }
+			@Override public String get(final String key) { return me.get(key); }
+			@Override public Map<String, String> hgetAll(final String key) { return me.hash(key); }
+			@Override public Long hset(final String key, final Map<String, String> values) { me.hash(key, values); return 1L; }
+			@Override public String setex(final String key, final int seconds, final String value) { return me.put(key, value, seconds); }
 		});
 	}
 

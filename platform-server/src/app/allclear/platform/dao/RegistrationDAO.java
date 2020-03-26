@@ -5,6 +5,8 @@ import java.util.Map;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 
+import redis.clients.jedis.Jedis;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -73,10 +75,15 @@ public class RegistrationDAO
 	 */
 	public StartRequest confirm(final String phone, final String code) throws ValidationException
 	{
-		var o = request(phone, code);
-		if (null == o) throw new ValidationException("code", "The supplied code is invalid.");
+		return redis.operation(j -> {
+			var key = key(phone, code);
+			var o = request(j, key);
+			if (null == o) throw new ValidationException("code", "The supplied code is invalid.");
 
-		return o;
+			j.del(key);	// Once confirmed, delete the key.
+
+			return o;
+		});
 	}
 
 	/** Gets the original start request based on the phone number and registration confirmation code.
@@ -87,8 +94,18 @@ public class RegistrationDAO
 	 */
 	StartRequest request(final String phone, final String code)
 	{
-		var key = key(phone, code);
-		var map = redis.hash(key);
+		return redis.operation(j -> request(j, key(phone, code)));
+	}
+
+	/** Gets the original start request based on the phone number and registration confirmation code.
+	 * 
+	 * @param jedis
+	 * @param key
+	 * @return NULL if not found
+	 */
+	StartRequest request(final Jedis jedis, final String key)
+	{
+		var map = jedis.hgetAll(key);
 		if (MapUtils.isEmpty(map)) return null;
 
 		return mapper.convertValue(map, StartRequest.class);

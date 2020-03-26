@@ -26,6 +26,7 @@ public class SessionValueTest
 		assertThat(o.id).as("Check ID").hasSize(36);
 		Assertions.assertFalse(o.rememberMe, "Check rememberMe");
 		Assertions.assertEquals(SessionValue.DURATION_SHORT, o.duration, "Check duration");
+		Assertions.assertEquals(30 * 60, o.seconds(), "Check seconds");
 		Assertions.assertNotNull(o.person, "Check person");
 		Assertions.assertEquals("stevie", o.person.name, "Check person.name");
 		Assertions.assertEquals("888-555-0001", o.person.phone, "Check person.phone");
@@ -36,8 +37,10 @@ public class SessionValueTest
 
 		ThreadUtils.sleep(2000L);
 
+		var expiresAt = new Date(o.expiresAt.getTime());
 		var lastAccessedAt = new Date(o.lastAccessedAt.getTime());
-		assertThat(o.accessed().lastAccessedAt).as("Check accessed").isAfter(lastAccessedAt);
+		assertThat(o.accessed().expiresAt).as("Check accessed: expiresAt").isAfter(expiresAt);
+		assertThat(o.accessed().lastAccessedAt).as("Check accessed: lastAccessedAt").isAfter(lastAccessedAt);
 	}
 
 	@Test
@@ -47,6 +50,7 @@ public class SessionValueTest
 		assertThat(o.id).as("Check ID").hasSize(36);
 		Assertions.assertTrue(o.rememberMe, "Check rememberMe");
 		Assertions.assertEquals(SessionValue.DURATION_LONG, o.duration, "Check duration");
+		Assertions.assertEquals(30 * 24 * 60 * 60, o.seconds(), "Check seconds");
 		Assertions.assertNotNull(o.person, "Check person");
 		Assertions.assertEquals("moira", o.person.name, "Check person.name");
 		Assertions.assertEquals("888-555-0002", o.person.phone, "Check person.phone");
@@ -57,8 +61,10 @@ public class SessionValueTest
 
 		ThreadUtils.sleep(2000L);
 
+		var expiresAt = new Date(o.expiresAt.getTime());
 		var lastAccessedAt = new Date(o.lastAccessedAt.getTime());
-		assertThat(o.accessed().lastAccessedAt).as("Check accessed").isAfter(lastAccessedAt);
+		assertThat(o.accessed().expiresAt).as("Check accessed: expiresAt").isAfter(expiresAt);
+		assertThat(o.accessed().lastAccessedAt).as("Check accessed: lastAccessedAt").isAfter(lastAccessedAt);
 	}
 
 	@Test
@@ -68,6 +74,7 @@ public class SessionValueTest
 		assertThat(o.id).as("Check ID").hasSize(36);
 		Assertions.assertFalse(o.rememberMe, "Check rememberMe");
 		Assertions.assertEquals(SessionValue.DURATION_SHORT, o.duration, "Check duration");
+		Assertions.assertEquals(30 * 60, o.seconds(), "Check seconds");
 		Assertions.assertNull(o.person, "Check person");
 		Assertions.assertNotNull(o.registration, "Check registration");
 		Assertions.assertEquals("888-555-0003", o.registration.phone, "Check registration.phone");
@@ -78,7 +85,9 @@ public class SessionValueTest
 
 		ThreadUtils.sleep(2000L);
 
+		var expiresAt = new Date(o.expiresAt.getTime());
 		var lastAccessedAt = new Date(o.lastAccessedAt.getTime());
-		assertThat(o.accessed().lastAccessedAt).as("Check accessed").isAfter(lastAccessedAt);
+		assertThat(o.accessed().expiresAt).as("Check accessed: expiresAt").isAfter(expiresAt);
+		assertThat(o.accessed().lastAccessedAt).as("Check accessed: lastAccessedAt").isAfter(lastAccessedAt);
 	}
 }

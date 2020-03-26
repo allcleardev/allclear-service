@@ -55,8 +55,7 @@ public class RegistrationDAOTest
 			arguments("888-555-1005", true, true, true, true),
 			arguments("888-555-1006", true, false, true, false),
 			arguments("888-555-1007", false, true, false, true),
-			arguments("888-555-1008", false, false, false, false)
-			);
+			arguments("888-555-1008", false, false, false, false));
 	}
 
 	@ParameterizedTest
@@ -72,11 +71,21 @@ public class RegistrationDAOTest
 		Assertions.assertEquals(expectedBeenTested, o.beenTested, "Check beenTested");
 		Assertions.assertEquals(expectedHaveSymptoms, o.haveSymptoms, "Check haveSymptoms");
 
-		codes.put(phone, code);
+		Assertions.assertNull(dao.request(phone, code), "Check request: after confirm");
+		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.confirm(phone, code)))
+			.as("Check confirm: after confirm")
+			.hasMessage("The supplied code is invalid.");
+	}
+
+	@ParameterizedTest
+	@MethodSource("add")
+	public void add_again(final String phone, final Boolean beenTested, final Boolean haveSymptoms, final boolean expectedBeenTested, final boolean expectedHaveSymptoms)
+	{
+		codes.put(phone, dao.start(new StartRequest(phone, beenTested, haveSymptoms)));
 	}
 
 	@Test
-	public void check()
+	public void add_again_check()
 	{
 		var code = codes.get("888-555-1008");
 		assertThat(code).as("Check code").hasSize(10);
