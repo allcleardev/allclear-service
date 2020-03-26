@@ -83,6 +83,12 @@ public class SessionDAO
 		catch (final IOException ex) { throw new RuntimeException(ex); }
 	}
 
+	/** Gets the session value associated with the current thread.
+	 * 
+	 * @return NULL if there is no current session
+	 */
+	public SessionValue current() { return current.get(); }
+
 	/** Internal/test usage - sets the current threads associated session.
 	 * 
 	 * @param value
@@ -93,6 +99,23 @@ public class SessionDAO
 		current.set(value);
 
 		return value;
+	}
+
+	/** Set the current threads associated session based on the supplied session ID.
+	 * 
+	 * @param id
+	 * @return never NULL
+	 * @throws NotAuthenticatedException
+	 */
+	public SessionValue current(final String id) throws NotAuthenticatedException
+	{
+		return current(get(id));
+	}
+	
+	/** Internal/test usage - clears the current session. */
+	void clear()
+	{
+		current.remove();
 	}
 
 	/** Gets the current session.
@@ -132,6 +155,13 @@ public class SessionDAO
 			}
 			catch (final IOException ex) { throw new RuntimeException(ex); }
 		});
+	}
+
+	/** Removes the current session. */
+	public void remove()
+	{
+		var v = current();
+		if (null != v) remove(v.id);
 	}
 
 	/** Removes a single session.

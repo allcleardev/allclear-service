@@ -71,6 +71,38 @@ public class SessionDAOTest
 	}
 
 	@Test
+	public void current()
+	{
+		Assertions.assertNull(dao.current());
+	}
+
+	@Test
+	public void current_invalidId()
+	{
+		assertThat(Assertions.assertThrows(NotAuthenticatedException.class, () -> dao.current("INVALID")))
+			.hasMessage("The ID 'INVALID' is invalid.");
+	}
+
+	@Test
+	public void current_start1()
+	{
+		Assertions.assertNull(dao.current());
+		Assertions.assertEquals(START_1.id, dao.current(START_1.id).id);
+	}
+
+	@Test
+	public void current_start1_check()
+	{
+		Assertions.assertEquals(START_1.id, dao.current().id);
+	}
+
+	@Test
+	public void current_start1_clear()
+	{
+		dao.clear();
+	}
+
+	@Test
 	public void get_invalid()
 	{
 		assertThat(Assertions.assertThrows(NotAuthenticatedException.class, () -> dao.get("invalid")))
@@ -149,7 +181,7 @@ public class SessionDAOTest
 	@Test
 	public void promote_start()
 	{
-		dao.current(START);
+		dao.current(START.id);
 
 		var v = dao.promote(new PeopleValue("morty", "888-555-0003", true), true);
 		Assertions.assertNotNull(v, "Exists");
@@ -190,6 +222,8 @@ public class SessionDAOTest
 	@Test
 	public void remove_start1()
 	{
+		Assertions.assertNotNull(dao.get(START_1.id));
+
 		dao.remove(START_1.id);
 
 		Assertions.assertThrows(NotAuthenticatedException.class, () -> dao.get(START_1.id));
