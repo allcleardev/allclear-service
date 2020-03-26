@@ -2,6 +2,7 @@ package app.allclear.platform.type;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -23,7 +24,7 @@ public class PeopleStatus implements Serializable
 	public static final PeopleStatus SYMPTOMATIC = new PeopleStatus("s", "Symptomatic");
 
 	public static final List<PeopleStatus> LIST = List.of(HEALTHY, INFECTED, RECOVERED, SYMPTOMATIC);
-	public static final Map<String, PeopleStatus> VALUES = Map.of(HEALTHY.id, HEALTHY, INFECTED.id, INFECTED, RECOVERED.id, RECOVERED, SYMPTOMATIC.id, SYMPTOMATIC);
+	public static final Map<String, PeopleStatus> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
 
 	public final String id;
 	public final String name;

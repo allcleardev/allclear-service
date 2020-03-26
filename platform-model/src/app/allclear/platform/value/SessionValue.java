@@ -45,6 +45,21 @@ public class SessionValue implements Serializable
 		return this;
 	}
 
+	// Promotes an existing Registration session into a Person session.
+	public SessionValue promote(final boolean rememberMe, final PeopleValue person)
+	{
+		var now = new Date();
+		var duration = rememberMe ? DURATION_LONG : DURATION_SHORT;
+		return new SessionValue(id,
+			rememberMe,
+			duration,
+			person,
+			null,
+			new Date(now.getTime() + duration),
+			now,
+			createdAt);
+	}
+
 	public SessionValue(final StartRequest registration)
 	{
 		this(

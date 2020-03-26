@@ -26,6 +26,7 @@ public class SessionDAO
 	public static String key(final String id) { return String.format(ID, id); }
 
 	private final RedisClient redis;
+	private final ThreadLocal<SessionValue> current = new ThreadLocal<>();
 
 	public SessionDAO(final RedisClient redis)
 	{
@@ -64,13 +65,56 @@ public class SessionDAO
 		return value;
 	}
 
+	/** Promotes a registration session to a person session maintaining the same ID.
+	 * 
+	 * @param person
+	 * @param rememberMe
+	 * @return never NULL
+	 */
+	public SessionValue promote(final PeopleValue person, final boolean rememberMe)
+	{
+		try
+		{
+			var o = get().promote(rememberMe, person);
+			redis.put(key(o.id), mapper.writeValueAsString(o), o.seconds());
+
+			return o;
+		}
+		catch (final IOException ex) { throw new RuntimeException(ex); }
+	}
+
+	/** Internal/test usage - sets the current threads associated session.
+	 * 
+	 * @param value
+	 * @return the supplied session value
+	 */
+	SessionValue current(final SessionValue value)
+	{
+		current.set(value);
+
+		return value;
+	}
+
+	/** Gets the current session.
+	 * 
+	 * @return never NULL
+	 * @throws NotAuthenticatedException
+	 */
+	public SessionValue get() throws NotAuthenticatedException
+	{
+		var v = current.get();
+		if (null == v) throw new NotAuthenticatedException("No current session is available.");
+
+		return v;
+	}
+
 	/** Gets the session value by the specified ID and extends the expiration.
 	 * 
 	 * @param id
 	 * @return never NULL
 	 * @throws NotAuthenticatedException if not found
 	 */
-	SessionValue get(final String id) throws NotAuthenticatedException
+	public SessionValue get(final String id) throws NotAuthenticatedException
 	{
 		return redis.operation(j -> {
 			var key = key(id);

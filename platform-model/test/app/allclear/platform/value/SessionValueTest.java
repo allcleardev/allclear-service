@@ -89,5 +89,35 @@ public class SessionValueTest
 		var lastAccessedAt = new Date(o.lastAccessedAt.getTime());
 		assertThat(o.accessed().expiresAt).as("Check accessed: expiresAt").isAfter(expiresAt);
 		assertThat(o.accessed().lastAccessedAt).as("Check accessed: lastAccessedAt").isAfter(lastAccessedAt);
+
+		ThreadUtils.sleep(2000L);
+
+		var s = o.promote(true, new PeopleValue("johnny", "888-555-0004", true));
+		assertThat(s.id).as("Check ID").hasSize(36);
+		Assertions.assertTrue(s.rememberMe, "Check rememberMe");
+		Assertions.assertEquals(SessionValue.DURATION_LONG, s.duration, "Check duration");
+		Assertions.assertEquals(30 * 24 * 60 * 60, s.seconds(), "Check seconds");
+		Assertions.assertNotNull(s.person, "Check person");
+		Assertions.assertEquals("johnny", s.person.name, "Check person.name");
+		Assertions.assertEquals("888-555-0004", s.person.phone, "Check person.phone");
+		Assertions.assertTrue(s.person.active, "Check person.active");
+		Assertions.assertNull(s.registration, "Check registration");
+		assertThat(s.expiresAt).as("Check expiresAt").isCloseTo(new Date(System.currentTimeMillis() + SessionValue.DURATION_LONG), 100L).isAfter(o.expiresAt);
+		assertThat(s.lastAccessedAt).as("Check lastAccessedAt").isCloseTo(new Date(), 100L).isAfter(o.createdAt).isAfter(o.lastAccessedAt);
+
+		ThreadUtils.sleep(2000L);
+
+		var ss = o.promote(false, new PeopleValue("barbara", "888-555-0005", true));
+		assertThat(ss.id).as("Check ID").hasSize(36);
+		Assertions.assertFalse(ss.rememberMe, "Check rememberMe");
+		Assertions.assertEquals(SessionValue.DURATION_SHORT, ss.duration, "Check duration");
+		Assertions.assertEquals(30 * 60, ss.seconds(), "Check seconds");
+		Assertions.assertNotNull(ss.person, "Check person");
+		Assertions.assertEquals("barbara", ss.person.name, "Check person.name");
+		Assertions.assertEquals("888-555-0005", ss.person.phone, "Check person.phone");
+		Assertions.assertTrue(ss.person.active, "Check person.active");
+		Assertions.assertNull(ss.registration, "Check registration");
+		assertThat(ss.expiresAt).as("Check expiresAt").isCloseTo(new Date(System.currentTimeMillis() + SessionValue.DURATION_SHORT), 100L).isAfter(o.expiresAt);
+		assertThat(ss.lastAccessedAt).as("Check lastAccessedAt").isCloseTo(new Date(), 100L).isAfter(o.createdAt).isAfter(s.lastAccessedAt);
 	}
 }

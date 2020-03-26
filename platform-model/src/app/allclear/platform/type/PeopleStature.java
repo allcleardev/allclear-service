@@ -2,6 +2,7 @@ package app.allclear.platform.type;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -21,7 +22,7 @@ public class PeopleStature implements Serializable
 	public static final PeopleStature INFLUENCER = new PeopleStature("i", "Influencer");
 
 	public static final List<PeopleStature> LIST = List.of(CELEBRITY, INFLUENCER);
-	public static final Map<String, PeopleStature> VALUES = Map.of(CELEBRITY.id, CELEBRITY, INFLUENCER.id, INFLUENCER);
+	public static final Map<String, PeopleStature> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
 
 	public final String id;
 	public final String name;
