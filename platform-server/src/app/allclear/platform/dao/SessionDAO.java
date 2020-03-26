@@ -112,8 +112,8 @@ public class SessionDAO
 		return current(get(id));
 	}
 	
-	/** Internal/test usage - clears the current session. */
-	void clear()
+	/** Clears the current session. */
+	public void clear()
 	{
 		current.remove();
 	}
