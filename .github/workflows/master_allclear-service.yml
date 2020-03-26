@@ -29,4 +29,4 @@ jobs:
         app-name: 'allclear-service'
         slot-name: 'production'
         publish-profile: ${{ secrets.AzureAppService_PublishProfile_10c45aabfeb54c3583ed8203e64a154b }}
-        package: '${{ github.workspace }}/target/*.jar'
+        package: '${{ github.workspace }}/build/libs/*.jar'
