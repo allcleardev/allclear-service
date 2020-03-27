@@ -37,7 +37,9 @@ public class SessionDAOTest
 		Assertions.assertNotNull(PERSON, "Exists");
 		Assertions.assertNull(PERSON.registration, "Check registration");
 		Assertions.assertNotNull(PERSON.person, "Check person");
+		Assertions.assertEquals("888-555-0000", PERSON.person.phone, "Check person.phone");
 		Assertions.assertEquals(30 * 60, PERSON.seconds(), "Check seconds");
+		Assertions.assertEquals(30L * 60L, redis.ttl(SessionDAO.key(PERSON.id)), "Check expiration");
 	}
 
 	@Test
@@ -47,7 +49,9 @@ public class SessionDAOTest
 		Assertions.assertNotNull(PERSON_1, "Exists");
 		Assertions.assertNull(PERSON_1.registration, "Check registration");
 		Assertions.assertNotNull(PERSON_1.person, "Check person");
+		Assertions.assertEquals("888-555-0001", PERSON_1.person.phone, "Check person.phone");
 		Assertions.assertEquals(30 * 24 * 60 * 60, PERSON_1.seconds(), "Check seconds");
+		Assertions.assertEquals(30L * 24L * 60L * 60L, redis.ttl(SessionDAO.key(PERSON_1.id)), "Check expiration");
 	}
 
 	@Test
@@ -56,18 +60,26 @@ public class SessionDAOTest
 		Assertions.assertNotNull(START = dao.add(new StartRequest("888-555-0002", false, false)));
 		Assertions.assertNotNull(START, "Exists");
 		Assertions.assertNotNull(START.registration, "Check registration");
+		Assertions.assertEquals("888-555-0002", START.registration.phone, "Check registration.phone");
+		Assertions.assertFalse(START.registration.beenTested, "Check registration.beenTested");
+		Assertions.assertFalse(START.registration.haveSymptoms, "Check registration.haveSymptoms");
 		Assertions.assertNull(START.person, "Check person");
 		Assertions.assertEquals(30 * 60, START.seconds(), "Check seconds");
+		Assertions.assertEquals(30L * 60L, redis.ttl(SessionDAO.key(START.id)), "Check expiration");
 	}
 
 	@Test
 	public void add_start1()
 	{
 		Assertions.assertNotNull(START_1 = dao.add(new StartRequest("888-555-0005", true, true)));
-		Assertions.assertNotNull(START, "Exists");
-		Assertions.assertNotNull(START.registration, "Check registration");
-		Assertions.assertNull(START.person, "Check person");
-		Assertions.assertEquals(30 * 60, START.seconds(), "Check seconds");
+		Assertions.assertNotNull(START_1, "Exists");
+		Assertions.assertNotNull(START_1.registration, "Check registration");
+		Assertions.assertEquals("888-555-0005", START_1.registration.phone, "Check registration.phone");
+		Assertions.assertTrue(START_1.registration.beenTested, "Check registration.beenTested");
+		Assertions.assertTrue(START_1.registration.haveSymptoms, "Check registration.haveSymptoms");
+		Assertions.assertNull(START_1.person, "Check person");
+		Assertions.assertEquals(30 * 60, START_1.seconds(), "Check seconds");
+		Assertions.assertEquals(30L * 60L, redis.ttl(SessionDAO.key(START_1.id)), "Check expiration");
 	}
 
 	@Test
@@ -193,6 +205,7 @@ public class SessionDAOTest
 		assertThat(v.expiresAt).as("Check expiresAt").isCloseTo(new Date(System.currentTimeMillis() + SessionValue.DURATION_LONG), 100L).isAfter(START.expiresAt);
 		assertThat(v.lastAccessedAt).as("Check lastAccessedAt").isCloseTo(new Date(), 100L).isAfter(START.lastAccessedAt);
 		assertThat(v.createdAt).as("Check createdAt").isInSameSecondAs(START.createdAt).isBefore(v.lastAccessedAt);
+		Assertions.assertEquals(30L * 24L * 60L * 60L, redis.ttl(SessionDAO.key(v.id)), "Check expiration");
 	}
 
 	@Test

@@ -84,7 +84,7 @@ public class IntegrationTest
 
 		var value = response.readEntity(HealthResponse.class);
 		Assertions.assertEquals("success", value.status);
-		assertThat(value.timestamp).as("Check timestamp").isCloseTo(new Date(), 200L);
+		assertThat(value.timestamp).as("Check timestamp").isCloseTo(new Date(), 1000L);
 	}
 
 	@Test
