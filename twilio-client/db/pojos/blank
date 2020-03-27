@@ -1,0 +1,10 @@
+{
+  "packageName": "app.allclear.twilio.model",
+  "className": "Twilio",
+  "caption": "Twilio ",
+  "author": "smalleyd",
+  "version": "1.0.0",
+  "fields": {
+    "": "String",
+  }
+}

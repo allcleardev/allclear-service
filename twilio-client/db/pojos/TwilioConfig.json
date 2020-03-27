@@ -1,0 +1,12 @@
+{
+  "packageName": "app.allclear.twilio.client",
+  "className": "TwilioConfig",
+  "caption": "Value object that represents the Twilio HTTP client configuration.",
+  "author": "smalleyd",
+  "version": "1.0.0",
+  "fields": {
+    "baseUrl": "String",
+    "accountId": "String",
+    "authToken": "String"
+  }
+}

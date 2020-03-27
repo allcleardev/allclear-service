@@ -1,0 +1,29 @@
+{
+  "packageName": "app.allclear.twilio.model",
+  "className": "SMSResponse",
+  "caption": "Value object that represents a response from the SMS Message API.",
+  "author": "smalleyd",
+  "version": "1.0.0",
+  "fields": {
+    "account_sid": "String",
+    "api_version": "String",
+    "body": "String",
+    "date_created": "Date",
+    "date_sent": "Date",
+    "date_updated": "Date",
+    "direction": "String",
+    "error_code": "Integer",
+    "error_message": "String",
+    "from": "String",
+    "messaging_service_sid": "String",
+    "num_media": "String",
+    "num_segments": "String",
+    "price": "BigDecimal",
+    "price_unit": "String",
+    "sid": "String",
+    "status": "String",
+    "subresource_uris": "Map<String, String>",
+    "to": "String",
+    "uri": "String"
+  }
+}

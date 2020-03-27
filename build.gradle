@@ -24,6 +24,7 @@ subprojects {
 
   ext {
     awsVersion = '1.11.703'
+    commonsCodecVersion = '1.11'
     commonsCollectionVersion = '4.4'
     commonsIOVersion = '2.6'
     commonsLangVersion = '3.9'
@@ -39,6 +40,7 @@ subprojects {
     jerseyVersion = '2.29.1'
     junitVersion = '5.5.2'
     liquibaseVersion = '3.8.2'
+    logbackVersion = '1.2.3'
     mockitoVersion = '3.2.0'
     mysqlVersion = '8.0.19'
     slf4jVersion = '1.7.29'
@@ -101,6 +103,13 @@ project(':platform-server') {
     compile project(':common-hibernate')
     compile project(':common-service')
     compile project(':platform-model')
+    compile project(':twilio-client')
+    testCompile project(':common-testing')
+  }
+}
+
+project(':twilio-client') {
+  dependencies {
     testCompile project(':common-testing')
   }
 }
