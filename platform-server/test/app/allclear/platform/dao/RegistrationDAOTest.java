@@ -72,7 +72,7 @@ public class RegistrationDAOTest
 	{
 		var code = dao.start(new StartRequest(phone, beenTested, haveSymptoms));
 		assertThat(code).hasSize(10).matches(PATTERN_CODE);
-		Assertions.assertNotNull(LAST_RESPONSE, "Check lastResponse: after");
+		Assertions.assertNotNull(LAST_RESPONSE, "Check lastResponse");
 		Assertions.assertEquals(String.format(MESSAGE, phone, code), LAST_RESPONSE.body, "Check lastResponse.body");
 
 		var o = dao.confirm(phone, code);
