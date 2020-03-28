@@ -1,4 +1,4 @@
-FROM gradle:jdk11 as build
+FROM gradle:jdk13 as build
 WORKDIR /app
 COPY . /app
 RUN gradle build shadowJar
