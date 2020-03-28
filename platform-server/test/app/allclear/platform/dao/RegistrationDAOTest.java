@@ -2,6 +2,7 @@ package app.allclear.platform.dao;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.*;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -16,7 +17,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.redis.FakeRedisClient;
+import app.allclear.platform.ConfigTest;
 import app.allclear.platform.model.StartRequest;
+import app.allclear.twilio.client.TwilioClient;
+import app.allclear.twilio.model.*;
 
 /** Functional test class that verifies RegistrationDAO component.
  * 
@@ -31,9 +35,12 @@ import app.allclear.platform.model.StartRequest;
 public class RegistrationDAOTest
 {
 	public static final Pattern PATTERN_CODE = Pattern.compile("[A-Z0-9]{10}");
+	public static final String MESSAGE = "Click https://mobile.test.allclear.app/register?phone=%s&token=%s to complete your registration.";
 
 	private static RegistrationDAO dao;
 	private static FakeRedisClient redis;
+	private static TwilioClient twilio = mock(TwilioClient.class);
+	private static SMSResponse LAST_RESPONSE;
 
 	private static Map<String, String> codes = new HashMap<>();
 
@@ -41,7 +48,8 @@ public class RegistrationDAOTest
 	public static void up()
 	{
 		redis = new FakeRedisClient();
-		dao = new RegistrationDAO(redis);
+		dao = new RegistrationDAO(redis, twilio, ConfigTest.loadTest());
+		when(twilio.send(any(SMSRequest.class))).thenAnswer(a -> LAST_RESPONSE = new SMSResponse((SMSRequest) a.getArgument(0)));
 	}
 
 	public static Stream<Arguments> add()
@@ -64,6 +72,8 @@ public class RegistrationDAOTest
 	{
 		var code = dao.start(new StartRequest(phone, beenTested, haveSymptoms));
 		assertThat(code).hasSize(10).matches(PATTERN_CODE);
+		Assertions.assertNotNull(LAST_RESPONSE, "Check lastResponse: after");
+		Assertions.assertEquals(String.format(MESSAGE, phone, code), LAST_RESPONSE.body, "Check lastResponse.body");
 
 		var o = dao.confirm(phone, code);
 		Assertions.assertNotNull(o, "Exists");

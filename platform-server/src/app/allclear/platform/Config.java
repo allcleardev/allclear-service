@@ -1,6 +1,7 @@
 package app.allclear.platform;
 
 import java.io.Serializable;
+import java.util.regex.Pattern;
 
 import io.dropwizard.Configuration;
 import io.dropwizard.db.DataSourceFactory;
@@ -22,6 +23,12 @@ import app.allclear.common.value.ManifestValue;
 public class Config extends Configuration implements Serializable
 {
 	private static final long serialVersionUID = 1L;
+
+	private static final Pattern PATTERN_BASE_URL = Pattern.compile("\\$\\{baseUrl\\}");
+	public static String baseUrl(final String name, final String baseUrl)
+	{
+		return PATTERN_BASE_URL.matcher(DWUtil.load(Config.class.getResource(name))).replaceAll(baseUrl);
+	}
 
 	public final String env;
 	public final boolean disableSwagger;
@@ -51,7 +58,7 @@ public class Config extends Configuration implements Serializable
 		this.baseUrl = baseUrl;
 		this.registrationPhone = registrationPhone;
 		this.authenticationPhone = authenticationPhone;
-		this.registrationSMSMessage = DWUtil.load(Config.class.getResource("/messages/sms/registration.txt")).replace("${baseUrl}", baseUrl);
-		this.authenticationSMSMessage = DWUtil.load(Config.class.getResource("/messages/sms/authentication.txt")).replace("${baseUrl}", baseUrl);
+		this.registrationSMSMessage = baseUrl("/messages/sms/registration.txt", baseUrl);
+		this.authenticationSMSMessage = baseUrl("/messages/sms/authentication.txt", baseUrl);
 	}
 }

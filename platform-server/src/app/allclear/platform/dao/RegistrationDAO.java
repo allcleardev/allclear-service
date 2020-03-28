@@ -14,7 +14,10 @@ import app.allclear.common.errors.Validator;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.jackson.JacksonUtils;
 import app.allclear.common.redis.RedisClient;
+import app.allclear.platform.Config;
 import app.allclear.platform.model.StartRequest;
+import app.allclear.twilio.client.TwilioClient;
+import app.allclear.twilio.model.*;
 
 /** Data access component that manages the person registration process.
  * 
@@ -31,9 +34,18 @@ public class RegistrationDAO
 	private static final ObjectMapper mapper = JacksonUtils.createMapper();
 	private static final TypeReference<Map<String, String>> TYPE_MAP = new TypeReference<Map<String, String>>() {};
 
+	private final String from;
+	private final String message;
 	private final RedisClient redis;
+	private final TwilioClient twilio;
 
-	public RegistrationDAO(final RedisClient redis) { this.redis = redis; }
+	public RegistrationDAO(final RedisClient redis, final TwilioClient twilio, final Config conf)
+	{
+		this.redis = redis;
+		this.twilio = twilio;
+		this.from = conf.registrationPhone;
+		this.message = conf.registrationSMSMessage;
+	}
 
 	public String key(final String phone, final String code) { return String.format(ID, phone, code); }
 
@@ -59,6 +71,7 @@ public class RegistrationDAO
 				key = key(request.phone, code = RandomStringUtils.randomAlphanumeric(10).toUpperCase());
 			}
 
+			twilio.send(new SMSRequest(from, String.format(message, request.phone, code), request.phone));
 			c.hset(key, mapper.convertValue(request, TYPE_MAP));
 			c.expire(key, EXPIRATION);
 
