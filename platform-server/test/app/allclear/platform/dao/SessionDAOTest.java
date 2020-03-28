@@ -7,6 +7,7 @@ import java.util.Date;
 import org.junit.jupiter.api.*;
 
 import app.allclear.common.errors.NotAuthenticatedException;
+import app.allclear.common.errors.ValidationException;
 import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.platform.model.StartRequest;
 import app.allclear.platform.value.*;
@@ -80,6 +81,13 @@ public class SessionDAOTest
 		Assertions.assertNull(START_1.person, "Check person");
 		Assertions.assertEquals(30 * 60, START_1.seconds(), "Check seconds");
 		Assertions.assertEquals(30L * 60L, redis.ttl(SessionDAO.key(START_1.id)), "Check expiration");
+	}
+
+	@Test
+	public void auth()
+	{
+		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.auth("888-555-0010", "ABC")))
+			.hasMessage("Confirmation failed.");
 	}
 
 	@Test

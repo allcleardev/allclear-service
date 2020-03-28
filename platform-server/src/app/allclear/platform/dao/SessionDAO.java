@@ -2,9 +2,12 @@ package app.allclear.platform.dao;
 
 import java.io.IOException;
 
+import org.apache.commons.lang3.RandomStringUtils;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import app.allclear.common.errors.NotAuthenticatedException;
+import app.allclear.common.errors.ValidationException;
 import app.allclear.common.jackson.JacksonUtils;
 import app.allclear.common.redis.RedisClient;
 import app.allclear.platform.model.StartRequest;
@@ -21,9 +24,12 @@ import app.allclear.platform.value.*;
 public class SessionDAO
 {
 	private static final String ID = "session:%s";
+	private static final int AUTH_DURATION = 5 * 60;	// Five minutes
+	private static final String AUTH_KEY = "authentication:%s:%s";
 	private final ObjectMapper mapper = JacksonUtils.createMapper();
 
 	public static String key(final String id) { return String.format(ID, id); }
+	public static String authKey(final String phone, final String token) { return String.format(AUTH_KEY, phone, token); }
 
 	private final RedisClient redis;
 	private final ThreadLocal<SessionValue> current = new ThreadLocal<>();
@@ -63,6 +69,31 @@ public class SessionDAO
 		catch (final IOException ex) { throw new RuntimeException(ex); }
 
 		return value;
+	}
+
+	/** Sends an authentication token to the specified user.
+	 * 
+	 * @param phone
+	 */
+	public void auth(final String phone)
+	{
+		var token = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
+		redis.put(authKey(phone, token), phone, AUTH_DURATION);
+	}
+
+	/** Confirms the authentication token.
+	 * 
+	 * @param phone
+	 * @param token
+	 * @throws ValidationException if the phone/token combination cannot be found
+	 */
+	public void auth(final String phone, final String token) throws ValidationException
+	{
+		var key = authKey(phone, token);
+		redis.operation(j -> {
+			if (!j.exists(key)) throw new ValidationException("Confirmation failed.");	// Do NOT give too much information on bad authentication requests.
+			return j.del(key);
+		});
 	}
 
 	/** Promotes a registration session to a person session maintaining the same ID.
