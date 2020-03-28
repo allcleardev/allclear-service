@@ -30,32 +30,17 @@ public class ConfigTest
 {
 	private static final ObjectMapper mapper = Jackson.newObjectMapper();
 
-	private Config load(final String name) throws Exception
+	public static Config loadTest()
+	{
+		try { return load("test"); }
+		catch (final RuntimeException ex) { throw ex; }
+		catch (final Exception ex) { throw new RuntimeException(ex); }
+	}
+
+	public static Config load(final String name) throws Exception
 	{
 		return mapper.readValue(new EnvironmentVariableSubstitutor().replace(
 				new TextStringBuilder(IOUtils.toString(new FileInputStream("conf/" + name + ".json"), Charset.defaultCharset()))), Config.class);
-	}
-
-	@Test
-	public void local() throws Exception
-	{
-		var o = load("local");
-		Assertions.assertNotNull(o, "Exists");
-		Assertions.assertEquals("local", o.env, "Check env");
-		Assertions.assertFalse(o.disableSwagger, "Check disableSwagger");
-		Assertions.assertEquals("com.mysql.jdbc.Driver", o.trans.getDriverClass(), "Check trans.driverClass");
-		Assertions.assertEquals("allclear", o.trans.getUser(), "Check trans.user");
-		Assertions.assertEquals("allclear", o.trans.getPassword(), "Check trans.password");
-		Assertions.assertEquals("jdbc:mysql://localhost:3306/allclear?useEncoding=true&characterEncoding=UTF-8&prepStmtCacheSize=100&prepStmtCacheSqlLimit=1024&serverTimezone=UTC",  o.trans.getUrl(), "Check trans.url");
-		Assertions.assertEquals(Duration.seconds(1L), o.trans.getMaxWaitForConnection(), "Check trans.maxWaitForConnection");
-		Assertions.assertEquals(Optional.of("SELECT 1"), o.trans.getValidationQuery(), "Check trans.validationQuery");
-		Assertions.assertEquals(Optional.of(Duration.seconds(10L)), o.trans.getValidationQueryTimeout(), "Check trans.validationQueryTimeout");
-		Assertions.assertEquals(1, o.trans.getMinSize(), "Check trans.minSize");
-		Assertions.assertEquals(10, o.trans.getMaxSize(), "Check trans.maxSize");
-		Assertions.assertTrue(o.trans.getCheckConnectionWhileIdle(), "Check trans.checkConnectionWhileIdle");
-		Assertions.assertTrue(o.trans.getCheckConnectionOnBorrow(), "Check trans.checkConnectionOnBorrow");
-		Assertions.assertEquals(TransactionIsolation.READ_COMMITTED, o.trans.getDefaultTransactionIsolation(), "Check trans.defaultTransactionIsolation");
-		assertThat(o.trans.getProperties()).as("Check properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect"));
 	}
 
 	@Test
@@ -65,6 +50,11 @@ public class ConfigTest
 		Assertions.assertNotNull(o, "Exists");
 		Assertions.assertEquals("dev", o.env, "Check env");
 		Assertions.assertFalse(o.disableSwagger, "Check disableSwagger");
+		Assertions.assertEquals("https://mobile.dev.allclear.app", o.baseUrl, "Check baseUrl");
+		Assertions.assertEquals("5555", o.registrationPhone, "Check registrationPhone");
+		Assertions.assertEquals("5556", o.authenticationPhone, "Check authenticationPhone");
+		Assertions.assertEquals("Click https://mobile.dev.allclear.app/register?phone=%s&token=%s to complete your registration.", o.registrationSMSMessage, "Check registrationSMSMessage");
+		Assertions.assertEquals("Click https://mobile.dev.allclear.app/auth?phone=%s&token=%s to login in.", o.authenticationSMSMessage, "Check authenticationSMSMessage");
 		Assertions.assertEquals("com.mysql.jdbc.Driver", o.trans.getDriverClass(), "Check trans.driverClass");
 		Assertions.assertEquals("allclear", o.trans.getUser(), "Check trans.user");
 		Assertions.assertEquals("allclearpwd", o.trans.getPassword(), "Check trans.password");
@@ -81,12 +71,44 @@ public class ConfigTest
 	}
 
 	@Test
+	public void local() throws Exception
+	{
+		var o = load("local");
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals("local", o.env, "Check env");
+		Assertions.assertFalse(o.disableSwagger, "Check disableSwagger");
+		Assertions.assertEquals("http://localhost:8080", o.baseUrl, "Check baseUrl");
+		Assertions.assertEquals("5555", o.registrationPhone, "Check registrationPhone");
+		Assertions.assertEquals("5556", o.authenticationPhone, "Check authenticationPhone");
+		Assertions.assertEquals("Click http://localhost:8080/register?phone=%s&token=%s to complete your registration.", o.registrationSMSMessage, "Check registrationSMSMessage");
+		Assertions.assertEquals("Click http://localhost:8080/auth?phone=%s&token=%s to login in.", o.authenticationSMSMessage, "Check authenticationSMSMessage");
+		Assertions.assertEquals("com.mysql.jdbc.Driver", o.trans.getDriverClass(), "Check trans.driverClass");
+		Assertions.assertEquals("allclear", o.trans.getUser(), "Check trans.user");
+		Assertions.assertEquals("allclear", o.trans.getPassword(), "Check trans.password");
+		Assertions.assertEquals("jdbc:mysql://localhost:3306/allclear?useEncoding=true&characterEncoding=UTF-8&prepStmtCacheSize=100&prepStmtCacheSqlLimit=1024&serverTimezone=UTC",  o.trans.getUrl(), "Check trans.url");
+		Assertions.assertEquals(Duration.seconds(1L), o.trans.getMaxWaitForConnection(), "Check trans.maxWaitForConnection");
+		Assertions.assertEquals(Optional.of("SELECT 1"), o.trans.getValidationQuery(), "Check trans.validationQuery");
+		Assertions.assertEquals(Optional.of(Duration.seconds(10L)), o.trans.getValidationQueryTimeout(), "Check trans.validationQueryTimeout");
+		Assertions.assertEquals(1, o.trans.getMinSize(), "Check trans.minSize");
+		Assertions.assertEquals(10, o.trans.getMaxSize(), "Check trans.maxSize");
+		Assertions.assertTrue(o.trans.getCheckConnectionWhileIdle(), "Check trans.checkConnectionWhileIdle");
+		Assertions.assertTrue(o.trans.getCheckConnectionOnBorrow(), "Check trans.checkConnectionOnBorrow");
+		Assertions.assertEquals(TransactionIsolation.READ_COMMITTED, o.trans.getDefaultTransactionIsolation(), "Check trans.defaultTransactionIsolation");
+		assertThat(o.trans.getProperties()).as("Check properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect"));
+	}
+
+	@Test
 	public void test() throws Exception
 	{
 		var o = load("test");
 		Assertions.assertNotNull(o, "Exists");
 		Assertions.assertEquals("test", o.env, "Check env");
 		Assertions.assertFalse(o.disableSwagger, "Check disableSwagger");
+		Assertions.assertEquals("https://mobile.test.allclear.app", o.baseUrl, "Check baseUrl");
+		Assertions.assertEquals("5555", o.registrationPhone, "Check registrationPhone");
+		Assertions.assertEquals("5556", o.authenticationPhone, "Check authenticationPhone");
+		Assertions.assertEquals("Click https://mobile.test.allclear.app/register?phone=%s&token=%s to complete your registration.", o.registrationSMSMessage, "Check registrationSMSMessage");
+		Assertions.assertEquals("Click https://mobile.test.allclear.app/auth?phone=%s&token=%s to login in.", o.authenticationSMSMessage, "Check authenticationSMSMessage");
 		Assertions.assertEquals("org.h2.Driver", o.trans.getDriverClass(), "Check trans.driverClass");
 		Assertions.assertNull(o.trans.getUser(), "Check trans.user");
 		Assertions.assertNull(o.trans.getPassword(), "Check trans.password");

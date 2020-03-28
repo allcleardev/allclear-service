@@ -7,6 +7,7 @@ import io.dropwizard.db.DataSourceFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.common.DWUtil;
 import app.allclear.common.ManifestUtils;
 import app.allclear.common.value.ManifestValue;
 
@@ -27,15 +28,30 @@ public class Config extends Configuration implements Serializable
 	public final DataSourceFactory trans;
 	public final ManifestValue manifest;
 
+	public final String baseUrl;
+	public final String registrationPhone;
+	public final String authenticationPhone;
+	public final String registrationSMSMessage;
+	public final String authenticationSMSMessage;
+
 	public String getVersion() { return manifest.version; }
 
 	public Config(@JsonProperty("env") final String env,
 		@JsonProperty("disableSwagger") final Boolean disableSwagger,
-		@JsonProperty("trans") final DataSourceFactory trans)
+		@JsonProperty("trans") final DataSourceFactory trans,
+		@JsonProperty("baseUrl") final String baseUrl,
+		@JsonProperty("registrationPhone") final String registrationPhone,
+		@JsonProperty("authenticationPhone") final String authenticationPhone)
 	{
 		this.env = env;
 		this.trans = trans;
 		this.manifest = ManifestUtils.getInfo(getClass());
 		this.disableSwagger = Boolean.TRUE.equals(disableSwagger);
+
+		this.baseUrl = baseUrl;
+		this.registrationPhone = registrationPhone;
+		this.authenticationPhone = authenticationPhone;
+		this.registrationSMSMessage = DWUtil.load(Config.class.getResource("/messages/sms/registration.txt")).replace("${baseUrl}", baseUrl);
+		this.authenticationSMSMessage = DWUtil.load(Config.class.getResource("/messages/sms/authentication.txt")).replace("${baseUrl}", baseUrl);
 	}
 }

@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import app.allclear.common.errors.NotAuthenticatedException;
 import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.common.resources.Headers;
+import app.allclear.platform.ConfigTest;
 import app.allclear.platform.dao.SessionDAO;
 import app.allclear.platform.model.StartRequest;
 import app.allclear.platform.value.PeopleValue;
@@ -33,7 +34,7 @@ import app.allclear.platform.value.SessionValue;
 public class AuthFilterTest
 {
 	private static final FakeRedisClient redis = new FakeRedisClient();
-	private static final SessionDAO dao = new SessionDAO(redis);
+	private static final SessionDAO dao = new SessionDAO(redis, ConfigTest.loadTest());
 	private static final AuthFilter auth = new AuthFilter(dao);
 
 	private static SessionValue PERSON;

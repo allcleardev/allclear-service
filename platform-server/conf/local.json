@@ -1,6 +1,10 @@
 {
   "env": "local",
 
+  "baseUrl": "${baseUrl:-http://localhost:8080}",
+  "registrationPhone": "5555",
+  "authenticationPhone": "5556",
+ 
   "trans": {
     "driverClass": "com.mysql.jdbc.Driver",
     "user": "allclear",

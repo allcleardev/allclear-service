@@ -1,6 +1,10 @@
 {
   "env": "test",
 
+  "baseUrl": "${baseUrl:-https://mobile.test.allclear.app}",
+  "registrationPhone": "5555",
+  "authenticationPhone": "5556",
+
   "trans": {
     "driverClass": "org.h2.Driver",
     "url": "jdbc:h2:mem:test;DB_CLOSE_DELAY=-1",

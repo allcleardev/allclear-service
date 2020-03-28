@@ -10,6 +10,7 @@ import org.junit.jupiter.api.*;
 import app.allclear.common.errors.NotAuthenticatedException;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.redis.FakeRedisClient;
+import app.allclear.platform.ConfigTest;
 import app.allclear.platform.model.StartRequest;
 import app.allclear.platform.value.*;
 import app.allclear.twilio.client.TwilioClient;
@@ -27,11 +28,11 @@ import app.allclear.twilio.model.SMSResponse;
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class SessionDAOTest
 {
-	public static final String MESSAGE = "Click https://mobile.allclear.app/auth?phone=%s&token=%s to login in.";
+	public static final String MESSAGE = "Click https://mobile.test.allclear.app/auth?phone=%s&token=%s to login in.";
 
 	private static final FakeRedisClient redis = new FakeRedisClient();
 	private static final TwilioClient twilio = mock(TwilioClient.class);
-	private static final SessionDAO dao = new SessionDAO(redis, twilio, "+12014107770", MESSAGE);
+	private static final SessionDAO dao = new SessionDAO(redis, twilio, ConfigTest.loadTest());
 
 	private static SessionValue START;
 	private static SessionValue START_1;
@@ -42,7 +43,7 @@ public class SessionDAOTest
 	@BeforeAll
 	public static void up()
 	{
-		when(twilio.send(any(SMSRequest.class))).thenAnswer(a -> LAST_RESPONSE = new SMSResponse(((SMSRequest) a.getArgument(0)).body));
+		when(twilio.send(any(SMSRequest.class))).thenAnswer(a -> LAST_RESPONSE = new SMSResponse(((SMSRequest) a.getArgument(0))));
 	}
 
 	@Test

@@ -1,0 +1,1 @@
+Click ${baseUrl}/register?phone=%s&token=%s to complete your registration.

@@ -41,8 +41,8 @@ public class SMSResponse implements Serializable
 	public final String to;
 	public final String uri;
 
-	public SMSResponse() { this(null); }
-	public SMSResponse(final String body) { this(null, null, body, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null); }
+	public SMSResponse(final SMSRequest request) { this(request.from, request.body, request.to); }
+	public SMSResponse(final String from, final String body, final String to) { this(null, null, body, null, null, null, null, null, null, from, null, null, null, null, null, null, "sent", null, to, null); }
 	public SMSResponse(
 		@JsonProperty("account_sid") final String account_sid,
 		@JsonProperty("api_version") final String api_version,

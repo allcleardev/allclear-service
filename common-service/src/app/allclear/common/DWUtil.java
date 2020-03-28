@@ -2,9 +2,11 @@ package app.allclear.common;
 
 import java.io.*;
 import java.net.*;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.text.StringSubstitutor;
 import org.apache.commons.text.lookup.StringLookupFactory;
 import org.eclipse.jetty.util.RolloverFileOutputStream;
@@ -28,6 +30,18 @@ public class DWUtil
 {
 	private static final Logger logger = LoggerFactory.getLogger(DWUtil.class);
 	public static final String APP_CREDENTIALS_FILE = "appCredentialsFile";
+
+	/** Load resource by name as a String.
+	 * 
+	 * @param name
+	 * @return never NULL
+	 */
+	public static String load(final String name) { return load(DWUtil.class.getResource(name)); }
+	public static String load(final URL url)
+	{
+		try { return IOUtils.toString(url, Charset.defaultCharset()); }
+		catch (IOException ex) { throw new RuntimeException(ex); }
+	}
 
 	/** Loads the application credentials file into system properties. */
 	public static StringSubstitutor loadAppCredentials()

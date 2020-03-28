@@ -10,6 +10,7 @@ import app.allclear.common.errors.NotAuthenticatedException;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.jackson.JacksonUtils;
 import app.allclear.common.redis.RedisClient;
+import app.allclear.platform.Config;
 import app.allclear.platform.model.StartRequest;
 import app.allclear.platform.value.*;
 import app.allclear.twilio.client.TwilioClient;
@@ -39,13 +40,13 @@ public class SessionDAO
 	private final TwilioClient twilio;
 	private final ThreadLocal<SessionValue> current = new ThreadLocal<>();
 
-	public SessionDAO(final RedisClient redis) { this(redis, null, null, null); }
-	public SessionDAO(final RedisClient redis, final TwilioClient twilio, final String authFrom, final String authMessage)
+	public SessionDAO(final RedisClient redis, final Config conf) { this(redis, null, conf); }
+	public SessionDAO(final RedisClient redis, final TwilioClient twilio, final Config conf)
 	{
 		this.redis = redis;
 		this.twilio = twilio;
-		this.authFrom = authFrom;
-		this.authMessage = authMessage;
+		this.authFrom = conf.authenticationPhone;
+		this.authMessage = conf.authenticationSMSMessage;
 	}
 
 	/** Adds a short-term registration session.

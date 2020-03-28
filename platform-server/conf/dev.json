@@ -1,6 +1,10 @@
 {
   "env": "dev",
 
+  "baseUrl": "${baseUrl:-https://mobile.dev.allclear.app}",
+  "registrationPhone": "5555",
+  "authenticationPhone": "5556",
+
   "trans": {
     "driverClass": "com.mysql.jdbc.Driver",
     "user": "${trans.user:-allclear}",
