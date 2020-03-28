@@ -35,15 +35,11 @@ public class SessionDAOTest
 	private static SessionValue START_1;
 	private static SessionValue PERSON;
 	private static SessionValue PERSON_1;
-	private static String LAST_TOKEN;
 
 	@BeforeAll
 	public static void up()
 	{
-		when(twilio.send(any(SMSRequest.class))).thenAnswer(a -> {
-			LAST_TOKEN = ((SMSRequest) a.getArgument(0)).body;
-			return new SMSResponse();
-		}); 
+		when(twilio.send(any(SMSRequest.class))).thenReturn(new SMSResponse());
 	}
 
 	@Test
@@ -108,13 +104,12 @@ public class SessionDAOTest
 	@Test
 	public void auth_success()
 	{
-		Assertions.assertNull(LAST_TOKEN, "Check lastToken: before");
-		dao.auth("888-555-0011");
-		Assertions.assertNotNull(LAST_TOKEN, "Check lastToken: after");
+		var token = dao.auth("888-555-0011");
+		Assertions.assertNotNull(token, "Check token");
+		Assertions.assertTrue(redis.containsKey(SessionDAO.authKey("888-555-0011", token)), "Check redis: before");
 
-		Assertions.assertTrue(redis.containsKey(SessionDAO.authKey("888-555-0011", LAST_TOKEN)), "Check redis: before");
-		dao.auth("888-555-0011", LAST_TOKEN);
-		Assertions.assertFalse(redis.containsKey(SessionDAO.authKey("888-555-0011", LAST_TOKEN)), "Check redis: after");
+		dao.auth("888-555-0011", token);
+		Assertions.assertFalse(redis.containsKey(SessionDAO.authKey("888-555-0011", token)), "Check redis: after");
 	}
 
 	@Test

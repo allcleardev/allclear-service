@@ -83,13 +83,16 @@ public class SessionDAO
 	/** Sends an authentication token to the specified user.
 	 * 
 	 * @param phone
+	 * @return the token to be used in tests.
 	 */
-	public void auth(final String phone)
+	public String auth(final String phone)
 	{
 		var token = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
 
 		twilio.send(new SMSRequest(authFrom, String.format(authMessage, token), phone));
 		redis.put(authKey(phone, token), phone, AUTH_DURATION);
+
+		return token;
 	}
 
 	/** Confirms the authentication token.
