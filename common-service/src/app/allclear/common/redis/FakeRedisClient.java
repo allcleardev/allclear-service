@@ -47,7 +47,7 @@ public class FakeRedisClient extends RedisClient
 	}
 
 	@Override
-	public boolean containsKey(Object key) { return map.containsKey((String) key); }
+	public boolean containsKey(Object key) { return map.containsKey(key) || maps.containsKey(key) || sets.containsKey(key) || queues.containsKey(key); }
 
 	@Override
 	public boolean containsValue(Object value) { return map.containsValue(value); }
@@ -413,7 +413,7 @@ public class FakeRedisClient extends RedisClient
 		@SuppressWarnings("resource") var me = this;
 		return fx.apply(new Jedis() {
 			@Override public Long del(final String key) { me.remove(key); return 1L; }
-			@Override public Boolean exists(final String key) { return maps.containsKey(key); }
+			@Override public Boolean exists(final String key) { return me.containsKey(key); }
 			@Override public Long expire(final String key, final int seconds) { me.expire(key, seconds); return 1L; }
 			@Override public String get(final String key) { return me.get(key); }
 			@Override public Map<String, String> hgetAll(final String key) { return me.hash(key); }

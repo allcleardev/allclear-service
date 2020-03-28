@@ -12,6 +12,8 @@ import app.allclear.common.jackson.JacksonUtils;
 import app.allclear.common.redis.RedisClient;
 import app.allclear.platform.model.StartRequest;
 import app.allclear.platform.value.*;
+import app.allclear.twilio.client.TwilioClient;
+import app.allclear.twilio.model.SMSRequest;
 
 /** Data access object that manages user sessions.
  * 
@@ -31,12 +33,19 @@ public class SessionDAO
 	public static String key(final String id) { return String.format(ID, id); }
 	public static String authKey(final String phone, final String token) { return String.format(AUTH_KEY, phone, token); }
 
+	private final String authFrom;
 	private final RedisClient redis;
+	private final String authMessage;
+	private final TwilioClient twilio;
 	private final ThreadLocal<SessionValue> current = new ThreadLocal<>();
 
-	public SessionDAO(final RedisClient redis)
+	public SessionDAO(final RedisClient redis) { this(redis, null, null, null); }
+	public SessionDAO(final RedisClient redis, final TwilioClient twilio, final String authFrom, final String authMessage)
 	{
 		this.redis = redis;
+		this.twilio = twilio;
+		this.authFrom = authFrom;
+		this.authMessage = authMessage;
 	}
 
 	/** Adds a short-term registration session.
@@ -78,6 +87,8 @@ public class SessionDAO
 	public void auth(final String phone)
 	{
 		var token = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
+
+		twilio.send(new SMSRequest(authFrom, String.format(authMessage, token), phone));
 		redis.put(authKey(phone, token), phone, AUTH_DURATION);
 	}
 

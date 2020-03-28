@@ -1,6 +1,7 @@
 package app.allclear.platform.dao;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.mockito.Mockito.*;
 
 import java.util.Date;
 
@@ -11,6 +12,9 @@ import app.allclear.common.errors.ValidationException;
 import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.platform.model.StartRequest;
 import app.allclear.platform.value.*;
+import app.allclear.twilio.client.TwilioClient;
+import app.allclear.twilio.model.SMSRequest;
+import app.allclear.twilio.model.SMSResponse;
 
 /** Functional test class that verifies the SessionDAO component.
  * 
@@ -24,12 +28,23 @@ import app.allclear.platform.value.*;
 public class SessionDAOTest
 {
 	private static final FakeRedisClient redis = new FakeRedisClient();
-	private static final SessionDAO dao = new SessionDAO(redis);
+	private static final TwilioClient twilio = mock(TwilioClient.class);
+	private static final SessionDAO dao = new SessionDAO(redis, twilio, "+12014107770", "%s");
 
 	private static SessionValue START;
 	private static SessionValue START_1;
 	private static SessionValue PERSON;
 	private static SessionValue PERSON_1;
+	private static String LAST_TOKEN;
+
+	@BeforeAll
+	public static void up()
+	{
+		when(twilio.send(any(SMSRequest.class))).thenAnswer(a -> {
+			LAST_TOKEN = ((SMSRequest) a.getArgument(0)).body;
+			return new SMSResponse();
+		}); 
+	}
 
 	@Test
 	public void add_person()
@@ -84,10 +99,22 @@ public class SessionDAOTest
 	}
 
 	@Test
-	public void auth()
+	public void auth_failure()
 	{
 		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.auth("888-555-0010", "ABC")))
 			.hasMessage("Confirmation failed.");
+	}
+
+	@Test
+	public void auth_success()
+	{
+		Assertions.assertNull(LAST_TOKEN, "Check lastToken: before");
+		dao.auth("888-555-0011");
+		Assertions.assertNotNull(LAST_TOKEN, "Check lastToken: after");
+
+		Assertions.assertTrue(redis.containsKey(SessionDAO.authKey("888-555-0011", LAST_TOKEN)), "Check redis: before");
+		dao.auth("888-555-0011", LAST_TOKEN);
+		Assertions.assertFalse(redis.containsKey(SessionDAO.authKey("888-555-0011", LAST_TOKEN)), "Check redis: after");
 	}
 
 	@Test
