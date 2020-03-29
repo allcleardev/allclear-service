@@ -9,10 +9,11 @@ WORKDIR /app
 COPY --from=build /app/platform-server/conf/ /app/conf/
 COPY --from=build /app/platform-server/build/libs/platform-server*.jar /app/platform-server.jar
 
+ENV APP_ENV
 EXPOSE 8080
 CMD ["java", \
   "-Dfile.encoding=UTF-8", \
   "-Duser.timezone=UTC", \
   "-Dhibernate.dialect.storage_engine=innodb", \
   "-jar", "platform-server.jar", \
-  "server", "conf/dev.json"]
+  "server", "conf/${APP_ENV}.json"]
