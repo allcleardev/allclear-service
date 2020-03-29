@@ -39,10 +39,8 @@
     "requestLog": {
         "appenders": [
             {
-                "type": "file",
-                "currentLogFilename": "/var/log/platform-server/request.log",
+                "type": "console",
                 "threshold": "ALL",
-                "archive": false,
                 "timeZone": "UTC"
             }
         ]
