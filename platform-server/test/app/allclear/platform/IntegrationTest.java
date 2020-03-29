@@ -4,10 +4,8 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static app.allclear.testing.TestingUtils.*;
 
 import java.util.Date;
-import java.util.List;
 
 import javax.ws.rs.client.*;
-import javax.ws.rs.core.GenericType;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
