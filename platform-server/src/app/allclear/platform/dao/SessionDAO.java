@@ -140,7 +140,7 @@ public class SessionDAO
 	 * @param value
 	 * @return the supplied session value
 	 */
-	SessionValue current(final SessionValue value)
+	public SessionValue current(final SessionValue value)
 	{
 		current.set(value);
 

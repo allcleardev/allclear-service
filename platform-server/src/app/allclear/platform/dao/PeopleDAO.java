@@ -198,6 +198,9 @@ public class PeopleDAO extends AbstractDAO<People>
 		return record;
 	}
 
+	public boolean existsByEmail(final String email) { return (null != namedQuery("getPeopleIdByEmail", String.class).setParameter("email", email).uniqueResult()); } 
+	public boolean existsByPhone(final String phone) { return (null != namedQuery("getPeopleIdByPhone", String.class).setParameter("phone", phone).uniqueResult()); }
+
 	People find(final String name) { return namedQuery("findPeople").setParameter("name", name).uniqueResult(); }
 	People findByEmail(final String email) { return namedQuery("findPeopleByEmail").setParameter("email", email).uniqueResult(); }
 	People findByPhone(final String phone) { return namedQuery("findPeopleByPhone").setParameter("phone", phone).uniqueResult(); }
@@ -214,14 +217,14 @@ public class PeopleDAO extends AbstractDAO<People>
 	{
 		if (null != phone)
 		{
-			if (null != namedQuery("getPeopleIdByPhone", String.class).setParameter("phone", phone).uniqueResult())	return;	// Success
+			if (existsByPhone(phone)) return;	// Success
 
 			throw new ValidationException("phone", "The phone number '" + phone + "' is not associated with an existing user.");
 		}
 
 		if (null != email)
 		{
-			if (null != namedQuery("getPeopleIdByEmail", String.class).setParameter("email", email).uniqueResult()) return;	// Success
+			if (existsByEmail(email)) return;	// Success
 
 			throw new ValidationException("email", "The email address '" + email + "' is not associated with an existing user.");
 		}

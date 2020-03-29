@@ -22,8 +22,7 @@ import io.dropwizard.testing.junit5.ResourceExtension;
 
 import app.allclear.junit.hibernate.*;
 import app.allclear.common.dao.QueryResults;
-import app.allclear.common.errors.NotFoundExceptionMapper;
-import app.allclear.common.errors.ValidationExceptionMapper;
+import app.allclear.common.errors.*;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.common.value.OperationResponse;
@@ -32,8 +31,11 @@ import app.allclear.platform.Config;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.dao.*;
 import app.allclear.platform.filter.PeopleFilter;
+import app.allclear.platform.model.*;
 import app.allclear.platform.value.PeopleValue;
+import app.allclear.platform.value.SessionValue;
 import app.allclear.twilio.client.TwilioClient;
+import app.allclear.twilio.model.*;
 
 /**********************************************************************************
 *
@@ -63,8 +65,11 @@ public class PeopleResourceTest
 	private static Date AUTH_AT;
 	private static Date EMAIL_VERIFIED_AT;
 	private static Date PHONE_VERIFIED_AT;
+	private static SMSResponse LAST_SMS_RESPONSE;
+	private static SessionValue SESSION;
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
+		.addResource(new AuthenticationExceptionMapper())
 		.addResource(new NotFoundExceptionMapper())
 		.addResource(new ValidationExceptionMapper())
 		.addResource(new PeopleResource(dao, registrationDao, sessionDao)).build();
@@ -86,6 +91,8 @@ public class PeopleResourceTest
 		AUTH_AT = timestamp("2020-03-24T12:46:30-0000");
 		EMAIL_VERIFIED_AT = timestamp("2020-03-24T12:47:30-0000");
 		PHONE_VERIFIED_AT = timestamp("2020-03-24T12:48:30-0000");
+
+		when(twilio.send(any(SMSRequest.class))).thenAnswer(a -> LAST_SMS_RESPONSE = new SMSResponse((SMSRequest) a.getArgument(0)));
 	}
 
 	@Test
@@ -299,6 +306,71 @@ public class PeopleResourceTest
 	{
 		count(new PeopleFilter().withId(VALUE.id), 0L);
 		count(new PeopleFilter().withHasEmail(true), 0L);
+	}
+
+	@Test
+	public void z_00_register()
+	{
+		var response = request("start").post(Entity.json(new StartRequest("888-555-2000", false, true)));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status: start");
+
+		response = request("confirm").post(Entity.json(new StartResponse("888-555-2000", null, code())));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status: confirm");
+		var session = response.readEntity(SessionValue.class);
+		Assertions.assertNotNull(session, "Exists: session");
+		Assertions.assertNotNull(session.registration, "Exists: session.registration");
+		Assertions.assertNull(session.person, "Exists: session.person");
+
+		response = request("register").post(Entity.json(VALUE = PeopleDAOTest.createValid()));
+		Assertions.assertEquals(HTTP_STATUS_AUTHENTICATE, response.getStatus(), "Status: register - fail");
+
+		sessionDao.current(session);
+		response = request("register").post(Entity.json(VALUE));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status: register - success");
+		var registered = SESSION = response.readEntity(SessionValue.class);
+		Assertions.assertNotNull(registered, "Exists: registered");
+		Assertions.assertNull(registered.registration, "Exists: registered.registration");
+		Assertions.assertNotNull(registered.person, "Exists: registered.person");
+		Assertions.assertEquals("888-555-2000", registered.person.phone, "Check registerd.person.phone");
+		Assertions.assertNotEquals(VALUE.phone, registered.person.phone, "Phone fixed");
+	}
+
+	@Test
+	public void z_01_authenticate_fail()
+	{
+		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, request("auth").post(Entity.json(new AuthRequest("888-555-2001"))).getStatus());
+	}
+
+	@Test
+	public void z_01_authenticate_success()
+	{
+		var response = request("auth").post(Entity.json(new AuthRequest("888-555-2000")));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());
+
+		response = request("auth").put(Entity.json(new AuthResponse("888-555-2000", null, token(), true)));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());
+		var session = response.readEntity(SessionValue.class);
+		Assertions.assertNotNull(session, "Exists: session");
+		Assertions.assertNull(session.registration, "Exists: session.registration");
+		Assertions.assertNotNull(session.person, "Exists: session.person");
+		Assertions.assertEquals("888-555-2000", session.person.phone, "Check session.person.phone");
+		Assertions.assertNotEquals(SESSION.id, session.id, "New session");
+	}
+
+	private String code()
+	{
+		var body = LAST_SMS_RESPONSE.body;
+		var i = body.indexOf("code=") + 5;
+
+		return body.substring(i, body.indexOf(' ', i));
+	}
+
+	private String token()
+	{
+		var body = LAST_SMS_RESPONSE.body;
+		var i = body.indexOf("token=") + 6;
+
+		return body.substring(i, body.indexOf(' ', i));
 	}
 
 	/** Helper method - creates the base WebTarget. */

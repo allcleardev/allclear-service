@@ -5,8 +5,6 @@ import java.util.List;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
-import org.apache.commons.lang3.StringUtils;
-
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 
@@ -18,6 +16,7 @@ import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.value.OperationResponse;
 import app.allclear.platform.dao.*;
 import app.allclear.platform.filter.PeopleFilter;
+import app.allclear.platform.model.*;
 import app.allclear.platform.value.PeopleValue;
 import app.allclear.platform.value.SessionValue;
 
@@ -79,13 +78,42 @@ public class PeopleResource
 	@POST
 	@Path("/auth") @Timed @UnitOfWork(readOnly=true, transactional=false)
 	@ApiOperation(value="startAuth", notes="Starts the authentication process by sending a magic link to the user's phone number or email address.")
-	public Response startAuth(@QueryParam("phone") @ApiParam(name="phone", value="If the phone number is provided, the magic link is sent via SMS.", required=false) final String phone,
-		@QueryParam("email") @ApiParam(name="email", value="If the email address is provided, the magic link is sent via Email.", required=false) final String email)
-			throws ValidationException
+	public Response startAuth(final AuthRequest request) throws ValidationException
 	{
-		dao.check(phone, null);	// Do NOT use email for now as magic link via email has not been implememted yet. DLS on 3/28/2020.
+		dao.check(request.phone, null);	// Do NOT use email for now as magic link via email has not been implememted yet. DLS on 3/28/2020.
 
-		sessionDao.auth(phone);
+		sessionDao.auth(request.phone);
+
+		return Response.ok().build();
+	}
+
+	@POST
+	@Path("/confirm") @Timed @UnitOfWork(readOnly=true, transactional=false)
+	@ApiOperation(value="confirm", notes="Confirms the user phone number or email address during the registration process.", response=SessionValue.class)
+	public SessionValue confirm(final StartResponse request) throws ValidationException
+	{
+		return sessionDao.add(registrationDao.confirm(request.phone, request.code));
+	}
+
+	@POST
+	@Path("/register") @Timed @UnitOfWork
+	@ApiOperation(value="register", notes="Completes the user registration process.", response=SessionValue.class)
+	public SessionValue register(@QueryParam("rememberMe") @ApiParam(name="rememberMe", value="Indicates to use a long term session if TRUE.", defaultValue="false", required=false) @DefaultValue("false") final Boolean rememberMe,
+		final PeopleValue value) throws ValidationException
+	{
+		return sessionDao.promote(dao.add(value.withPhone(sessionDao.get().registration.phone)),	// The AuthFilter ensures that this is a Registration session. DLS on 3/29/2020.
+			Boolean.TRUE.equals(rememberMe));
+	}
+
+	@POST
+	@Path("/start") @Timed @UnitOfWork(readOnly=true, transactional=false)
+	@ApiOperation(value="start", notes="Starts the registration process by sending a magic link to the user's phone number or email address.")
+	public Response start(final StartRequest request) throws ValidationException
+	{
+		if (dao.existsByPhone(request.phone))	// Make sure that the user phone number doesn't already exist.
+			throw new ValidationException("An account with that phone number already exists. Pleaes proceed to authenticate instead.");
+
+		registrationDao.start(request);
 
 		return Response.ok().build();
 	}
@@ -101,18 +129,14 @@ public class PeopleResource
 	@PUT
 	@Path("/auth") @Timed @UnitOfWork	// Authentication updates the Person record.
 	@ApiOperation(value="finishAuth", notes="Confirms the authentication phone/email and token to provide a session to the caller.", response=SessionValue.class)
-	public SessionValue finishAuth(@QueryParam("phone") @ApiParam(name="phone", value="The phone number to which the token was sent.", required=false) final String phone,
-		@QueryParam("email") @ApiParam(name="email", value="The email address to which the token was sent.", required=false) final String email,
-		@QueryParam("token") @ApiParam(name="token", value="The secret token sent to the account.", required=true) final String token,
-		@QueryParam("rememberMe") @ApiParam(name="rememberMe", value="Indicates to use a long term session if TRUE.", required=false) final Boolean rememberMe)
-			throws ObjectNotFoundException, ValidationException
+	public SessionValue finishAuth(final AuthResponse request) throws ObjectNotFoundException, ValidationException
 	{
-		if (StringUtils.isEmpty(phone)) throw new ValidationException("phone", "The phone number is required.");
-		if (StringUtils.isEmpty(token)) throw new ValidationException("token", "The token is required.");
+		if (null == request.phone) throw new ValidationException("phone", "The phone number is required.");
+		if (null == request.token) throw new ValidationException("token", "The token is required.");
 
-		sessionDao.auth(phone, token);
+		sessionDao.auth(request.phone, request.token);
 
-		return sessionDao.add(dao.authenticatedByPhone(phone), Boolean.TRUE.equals(rememberMe));
+		return sessionDao.add(dao.authenticatedByPhone(request.phone), request.rememberMe);
 	}
 
 	@DELETE

@@ -30,6 +30,7 @@ import app.allclear.twilio.model.*;
 public class RegistrationDAO
 {
 	private static final String ID = "registration:%s:%s";
+	public static final int CODE_LENGTH = 10;
 	private static final int EXPIRATION = 10 * 60;	// Ten minutes
 	private static final ObjectMapper mapper = JacksonUtils.createMapper();
 	private static final TypeReference<Map<String, String>> TYPE_MAP = new TypeReference<Map<String, String>>() {};
@@ -63,12 +64,12 @@ public class RegistrationDAO
 		
 		return redis.operation(c -> {
 			int i = 0;
-			var code = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
+			var code = RandomStringUtils.randomAlphanumeric(CODE_LENGTH).toUpperCase();
 			var key = key(request.phone, code);
 			while (c.exists(key))
 			{
 				if (10 < i++) throw new IllegalArgumentException("CanNOT generate identifier - 10 tries.");
-				key = key(request.phone, code = RandomStringUtils.randomAlphanumeric(10).toUpperCase());
+				key = key(request.phone, code = RandomStringUtils.randomAlphanumeric(CODE_LENGTH).toUpperCase());
 			}
 
 			twilio.send(new SMSRequest(from, String.format(message, request.phone, code), request.phone));

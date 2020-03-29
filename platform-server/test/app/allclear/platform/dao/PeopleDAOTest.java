@@ -68,7 +68,7 @@ public class PeopleDAOTest
 	/** Creates a valid People value for the validation tests.
 	 *	@return never NULL.
 	*/
-	private PeopleValue createValid()
+	public static PeopleValue createValid()
 	{
 		return new PeopleValue("bryce", "888-555-1001", "dallas@gmail.com", "Dallas", "Drawoh",
 			DOB_1, PeopleStatus.RECOVERED.id, PeopleStature.CELEBRITY.id, false);
@@ -191,6 +191,44 @@ public class PeopleDAOTest
 	{
 		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.check(phone, email)))
 			.hasMessage(message);
+	}
+
+	public static Stream<Arguments> existsByEmail()
+	{
+		return Stream.of(
+			arguments("", false),
+			arguments(null, false),
+			arguments("ronny@gmail.com", true),
+			arguments("888-555-1000", false),
+			arguments("dallas@gmail.com", false),
+			arguments("ronny@gmail.co", false),
+			arguments("onny@gmail.com", false));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void existsByEmail(final String value, final boolean expected)
+	{
+		Assertions.assertEquals(expected, dao.existsByEmail(value));
+	}
+
+	public static Stream<Arguments> existsByPhone()
+	{
+		return Stream.of(
+			arguments("", false),
+			arguments(null, false),
+			arguments("888-555-1000", true),
+			arguments("ronny@gmail.com", false),
+			arguments("888-555-1001", false),
+			arguments("888-555-100", false),
+			arguments("88-555-1000", false));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void existsByPhone(final String value, final boolean expected)
+	{
+		Assertions.assertEquals(expected, dao.existsByPhone(value));
 	}
 
 	@Test

@@ -56,7 +56,7 @@ public class ConfigTest
 		Assertions.assertEquals("https://mobile.dev.allclear.app", o.baseUrl, "Check baseUrl");
 		Assertions.assertEquals("5555", o.registrationPhone, "Check registrationPhone");
 		Assertions.assertEquals("5556", o.authenticationPhone, "Check authenticationPhone");
-		Assertions.assertEquals("Click https://mobile.dev.allclear.app/register?phone=%s&token=%s to complete your registration.", o.registrationSMSMessage, "Check registrationSMSMessage");
+		Assertions.assertEquals("Click https://mobile.dev.allclear.app/register?phone=%s&code=%s to complete your registration.", o.registrationSMSMessage, "Check registrationSMSMessage");
 		Assertions.assertEquals("Click https://mobile.dev.allclear.app/auth?phone=%s&token=%s to login in.", o.authenticationSMSMessage, "Check authenticationSMSMessage");
 		Assertions.assertNotNull(o.session, "Check session");
 		Assertions.assertEquals("allclear-dev.redis.cache.windows.net", o.session.host, "Check session.host");
@@ -96,7 +96,7 @@ public class ConfigTest
 		Assertions.assertEquals("http://localhost:8080", o.baseUrl, "Check baseUrl");
 		Assertions.assertEquals("5555", o.registrationPhone, "Check registrationPhone");
 		Assertions.assertEquals("5556", o.authenticationPhone, "Check authenticationPhone");
-		Assertions.assertEquals("Click http://localhost:8080/register?phone=%s&token=%s to complete your registration.", o.registrationSMSMessage, "Check registrationSMSMessage");
+		Assertions.assertEquals("Click http://localhost:8080/register?phone=%s&code=%s to complete your registration.", o.registrationSMSMessage, "Check registrationSMSMessage");
 		Assertions.assertEquals("Click http://localhost:8080/auth?phone=%s&token=%s to login in.", o.authenticationSMSMessage, "Check authenticationSMSMessage");
 		Assertions.assertNotNull(o.session, "Check session");
 		Assertions.assertEquals("localhost", o.session.host, "Check session.host");
@@ -136,7 +136,7 @@ public class ConfigTest
 		Assertions.assertEquals("https://mobile.test.allclear.app", o.baseUrl, "Check baseUrl");
 		Assertions.assertEquals("5555", o.registrationPhone, "Check registrationPhone");
 		Assertions.assertEquals("5556", o.authenticationPhone, "Check authenticationPhone");
-		Assertions.assertEquals("Click https://mobile.test.allclear.app/register?phone=%s&token=%s to complete your registration.", o.registrationSMSMessage, "Check registrationSMSMessage");
+		Assertions.assertEquals("Click https://mobile.test.allclear.app/register?phone=%s&code=%s to complete your registration.", o.registrationSMSMessage, "Check registrationSMSMessage");
 		Assertions.assertEquals("Click https://mobile.test.allclear.app/auth?phone=%s&token=%s to login in.", o.authenticationSMSMessage, "Check authenticationSMSMessage");
 		Assertions.assertNotNull(o.session, "Check session");
 		Assertions.assertNull(o.session.host, "Check session.host");
