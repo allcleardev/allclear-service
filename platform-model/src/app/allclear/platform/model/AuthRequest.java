@@ -6,6 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.twilio.model.TwilioUtils;
+
 /** Value object that represents the request to start the authentication process via magic link.
  * 
  * @author smalleyd
@@ -24,7 +26,7 @@ public class AuthRequest implements Serializable
 	public AuthRequest(@JsonProperty("phone") final String phone,
 		@JsonProperty("email") final String email)
 	{
-		this.phone = StringUtils.trimToNull(phone);
+		this.phone = TwilioUtils.normalize(StringUtils.trimToNull(phone));
 		this.email = StringUtils.trimToNull(email);
 	}
 

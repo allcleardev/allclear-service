@@ -55,56 +55,58 @@ public class RegistrationDAOTest
 	public static Stream<Arguments> add()
 	{
 		return Stream.of(
-			arguments("888-555-1000", null, null, false, false),
-			arguments("888-555-1001", true, null, true, false),
-			arguments("888-555-1002", null, true, false, true),
-			arguments("888-555-1003", false, null, false, false),
-			arguments("888-555-1004", null, false, false, false),
-			arguments("888-555-1005", true, true, true, true),
-			arguments("888-555-1006", true, false, true, false),
-			arguments("888-555-1007", false, true, false, true),
-			arguments("888-555-1008", false, false, false, false));
+			arguments("888-555-1000", null, null, "+18885551000", false, false),
+			arguments("888-555-1001", true, null, "+18885551001", true, false),
+			arguments("888-555-1002", null, true, "+18885551002", false, true),
+			arguments("888-555-1003", false, null, "+18885551003", false, false),
+			arguments("888-555-1004", null, false, "+18885551004", false, false),
+			arguments("888-555-1005", true, true, "+18885551005", true, true),
+			arguments("888-555-1006", true, false, "+18885551006", true, false),
+			arguments("888-555-1007", false, true, "+18885551007", false, true),
+			arguments("888-555-1008", false, false, "+18885551008", false, false));
 	}
 
 	@ParameterizedTest
 	@MethodSource
-	public void add(final String phone, final Boolean beenTested, final Boolean haveSymptoms, final boolean expectedBeenTested, final boolean expectedHaveSymptoms)
+	public void add(final String phone, final Boolean beenTested, final Boolean haveSymptoms,
+		final String expectedPhone, final boolean expectedBeenTested, final boolean expectedHaveSymptoms)
 	{
 		var code = dao.start(new StartRequest(phone, beenTested, haveSymptoms));
 		assertThat(code).hasSize(10).matches(PATTERN_CODE);
 		Assertions.assertNotNull(LAST_RESPONSE, "Check lastResponse");
-		Assertions.assertEquals(String.format(MESSAGE, phone, code), LAST_RESPONSE.body, "Check lastResponse.body");
+		Assertions.assertEquals(String.format(MESSAGE, expectedPhone, code), LAST_RESPONSE.body, "Check lastResponse.body");
 
-		var o = dao.confirm(phone, code);
+		var o = dao.confirm(expectedPhone, code);
 		Assertions.assertNotNull(o, "Exists");
-		Assertions.assertEquals(phone, o.phone, "Check phone");
+		Assertions.assertEquals(expectedPhone, o.phone, "Check phone");
 		Assertions.assertEquals(expectedBeenTested, o.beenTested, "Check beenTested");
 		Assertions.assertEquals(expectedHaveSymptoms, o.haveSymptoms, "Check haveSymptoms");
 
-		Assertions.assertNull(dao.request(phone, code), "Check request: after confirm");
-		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.confirm(phone, code)))
+		Assertions.assertNull(dao.request(expectedPhone, code), "Check request: after confirm");
+		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.confirm(expectedPhone, code)))
 			.as("Check confirm: after confirm")
 			.hasMessage("The supplied code is invalid.");
 	}
 
 	@ParameterizedTest
 	@MethodSource("add")
-	public void add_again(final String phone, final Boolean beenTested, final Boolean haveSymptoms, final boolean expectedBeenTested, final boolean expectedHaveSymptoms)
+	public void add_again(final String phone, final Boolean beenTested, final Boolean haveSymptoms,
+		final String expectedPhone, final boolean expectedBeenTested, final boolean expectedHaveSymptoms)
 	{
-		codes.put(phone, dao.start(new StartRequest(phone, beenTested, haveSymptoms)));
+		codes.put(expectedPhone, dao.start(new StartRequest(phone, beenTested, haveSymptoms)));
 	}
 
 	@Test
 	public void add_again_check()
 	{
-		var code = codes.get("888-555-1008");
+		var code = codes.get("+18885551008");
 		assertThat(code).as("Check code").hasSize(10);
 
-		Assertions.assertNotNull(dao.request("888-555-1008", code), "Check correct phone number");
-		Assertions.assertNull(dao.request("888-555-1000", code), "Check mismatched phone number");
+		Assertions.assertNotNull(dao.request("+18885551008", code), "Check correct phone number");
+		Assertions.assertNull(dao.request("+18885551000", code), "Check mismatched phone number");
 
-		Assertions.assertNotNull(dao.confirm("888-555-1008", code), "Check correct phone number");
-		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.confirm("888-555-1000", code)))
+		Assertions.assertNotNull(dao.confirm("+18885551008", code), "Check correct phone number");
+		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.confirm("+18885551000", code)))
 			.hasMessage("The supplied code is invalid.");
 	}
 }

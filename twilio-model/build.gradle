@@ -1,0 +1,5 @@
+dependencies {
+  compile "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+  compile "io.swagger:swagger-annotations:${swaggerVersion}"
+}
+

@@ -77,7 +77,7 @@ public class SessionValueTest
 		Assertions.assertEquals(30 * 60, o.seconds(), "Check seconds");
 		Assertions.assertNull(o.person, "Check person");
 		Assertions.assertNotNull(o.registration, "Check registration");
-		Assertions.assertEquals("888-555-0003", o.registration.phone, "Check registration.phone");
+		Assertions.assertEquals("+18885550003", o.registration.phone, "Check registration.phone");
 		Assertions.assertTrue(o.registration.beenTested, "Check registration.beenTested");
 		Assertions.assertTrue(o.registration.haveSymptoms, "Check registration.haveSymptoms");
 		assertThat(o.expiresAt).as("Check expiresAt").isCloseTo(new Date(System.currentTimeMillis() + SessionValue.DURATION_SHORT), 100L);

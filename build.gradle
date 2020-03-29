@@ -93,6 +93,7 @@ project(':common-hibernate') {
 project(':platform-model') {
   dependencies {
     compile project(':common-model')
+    compile project(':twilio-model')
     testCompile project(':common-testing')
   }
 }
@@ -108,6 +109,13 @@ project(':platform-server') {
 }
 
 project(':twilio-client') {
+  dependencies {
+    compile project(':twilio-model')
+    testCompile project(':common-testing')
+  }
+}
+
+project(':twilio-model') {
   dependencies {
     testCompile project(':common-testing')
   }

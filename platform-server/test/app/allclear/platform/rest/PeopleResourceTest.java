@@ -314,7 +314,7 @@ public class PeopleResourceTest
 		var response = request("start").post(Entity.json(new StartRequest("888-555-2000", false, true)));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status: start");
 
-		response = request("confirm").post(Entity.json(new StartResponse("888-555-2000", null, code())));
+		response = request("confirm").post(Entity.json(new StartResponse("+18885552000", null, code())));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status: confirm");
 		var session = response.readEntity(SessionValue.class);
 		Assertions.assertNotNull(session, "Exists: session");
@@ -331,7 +331,7 @@ public class PeopleResourceTest
 		Assertions.assertNotNull(registered, "Exists: registered");
 		Assertions.assertNull(registered.registration, "Exists: registered.registration");
 		Assertions.assertNotNull(registered.person, "Exists: registered.person");
-		Assertions.assertEquals("888-555-2000", registered.person.phone, "Check registerd.person.phone");
+		Assertions.assertEquals("+18885552000", registered.person.phone, "Check registerd.person.phone");
 		Assertions.assertNotEquals(VALUE.phone, registered.person.phone, "Phone fixed");
 	}
 
@@ -347,13 +347,13 @@ public class PeopleResourceTest
 		var response = request("auth").post(Entity.json(new AuthRequest("888-555-2000")));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());
 
-		response = request("auth").put(Entity.json(new AuthResponse("888-555-2000", null, token(), true)));
+		response = request("auth").put(Entity.json(new AuthResponse("+18885552000", null, token(), true)));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());
 		var session = response.readEntity(SessionValue.class);
 		Assertions.assertNotNull(session, "Exists: session");
 		Assertions.assertNull(session.registration, "Exists: session.registration");
 		Assertions.assertNotNull(session.person, "Exists: session.person");
-		Assertions.assertEquals("888-555-2000", session.person.phone, "Check session.person.phone");
+		Assertions.assertEquals("+18885552000", session.person.phone, "Check session.person.phone");
 		Assertions.assertNotEquals(SESSION.id, session.id, "New session");
 	}
 

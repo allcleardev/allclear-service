@@ -76,7 +76,7 @@ public class SessionDAOTest
 		Assertions.assertNotNull(START = dao.add(new StartRequest("888-555-0002", false, false)));
 		Assertions.assertNotNull(START, "Exists");
 		Assertions.assertNotNull(START.registration, "Check registration");
-		Assertions.assertEquals("888-555-0002", START.registration.phone, "Check registration.phone");
+		Assertions.assertEquals("+18885550002", START.registration.phone, "Check registration.phone");
 		Assertions.assertFalse(START.registration.beenTested, "Check registration.beenTested");
 		Assertions.assertFalse(START.registration.haveSymptoms, "Check registration.haveSymptoms");
 		Assertions.assertNull(START.person, "Check person");
@@ -90,7 +90,7 @@ public class SessionDAOTest
 		Assertions.assertNotNull(START_1 = dao.add(new StartRequest("888-555-0005", true, true)));
 		Assertions.assertNotNull(START_1, "Exists");
 		Assertions.assertNotNull(START_1.registration, "Check registration");
-		Assertions.assertEquals("888-555-0005", START_1.registration.phone, "Check registration.phone");
+		Assertions.assertEquals("+18885550005", START_1.registration.phone, "Check registration.phone");
 		Assertions.assertTrue(START_1.registration.beenTested, "Check registration.beenTested");
 		Assertions.assertTrue(START_1.registration.haveSymptoms, "Check registration.haveSymptoms");
 		Assertions.assertNull(START_1.person, "Check person");
@@ -195,7 +195,7 @@ public class SessionDAOTest
 		var v = dao.get(START.id);
 		Assertions.assertNotNull(v, "Exists");
 		Assertions.assertNotNull(v.registration, "Check registration");
-		Assertions.assertEquals("888-555-0002", v.registration.phone, "Check registration.phone");
+		Assertions.assertEquals("+18885550002", v.registration.phone, "Check registration.phone");
 		Assertions.assertFalse(v.registration.beenTested, "Check registration.beenTested");
 		Assertions.assertFalse(v.registration.haveSymptoms, "Check registration.haveSymptoms");
 		Assertions.assertNull(v.person, "Check person");
@@ -211,7 +211,7 @@ public class SessionDAOTest
 		var v = dao.get(START_1.id);
 		Assertions.assertNotNull(v, "Exists");
 		Assertions.assertNotNull(v.registration, "Check registration");
-		Assertions.assertEquals("888-555-0005", v.registration.phone, "Check registration.phone");
+		Assertions.assertEquals("+18885550005", v.registration.phone, "Check registration.phone");
 		Assertions.assertTrue(v.registration.beenTested, "Check registration.beenTested");
 		Assertions.assertTrue(v.registration.haveSymptoms, "Check registration.haveSymptoms");
 		Assertions.assertNull(v.person, "Check person");

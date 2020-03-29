@@ -1,2 +1,2 @@
-include 'common-hibernate', 'common-jersey', 'common-model', 'common-service', 'common-testing', 'platform-model', 'platform-server', 'twilio-client'
+include 'common-hibernate', 'common-jersey', 'common-model', 'common-service', 'common-testing', 'platform-model', 'platform-server', 'twilio-client', 'twilio-model'
 
