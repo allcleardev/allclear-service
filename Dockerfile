@@ -8,6 +8,8 @@ FROM adoptopenjdk:13-jdk-hotspot
 WORKDIR /app
 COPY --from=build /app/platform-server/conf/ /app/conf/
 COPY --from=build /app/platform-server/build/libs/platform-server*.jar /app/platform-server.jar
+
+EXPOSE 8080
 CMD ["java", \
   "-Dfile.encoding=UTF-8", \
   "-Duser.timezone=UTC", \
