@@ -4,7 +4,10 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static app.allclear.testing.TestingUtils.*;
 
 import java.util.Date;
+import java.util.List;
+
 import javax.ws.rs.client.*;
+import javax.ws.rs.core.GenericType;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +48,18 @@ public class IntegrationTest
 	}
 
 	@Test
+	public void getConditions()
+	{
+		assertThat(request(types.path("conditions")).get(Condition[].class)).hasSize(Condition.LIST.size());
+	}
+
+	@Test
+	public void getExposures()
+	{
+		assertThat(request(types.path("exposures")).get(Exposure[].class)).hasSize(Exposure.LIST.size());
+	}
+
+	@Test
 	public void getPeopleStatuses()
 	{
 		assertThat(request(types.path("peopleStatuses")).get(PeopleStatus[].class)).hasSize(PeopleStatus.LIST.size());
@@ -60,6 +75,12 @@ public class IntegrationTest
 	public void getPerson()
 	{
 		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, request(people.path("INVALID")).get().getStatus());
+	}
+
+	@Test
+	public void getSymptoms()
+	{
+		assertThat(request(types.path("symptoms")).get(Symptom[].class)).hasSize(Symptom.LIST.size());
 	}
 
 	@Test

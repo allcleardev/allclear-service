@@ -35,6 +35,24 @@ public class TypeResourceTest
 	private Invocation.Builder request(final String path) { return RULE.client().target(TARGET).path(path).request(UTF8MediaType.APPLICATION_JSON_TYPE); }
 
 	@Test
+	public void getConditions()
+	{
+		var response = request("conditions").get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		assertThat(response.readEntity(new GenericType<List<Condition>>() {})).isEqualTo(Condition.LIST);
+	}
+
+	@Test
+	public void getExposures()
+	{
+		var response = request("exposures").get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		assertThat(response.readEntity(new GenericType<List<Exposure>>() {})).isEqualTo(Exposure.LIST);
+	}
+
+	@Test
 	public void getPeopleStatuses()
 	{
 		var response = request("peopleStatuses").get();
@@ -50,5 +68,14 @@ public class TypeResourceTest
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		assertThat(response.readEntity(new GenericType<List<PeopleStature>>() {})).isEqualTo(PeopleStature.LIST);
+	}
+
+	@Test
+	public void getSymptoms()
+	{
+		var response = request("symptoms").get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		assertThat(response.readEntity(new GenericType<List<Symptom>>() {})).isEqualTo(Symptom.LIST);
 	}
 }
