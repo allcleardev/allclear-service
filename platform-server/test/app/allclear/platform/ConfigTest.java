@@ -54,8 +54,8 @@ public class ConfigTest
 		Assertions.assertEquals("dev", o.env, "Check env");
 		Assertions.assertFalse(o.disableSwagger, "Check disableSwagger");
 		Assertions.assertEquals("https://mobile.dev.allclear.app", o.baseUrl, "Check baseUrl");
-		Assertions.assertEquals("5555", o.registrationPhone, "Check registrationPhone");
-		Assertions.assertEquals("5556", o.authenticationPhone, "Check authenticationPhone");
+		Assertions.assertEquals("+16466321488", o.registrationPhone, "Check registrationPhone");
+		Assertions.assertEquals("+16466321488", o.authenticationPhone, "Check authenticationPhone");
 		Assertions.assertEquals("Click https://mobile.dev.allclear.app/register?phone=%s&code=%s to complete your registration.", o.registrationSMSMessage, "Check registrationSMSMessage");
 		Assertions.assertEquals("Click https://mobile.dev.allclear.app/auth?phone=%s&token=%s to login in.", o.authenticationSMSMessage, "Check authenticationSMSMessage");
 		Assertions.assertNotNull(o.session, "Check session");
@@ -69,8 +69,8 @@ public class ConfigTest
 		Assertions.assertFalse(o.session.test, "Check session.test");
 		Assertions.assertNotNull(o.twilio, "Check twilio");
 		Assertions.assertEquals(TwilioConfig.BASE_URL, o.twilio.baseUrl, "Check twilio.baseUrl");
-		Assertions.assertEquals("123", o.twilio.accountId, "Check twilio.accountId");
-		Assertions.assertEquals("token", o.twilio.authToken, "Check twilio.authToken");
+		Assertions.assertNotNull(o.twilio.accountId, "Check twilio.accountId");	// Could be the real account ID if the environment variable is set.
+		Assertions.assertNotNull(o.twilio.authToken, "Check twilio.authToken");	// Could be the real authorization token if the environment variable is set.
 		Assertions.assertEquals("com.mysql.jdbc.Driver", o.trans.getDriverClass(), "Check trans.driverClass");
 		Assertions.assertEquals("allclear", o.trans.getUser(), "Check trans.user");
 		Assertions.assertEquals("allclearpwd", o.trans.getPassword(), "Check trans.password");
@@ -94,8 +94,8 @@ public class ConfigTest
 		Assertions.assertEquals("local", o.env, "Check env");
 		Assertions.assertFalse(o.disableSwagger, "Check disableSwagger");
 		Assertions.assertEquals("http://localhost:8080", o.baseUrl, "Check baseUrl");
-		Assertions.assertEquals("5555", o.registrationPhone, "Check registrationPhone");
-		Assertions.assertEquals("5556", o.authenticationPhone, "Check authenticationPhone");
+		Assertions.assertEquals("+16466321488", o.registrationPhone, "Check registrationPhone");
+		Assertions.assertEquals("+16466321488", o.authenticationPhone, "Check authenticationPhone");
 		Assertions.assertEquals("Click http://localhost:8080/register?phone=%s&code=%s to complete your registration.", o.registrationSMSMessage, "Check registrationSMSMessage");
 		Assertions.assertEquals("Click http://localhost:8080/auth?phone=%s&token=%s to login in.", o.authenticationSMSMessage, "Check authenticationSMSMessage");
 		Assertions.assertNotNull(o.session, "Check session");
@@ -134,8 +134,8 @@ public class ConfigTest
 		Assertions.assertEquals("test", o.env, "Check env");
 		Assertions.assertFalse(o.disableSwagger, "Check disableSwagger");
 		Assertions.assertEquals("https://mobile.test.allclear.app", o.baseUrl, "Check baseUrl");
-		Assertions.assertEquals("5555", o.registrationPhone, "Check registrationPhone");
-		Assertions.assertEquals("5556", o.authenticationPhone, "Check authenticationPhone");
+		Assertions.assertEquals("+16466321488", o.registrationPhone, "Check registrationPhone");
+		Assertions.assertEquals("+16466321488", o.authenticationPhone, "Check authenticationPhone");
 		Assertions.assertEquals("Click https://mobile.test.allclear.app/register?phone=%s&code=%s to complete your registration.", o.registrationSMSMessage, "Check registrationSMSMessage");
 		Assertions.assertEquals("Click https://mobile.test.allclear.app/auth?phone=%s&token=%s to login in.", o.authenticationSMSMessage, "Check authenticationSMSMessage");
 		Assertions.assertNotNull(o.session, "Check session");

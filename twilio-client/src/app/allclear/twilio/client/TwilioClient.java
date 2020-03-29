@@ -1,10 +1,11 @@
 package app.allclear.twilio.client;
 
 import java.text.SimpleDateFormat;
+import java.util.concurrent.TimeUnit;
+
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.MediaType;
 
-import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.glassfish.jersey.internal.util.collection.MultivaluedStringMap;
 
@@ -41,9 +42,10 @@ public class TwilioClient implements AutoCloseable
 
 	public TwilioClient(final TwilioConfig conf)
 	{
-		this.client = ClientBuilder.newClient()
-			.property(ClientProperties.READ_TIMEOUT, 20000L)
-			.property(ClientProperties.CONNECT_TIMEOUT, 20000L)
+		this.client = ClientBuilder.newBuilder()
+			.connectTimeout(20L, TimeUnit.SECONDS)	
+			.readTimeout(20L, TimeUnit.SECONDS)	
+			.build()
 			.register(new JacksonJsonProvider(mapper))
 			.register(HttpAuthenticationFeature.basic(conf.accountId, conf.authToken));
 

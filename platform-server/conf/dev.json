@@ -2,8 +2,8 @@
   "env": "dev",
 
   "baseUrl": "${baseUrl:-https://mobile.dev.allclear.app}",
-  "registrationPhone": "5555",
-  "authenticationPhone": "5556",
+  "registrationPhone": "+16466321488",
+  "authenticationPhone": "+16466321488",
 
   "session": { "host": "allclear-dev.redis.cache.windows.net", "port": 6380, "timeout": 200, "poolSize": 10, "password": "${REDIS_PASSWORD:-password}", "ssl": true, "testWhileIdle": true },
   "twilio": { "baseUrl": "${twilio.baseUrl:-https://api.twilio.com/2010-04-01}", "accountId": "${TWILIO_ACCOUNT_ID:-123}", "authToken": "${TWILIO_AUTH_TOKEN:-token}" },

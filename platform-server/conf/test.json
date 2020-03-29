@@ -2,8 +2,8 @@
   "env": "test",
 
   "baseUrl": "${baseUrl:-https://mobile.test.allclear.app}",
-  "registrationPhone": "5555",
-  "authenticationPhone": "5556",
+  "registrationPhone": "+16466321488",
+  "authenticationPhone": "+16466321488",
 
   "session": { "test": true },
   "twilio": { "baseUrl": "${twilio.baseUrl:-https://api.twilio.com/2010-04-01}", "accountId": "${twilio.accountId:-123}", "authToken": "${twilio.authToken:-token}" },
