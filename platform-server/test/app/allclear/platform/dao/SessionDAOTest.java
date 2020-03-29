@@ -28,7 +28,7 @@ import app.allclear.twilio.model.SMSResponse;
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class SessionDAOTest
 {
-	public static final String MESSAGE = "Click https://mobile.test.allclear.app/auth?phone=%s&token=%s to login in.";
+	public static final String MESSAGE = "Click https://app-test.allclear.app/auth?phone=%s&token=%s to login in.";
 
 	private static final FakeRedisClient redis = new FakeRedisClient();
 	private static final TwilioClient twilio = mock(TwilioClient.class);

@@ -1,7 +1,7 @@
 {
   "env": "dev",
 
-  "baseUrl": "${baseUrl:-https://mobile.dev.allclear.app}",
+  "baseUrl": "${baseUrl:-https://app-dev.allclear.app}",
   "registrationPhone": "+16466321488",
   "authenticationPhone": "+16466321488",
 

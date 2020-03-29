@@ -35,7 +35,7 @@ import app.allclear.twilio.model.*;
 public class RegistrationDAOTest
 {
 	public static final Pattern PATTERN_CODE = Pattern.compile("[A-Z0-9]{10}");
-	public static final String MESSAGE = "Click https://mobile.test.allclear.app/register?phone=%s&code=%s to complete your registration.";
+	public static final String MESSAGE = "Click https://app-test.allclear.app/register?phone=%s&code=%s to complete your registration.";
 
 	private static RegistrationDAO dao;
 	private static FakeRedisClient redis;
