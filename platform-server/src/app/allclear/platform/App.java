@@ -124,7 +124,7 @@ public class App extends Application<Config>
 		var config = new BeanConfig();
 		config.setTitle(conf.env.toUpperCase() + " " + getName());
 		config.setVersion(conf.getVersion());
-		config.setResourcePackage("com.jibe.dwservice.resources,com.jibe.translation.rest");
+		config.setResourcePackage("app.allclear.common.resources,app.allclear.platform.rest");
 		config.setScan(true);
 
 		env.jersey().register(new RedirectResource("swagger-ui/index.html"));

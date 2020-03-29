@@ -16,7 +16,7 @@ public class TwilioClientTest
 {
 	private static final TwilioClient client = new TwilioClient(TwilioConfig.test());
 
-	@Test // @Disabled
+	@Test @Disabled
 	public void sendSMSMessage()
 	{
 		var request = new SMSRequest("+16466321488", "Click this link to confirm your phone number.", "+12014107770");

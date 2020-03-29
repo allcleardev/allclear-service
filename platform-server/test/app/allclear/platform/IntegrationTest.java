@@ -74,9 +74,28 @@ public class IntegrationTest
 	}
 
 	@Test
+	public void home()
+	{
+		Assertions.assertEquals(HTTP_STATUS_AUTHENTICATE, request(home.path("")).get().getStatus(), "Check empty path");
+		Assertions.assertEquals(HTTP_STATUS_AUTHENTICATE, request(home.path("/")).get().getStatus(), "Check / path");
+	}
+
+	@Test
 	public void ping()
 	{
 		Assertions.assertEquals(HTTP_STATUS_OK, request(info.path("ping")).get().getStatus());
+	}
+
+	@Test
+	public void swagger()
+	{
+		Assertions.assertEquals(HTTP_STATUS_OK, request(home.path("swagger-ui/index.html")).get().getStatus());
+	}
+
+	@Test
+	public void swaggerJson()
+	{
+		Assertions.assertEquals(HTTP_STATUS_OK, request(home.path("swagger.json")).get().getStatus());
 	}
 
 	private Invocation.Builder request(final WebTarget target) { return target.request(UTF8MediaType.APPLICATION_JSON_TYPE); }
