@@ -18,6 +18,9 @@ import io.dropwizard.util.Duration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import app.allclear.common.redis.RedisConfig;
+import app.allclear.twilio.client.TwilioConfig;
+
 /** Unit test class that verifies the Config POJO.
  * 
  * @author smalleyd
@@ -55,6 +58,18 @@ public class ConfigTest
 		Assertions.assertEquals("5556", o.authenticationPhone, "Check authenticationPhone");
 		Assertions.assertEquals("Click https://mobile.dev.allclear.app/register?phone=%s&token=%s to complete your registration.", o.registrationSMSMessage, "Check registrationSMSMessage");
 		Assertions.assertEquals("Click https://mobile.dev.allclear.app/auth?phone=%s&token=%s to login in.", o.authenticationSMSMessage, "Check authenticationSMSMessage");
+		Assertions.assertNotNull(o.session, "Check session");
+		Assertions.assertEquals("allclearsession-dev.redis.cache.azure.com", o.session.host, "Check session.host");
+		Assertions.assertEquals(RedisConfig.PORT_DEFAULT, o.session.port, "Check session.port");
+		Assertions.assertEquals(200L, o.session.timeout, "Check session.timeout");
+		Assertions.assertEquals(10, o.session.poolSize, "Check session.poolSize");
+		Assertions.assertTrue(o.session.ssl, "Check session.ssl");
+		Assertions.assertTrue(o.session.testWhileIdle, "Check session.testWhileIdle");
+		Assertions.assertFalse(o.session.test, "Check session.test");
+		Assertions.assertNotNull(o.twilio, "Check twilio");
+		Assertions.assertEquals(TwilioConfig.BASE_URL, o.twilio.baseUrl, "Check twilio.baseUrl");
+		Assertions.assertEquals("123", o.twilio.accountId, "Check twilio.accountId");
+		Assertions.assertEquals("token", o.twilio.authToken, "Check twilio.authToken");
 		Assertions.assertEquals("com.mysql.jdbc.Driver", o.trans.getDriverClass(), "Check trans.driverClass");
 		Assertions.assertEquals("allclear", o.trans.getUser(), "Check trans.user");
 		Assertions.assertEquals("allclearpwd", o.trans.getPassword(), "Check trans.password");
@@ -82,6 +97,18 @@ public class ConfigTest
 		Assertions.assertEquals("5556", o.authenticationPhone, "Check authenticationPhone");
 		Assertions.assertEquals("Click http://localhost:8080/register?phone=%s&token=%s to complete your registration.", o.registrationSMSMessage, "Check registrationSMSMessage");
 		Assertions.assertEquals("Click http://localhost:8080/auth?phone=%s&token=%s to login in.", o.authenticationSMSMessage, "Check authenticationSMSMessage");
+		Assertions.assertNotNull(o.session, "Check session");
+		Assertions.assertEquals("localhost", o.session.host, "Check session.host");
+		Assertions.assertEquals(RedisConfig.PORT_DEFAULT, o.session.port, "Check session.port");
+		Assertions.assertEquals(200L, o.session.timeout, "Check session.timeout");
+		Assertions.assertEquals(10, o.session.poolSize, "Check session.poolSize");
+		Assertions.assertFalse(o.session.ssl, "Check session.ssl");
+		Assertions.assertTrue(o.session.testWhileIdle, "Check session.testWhileIdle");
+		Assertions.assertFalse(o.session.test, "Check session.test");
+		Assertions.assertNotNull(o.twilio, "Check twilio");
+		Assertions.assertEquals(TwilioConfig.BASE_URL, o.twilio.baseUrl, "Check twilio.baseUrl");
+		Assertions.assertEquals("123", o.twilio.accountId, "Check twilio.accountId");
+		Assertions.assertEquals("token", o.twilio.authToken, "Check twilio.authToken");
 		Assertions.assertEquals("com.mysql.jdbc.Driver", o.trans.getDriverClass(), "Check trans.driverClass");
 		Assertions.assertEquals("allclear", o.trans.getUser(), "Check trans.user");
 		Assertions.assertEquals("allclear", o.trans.getPassword(), "Check trans.password");
@@ -109,6 +136,18 @@ public class ConfigTest
 		Assertions.assertEquals("5556", o.authenticationPhone, "Check authenticationPhone");
 		Assertions.assertEquals("Click https://mobile.test.allclear.app/register?phone=%s&token=%s to complete your registration.", o.registrationSMSMessage, "Check registrationSMSMessage");
 		Assertions.assertEquals("Click https://mobile.test.allclear.app/auth?phone=%s&token=%s to login in.", o.authenticationSMSMessage, "Check authenticationSMSMessage");
+		Assertions.assertNotNull(o.session, "Check session");
+		Assertions.assertNull(o.session.host, "Check session.host");
+		Assertions.assertEquals(RedisConfig.PORT_DEFAULT, o.session.port, "Check session.port");
+		Assertions.assertNull(o.session.timeout, "Check session.timeout");
+		Assertions.assertNull(o.session.poolSize, "Check session.poolSize");
+		Assertions.assertFalse(o.session.ssl, "Check session.ssl");
+		Assertions.assertTrue(o.session.testWhileIdle, "Check session.testWhileIdle");
+		Assertions.assertTrue(o.session.test, "Check session.test");
+		Assertions.assertNotNull(o.twilio, "Check twilio");
+		Assertions.assertEquals(TwilioConfig.BASE_URL, o.twilio.baseUrl, "Check twilio.baseUrl");
+		Assertions.assertEquals("123", o.twilio.accountId, "Check twilio.accountId");
+		Assertions.assertEquals("token", o.twilio.authToken, "Check twilio.authToken");
 		Assertions.assertEquals("org.h2.Driver", o.trans.getDriverClass(), "Check trans.driverClass");
 		Assertions.assertNull(o.trans.getUser(), "Check trans.user");
 		Assertions.assertNull(o.trans.getPassword(), "Check trans.password");

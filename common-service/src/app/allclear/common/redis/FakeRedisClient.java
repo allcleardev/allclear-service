@@ -31,6 +31,12 @@ public class FakeRedisClient extends RedisClient
 	private final Map<String, Set<String>> sets = new HashMap<>();
 	private final Map<String, Map<String, String>> maps = new HashMap<>();
 
+	@Override
+	public void close()
+	{
+		clear();
+	}
+
 	/*******************************************************************************************************************
 	 * 
 	 * Map methods

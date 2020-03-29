@@ -34,7 +34,9 @@ import app.allclear.platform.value.PeopleValue;
 	@NamedQuery(name="findPeople", query="SELECT OBJECT(o) FROM People o WHERE o.name = :name"),
 	@NamedQuery(name="findPeopleByEmail", query="SELECT OBJECT(o) FROM People o WHERE o.email = :email"),
 	@NamedQuery(name="findPeopleByPhone", query="SELECT OBJECT(o) FROM People o WHERE o.phone = :phone"),
-	@NamedQuery(name="findActivePeopleByIdOrName", query="SELECT OBJECT(o) FROM People o WHERE ((o.id LIKE :name) OR (o.name LIKE :name)) AND o.active = TRUE ORDER BY o.name")})
+	@NamedQuery(name="findActivePeopleByIdOrName", query="SELECT OBJECT(o) FROM People o WHERE ((o.id LIKE :name) OR (o.name LIKE :name)) AND o.active = TRUE ORDER BY o.name"),
+	@NamedQuery(name="getPeopleIdByEmail", query="SELECT o.id FROM People o WHERE o.email = :email"),
+	@NamedQuery(name="getPeopleIdByPhone", query="SELECT o.id FROM People o WHERE o.phone = :phone")})
 public class People implements Serializable
 {
 	private final static long serialVersionUID = 1L;
@@ -178,6 +180,16 @@ public class People implements Serializable
 			DateUtils.truncatedEquals(emailVerifiedAt, v.emailVerifiedAt, Calendar.SECOND) &&
 			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND) &&
 			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
+	}
+
+	@Transient
+	public People auth()
+	{
+		active = true;
+		updatedAt = authAt = new Date();
+		if (null == phoneVerifiedAt) phoneVerifiedAt = updatedAt;
+
+		return this;
 	}
 
 	@Transient

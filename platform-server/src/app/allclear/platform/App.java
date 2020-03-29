@@ -17,13 +17,17 @@ import io.dropwizard.setup.Environment;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.listing.*;
 
+import app.allclear.common.AutoCloseableManager;
 import app.allclear.common.errors.*;
 import app.allclear.common.jackson.ObjectMapperProvider;
 import app.allclear.common.jersey.CrossDomainHeadersFilter;
+import app.allclear.common.redis.FakeRedisClient;
+import app.allclear.common.redis.RedisClient;
 import app.allclear.common.resources.*;
 import app.allclear.platform.dao.*;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.rest.*;
+import app.allclear.twilio.client.TwilioClient;
 
 /** Represents the Dropwizard application entry point.
  * 
@@ -71,8 +75,17 @@ public class App extends Application<Config>
 	{
 		log.info("Initialized: {} - {}", conf.env, conf.getVersion());
 
+		var lifecycle = env.lifecycle();
+		var session = conf.session.test ? new FakeRedisClient() : new RedisClient(conf.session);
+		var twilio = new TwilioClient(conf.twilio);
+
+		lifecycle.manage(new AutoCloseableManager(session));
+		lifecycle.manage(new AutoCloseableManager(twilio));
+
 		var factory = transHibernateBundle.getSessionFactory();
 		var peopleDao = new PeopleDAO(factory);
+		var sessionDao = new SessionDAO(session, twilio, conf);
+		var registrationDao = new RegistrationDAO(session, twilio, conf);
 
 		var jersey = env.jersey();
         jersey.register(MultiPartFeature.class);
@@ -89,7 +102,8 @@ public class App extends Application<Config>
         jersey.register(new InfoResource(conf, env.healthChecks(), List.of(HibernateBundle.DEFAULT_NAME), conf.getVersion()));
         jersey.register(new HeapDumpResource());
         jersey.register(new HibernateResource(factory));
-		jersey.register(new PeopleResource(peopleDao));
+        jersey.register(new AuthFilter(sessionDao));
+		jersey.register(new PeopleResource(peopleDao, registrationDao, sessionDao));
 		jersey.register(new TypeResource());
 
 		setupSwagger(conf, env);

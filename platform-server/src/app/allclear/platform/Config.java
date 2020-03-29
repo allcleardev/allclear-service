@@ -10,7 +10,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import app.allclear.common.DWUtil;
 import app.allclear.common.ManifestUtils;
+import app.allclear.common.redis.RedisConfig;
 import app.allclear.common.value.ManifestValue;
+import app.allclear.twilio.client.TwilioConfig;
 
 /** Value object that represents the application configuration properties.
  * 
@@ -41,6 +43,9 @@ public class Config extends Configuration implements Serializable
 	public final String registrationSMSMessage;
 	public final String authenticationSMSMessage;
 
+	public final RedisConfig session;
+	public final TwilioConfig twilio;
+
 	public String getVersion() { return manifest.version; }
 
 	public Config(@JsonProperty("env") final String env,
@@ -48,7 +53,9 @@ public class Config extends Configuration implements Serializable
 		@JsonProperty("trans") final DataSourceFactory trans,
 		@JsonProperty("baseUrl") final String baseUrl,
 		@JsonProperty("registrationPhone") final String registrationPhone,
-		@JsonProperty("authenticationPhone") final String authenticationPhone)
+		@JsonProperty("authenticationPhone") final String authenticationPhone,
+		@JsonProperty("session") final RedisConfig session,
+		@JsonProperty("twilio") final TwilioConfig twilio)
 	{
 		this.env = env;
 		this.trans = trans;
@@ -60,5 +67,8 @@ public class Config extends Configuration implements Serializable
 		this.authenticationPhone = authenticationPhone;
 		this.registrationSMSMessage = baseUrl("/messages/sms/registration.txt", baseUrl);
 		this.authenticationSMSMessage = baseUrl("/messages/sms/authentication.txt", baseUrl);
+
+		this.session = session;
+		this.twilio = twilio;
 	}
 }

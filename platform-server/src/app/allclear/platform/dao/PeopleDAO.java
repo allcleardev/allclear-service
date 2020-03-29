@@ -94,6 +94,20 @@ public class PeopleDAO extends AbstractDAO<People>
 		return value.withId(toEntity(value, record, cmrs).getId());
 	}
 
+	/** Based on the phone number, the Person is retrieved and marked authenticated.
+	 * 
+	 * @param phone
+	 * @return never NULL.
+	 * @throws ObjectNotFoundException
+	 */
+	public PeopleValue authenticatedByPhone(final String phone) throws ObjectNotFoundException
+	{
+		var record = findByPhone(phone);
+		if (null == record) throw new ObjectNotFoundException("Could not find the account with phone number '" + phone + "'.");
+
+		return record.auth().toValue();
+	}
+
 	/** Validates a single People value.
 	 *
 	 * @param value
@@ -188,6 +202,32 @@ public class PeopleDAO extends AbstractDAO<People>
 	People findByEmail(final String email) { return namedQuery("findPeopleByEmail").setParameter("email", email).uniqueResult(); }
 	People findByPhone(final String phone) { return namedQuery("findPeopleByPhone").setParameter("phone", phone).uniqueResult(); }
 	List<People> findActiveByIdOrName(final String name) { return namedQuery("findActivePeopleByIdOrName").setParameter("name", name + "%").list(); }
+
+	/** Checks for the existence of an account. Used to ensure account validity before attempting to authenticate.
+	 *  Allow for authentication of inactive accounts which can be used to reactivate an account.
+	 *
+	 * @param phone
+	 * @param email
+	 * @throws ValidationException
+	 */
+	public void check(final String phone, final String email) throws ValidationException
+	{
+		if (null != phone)
+		{
+			if (null != namedQuery("getPeopleIdByPhone", String.class).setParameter("phone", phone).uniqueResult())	return;	// Success
+
+			throw new ValidationException("phone", "The phone number '" + phone + "' is not associated with an existing user.");
+		}
+
+		if (null != email)
+		{
+			if (null != namedQuery("getPeopleIdByEmail", String.class).setParameter("email", email).uniqueResult()) return;	// Success
+
+			throw new ValidationException("email", "The email address '" + email + "' is not associated with an existing user.");
+		}
+
+		throw new ValidationException("Please provide a phone number.");
+	}
 
 	/** Gets a single People value by identifier.
 	 *

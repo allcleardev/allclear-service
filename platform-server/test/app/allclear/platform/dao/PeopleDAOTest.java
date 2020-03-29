@@ -152,6 +152,47 @@ public class PeopleDAOTest
 		assertThrows(ValidationException.class, () -> dao.add(createValid().withStatureId(StringUtils.repeat("A", PeopleValue.MAX_LEN_STATURE_ID + 1))));
 	}
 
+	public static Stream<Arguments> check()
+	{
+		return Stream.of(
+			arguments("888-555-1000", "ronny@gmail.com"),
+			arguments("888-555-1000", null),
+			arguments(null, "ronny@gmail.com"));
+	}
+
+	@Test
+	public void authenticatedByPhone_invalid()
+	{
+		assertThat(Assertions.assertThrows(ObjectNotFoundException.class, () -> dao.authenticatedByPhone("ronny")))
+			.hasMessage("Could not find the account with phone number 'ronny'.");	// Not the phone number.
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void check(final String phone, final String email)
+	{
+		dao.check(phone, email);
+	}
+
+	public static Stream<Arguments> check_failure()
+	{
+		return Stream.of(
+			arguments("888-555-1001", null, "The phone number '888-555-1001' is not associated with an existing user."),
+			arguments(null, "dallas@gmail.com", "The email address 'dallas@gmail.com' is not associated with an existing user."),
+			arguments("888-555-1001", "dallas@gmail.com", "The phone number '888-555-1001' is not associated with an existing user."),
+			arguments("ronny@gmail.com", null, "The phone number 'ronny@gmail.com' is not associated with an existing user."),
+			arguments(null, "888-555-1000", "The email address '888-555-1000' is not associated with an existing user."),
+			arguments(null, null, "Please provide a phone number."));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void check_failure(final String phone, final String email, final String message)
+	{
+		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.check(phone, email)))
+			.hasMessage(message);
+	}
+
 	@Test
 	public void find()
 	{
@@ -573,7 +614,7 @@ public class PeopleDAOTest
 	@Test
 	public void z_00_add_min()
 	{
-		Assertions.assertNotNull(VALUE = dao.add(new PeopleValue("minimal", "888-minimal", true)));
+		Assertions.assertNotNull(VALUE = dao.add(new PeopleValue("minimal", "888-minimal", false)));
 	}
 
 	@Test
@@ -589,12 +630,52 @@ public class PeopleDAOTest
 		Assertions.assertNull(value.dob, "Check dob");
 		Assertions.assertNull(value.statusId, "Check statusId");
 		Assertions.assertNull(value.statureId, "Check statureId");
-		Assertions.assertTrue(value.active, "Check active");
+		Assertions.assertFalse(value.active, "Check active");
 		Assertions.assertNull(value.authAt, "Check authAt");
 		Assertions.assertNull(value.phoneVerifiedAt, "Check phoneVerifiedAt");
 		Assertions.assertNull(value.emailVerifiedAt, "Check emailVerifiedAt");
 		Assertions.assertEquals(VALUE.createdAt, value.createdAt, "Check createdAt");
 		Assertions.assertEquals(value.createdAt, value.updatedAt, "Check updatedAt");
+	}
+
+	@Test
+	public void z_01_authenticatedByPhone()
+	{
+		var value = dao.authenticatedByPhone("888-minimal");
+		Assertions.assertEquals("minimal", value.name, "Check name");
+		Assertions.assertEquals("888-minimal", value.phone, "Check phone");
+		Assertions.assertNull(value.email, "Check email");
+		Assertions.assertNull(value.firstName, "Check firstName");
+		Assertions.assertNull(value.lastName, "Check lastName");
+		Assertions.assertNull(value.dob, "Check dob");
+		Assertions.assertNull(value.statusId, "Check statusId");
+		Assertions.assertNull(value.statureId, "Check statureId");
+		Assertions.assertTrue(value.active, "Check active");
+		assertThat(value.authAt).as("Check authAt").isCloseTo(new Date(), 200L);
+		assertThat(value.phoneVerifiedAt).as("Check phoneVerifiedAt").isAfter(value.createdAt).isEqualTo(value.authAt);
+		Assertions.assertNull(value.emailVerifiedAt, "Check emailVerifiedAt");
+		Assertions.assertEquals(VALUE.createdAt, value.createdAt, "Check createdAt");
+		assertThat(value.updatedAt).as("Check updatedAt").isAfter(value.createdAt).isEqualTo(value.authAt);
+	}
+
+	@Test
+	public void z_01_authenticatedByPhone_check()
+	{
+		var value = dao.getById(VALUE.id);
+		Assertions.assertEquals("minimal", value.name, "Check name");
+		Assertions.assertEquals("888-minimal", value.phone, "Check phone");
+		Assertions.assertNull(value.email, "Check email");
+		Assertions.assertNull(value.firstName, "Check firstName");
+		Assertions.assertNull(value.lastName, "Check lastName");
+		Assertions.assertNull(value.dob, "Check dob");
+		Assertions.assertNull(value.statusId, "Check statusId");
+		Assertions.assertNull(value.statureId, "Check statureId");
+		Assertions.assertTrue(value.active, "Check active");
+		assertThat(value.authAt).as("Check authAt").isCloseTo(new Date(), 500L);
+		assertThat(value.phoneVerifiedAt).as("Check phoneVerifiedAt").isAfter(value.createdAt).isEqualTo(value.authAt);
+		Assertions.assertNull(value.emailVerifiedAt, "Check emailVerifiedAt");
+		Assertions.assertEquals(VALUE.createdAt, value.createdAt, "Check createdAt");
+		assertThat(value.updatedAt).as("Check updatedAt").isAfter(value.createdAt).isEqualTo(value.authAt);
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.

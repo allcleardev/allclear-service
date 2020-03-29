@@ -2,6 +2,7 @@ package app.allclear.platform.rest;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.*;
 import static app.allclear.testing.TestingUtils.*;
 
 import java.util.*;
@@ -24,11 +25,15 @@ import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.NotFoundExceptionMapper;
 import app.allclear.common.errors.ValidationExceptionMapper;
 import app.allclear.common.mediatype.UTF8MediaType;
+import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.common.value.OperationResponse;
 import app.allclear.platform.App;
-import app.allclear.platform.dao.PeopleDAO;
+import app.allclear.platform.Config;
+import app.allclear.platform.ConfigTest;
+import app.allclear.platform.dao.*;
 import app.allclear.platform.filter.PeopleFilter;
 import app.allclear.platform.value.PeopleValue;
+import app.allclear.twilio.client.TwilioClient;
 
 /**********************************************************************************
 *
@@ -47,7 +52,13 @@ public class PeopleResourceTest
 	public static final HibernateRule DAO_RULE = new HibernateRule(App.ENTITIES);
 	public final HibernateTransactionRule transRule = new HibernateTransactionRule(DAO_RULE);
 
+	private static final Config conf = ConfigTest.loadTest();
+
 	private static PeopleDAO dao = null;
+	private static final FakeRedisClient redis = new FakeRedisClient();
+	private static final TwilioClient twilio = mock(TwilioClient.class);
+	private static final SessionDAO sessionDao = new SessionDAO(redis, twilio, conf);
+	private static final RegistrationDAO registrationDao = new RegistrationDAO(redis, twilio, conf);
 	private static PeopleValue VALUE = null;
 	private static Date AUTH_AT;
 	private static Date EMAIL_VERIFIED_AT;
@@ -56,7 +67,7 @@ public class PeopleResourceTest
 	public final ResourceExtension RULE = ResourceExtension.builder()
 		.addResource(new NotFoundExceptionMapper())
 		.addResource(new ValidationExceptionMapper())
-		.addResource(new PeopleResource(dao)).build();
+		.addResource(new PeopleResource(dao, registrationDao, sessionDao)).build();
 
 	/** Primary URI to test. */
 	private static final String TARGET = "/peoples";
