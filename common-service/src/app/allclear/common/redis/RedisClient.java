@@ -44,7 +44,7 @@ public class RedisClient extends HealthCheck implements Closeable, Map<String, S
 		if (null != conf.poolSize) config.setMaxTotal(conf.poolSize);
 		if (null != conf.timeout) config.setMaxWaitMillis(conf.timeout);
 
-		pool = new JedisPool(config, conf.host, conf.port, conf.ssl);
+		pool = new JedisPool(config, conf.host, conf.port, 500, conf.password, conf.ssl);
 	}
 
 	@Override

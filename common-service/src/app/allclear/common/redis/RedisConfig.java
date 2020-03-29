@@ -22,13 +22,14 @@ public class RedisConfig implements Serializable
 	public final int port;
 	public final Long timeout;	// Redis's operational timeout.
 	public final Integer poolSize;
+	public final String password;
 	public final boolean ssl;
 	public final boolean testWhileIdle;
 	public final boolean test;
 
 	public RedisConfig(final String host, final Integer port)
 	{
-		this(host, port, null, null, null, null, null);
+		this(host, port, null, null, null, null, null, null);
 	}
 
 	/** Populator.
@@ -45,6 +46,7 @@ public class RedisConfig implements Serializable
 		@JsonProperty("port") final Integer port,
 		@JsonProperty("timeout") final Long timeout,
 		@JsonProperty("poolSize") final Integer poolSize,
+		@JsonProperty("password") final String password,
 		@JsonProperty("ssl") final Boolean ssl,
 		@JsonProperty("testWhileIdle") final Boolean testWhileIdle,
 		@JsonProperty("test") final Boolean test)
@@ -53,6 +55,7 @@ public class RedisConfig implements Serializable
 		this.port = (null != port) ? port : PORT_DEFAULT;
 		this.timeout = timeout;
 		this.poolSize = poolSize;
+		this.password = password;
 		this.ssl = (null != ssl) ? ssl : false;
 		this.testWhileIdle = (null != testWhileIdle) ? testWhileIdle :  true;
 		this.test = (null != test) ? test : false;
@@ -60,6 +63,6 @@ public class RedisConfig implements Serializable
 
 	public RedisConfig(final String host, final int port, final Long timeout, final Integer poolSize)
 	{
-		this(host, port, timeout, poolSize, null, null, null);
+		this(host, port, timeout, poolSize, null, null, null, null);
 	}
 }

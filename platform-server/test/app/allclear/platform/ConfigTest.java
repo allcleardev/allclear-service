@@ -59,10 +59,11 @@ public class ConfigTest
 		Assertions.assertEquals("Click https://mobile.dev.allclear.app/register?phone=%s&token=%s to complete your registration.", o.registrationSMSMessage, "Check registrationSMSMessage");
 		Assertions.assertEquals("Click https://mobile.dev.allclear.app/auth?phone=%s&token=%s to login in.", o.authenticationSMSMessage, "Check authenticationSMSMessage");
 		Assertions.assertNotNull(o.session, "Check session");
-		Assertions.assertEquals("allclearsession-dev.redis.cache.azure.com", o.session.host, "Check session.host");
-		Assertions.assertEquals(RedisConfig.PORT_DEFAULT, o.session.port, "Check session.port");
+		Assertions.assertEquals("allclear-dev.redis.cache.windows.net", o.session.host, "Check session.host");
+		Assertions.assertEquals(6380, o.session.port, "Check session.port");
 		Assertions.assertEquals(200L, o.session.timeout, "Check session.timeout");
 		Assertions.assertEquals(10, o.session.poolSize, "Check session.poolSize");
+		Assertions.assertEquals("password", o.session.password, "Check session.password");
 		Assertions.assertTrue(o.session.ssl, "Check session.ssl");
 		Assertions.assertTrue(o.session.testWhileIdle, "Check session.testWhileIdle");
 		Assertions.assertFalse(o.session.test, "Check session.test");
@@ -102,6 +103,7 @@ public class ConfigTest
 		Assertions.assertEquals(RedisConfig.PORT_DEFAULT, o.session.port, "Check session.port");
 		Assertions.assertEquals(200L, o.session.timeout, "Check session.timeout");
 		Assertions.assertEquals(10, o.session.poolSize, "Check session.poolSize");
+		Assertions.assertNull(o.session.password, "Check session.password");
 		Assertions.assertFalse(o.session.ssl, "Check session.ssl");
 		Assertions.assertTrue(o.session.testWhileIdle, "Check session.testWhileIdle");
 		Assertions.assertFalse(o.session.test, "Check session.test");
@@ -141,6 +143,7 @@ public class ConfigTest
 		Assertions.assertEquals(RedisConfig.PORT_DEFAULT, o.session.port, "Check session.port");
 		Assertions.assertNull(o.session.timeout, "Check session.timeout");
 		Assertions.assertNull(o.session.poolSize, "Check session.poolSize");
+		Assertions.assertNull(o.session.password, "Check session.password");
 		Assertions.assertFalse(o.session.ssl, "Check session.ssl");
 		Assertions.assertTrue(o.session.testWhileIdle, "Check session.testWhileIdle");
 		Assertions.assertTrue(o.session.test, "Check session.test");
