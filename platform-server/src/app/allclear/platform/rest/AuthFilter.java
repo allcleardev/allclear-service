@@ -22,7 +22,7 @@ import app.allclear.platform.dao.SessionDAO;
 public class AuthFilter implements ContainerRequestFilter
 {
 	public static final String PATH_TYPES = "types/";
-	public static final List<String> PATH_NO_AUTH = List.of("info/health", "info/ping", "peoples/auth", "peoples/confirm", "peoples/start");
+	public static final List<String> PATH_NO_AUTH = List.of("info/health", "info/ping", "peoples/auth", "peoples/confirm", "peoples/start", "swagger.json");
 	public static final String PATH_REGISTER = "peoples/register";
 
 	private final SessionDAO dao;
