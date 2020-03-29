@@ -45,6 +45,7 @@ public class App extends Application<Config>
 
 	public static final Class<?>[] ENTITIES = new Class<?>[] { People.class };
 
+	private MigrationsBundle<Config> migrations;
 	private final HibernateBundle<Config> transHibernateBundle = new HibernateBundle<>(People.class, ENTITIES) {
 		@Override public DataSourceFactory getDataSourceFactory(final Config conf) { return conf.trans; }
 	};
@@ -64,16 +65,19 @@ public class App extends Application<Config>
 
 		bootstrap.addBundle(transHibernateBundle);
 		bootstrap.addBundle(new AssetsBundle("/assets/swagger_ui", "/swagger-ui/", null, "swagger-ui"));
-		bootstrap.addBundle(new MigrationsBundle<Config>() {
+		bootstrap.addBundle(migrations = new MigrationsBundle<Config>() {
 			@Override
 			public DataSourceFactory getDataSourceFactory(final Config conf) { return conf.trans; }
 		});
 	}
 
 	@Override
-	public void run(final Config conf, final Environment env)
+	public void run(final Config conf, final Environment env) throws Exception
 	{
 		log.info("Initialized: {} - {}", conf.env, conf.getVersion());
+
+		migrations.run(conf, env);
+		log.info("Migrations: completed");
 
 		var lifecycle = env.lifecycle();
 		var session = conf.session.test ? new FakeRedisClient() : new RedisClient(conf.session);

@@ -12,10 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
-import liquibase.Liquibase;
-import liquibase.database.jvm.JdbcConnection;
-import liquibase.resource.ClassLoaderResourceAccessor;
-
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.value.HealthResponse;
 import app.allclear.platform.type.*;
@@ -34,7 +30,6 @@ public class IntegrationTest
 {
 	public static final DropwizardAppExtension<Config> APP = new DropwizardAppExtension<>(App.class, "conf/test.json");
 
-	private static Config conf;
 	private static WebTarget home;
 	private static WebTarget info;
 	private static WebTarget people;
@@ -43,15 +38,6 @@ public class IntegrationTest
 	@BeforeAll
 	public static void up() throws Exception
 	{
-		conf = APP.getConfiguration();
-
-		try (var conn = conf.trans.build(APP.getEnvironment().metrics(), "migration").getConnection())
-		{
-			var migrator = new Liquibase("migrations.xml", new ClassLoaderResourceAccessor(), new JdbcConnection(conn));
-			migrator.dropAll();
-			migrator.update("");
-		}
-
 		home = ClientBuilder.newClient().target("http://127.0.0.1:" + APP.getLocalPort());
 		info = home.path("info");
 		people = home.path("people");
