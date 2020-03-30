@@ -39,4 +39,61 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.0.4_profile" author="smalleyd">
+		<createTable tableName="conditions" remarks="Represents the conditions that afflict a person.">
+			<column name="person_id" type="VARCHAR(10)" remarks="Refers to the person.">
+				<constraints nullable="false" />
+			</column>
+			<column name="condition_id" type="CHAR(2)" remarks="Refers to the condition.">
+				<constraints nullable="false" />
+			</column>
+			<column name="created_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was created.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey tableName="conditions" columnNames="person_id, condition_id" constraintName="pk_conditions" />
+		<addForeignKeyConstraint baseTableName="conditions" baseColumnNames="person_id" referencedTableName="people" referencedColumnNames="id" constraintName="fk_conditions_1" />
+		<createIndex tableName="conditions" indexName="idx_conditions_2">
+			<column name="condition_id" />
+		</createIndex>
+		<createTable tableName="exposures" remarks="Represents the exposure possibilities for a person.">
+			<column name="person_id" type="VARCHAR(10)" remarks="Refers to the person.">
+				<constraints nullable="false" />
+			</column>
+			<column name="exposure_id" type="CHAR(2)" remarks="Refers to the exposure.">
+				<constraints nullable="false" />
+			</column>
+			<column name="created_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was created.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey tableName="exposures" columnNames="person_id, exposure_id" constraintName="pk_exposures" />
+		<addForeignKeyConstraint baseTableName="exposures" baseColumnNames="person_id" referencedTableName="people" referencedColumnNames="id" constraintName="fk_exposures_1" />
+		<createIndex tableName="exposures" indexName="idx_exposures_2">
+			<column name="exposure_id" />
+		</createIndex>
+		<createTable tableName="symptoms" remarks="Represents the symptoms that currently afflict a person.">
+			<column name="person_id" type="VARCHAR(10)" remarks="Refers to the person.">
+				<constraints nullable="false" />
+			</column>
+			<column name="symptom_id" type="CHAR(2)" remarks="Refers to the symptom.">
+				<constraints nullable="false" />
+			</column>
+			<column name="created_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was created.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey tableName="symptoms" columnNames="person_id, symptom_id" constraintName="pk_symptoms" />
+		<addForeignKeyConstraint baseTableName="symptoms" baseColumnNames="person_id" referencedTableName="people" referencedColumnNames="id" constraintName="fk_symptoms_1" />
+		<createIndex tableName="symptoms" indexName="idx_symptoms_2">
+			<column name="symptom_id" />
+		</createIndex>
+
+		<rollback>
+			<dropTable tableName="symptoms" />
+			<dropTable tableName="exposures" />
+			<dropTable tableName="conditions" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

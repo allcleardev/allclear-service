@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.common.value.CreatedValue;
+
 /** Represents the statuses that be associated with People.
  * 
  * @author smalleyd
@@ -36,6 +38,8 @@ public class Condition implements Serializable
 		this.id = id;
 		this.name = name;
 	}
+
+	public CreatedValue created() { return new CreatedValue(id, name, null); }
 
 	@Override
 	public String toString()

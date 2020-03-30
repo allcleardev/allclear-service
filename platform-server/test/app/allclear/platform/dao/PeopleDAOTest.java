@@ -1,5 +1,7 @@
 package app.allclear.platform.dao;
 
+import static app.allclear.platform.type.Condition.*;
+
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -716,6 +718,148 @@ public class PeopleDAOTest
 		assertThat(value.updatedAt).as("Check updatedAt").isAfter(value.createdAt).isEqualTo(value.authAt);
 	}
 
+	@Test
+	public void z_10_addWithChildren()
+	{
+		VALUE = dao.add(new PeopleValue("minWithChildren", "888-555-children", true)
+			.withConditions(DIABETIC, PREGNANT));
+
+		var now = new Date();
+		VALUE.conditions.forEach(c -> assertThat(c.createdAt).as("Check conditions.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(VALUE.conditions).as("Check conditions").containsOnly(DIABETIC.created(), PREGNANT.created());
+	}
+
+	@Test
+	public void z_10_addWithChildren_check()
+	{
+		var now = new Date();
+		var value = dao.getById(VALUE.id);
+		value.conditions.forEach(c -> assertThat(c.createdAt).as("Check conditions.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(value.conditions).as("Check conditions").containsOnly(DIABETIC.created(), PREGNANT.created());
+	}
+
+	@Test
+	public void z_10_addWithChildren_count()
+	{
+		countByChildren(1L, 0L);
+	}
+
+	@Test
+	public void z_10_changeLess()
+	{
+		dao.update(VALUE.nullConditions());
+	}
+
+	@Test
+	public void z_10_changeLess_check()
+	{
+		z_10_addWithChildren_check();
+	}
+
+	@Test
+	public void z_10_changeLess_count()
+	{
+		z_10_addWithChildren_count();
+	}
+
+	@Test
+	public void z_10_modifyWithChildren()
+	{
+		dao.update(VALUE
+			.withConditions(CARDIO_RESPIRATORY_DISEASE, KIDNEY_CIRRHOSIS, WEAKENED_IMMUNE_SYSTEM));
+
+		var now = new Date();
+		VALUE.conditions.forEach(c -> assertThat(c.createdAt).as("Check conditions.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(VALUE.conditions).as("Check conditions").containsOnly(CARDIO_RESPIRATORY_DISEASE.created(), KIDNEY_CIRRHOSIS.created(), WEAKENED_IMMUNE_SYSTEM.created());
+	}
+
+	@Test
+	public void z_10_modifyWithChildren_check()
+	{
+		var now = new Date();
+		var value = dao.getById(VALUE.id);
+		value.conditions.forEach(c -> assertThat(c.createdAt).as("Check conditions.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(value.conditions).as("Check conditions").containsOnly(CARDIO_RESPIRATORY_DISEASE.created(), KIDNEY_CIRRHOSIS.created(), WEAKENED_IMMUNE_SYSTEM.created());
+	}
+
+	@Test
+	public void z_10_modifyWithChildren_count()
+	{
+		countByChildren(0L, 1L);
+	}
+
+	@Test
+	public void z_10_removeChildren()
+	{
+		dao.update(VALUE.emptyConditions());
+	}
+
+	@Test
+	public void z_10_removeChildren_check()
+	{
+		var value = dao.getById(VALUE.id);
+		Assertions.assertNull(value.conditions, "Check conditions");
+	}
+
+	@Test
+	public void z_10_removeWithChildren_count()
+	{
+		countByChildren(0L, 0L);
+	}
+
+	@Test
+	public void z_11_modifyWithAllChildren()
+	{
+		dao.update(VALUE
+			.withConditions(CARDIO_RESPIRATORY_DISEASE, DIABETIC, KIDNEY_CIRRHOSIS, PREGNANT, WEAKENED_IMMUNE_SYSTEM));
+
+		var now = new Date();
+		VALUE.conditions.forEach(c -> assertThat(c.createdAt).as("Check conditions.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(VALUE.conditions).as("Check conditions").containsOnly(CARDIO_RESPIRATORY_DISEASE.created(), DIABETIC.created(), KIDNEY_CIRRHOSIS.created(), PREGNANT.created(), WEAKENED_IMMUNE_SYSTEM.created());
+	}
+
+	@Test
+	public void z_11_modifyWithAllChildren_check()
+	{
+		var now = new Date();
+		var value = dao.getById(VALUE.id);
+		value.conditions.forEach(c -> assertThat(c.createdAt).as("Check conditions.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(value.conditions).as("Check conditions").containsOnly(CARDIO_RESPIRATORY_DISEASE.created(), DIABETIC.created(), KIDNEY_CIRRHOSIS.created(), PREGNANT.created(), WEAKENED_IMMUNE_SYSTEM.created());
+	}
+
+	@Test
+	public void z_11_modifyWithAllChildren_count()
+	{
+		countByChildren(1L, 1L);
+	}
+
+	private void countByChildren(final long first, final long second)
+	{
+		var combined = first | second;
+
+		count(new PeopleFilter().withIncludeConditions(DIABETIC.id), first);
+		count(new PeopleFilter().withIncludeConditions(PREGNANT.id), first);
+		count(new PeopleFilter().withIncludeConditions(DIABETIC.id, PREGNANT.id), first);
+		count(new PeopleFilter().withIncludeConditions(DIABETIC.id, KIDNEY_CIRRHOSIS.id, PREGNANT.id), combined);
+		count(new PeopleFilter().withIncludeConditions(CARDIO_RESPIRATORY_DISEASE.id, PREGNANT.id), combined);
+		count(new PeopleFilter().withIncludeConditions(DIABETIC.id, WEAKENED_IMMUNE_SYSTEM.id), combined);
+		count(new PeopleFilter().withIncludeConditions(CARDIO_RESPIRATORY_DISEASE.id), second);
+		count(new PeopleFilter().withIncludeConditions(KIDNEY_CIRRHOSIS.id), second);
+		count(new PeopleFilter().withIncludeConditions(WEAKENED_IMMUNE_SYSTEM.id), second);
+		count(new PeopleFilter().withIncludeConditions(CARDIO_RESPIRATORY_DISEASE.id, KIDNEY_CIRRHOSIS.id, WEAKENED_IMMUNE_SYSTEM.id), second);
+
+		count(new PeopleFilter().withExcludeConditions(DIABETIC.id), 2L - first);
+		count(new PeopleFilter().withExcludeConditions(PREGNANT.id), 2L- first);
+		count(new PeopleFilter().withExcludeConditions(DIABETIC.id, PREGNANT.id), 2L - first);
+		count(new PeopleFilter().withExcludeConditions(DIABETIC.id, KIDNEY_CIRRHOSIS.id, PREGNANT.id), 2L - combined);
+		count(new PeopleFilter().withExcludeConditions(CARDIO_RESPIRATORY_DISEASE.id, PREGNANT.id), 2L - combined);
+		count(new PeopleFilter().withExcludeConditions(DIABETIC.id, WEAKENED_IMMUNE_SYSTEM.id), 2L - combined);
+		count(new PeopleFilter().withExcludeConditions(CARDIO_RESPIRATORY_DISEASE.id), 2L - second);
+		count(new PeopleFilter().withExcludeConditions(KIDNEY_CIRRHOSIS.id), 2L - second);
+		count(new PeopleFilter().withExcludeConditions(WEAKENED_IMMUNE_SYSTEM.id), 2L - second);
+		count(new PeopleFilter().withExcludeConditions(CARDIO_RESPIRATORY_DISEASE.id, KIDNEY_CIRRHOSIS.id, WEAKENED_IMMUNE_SYSTEM.id), 2L - second);
+	}
+
 	/** Helper method - calls the DAO count call and compares the expected total value.
 	 *
 	 * @param filter
@@ -768,5 +912,6 @@ public class PeopleDAOTest
 		Assertions.assertEquals(expected.emailVerifiedAt, value.emailVerifiedAt, assertId + "Check emailVerifiedAt");
 		Assertions.assertEquals(expected.createdAt, value.createdAt, assertId + "Check createdAt");
 		Assertions.assertEquals(expected.updatedAt, value.updatedAt, assertId + "Check updatedAt");
+		Assertions.assertNull(value.conditions, assertId + "Check conditons");
 	}
 }

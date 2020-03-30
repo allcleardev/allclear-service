@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /** Value object that represents a simple id, name, and creation timestamp.
@@ -38,6 +40,13 @@ public class CreatedValue implements Serializable
 		this.id = id;
 		this.name = name;
 		this.createdAt = createdAt;
+	}
+
+	public CreatedValue clean()
+	{
+		id = StringUtils.trimToNull(id);
+
+		return this;
 	}
 
 	@Override

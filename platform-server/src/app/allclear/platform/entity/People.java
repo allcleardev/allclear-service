@@ -1,15 +1,19 @@
 package app.allclear.platform.entity;
 
+import static java.util.stream.Collectors.toList;
+
 import java.io.Serializable;
 import java.util.*;
 
 import javax.persistence.*;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 
+import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.type.PeopleStatus;
 import app.allclear.platform.type.PeopleStature;
 import app.allclear.platform.value.PeopleValue;
@@ -117,6 +121,11 @@ public class People implements Serializable
 	public Date updatedAt;
 	public void setUpdatedAt(final Date newValue) { updatedAt = newValue; }
 
+	@OneToMany(cascade={CascadeType.REMOVE}, fetch=FetchType.LAZY, mappedBy="person")
+	public List<Conditions> getConditions() { return conditions; }
+	public List<Conditions> conditions;
+	public void setConditions(final List<Conditions> newValues) { conditions = newValues; }
+
 	public People() {}
 
 	public People(final String id,
@@ -213,5 +222,17 @@ public class People implements Serializable
 			getEmailVerifiedAt(),
 			getCreatedAt(),
 			getUpdatedAt());
+	}
+
+	@Transient
+	public PeopleValue toValueX()
+	{
+		return toValue().withConditions(toCreatedValues(getConditions()));
+	}
+
+	@Transient
+	public List<CreatedValue> toCreatedValues(final List<? extends PeopleChild> values)
+	{
+		return (CollectionUtils.isEmpty(values)) ? null : values.stream().map(o -> o.toValue()).collect(toList());
 	}
 }

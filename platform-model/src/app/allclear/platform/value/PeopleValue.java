@@ -1,13 +1,15 @@
 package app.allclear.platform.value;
 
+import static java.util.stream.Collectors.toList;
+
 import java.io.Serializable;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
-import app.allclear.platform.type.PeopleStatus;
-import app.allclear.platform.type.PeopleStature;
+import app.allclear.common.value.CreatedValue;
+import app.allclear.platform.type.*;
 
 /**********************************************************************************
 *
@@ -32,6 +34,7 @@ public class PeopleValue implements Serializable
 	public static final int MAX_LEN_LAST_NAME = 32;
 	public static final int MAX_LEN_STATUS_ID = 1;
 	public static final int MAX_LEN_STATURE_ID = 1;
+	public static final int MAX_LEN_CONDITION_ID = 2;
 
 	// Members
 	public String id = null;
@@ -51,6 +54,7 @@ public class PeopleValue implements Serializable
 	public Date emailVerifiedAt = null;
 	public Date createdAt = null;
 	public Date updatedAt = null;
+	public List<CreatedValue> conditions = null;
 
 	// Mutators
 	public PeopleValue withId(final String newValue) { id = newValue; return this; }
@@ -70,6 +74,14 @@ public class PeopleValue implements Serializable
 	public PeopleValue withEmailVerifiedAt(final Date newValue) { emailVerifiedAt = newValue; return this; }
 	public PeopleValue withCreatedAt(final Date newValue) { createdAt = newValue; return this; }
 	public PeopleValue withUpdatedAt(final Date newValue) { updatedAt = newValue; return this; }
+	public PeopleValue withConditions(final List<CreatedValue> newValues) { conditions = newValues; return this; }
+	public PeopleValue emptyConditions() { return withConditions(List.of()); }
+	public PeopleValue nullConditions() { conditions = null; return this; }
+	public PeopleValue withConditions(final Condition... newValues)
+	{
+		return withConditions(Arrays.asList(newValues).stream().map(v -> v.created()).collect(toList()));
+	}
+
 	public PeopleValue initDates()
 	{
 		this.createdAt = this.updatedAt = new Date();
@@ -194,6 +206,7 @@ public class PeopleValue implements Serializable
 			.append(", emailVerifiedAt: ").append(emailVerifiedAt)
 			.append(", createdAt: ").append(createdAt)
 			.append(", updatedAt: ").append(updatedAt)
+			.append(", conditions: ").append(conditions)
 			.append(" }").toString();
 	}
 }

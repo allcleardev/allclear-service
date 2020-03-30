@@ -1,8 +1,7 @@
 package app.allclear.common.errors;
 
 import java.math.BigDecimal;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -43,10 +42,12 @@ public class Validator
 	public static final String CODE_PASSWORD_MISSING_NUMBER = "AP-111";
 	public static final String CODE_PASSWORD_MISSING_SYMBOL = "AP-112";
 	public static final String CODE_PASSWORD_INVALID_CHAR = "AP-113";
+	public static final String CODE_INVALID_VALUE = "AP-114";
 
 	private static final String NOT_SET = "%s is not set.";
 	private static final String TOO_SHORT = "%s cannot be shorter than %d characters.";
 	private static final String TOO_LONG = "%s cannot be longer than %d characters.";
+	private static final String INVALID_VALUE = "'%s' is not a valid %s.";
 
 	public boolean hasErrors() { return CollectionUtils.isNotEmpty(errors); }
 	public List<FieldError> getErrors() { return errors; }
@@ -100,6 +101,25 @@ public class Validator
 			addWithCode(CODE_MISSING_TOO_SHORT, name, TOO_SHORT, caption, min);
 		else if (max < value.length())
 			addWithCode(CODE_MISSING_TOO_LONG, name, TOO_LONG, caption, max);
+
+		return this;
+	}
+
+	/** Ensure that the field value is contained within the keys of the map.
+	 * 
+	 * @param name
+	 * @param caption
+	 * @param value
+	 * @param map
+	 * @return SELF
+	 */
+	public Validator ensureExistsAndContains(final String name, final String caption, final Object value, final Map<?, ?> map)
+	{
+		if (null == value)
+			return addWithCode(CODE_MISSING_FIELD, name, NOT_SET, caption);
+
+		if (!map.containsKey(value))
+			return addWithCode(CODE_INVALID_VALUE, name, INVALID_VALUE, value, caption);
 
 		return this;
 	}

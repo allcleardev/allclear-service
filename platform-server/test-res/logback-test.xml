@@ -8,6 +8,9 @@
     </encoder>
   </appender>
 
+  <!-- logger name="app.allclear.common.dao.QueryBuilder" level="DEBUG" />
+  <logger name="app.allclear.common.hibernate.HibernateQueryBuilder" level="DEBUG" / -->
+
   <root level="info">
     <appender-ref ref="STDOUT" />
   </root>

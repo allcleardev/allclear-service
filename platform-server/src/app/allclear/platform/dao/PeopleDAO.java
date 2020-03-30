@@ -4,18 +4,23 @@ import static app.allclear.common.dao.OrderByBuilder.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.id.IdentifierGenerationException;
 
 import app.allclear.common.dao.*;
 import app.allclear.common.errors.*;
 import app.allclear.common.hibernate.AbstractDAO;
+import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.filter.PeopleFilter;
 import app.allclear.platform.type.PeopleStatus;
+import app.allclear.platform.type.Condition;
 import app.allclear.platform.type.PeopleStature;
 import app.allclear.platform.value.PeopleValue;
 
@@ -76,7 +81,19 @@ public class PeopleDAO extends AbstractDAO<People>
 	 */
 	public PeopleValue add(final PeopleValue value) throws ValidationException
 	{
-		return value.withId(persist(toEntity(value, _validate(value.withId(generateId())))).getId());
+		var record = persist(toEntity(value, _validate(value.withId(generateId()))));
+
+		// Save children.
+		var s = currentSession();
+		add(s, value.conditions, v -> new Conditions(record, v));
+
+		return value.withId(record.getId());
+	}
+
+	private void add(final Session s, final List<CreatedValue> values, final Function<CreatedValue, ? extends PeopleChild> toEntity)
+	{
+		if (CollectionUtils.isEmpty(values)) return;
+		values.stream().filter(v -> null != v).forEach(v -> s.persist(toEntity.apply(v)));
 	}
 
 	/** Updates a single People value.
@@ -88,10 +105,28 @@ public class PeopleDAO extends AbstractDAO<People>
 	{
 		var cmrs = _validate(value);
 		var record = (People) cmrs[0];
-		if (null == record)
-			record = findWithException(value.id);
+		if (null == record) record = findWithException(value.id);
+
+		// Save children.
+		var r = record;	// Must be effectively final.
+		var s = currentSession();
+		update(s, record, value.conditions, record.getConditions(), "deleteConditionsByPerson", v -> new Conditions(r, v));
 
 		return value.withId(toEntity(value, record, cmrs).getId());
+	}
+
+	private int update(final Session s,
+		final People record,
+		final List<CreatedValue> values,
+		final List<? extends PeopleChild> existing,
+		final String deleteQuery,
+		final Function<CreatedValue, ? extends PeopleChild> toEntity)
+	{
+		if (null == values) return 0;	// No change
+		if (values.isEmpty()) return namedQueryX(deleteQuery).setParameter("personId", record.getId()).executeUpdate();
+
+		return (int) (values.stream().filter(v -> (null != v) && existing.stream().noneMatch(e -> e.getChildId().equals(v.id))).peek(v -> s.persist(toEntity.apply(v))).count() +	// Add new.
+			existing.stream().filter(e -> values.stream().noneMatch(v -> (null != v) && v.id.equals(e.getChildId()))).peek(e -> s.delete(e)).count());	// Remove deleted items.
 	}
 
 	/** Based on the phone number, the Person is retrieved and marked authenticated.
@@ -140,11 +175,16 @@ public class PeopleDAO extends AbstractDAO<People>
 			.ensureLength("statureId", "Stature", value.statureId, PeopleValue.MAX_LEN_STATURE_ID)
 			.check();
 
+		// Check enum values.
 		if ((null != value.statusId) && (null == (value.status = PeopleStatus.VALUES.get(value.statusId))))
 			validator.add("statusId", "The Status ID '%s' is invalid.", value.statusId);
 
 		if ((null != value.statureId) && (null == (value.stature = PeopleStature.VALUES.get(value.statureId))))
 			validator.add("statureId", "The Stature ID '%s' is invalid.", value.statureId);
+
+		// Check children.
+		if (CollectionUtils.isNotEmpty(value.conditions))
+			value.conditions.stream().filter(v -> null != v).forEach(v -> validator.ensureExistsAndContains("conditions", "Condition", v.clean().id, Condition.VALUES));
 
 		// Throw exception if errors exist.
 		validator.check();
@@ -163,6 +203,10 @@ public class PeopleDAO extends AbstractDAO<People>
 
 		// Throw exception if errors exist.
 		validator.check();
+
+		// Check children.
+		if (CollectionUtils.isNotEmpty(value.conditions))
+			value.conditions.forEach(v -> validator.ensureExistsAndContains("conditions", "Condition", v.clean().id, Condition.VALUES));
 
 		return new Object[] { (null != o) ? o : (null != o2) ? o2 : o3 };
 	}
@@ -242,7 +286,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		var record = get(id);
 		if (null == record) return null;
 
-		return toValue(record);
+		return record.toValueX();
 	}
 
 	/** Gets a single People value by identifier.
@@ -253,7 +297,7 @@ public class PeopleDAO extends AbstractDAO<People>
 	 */
 	public PeopleValue getByIdWithException(final String id) throws ValidationException
 	{
-		return toValue(findWithException(id));
+		return findWithException(id).toValueX();
 	}
 
 	/** Gets a list of active People by wildcard ID and/or name search.
@@ -327,7 +371,9 @@ public class PeopleDAO extends AbstractDAO<People>
 			.add("createdAtFrom", "o.createdAt >= :createdAtFrom", filter.createdAtFrom)
 			.add("createdAtTo", "o.createdAt <= :createdAtTo", filter.createdAtTo)
 			.add("updatedAtFrom", "o.updatedAt >= :updatedAtFrom", filter.updatedAtFrom)
-			.add("updatedAtTo", "o.updatedAt <= :updatedAtTo", filter.updatedAtTo);
+			.add("updatedAtTo", "o.updatedAt <= :updatedAtTo", filter.updatedAtTo)
+			.addIn("includeConditions", "EXISTS (SELECT 1 FROM Conditions c WHERE c.personId = o.id AND c.conditionId IN {})", filter.includeConditions)
+			.addIn("excludeConditions", "NOT EXISTS (SELECT 1 FROM Conditions c WHERE c.personId = o.id AND c.conditionId IN {})", filter.excludeConditions);
 	}
 
 	/** Helper method - creates a non-transactional value from a transactional entity. */

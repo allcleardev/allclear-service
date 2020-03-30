@@ -1,6 +1,7 @@
 package app.allclear.common.errors;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 import org.junit.*;
 
@@ -14,6 +15,8 @@ import org.junit.*;
 
 public class ValidatorTest
 {
+	public static final Map<String, String> MAP = Map.of("1", "One", "2", "Two", "3", "Three");
+
 	@Test
 	public void ensureExists()
 	{
@@ -24,6 +27,20 @@ public class ValidatorTest
 	public void ensureExists_success()
 	{
 		checkSuccess(new Validator().ensureExists("field", "Caption", "No Error"));
+	}
+
+	@Test
+	public void ensureExistsAndContains()
+	{
+		checkSingle(new Validator().ensureExistsAndContains("field", "Caption", null, MAP), "field", "Caption is not set.");
+		checkSingle(new Validator().ensureExistsAndContains("field", "Caption", "", MAP), "field", "'' is not a valid Caption.");
+		checkSingle(new Validator().ensureExistsAndContains("field", "Caption", "a", MAP), "field", "'a' is not a valid Caption.");
+		checkSingle(new Validator().ensureExistsAndContains("field", "Caption", "One", MAP), "field", "'One' is not a valid Caption.");
+		checkSingle(new Validator().ensureExistsAndContains("field", "Caption", "4", MAP), "field", "'4' is not a valid Caption.");
+
+		checkSuccess(new Validator().ensureExistsAndContains("field", "Caption", "1", MAP));
+		checkSuccess(new Validator().ensureExistsAndContains("field", "Caption", "2", MAP));
+		checkSuccess(new Validator().ensureExistsAndContains("field", "Caption", "3", MAP));
 	}
 
 	@Test
