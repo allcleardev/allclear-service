@@ -74,7 +74,7 @@ public class ConfigTest
 		Assertions.assertEquals("com.mysql.jdbc.Driver", o.trans.getDriverClass(), "Check trans.driverClass");
 		Assertions.assertEquals("allclear", o.trans.getUser(), "Check trans.user");
 		Assertions.assertEquals("allclearpwd", o.trans.getPassword(), "Check trans.password");
-		Assertions.assertEquals("jdbc:mysql://allcleardb-dev.mysql.database.azure.com:3306/allclear?useEncoding=true&characterEncoding=UTF-8&prepStmtCacheSize=100&prepStmtCacheSqlLimit=1024&serverTimezone=UTC&useSSL=true&requireSSL=true",  o.trans.getUrl(), "Check trans.url");
+		Assertions.assertEquals("jdbc:mysql://allclear-dev.mysql.database.azure.com:3306/allclear?useEncoding=true&characterEncoding=UTF-8&prepStmtCacheSize=100&prepStmtCacheSqlLimit=1024&serverTimezone=UTC&useSSL=true&requireSSL=true",  o.trans.getUrl(), "Check trans.url");
 		Assertions.assertEquals(Duration.seconds(1L), o.trans.getMaxWaitForConnection(), "Check trans.maxWaitForConnection");
 		Assertions.assertEquals(Optional.of("SELECT 1"), o.trans.getValidationQuery(), "Check trans.validationQuery");
 		Assertions.assertEquals(Optional.of(Duration.seconds(10L)), o.trans.getValidationQueryTimeout(), "Check trans.validationQueryTimeout");

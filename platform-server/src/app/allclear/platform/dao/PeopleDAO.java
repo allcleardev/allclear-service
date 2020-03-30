@@ -85,6 +85,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		var s = currentSession();
 		add(s, value.conditions, v -> new Conditions(record, v));
 		add(s, value.exposures, v -> new Exposures(record, v));
+		add(s, value.symptoms, v -> new Symptoms(record, v));
 
 		return value.withId(record.getId());
 	}
@@ -111,6 +112,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		var s = currentSession();
 		update(s, record, value.conditions, record.getConditions(), "deleteConditionsByPerson", v -> new Conditions(r, v));
 		update(s, record, value.exposures, record.getExposures(), "deleteExposuresByPerson", v -> new Exposures(r, v));
+		update(s, record, value.symptoms, record.getSymptoms(), "deleteSymptomsByPerson", v -> new Symptoms(r, v));
 
 		return value.withId(toEntity(value, record, cmrs).getId());
 	}
@@ -201,6 +203,8 @@ public class PeopleDAO extends AbstractDAO<People>
 			value.conditions.stream().filter(v -> null != v).forEach(v -> validator.ensureExistsAndContains("conditions", "Condition", v.clean().id, Condition.VALUES));
 		if (CollectionUtils.isNotEmpty(value.exposures))
 			value.exposures.stream().filter(v -> null != v).forEach(v -> validator.ensureExistsAndContains("exposures", "Exposure", v.clean().id, Exposure.VALUES));
+		if (CollectionUtils.isNotEmpty(value.symptoms))
+			value.symptoms.stream().filter(v -> null != v).forEach(v -> validator.ensureExistsAndContains("symptoms", "Symptom", v.clean().id, Symptom.VALUES));
 
 		// Throw exception if errors exist.
 		validator.check();
@@ -387,7 +391,9 @@ public class PeopleDAO extends AbstractDAO<People>
 			.addIn("includeConditions", "EXISTS (SELECT 1 FROM Conditions c WHERE c.personId = o.id AND c.conditionId IN {})", filter.includeConditions)
 			.addIn("excludeConditions", "NOT EXISTS (SELECT 1 FROM Conditions c WHERE c.personId = o.id AND c.conditionId IN {})", filter.excludeConditions)
 			.addIn("includeExposures", "EXISTS (SELECT 1 FROM Exposures c WHERE c.personId = o.id AND c.exposureId IN {})", filter.includeExposures)
-			.addIn("excludeExposures", "NOT EXISTS (SELECT 1 FROM Exposures c WHERE c.personId = o.id AND c.exposureId IN {})", filter.excludeExposures);
+			.addIn("excludeExposures", "NOT EXISTS (SELECT 1 FROM Exposures c WHERE c.personId = o.id AND c.exposureId IN {})", filter.excludeExposures)
+			.addIn("includeSymptoms", "EXISTS (SELECT 1 FROM Symptoms c WHERE c.personId = o.id AND c.symptomId IN {})", filter.includeSymptoms)
+			.addIn("excludeSymptoms", "NOT EXISTS (SELECT 1 FROM Symptoms c WHERE c.personId = o.id AND c.symptomId IN {})", filter.excludeSymptoms);
 	}
 
 	/** Helper method - creates a non-transactional value from a transactional entity. */

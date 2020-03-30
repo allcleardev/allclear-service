@@ -131,6 +131,11 @@ public class People implements Serializable
 	public List<Exposures> exposures;
 	public void setExposures(final List<Exposures> newValues) { exposures = newValues; }
 
+	@OneToMany(cascade={CascadeType.REMOVE}, fetch=FetchType.LAZY, mappedBy="person")
+	public List<Symptoms> getSymptoms() { return symptoms; }
+	public List<Symptoms> symptoms;
+	public void setSymptoms(final List<Symptoms> newValues) { symptoms = newValues; }
+
 	public People() {}
 
 	public People(final String id,
@@ -233,7 +238,8 @@ public class People implements Serializable
 	public PeopleValue toValueX()
 	{
 		return toValue().withConditions(toCreatedValues(getConditions()))
-			.withExposures(toCreatedValues(getExposures()));
+			.withExposures(toCreatedValues(getExposures()))
+			.withSymptoms(toCreatedValues(getSymptoms()));
 	}
 
 	@Transient

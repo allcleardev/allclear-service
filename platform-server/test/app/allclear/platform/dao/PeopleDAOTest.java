@@ -2,6 +2,7 @@ package app.allclear.platform.dao;
 
 import static app.allclear.platform.type.Condition.*;
 import static app.allclear.platform.type.Exposure.*;
+import static app.allclear.platform.type.Symptom.*;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -191,6 +192,25 @@ public class PeopleDAOTest
 	public void add_invalidExposures(final List<CreatedValue> values, final String message)
 	{
 		assertThat(assertThrows(ValidationException.class, () -> dao.add(createValid().withExposures(values))))
+			.hasMessage(message);
+	}
+
+	public static Stream<Arguments> add_invalidSymptoms()
+	{
+		return Stream.of(
+			arguments(List.of(new CreatedValue("1")), "'1' is not a valid Symptom."),
+			arguments(Arrays.asList(new CreatedValue("1"), null), "'1' is not a valid Symptom."),
+			arguments(List.of(new CreatedValue("1"), new CreatedValue(null)), "'1' is not a valid Symptom.\nSymptom is not set."),
+			arguments(Arrays.asList(new CreatedValue("1"), null, new CreatedValue(null)), "'1' is not a valid Symptom.\nSymptom is not set."),
+			arguments(Arrays.asList(new CreatedValue("1"), null, new CreatedValue(null), new CreatedValue("2")), "'1' is not a valid Symptom.\nSymptom is not set.\n'2' is not a valid Symptom."),
+			arguments(Arrays.asList(new CreatedValue("1"), null, new CreatedValue(null), new CreatedValue("2"), SHORTNESS_OF_BREATH.created()), "'1' is not a valid Symptom.\nSymptom is not set.\n'2' is not a valid Symptom."));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void add_invalidSymptoms(final List<CreatedValue> values, final String message)
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.add(createValid().withSymptoms(values))))
 			.hasMessage(message);
 	}
 
@@ -763,7 +783,8 @@ public class PeopleDAOTest
 	{
 		VALUE = dao.add(new PeopleValue("minWithChildren", "888-555-children", true)
 			.withConditions(DIABETIC, PREGNANT)
-			.withExposures(CLOSE_CONTACT, NO_EXPOSURE));
+			.withExposures(CLOSE_CONTACT, NO_EXPOSURE)
+			.withSymptoms(DIARRHEA, FEVER));
 
 		var now = new Date();
 		VALUE.conditions.forEach(c -> assertThat(c.createdAt).as("Check conditions.createdAt: " + c.id).isCloseTo(now, 500L));
@@ -771,6 +792,9 @@ public class PeopleDAOTest
 
 		VALUE.exposures.forEach(c -> assertThat(c.createdAt).as("Check exposures.createdAt: " + c.id).isCloseTo(now, 500L));
 		assertThat(VALUE.exposures).as("Check exposures").containsOnly(CLOSE_CONTACT.created(), NO_EXPOSURE.created());
+
+		VALUE.symptoms.forEach(c -> assertThat(c.createdAt).as("Check symptoms.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(VALUE.symptoms).as("Check symptoms").containsOnly(DIARRHEA.created(), FEVER.created());
 	}
 
 	@Test
@@ -783,6 +807,9 @@ public class PeopleDAOTest
 
 		value.exposures.forEach(c -> assertThat(c.createdAt).as("Check exposures.createdAt: " + c.id).isCloseTo(now, 500L));
 		assertThat(value.exposures).as("Check exposures").containsOnly(CLOSE_CONTACT.created(), NO_EXPOSURE.created());
+
+		value.symptoms.forEach(c -> assertThat(c.createdAt).as("Check symptoms.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(value.symptoms).as("Check symptoms").containsOnly(DIARRHEA.created(), FEVER.created());
 	}
 
 	@Test
@@ -794,7 +821,7 @@ public class PeopleDAOTest
 	@Test
 	public void z_10_changeLess()
 	{
-		dao.update(VALUE.nullConditions().nullExposures());
+		dao.update(VALUE.nullConditions().nullExposures().nullSymptoms());
 	}
 
 	@Test
@@ -814,7 +841,8 @@ public class PeopleDAOTest
 	{
 		dao.update(VALUE
 			.withConditions(CARDIO_RESPIRATORY_DISEASE, KIDNEY_CIRRHOSIS, WEAKENED_IMMUNE_SYSTEM)
-			.withExposures(LIVE_WITH, UNSURE));
+			.withExposures(LIVE_WITH, UNSURE)
+			.withSymptoms(NAUSEA_VOMITING, SHORTNESS_OF_BREATH, SORE_THROAT));
 
 		var now = new Date();
 		VALUE.conditions.forEach(c -> assertThat(c.createdAt).as("Check conditions.createdAt: " + c.id).isCloseTo(now, 500L));
@@ -822,6 +850,9 @@ public class PeopleDAOTest
 
 		VALUE.exposures.forEach(c -> assertThat(c.createdAt).as("Check exposures.createdAt: " + c.id).isCloseTo(now, 500L));
 		assertThat(VALUE.exposures).as("Check exposures").containsOnly(LIVE_WITH.created(), UNSURE.created());
+
+		VALUE.symptoms.forEach(c -> assertThat(c.createdAt).as("Check symptoms.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(VALUE.symptoms).as("Check symptoms").containsOnly(NAUSEA_VOMITING.created(), SHORTNESS_OF_BREATH.created(), SORE_THROAT.created());
 	}
 
 	@Test
@@ -834,6 +865,9 @@ public class PeopleDAOTest
 
 		value.exposures.forEach(c -> assertThat(c.createdAt).as("Check exposures.createdAt: " + c.id).isCloseTo(now, 500L));
 		assertThat(value.exposures).as("Check exposures").containsOnly(LIVE_WITH.created(), UNSURE.created());
+
+		value.symptoms.forEach(c -> assertThat(c.createdAt).as("Check symptoms.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(value.symptoms).as("Check symptoms").containsOnly(NAUSEA_VOMITING.created(), SHORTNESS_OF_BREATH.created(), SORE_THROAT.created());
 	}
 
 	@Test
@@ -845,7 +879,7 @@ public class PeopleDAOTest
 	@Test
 	public void z_10_removeChildren()
 	{
-		dao.update(VALUE.emptyConditions().emptyExposures());
+		dao.update(VALUE.emptyConditions().emptyExposures().emptySymptoms());
 	}
 
 	@Test
@@ -854,6 +888,7 @@ public class PeopleDAOTest
 		var value = dao.getById(VALUE.id);
 		Assertions.assertNull(value.conditions, "Check conditions");
 		Assertions.assertNull(value.exposures, "Check exposures");
+		Assertions.assertNull(value.symptoms, "Check symptoms");
 	}
 
 	@Test
@@ -867,7 +902,8 @@ public class PeopleDAOTest
 	{
 		dao.update(VALUE
 			.withConditions(CARDIO_RESPIRATORY_DISEASE, DIABETIC, KIDNEY_CIRRHOSIS, PREGNANT, WEAKENED_IMMUNE_SYSTEM)
-			.withExposures(CLOSE_CONTACT, LIVE_WITH, NO_EXPOSURE, UNSURE));
+			.withExposures(CLOSE_CONTACT, LIVE_WITH, NO_EXPOSURE, UNSURE)
+			.withSymptoms(DIARRHEA, DRY_COUGH, FATIGUE, FEVER, MUSCLE_ACHE, NAUSEA_VOMITING, RUNNY_NOSE, SHORTNESS_OF_BREATH, SORE_THROAT));
 
 		var now = new Date();
 		VALUE.conditions.forEach(c -> assertThat(c.createdAt).as("Check conditions.createdAt: " + c.id).isCloseTo(now, 500L));
@@ -875,6 +911,9 @@ public class PeopleDAOTest
 
 		VALUE.exposures.forEach(c -> assertThat(c.createdAt).as("Check exposures.createdAt: " + c.id).isCloseTo(now, 500L));
 		assertThat(VALUE.exposures).as("Check exposures").containsOnly(CLOSE_CONTACT.created(), LIVE_WITH.created(), NO_EXPOSURE.created(), UNSURE.created());
+
+		VALUE.symptoms.forEach(c -> assertThat(c.createdAt).as("Check symptoms.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(VALUE.symptoms).as("Check symptoms").containsOnly(DIARRHEA.created(), DRY_COUGH.created(), FATIGUE.created(), FEVER.created(), MUSCLE_ACHE.created(), NAUSEA_VOMITING.created(), RUNNY_NOSE.created(), SHORTNESS_OF_BREATH.created(), SORE_THROAT.created());
 	}
 
 	@Test
@@ -887,6 +926,9 @@ public class PeopleDAOTest
 
 		value.exposures.forEach(c -> assertThat(c.createdAt).as("Check exposures.createdAt: " + c.id).isCloseTo(now, 500L));
 		assertThat(value.exposures).as("Check exposures").containsOnly(CLOSE_CONTACT.created(), LIVE_WITH.created(), NO_EXPOSURE.created(), UNSURE.created());
+
+		value.symptoms.forEach(c -> assertThat(c.createdAt).as("Check symptoms.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(value.symptoms).as("Check symptoms").containsOnly(DIARRHEA.created(), DRY_COUGH.created(), FATIGUE.created(), FEVER.created(), MUSCLE_ACHE.created(), NAUSEA_VOMITING.created(), RUNNY_NOSE.created(), SHORTNESS_OF_BREATH.created(), SORE_THROAT.created());
 	}
 
 	@Test
@@ -900,7 +942,8 @@ public class PeopleDAOTest
 	{
 		dao.update(VALUE
 			.withConditions(Arrays.asList(null, DIABETIC.created(), null, PREGNANT.created(), null))
-			.withExposures(Arrays.asList(CLOSE_CONTACT.created(), null, NO_EXPOSURE.created(), null)));
+			.withExposures(Arrays.asList(CLOSE_CONTACT.created(), null, NO_EXPOSURE.created(), null))
+			.withSymptoms(Arrays.asList(DIARRHEA.created(), null, FEVER.created(), null)));
 
 		var now = new Date();
 		VALUE.conditions.stream().filter(c -> null != c).forEach(c -> assertThat(c.createdAt).as("Check conditions.createdAt: " + c.id).isCloseTo(now, 500L));
@@ -908,6 +951,9 @@ public class PeopleDAOTest
 
 		VALUE.exposures.stream().filter(c -> null != c).forEach(c -> assertThat(c.createdAt).as("Check exposures.createdAt: " + c.id).isCloseTo(now, 500L));
 		assertThat(VALUE.exposures).as("Check exposures").containsOnly(CLOSE_CONTACT.created(), null, NO_EXPOSURE.created(), null);
+
+		VALUE.symptoms.stream().filter(c -> null != c).forEach(c -> assertThat(c.createdAt).as("Check symptoms.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(VALUE.symptoms).as("Check symptoms").containsOnly(DIARRHEA.created(), null, FEVER.created(), null);
 	}
 
 	@Test
@@ -920,6 +966,9 @@ public class PeopleDAOTest
 
 		value.exposures.forEach(c -> assertThat(c.createdAt).as("Check exposures.createdAt: " + c.id).isCloseTo(now, 500L));
 		assertThat(value.exposures).as("Check exposures").containsOnly(CLOSE_CONTACT.created(), NO_EXPOSURE.created());
+
+		value.symptoms.forEach(c -> assertThat(c.createdAt).as("Check symptoms.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(value.symptoms).as("Check symptoms").containsOnly(DIARRHEA.created(), FEVER.created());
 	}
 
 	@Test
@@ -973,6 +1022,28 @@ public class PeopleDAOTest
 		count(new PeopleFilter().withExcludeExposures(UNSURE.id), 2L - second);
 		count(new PeopleFilter().withExcludeExposures(LIVE_WITH.id), 2L - second);
 		count(new PeopleFilter().withExcludeExposures(UNSURE.id, LIVE_WITH.id), 2L - second);
+
+		count(new PeopleFilter().withIncludeSymptoms(DIARRHEA.id), first);
+		count(new PeopleFilter().withIncludeSymptoms(FEVER.id), first);
+		count(new PeopleFilter().withIncludeSymptoms(DIARRHEA.id, FEVER.id), first);
+		count(new PeopleFilter().withIncludeSymptoms(DIARRHEA.id, SHORTNESS_OF_BREATH.id, FEVER.id), combined);
+		count(new PeopleFilter().withIncludeSymptoms(NAUSEA_VOMITING.id, FEVER.id), combined);
+		count(new PeopleFilter().withIncludeSymptoms(DIARRHEA.id, SORE_THROAT.id), combined);
+		count(new PeopleFilter().withIncludeSymptoms(NAUSEA_VOMITING.id), second);
+		count(new PeopleFilter().withIncludeSymptoms(SHORTNESS_OF_BREATH.id), second);
+		count(new PeopleFilter().withIncludeSymptoms(SORE_THROAT.id), second);
+		count(new PeopleFilter().withIncludeSymptoms(NAUSEA_VOMITING.id, SHORTNESS_OF_BREATH.id, SORE_THROAT.id), second);
+
+		count(new PeopleFilter().withExcludeSymptoms(DIARRHEA.id), 2L - first);
+		count(new PeopleFilter().withExcludeSymptoms(FEVER.id), 2L- first);
+		count(new PeopleFilter().withExcludeSymptoms(DIARRHEA.id, FEVER.id), 2L - first);
+		count(new PeopleFilter().withExcludeSymptoms(DIARRHEA.id, SHORTNESS_OF_BREATH.id, FEVER.id), 2L - combined);
+		count(new PeopleFilter().withExcludeSymptoms(NAUSEA_VOMITING.id, FEVER.id), 2L - combined);
+		count(new PeopleFilter().withExcludeSymptoms(DIARRHEA.id, SORE_THROAT.id), 2L - combined);
+		count(new PeopleFilter().withExcludeSymptoms(NAUSEA_VOMITING.id), 2L - second);
+		count(new PeopleFilter().withExcludeSymptoms(SHORTNESS_OF_BREATH.id), 2L - second);
+		count(new PeopleFilter().withExcludeSymptoms(SORE_THROAT.id), 2L - second);
+		count(new PeopleFilter().withExcludeSymptoms(NAUSEA_VOMITING.id, SHORTNESS_OF_BREATH.id, SORE_THROAT.id), 2L - second);
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.
