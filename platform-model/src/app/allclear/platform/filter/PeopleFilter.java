@@ -54,6 +54,8 @@ public class PeopleFilter extends QueryFilter
 	public Date updatedAtTo = null;
 	public List<String> includeConditions = null;
 	public List<String> excludeConditions = null;
+	public List<String> includeExposures = null;
+	public List<String> excludeExposures = null;
 
 	// Mutators
 	public PeopleFilter withId(final String newValue) { id = newValue; return this; }
@@ -91,6 +93,10 @@ public class PeopleFilter extends QueryFilter
 	public PeopleFilter withIncludeConditions(final String... newValues) { return withIncludeConditions(Arrays.asList(newValues)); }
 	public PeopleFilter withExcludeConditions(final List<String> newValues) { excludeConditions = newValues; return this; }
 	public PeopleFilter withExcludeConditions(final String... newValues) { return withExcludeConditions(Arrays.asList(newValues)); }
+	public PeopleFilter withIncludeExposures(final List<String> newValues) { includeExposures = newValues; return this; }
+	public PeopleFilter withIncludeExposures(final String... newValues) { return withIncludeExposures(Arrays.asList(newValues)); }
+	public PeopleFilter withExcludeExposures(final List<String> newValues) { excludeExposures = newValues; return this; }
+	public PeopleFilter withExcludeExposures(final String... newValues) { return withExcludeExposures(Arrays.asList(newValues)); }
 
 	/**************************************************************************
 	*
@@ -255,6 +261,8 @@ public class PeopleFilter extends QueryFilter
 			.append(", updatedAtTo: ").append(updatedAtTo)
 			.append(", includeConditions: ").append(includeConditions)
 			.append(", excludeConditions: ").append(excludeConditions)
+			.append(", includeExposures: ").append(includeExposures)
+			.append(", excludeExposures: ").append(excludeExposures)
 			.append(" }").toString();
 	}
 }

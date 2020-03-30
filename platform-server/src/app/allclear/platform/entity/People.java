@@ -126,6 +126,11 @@ public class People implements Serializable
 	public List<Conditions> conditions;
 	public void setConditions(final List<Conditions> newValues) { conditions = newValues; }
 
+	@OneToMany(cascade={CascadeType.REMOVE}, fetch=FetchType.LAZY, mappedBy="person")
+	public List<Exposures> getExposures() { return exposures; }
+	public List<Exposures> exposures;
+	public void setExposures(final List<Exposures> newValues) { exposures = newValues; }
+
 	public People() {}
 
 	public People(final String id,
@@ -227,7 +232,8 @@ public class People implements Serializable
 	@Transient
 	public PeopleValue toValueX()
 	{
-		return toValue().withConditions(toCreatedValues(getConditions()));
+		return toValue().withConditions(toCreatedValues(getConditions()))
+			.withExposures(toCreatedValues(getExposures()));
 	}
 
 	@Transient

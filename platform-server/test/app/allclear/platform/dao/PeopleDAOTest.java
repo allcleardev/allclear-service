@@ -1,6 +1,7 @@
 package app.allclear.platform.dao;
 
 import static app.allclear.platform.type.Condition.*;
+import static app.allclear.platform.type.Exposure.*;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -722,11 +723,15 @@ public class PeopleDAOTest
 	public void z_10_addWithChildren()
 	{
 		VALUE = dao.add(new PeopleValue("minWithChildren", "888-555-children", true)
-			.withConditions(DIABETIC, PREGNANT));
+			.withConditions(DIABETIC, PREGNANT)
+			.withExposures(CLOSE_CONTACT, NO_EXPOSURE));
 
 		var now = new Date();
 		VALUE.conditions.forEach(c -> assertThat(c.createdAt).as("Check conditions.createdAt: " + c.id).isCloseTo(now, 500L));
 		assertThat(VALUE.conditions).as("Check conditions").containsOnly(DIABETIC.created(), PREGNANT.created());
+
+		VALUE.exposures.forEach(c -> assertThat(c.createdAt).as("Check exposures.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(VALUE.exposures).as("Check exposures").containsOnly(CLOSE_CONTACT.created(), NO_EXPOSURE.created());
 	}
 
 	@Test
@@ -736,6 +741,9 @@ public class PeopleDAOTest
 		var value = dao.getById(VALUE.id);
 		value.conditions.forEach(c -> assertThat(c.createdAt).as("Check conditions.createdAt: " + c.id).isCloseTo(now, 500L));
 		assertThat(value.conditions).as("Check conditions").containsOnly(DIABETIC.created(), PREGNANT.created());
+
+		value.exposures.forEach(c -> assertThat(c.createdAt).as("Check exposures.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(value.exposures).as("Check exposures").containsOnly(CLOSE_CONTACT.created(), NO_EXPOSURE.created());
 	}
 
 	@Test
@@ -747,7 +755,7 @@ public class PeopleDAOTest
 	@Test
 	public void z_10_changeLess()
 	{
-		dao.update(VALUE.nullConditions());
+		dao.update(VALUE.nullConditions().nullExposures());
 	}
 
 	@Test
@@ -766,11 +774,15 @@ public class PeopleDAOTest
 	public void z_10_modifyWithChildren()
 	{
 		dao.update(VALUE
-			.withConditions(CARDIO_RESPIRATORY_DISEASE, KIDNEY_CIRRHOSIS, WEAKENED_IMMUNE_SYSTEM));
+			.withConditions(CARDIO_RESPIRATORY_DISEASE, KIDNEY_CIRRHOSIS, WEAKENED_IMMUNE_SYSTEM)
+			.withExposures(LIVE_WITH, UNSURE));
 
 		var now = new Date();
 		VALUE.conditions.forEach(c -> assertThat(c.createdAt).as("Check conditions.createdAt: " + c.id).isCloseTo(now, 500L));
 		assertThat(VALUE.conditions).as("Check conditions").containsOnly(CARDIO_RESPIRATORY_DISEASE.created(), KIDNEY_CIRRHOSIS.created(), WEAKENED_IMMUNE_SYSTEM.created());
+
+		VALUE.exposures.forEach(c -> assertThat(c.createdAt).as("Check exposures.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(VALUE.exposures).as("Check exposures").containsOnly(LIVE_WITH.created(), UNSURE.created());
 	}
 
 	@Test
@@ -780,6 +792,9 @@ public class PeopleDAOTest
 		var value = dao.getById(VALUE.id);
 		value.conditions.forEach(c -> assertThat(c.createdAt).as("Check conditions.createdAt: " + c.id).isCloseTo(now, 500L));
 		assertThat(value.conditions).as("Check conditions").containsOnly(CARDIO_RESPIRATORY_DISEASE.created(), KIDNEY_CIRRHOSIS.created(), WEAKENED_IMMUNE_SYSTEM.created());
+
+		value.exposures.forEach(c -> assertThat(c.createdAt).as("Check exposures.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(value.exposures).as("Check exposures").containsOnly(LIVE_WITH.created(), UNSURE.created());
 	}
 
 	@Test
@@ -791,7 +806,7 @@ public class PeopleDAOTest
 	@Test
 	public void z_10_removeChildren()
 	{
-		dao.update(VALUE.emptyConditions());
+		dao.update(VALUE.emptyConditions().emptyExposures());
 	}
 
 	@Test
@@ -799,6 +814,7 @@ public class PeopleDAOTest
 	{
 		var value = dao.getById(VALUE.id);
 		Assertions.assertNull(value.conditions, "Check conditions");
+		Assertions.assertNull(value.exposures, "Check exposures");
 	}
 
 	@Test
@@ -811,11 +827,15 @@ public class PeopleDAOTest
 	public void z_11_modifyWithAllChildren()
 	{
 		dao.update(VALUE
-			.withConditions(CARDIO_RESPIRATORY_DISEASE, DIABETIC, KIDNEY_CIRRHOSIS, PREGNANT, WEAKENED_IMMUNE_SYSTEM));
+			.withConditions(CARDIO_RESPIRATORY_DISEASE, DIABETIC, KIDNEY_CIRRHOSIS, PREGNANT, WEAKENED_IMMUNE_SYSTEM)
+			.withExposures(CLOSE_CONTACT, LIVE_WITH, NO_EXPOSURE, UNSURE));
 
 		var now = new Date();
 		VALUE.conditions.forEach(c -> assertThat(c.createdAt).as("Check conditions.createdAt: " + c.id).isCloseTo(now, 500L));
 		assertThat(VALUE.conditions).as("Check conditions").containsOnly(CARDIO_RESPIRATORY_DISEASE.created(), DIABETIC.created(), KIDNEY_CIRRHOSIS.created(), PREGNANT.created(), WEAKENED_IMMUNE_SYSTEM.created());
+
+		VALUE.exposures.forEach(c -> assertThat(c.createdAt).as("Check exposures.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(VALUE.exposures).as("Check exposures").containsOnly(CLOSE_CONTACT.created(), LIVE_WITH.created(), NO_EXPOSURE.created(), UNSURE.created());
 	}
 
 	@Test
@@ -825,6 +845,9 @@ public class PeopleDAOTest
 		var value = dao.getById(VALUE.id);
 		value.conditions.forEach(c -> assertThat(c.createdAt).as("Check conditions.createdAt: " + c.id).isCloseTo(now, 500L));
 		assertThat(value.conditions).as("Check conditions").containsOnly(CARDIO_RESPIRATORY_DISEASE.created(), DIABETIC.created(), KIDNEY_CIRRHOSIS.created(), PREGNANT.created(), WEAKENED_IMMUNE_SYSTEM.created());
+
+		value.exposures.forEach(c -> assertThat(c.createdAt).as("Check exposures.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(value.exposures).as("Check exposures").containsOnly(CLOSE_CONTACT.created(), LIVE_WITH.created(), NO_EXPOSURE.created(), UNSURE.created());
 	}
 
 	@Test
@@ -858,6 +881,26 @@ public class PeopleDAOTest
 		count(new PeopleFilter().withExcludeConditions(KIDNEY_CIRRHOSIS.id), 2L - second);
 		count(new PeopleFilter().withExcludeConditions(WEAKENED_IMMUNE_SYSTEM.id), 2L - second);
 		count(new PeopleFilter().withExcludeConditions(CARDIO_RESPIRATORY_DISEASE.id, KIDNEY_CIRRHOSIS.id, WEAKENED_IMMUNE_SYSTEM.id), 2L - second);
+
+		count(new PeopleFilter().withIncludeExposures(CLOSE_CONTACT.id), first);
+		count(new PeopleFilter().withIncludeExposures(NO_EXPOSURE.id), first);
+		count(new PeopleFilter().withIncludeExposures(CLOSE_CONTACT.id, NO_EXPOSURE.id), first);
+		count(new PeopleFilter().withIncludeExposures(CLOSE_CONTACT.id, LIVE_WITH.id, NO_EXPOSURE.id), combined);
+		count(new PeopleFilter().withIncludeExposures(UNSURE.id, NO_EXPOSURE.id), combined);
+		count(new PeopleFilter().withIncludeExposures(CLOSE_CONTACT.id, UNSURE.id), combined);
+		count(new PeopleFilter().withIncludeExposures(UNSURE.id), second);
+		count(new PeopleFilter().withIncludeExposures(LIVE_WITH.id), second);
+		count(new PeopleFilter().withIncludeExposures(UNSURE.id, LIVE_WITH.id), second);
+
+		count(new PeopleFilter().withExcludeExposures(CLOSE_CONTACT.id), 2L - first);
+		count(new PeopleFilter().withExcludeExposures(NO_EXPOSURE.id), 2L- first);
+		count(new PeopleFilter().withExcludeExposures(CLOSE_CONTACT.id, NO_EXPOSURE.id), 2L - first);
+		count(new PeopleFilter().withExcludeExposures(CLOSE_CONTACT.id, LIVE_WITH.id, NO_EXPOSURE.id), 2L - combined);
+		count(new PeopleFilter().withExcludeExposures(UNSURE.id, NO_EXPOSURE.id), 2L - combined);
+		count(new PeopleFilter().withExcludeExposures(CLOSE_CONTACT.id, UNSURE.id), 2L - combined);
+		count(new PeopleFilter().withExcludeExposures(UNSURE.id), 2L - second);
+		count(new PeopleFilter().withExcludeExposures(LIVE_WITH.id), 2L - second);
+		count(new PeopleFilter().withExcludeExposures(UNSURE.id, LIVE_WITH.id), 2L - second);
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.

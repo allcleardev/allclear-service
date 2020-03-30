@@ -55,6 +55,7 @@ public class PeopleValue implements Serializable
 	public Date createdAt = null;
 	public Date updatedAt = null;
 	public List<CreatedValue> conditions = null;
+	public List<CreatedValue> exposures = null;
 
 	// Mutators
 	public PeopleValue withId(final String newValue) { id = newValue; return this; }
@@ -80,6 +81,13 @@ public class PeopleValue implements Serializable
 	public PeopleValue withConditions(final Condition... newValues)
 	{
 		return withConditions(Arrays.asList(newValues).stream().map(v -> v.created()).collect(toList()));
+	}
+	public PeopleValue withExposures(final List<CreatedValue> newValues) { exposures = newValues; return this; }
+	public PeopleValue emptyExposures() { return withExposures(List.of()); }
+	public PeopleValue nullExposures() { exposures = null; return this; }
+	public PeopleValue withExposures(final Exposure... newValues)
+	{
+		return withExposures(Arrays.asList(newValues).stream().map(v -> v.created()).collect(toList()));
 	}
 
 	public PeopleValue initDates()
@@ -207,6 +215,7 @@ public class PeopleValue implements Serializable
 			.append(", createdAt: ").append(createdAt)
 			.append(", updatedAt: ").append(updatedAt)
 			.append(", conditions: ").append(conditions)
+			.append(", exposures: ").append(exposures)
 			.append(" }").toString();
 	}
 }
