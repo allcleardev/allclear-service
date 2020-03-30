@@ -16,7 +16,9 @@ import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 import io.swagger.jaxrs.config.BeanConfig;
 import io.swagger.jaxrs.listing.*;
-
+import liquibase.Liquibase;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import app.allclear.common.AutoCloseableManager;
 import app.allclear.common.errors.*;
 import app.allclear.common.jackson.ObjectMapperProvider;
@@ -45,7 +47,6 @@ public class App extends Application<Config>
 
 	public static final Class<?>[] ENTITIES = new Class<?>[] { People.class };
 
-	private MigrationsBundle<Config> migrations;
 	private final HibernateBundle<Config> transHibernateBundle = new HibernateBundle<>(People.class, ENTITIES) {
 		@Override public DataSourceFactory getDataSourceFactory(final Config conf) { return conf.trans; }
 	};
@@ -65,7 +66,7 @@ public class App extends Application<Config>
 
 		bootstrap.addBundle(transHibernateBundle);
 		bootstrap.addBundle(new AssetsBundle("/assets/swagger_ui", "/swagger-ui/", null, "swagger-ui"));
-		bootstrap.addBundle(migrations = new MigrationsBundle<Config>() {
+		bootstrap.addBundle(new MigrationsBundle<Config>() {
 			@Override
 			public DataSourceFactory getDataSourceFactory(final Config conf) { return conf.trans; }
 		});
@@ -76,7 +77,13 @@ public class App extends Application<Config>
 	{
 		log.info("Initialized: {} - {}", conf.env, conf.getVersion());
 
-		migrations.run(conf, env);
+		var ds = conf.trans.build(env.metrics(), "migrations-init");
+		try (var connection = ds.getConnection())
+		{
+			var migrator = new Liquibase("migrations.xml", new ClassLoaderResourceAccessor(), new JdbcConnection(connection));
+			migrator.dropAll();
+			migrator.update("");
+		}
 		log.info("Migrations: completed");
 
 		var lifecycle = env.lifecycle();
