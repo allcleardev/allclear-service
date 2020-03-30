@@ -46,6 +46,7 @@ public class Conditions implements PeopleChild
 
 	@Transient @Override public String getChildId() { return getConditionId(); }
 	@Transient @Override public void setChildId(final String newValue) { setConditionId(newValue); }
+	@Transient @Override public String getChildName() { return Condition.VALUES.get(getConditionId()).name; }
 
 	@Column(name="created_at", columnDefinition="DATETIME", nullable=false)
 	public Date getCreatedAt() { return createdAt; }

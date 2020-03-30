@@ -19,9 +19,7 @@ import app.allclear.common.hibernate.AbstractDAO;
 import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.filter.PeopleFilter;
-import app.allclear.platform.type.PeopleStatus;
-import app.allclear.platform.type.Condition;
-import app.allclear.platform.type.PeopleStature;
+import app.allclear.platform.type.*;
 import app.allclear.platform.value.PeopleValue;
 
 /**********************************************************************************
@@ -127,8 +125,22 @@ public class PeopleDAO extends AbstractDAO<People>
 		if (null == values) return 0;	// No change
 		if (values.isEmpty()) return namedQueryX(deleteQuery).setParameter("personId", record.getId()).executeUpdate();
 
-		return (int) (values.stream().filter(v -> (null != v) && existing.stream().noneMatch(e -> e.getChildId().equals(v.id))).peek(v -> s.persist(toEntity.apply(v))).count() +	// Add new.
-			existing.stream().filter(e -> values.stream().noneMatch(v -> (null != v) && v.id.equals(e.getChildId()))).peek(e -> s.delete(e)).count());	// Remove deleted items.
+		// Add new items.
+		var count = values.stream().filter(v -> {
+				if (null == v) return false;
+				var o = existing.stream().filter(e -> e.getChildId().equals(v.id)).findFirst().orElse(null);
+
+				if (null == o) return true;
+
+				v.withName(o.getChildName()).withCreatedAt(o.getCreatedAt());	// Denormalize supplied values.
+				return false;
+			})
+			.peek(v -> s.persist(toEntity.apply(v)))
+			.count();
+
+
+		// Remove deleted items.
+		return (int) (count + existing.stream().filter(e -> values.stream().noneMatch(v -> (null != v) && v.id.equals(e.getChildId()))).peek(e -> s.delete(e)).count());
 	}
 
 	/** Based on the phone number, the Person is retrieved and marked authenticated.
@@ -187,6 +199,8 @@ public class PeopleDAO extends AbstractDAO<People>
 		// Check children.
 		if (CollectionUtils.isNotEmpty(value.conditions))
 			value.conditions.stream().filter(v -> null != v).forEach(v -> validator.ensureExistsAndContains("conditions", "Condition", v.clean().id, Condition.VALUES));
+		if (CollectionUtils.isNotEmpty(value.exposures))
+			value.exposures.stream().filter(v -> null != v).forEach(v -> validator.ensureExistsAndContains("exposures", "Exposure", v.clean().id, Exposure.VALUES));
 
 		// Throw exception if errors exist.
 		validator.check();
@@ -205,10 +219,6 @@ public class PeopleDAO extends AbstractDAO<People>
 
 		// Throw exception if errors exist.
 		validator.check();
-
-		// Check children.
-		if (CollectionUtils.isNotEmpty(value.conditions))
-			value.conditions.forEach(v -> validator.ensureExistsAndContains("conditions", "Condition", v.clean().id, Condition.VALUES));
 
 		return new Object[] { (null != o) ? o : (null != o2) ? o2 : o3 };
 	}

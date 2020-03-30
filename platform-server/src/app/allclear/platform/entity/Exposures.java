@@ -46,6 +46,7 @@ public class Exposures implements PeopleChild
 
 	@Transient @Override public String getChildId() { return getExposureId(); }
 	@Transient @Override public void setChildId(final String newValue) { setExposureId(newValue); }
+	@Transient @Override public String getChildName() { return Exposure.VALUES.get(getExposureId()).name; }
 
 	@Column(name="created_at", columnDefinition="DATETIME", nullable=false)
 	public Date getCreatedAt() { return createdAt; }

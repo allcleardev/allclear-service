@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static app.allclear.testing.TestingUtils.*;
 
-import java.util.Date;
+import java.util.*;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +23,7 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import app.allclear.junit.hibernate.*;
 import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
+import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.App;
 import app.allclear.platform.entity.People;
 import app.allclear.platform.filter.PeopleFilter;
@@ -155,6 +156,44 @@ public class PeopleDAOTest
 		assertThrows(ValidationException.class, () -> dao.add(createValid().withStatureId(StringUtils.repeat("A", PeopleValue.MAX_LEN_STATURE_ID + 1))));
 	}
 
+	public static Stream<Arguments> add_invalidConditions()
+	{
+		return Stream.of(
+			arguments(List.of(new CreatedValue("1")), "'1' is not a valid Condition."),
+			arguments(Arrays.asList(new CreatedValue("1"), null), "'1' is not a valid Condition."),
+			arguments(List.of(new CreatedValue("1"), new CreatedValue(null)), "'1' is not a valid Condition.\nCondition is not set."),
+			arguments(Arrays.asList(new CreatedValue("1"), null, new CreatedValue(null)), "'1' is not a valid Condition.\nCondition is not set."),
+			arguments(Arrays.asList(new CreatedValue("1"), null, new CreatedValue(null), new CreatedValue("2")), "'1' is not a valid Condition.\nCondition is not set.\n'2' is not a valid Condition."),
+			arguments(Arrays.asList(new CreatedValue("1"), null, new CreatedValue(null), new CreatedValue("2"), DIABETIC.created()), "'1' is not a valid Condition.\nCondition is not set.\n'2' is not a valid Condition."));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void add_invalidConditions(final List<CreatedValue> values, final String message)
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.add(createValid().withConditions(values))))
+			.hasMessage(message);
+	}
+
+	public static Stream<Arguments> add_invalidExposures()
+	{
+		return Stream.of(
+			arguments(List.of(new CreatedValue("1")), "'1' is not a valid Exposure."),
+			arguments(Arrays.asList(new CreatedValue("1"), null), "'1' is not a valid Exposure."),
+			arguments(List.of(new CreatedValue("1"), new CreatedValue(null)), "'1' is not a valid Exposure.\nExposure is not set."),
+			arguments(Arrays.asList(new CreatedValue("1"), null, new CreatedValue(null)), "'1' is not a valid Exposure.\nExposure is not set."),
+			arguments(Arrays.asList(new CreatedValue("1"), null, new CreatedValue(null), new CreatedValue("2")), "'1' is not a valid Exposure.\nExposure is not set.\n'2' is not a valid Exposure."),
+			arguments(Arrays.asList(new CreatedValue("1"), null, new CreatedValue(null), new CreatedValue("2"), LIVE_WITH.created()), "'1' is not a valid Exposure.\nExposure is not set.\n'2' is not a valid Exposure."));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void add_invalidExposures(final List<CreatedValue> values, final String message)
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.add(createValid().withExposures(values))))
+			.hasMessage(message);
+	}
+
 	public static Stream<Arguments> check()
 	{
 		return Stream.of(
@@ -166,7 +205,7 @@ public class PeopleDAOTest
 	@Test
 	public void authenticatedByPhone_invalid()
 	{
-		assertThat(Assertions.assertThrows(ObjectNotFoundException.class, () -> dao.authenticatedByPhone("ronny")))
+		assertThat(assertThrows(ObjectNotFoundException.class, () -> dao.authenticatedByPhone("ronny")))
 			.hasMessage("Could not find the account with phone number 'ronny'.");	// Not the phone number.
 	}
 
@@ -854,6 +893,39 @@ public class PeopleDAOTest
 	public void z_11_modifyWithAllChildren_count()
 	{
 		countByChildren(1L, 1L);
+	}
+
+	@Test
+	public void z_12_modifyWithANullChild()
+	{
+		dao.update(VALUE
+			.withConditions(Arrays.asList(null, DIABETIC.created(), null, PREGNANT.created(), null))
+			.withExposures(Arrays.asList(CLOSE_CONTACT.created(), null, NO_EXPOSURE.created(), null)));
+
+		var now = new Date();
+		VALUE.conditions.stream().filter(c -> null != c).forEach(c -> assertThat(c.createdAt).as("Check conditions.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(VALUE.conditions).as("Check conditions").containsOnly(null, DIABETIC.created(), null, PREGNANT.created(), null);
+
+		VALUE.exposures.stream().filter(c -> null != c).forEach(c -> assertThat(c.createdAt).as("Check exposures.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(VALUE.exposures).as("Check exposures").containsOnly(CLOSE_CONTACT.created(), null, NO_EXPOSURE.created(), null);
+	}
+
+	@Test
+	public void z_12_modifyWithANullChild_check()
+	{
+		var now = new Date();
+		var value = dao.getById(VALUE.id);
+		value.conditions.forEach(c -> assertThat(c.createdAt).as("Check conditions.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(value.conditions).as("Check conditions").containsOnly(DIABETIC.created(), PREGNANT.created());
+
+		value.exposures.forEach(c -> assertThat(c.createdAt).as("Check exposures.createdAt: " + c.id).isCloseTo(now, 500L));
+		assertThat(value.exposures).as("Check exposures").containsOnly(CLOSE_CONTACT.created(), NO_EXPOSURE.created());
+	}
+
+	@Test
+	public void z_12_modifyWithANullChild_count()
+	{
+		countByChildren(1L, 0L);
 	}
 
 	private void countByChildren(final long first, final long second)

@@ -23,6 +23,8 @@ public interface PeopleChild extends Serializable
 	public String getChildId();
 	public void setChildId(final String newValue);
 
+	public String getChildName();
+
 	public Date getCreatedAt();
 	public void setCreatedAt(final Date newValue);
 
