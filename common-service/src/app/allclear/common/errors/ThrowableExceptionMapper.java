@@ -7,7 +7,6 @@ import javax.ws.rs.ext.Provider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import app.allclear.common.errors.ErrorInfo;
 import app.allclear.common.mediatype.UTF8MediaType;
 
 /** Maps an ObjectNotFoundException to HTTP error output.

@@ -6,8 +6,6 @@ import java.util.*;
 
 import org.junit.*;
 
-import app.allclear.testing.TestingUtils;
-
 /** Unit test class that verifies the JacksonUtils class.
  * 
  * @author smalleyd

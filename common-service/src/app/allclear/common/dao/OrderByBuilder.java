@@ -6,8 +6,6 @@ import java.util.regex.Pattern;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import app.allclear.common.dao.QueryResults;
-
 /** Helper/builder class for a Hibernate criteria order-by.
  * 
  * @author smalleyd

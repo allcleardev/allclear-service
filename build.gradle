@@ -100,6 +100,7 @@ project(':platform-model') {
 
 project(':platform-server') {
   dependencies {
+    compile project(':admin-app')
     compile project(':common-hibernate')
     compile project(':common-service')
     compile project(':platform-model')

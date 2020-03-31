@@ -11,8 +11,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.*;
 
-import app.allclear.common.dao.QueryResults;
-
 /** Abstract builder class that helps construct database queries including joins and where clause.
  *  Can be used by Hibernate or JDBI to implement framework specified query builders.
  * 

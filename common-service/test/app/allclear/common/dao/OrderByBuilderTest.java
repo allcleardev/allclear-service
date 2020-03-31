@@ -6,8 +6,6 @@ import java.util.*;
 import org.junit.*;
 import org.apache.commons.lang3.ArrayUtils;
 
-import app.allclear.common.dao.QueryFilter;
-import app.allclear.common.dao.QueryResults;
 import app.allclear.testing.TestingUtils;
 
 /** Unit test class that verifies the OrderByBuilder class.

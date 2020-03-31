@@ -10,8 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import app.allclear.common.errors.ErrorInfo;
-import app.allclear.common.errors.ThrowableExceptionMapper;
 import app.allclear.common.jackson.JacksonUtils;
 import app.allclear.common.mediatype.UTF8MediaType;
 
