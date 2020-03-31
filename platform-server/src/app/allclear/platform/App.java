@@ -66,7 +66,7 @@ public class App extends Application<Config>
 
 		bootstrap.addBundle(transHibernateBundle);
 		bootstrap.addBundle(new AssetsBundle("/assets/swagger_ui", "/swagger-ui/", "index.html", "swagger-ui"));
-		bootstrap.addBundle(new AssetsBundle("/assets/admin-app", "/admin-app/", "index.html", "admin-app"));
+		bootstrap.addBundle(new AssetsBundle("/assets/web", "/admin-app/", "index.html", "admin-app"));
 		bootstrap.addBundle(new MigrationsBundle<Config>() {
 			@Override
 			public DataSourceFactory getDataSourceFactory(final Config conf) { return conf.trans; }

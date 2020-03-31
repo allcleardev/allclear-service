@@ -1,0 +1,121 @@
+* { font-family: Verdana, Helvetica, sans-serif; color: navy; font-size: 10pt; }
+
+#pageTitle { position: relative; width: 1150px; font-size: 16pt; }
+#pageTitle span { position: absolute; top: 0; right: 0; }
+#pageTitle span a { margin-right: 5px; font-size: 10pt; font-weight: normal; }
+#pageTitle span.wordsOfWisdom { display: inline; position: relative; margin-left: 30px; font-size: 10pt; font-weight: normal; }
+
+h3.center { text-align: center; }
+
+.delete { color: red; font-weight: bold; text-decoration: none; }
+.drilldown { color: green; font-weight: bold; font-size: 14pt; text-decoration: none; white-space: nowrap; }
+.drilldown span { color: green; font-weight: normal; font-size: 10pt; }
+table { border-collapse: collapse; min-width: 1000px; }
+table.bulkAnswers { min-width: 0; width: auto; }
+div.noRecordsFound { width: 1000px; border: solid 1px navy; margin: 0; padding: 10px 5px; }
+div.noRecordsFound a { display: block; margin-top: 10px; }
+tbody.modal { display: block; overflow: auto; }
+thead td, tfoot td, th { background-color: navy; color: white; white-space: nowrap; vertical-align: bottom; }
+thead td a, tfoot td a, th a { color: white; text-decoration: none; }
+thead td a:hover, tfoot td a:hover { text-decoration: underline; }
+thead td a.action, tfoot td a.action, th a.action { text-transform: uppercase; margin-left: 15px; }
+th, td { border: solid 1px navy; padding: 5px; }
+td.odd { background-color: #C1DBE8; }
+td.even { background-color: white; }
+td.right { text-align: right; }
+td.center { text-align: center; }
+td.highlight { background-color: navy; color: white; }
+thead td span, tfoot td span, th span { background-color: transparent; color: white; }
+div.rowActions { white-space: nowrap; }
+
+div.tabber div.tabs a { display: inline-block; margin-right: 10px; text-decoration: none; padding: 5px; outline: 0; border-left: solid 1px navy; border-top: solid 1px navy; border-right: solid 1px navy; }
+div.tabber div.tabs a.selected { background-color: navy; color: white; }
+div.tabber div.tabs a:hover { background-color: #C1DBE8; }
+div.tabber form { border: solid 1px navy; padding-left: 5px; }
+div.tabberDropdown { display: none; position: absolute; z-index: 170; background-color: white; border: solid 1px black; overflow: auto; }
+div.tabberDropdown a { display: block; border-bottom: solid 1px black; padding: 6px; text-decoration: none; }
+div.tabberDropdown a:last-child { border-bottom: none; }
+div.tabberDropdown a:hover { background-color: #CCCCCC; }
+
+/** div.modalShield { position: absolute; border-style: none; background-color: #99cccc; top: 0px; left: 0px; opacity: 0.5; -moz-opacity:0.5; z-index: 99; } */
+div.modalDialog { position: absolute; border: solid 3px navy; background-color: #C1DBE8; padding: 0; z-index: 100; }
+div.modalDialog form { padding: 0; margin: 0; }
+div.modalDialog form div.fields { overflow: auto; background-color: #ffffff; }
+div.modalDialog h1 { position: relative; background-color: navy; color: white; font-size: 14px; width: 100%; padding: 5px 0; margin: 0; text-indent: 5px; cursor: pointer; }
+div.modalDialog h1 span { background-color: navy; color: white; font-size: 14px; margin-right: 25px; cursor: pointer; } /* Make sure to not overlap the close anchor. */
+div.modalDialog h1 a { position: absolute; right: 5px; top: 5px; color: white; font-size: 14px; font-weight: bold; text-decoration: none; }
+div.modalDialog div.close { text-align: center; }
+div.modalDialog div.actions { padding: 5px; background-color: #f0f8ff; border-top: solid 1px black; }
+
+a.dropdownList { font-weight: bold; font-size: 11pt; color: red; margin-left: 10px; text-decoration: none; outline: none; }
+span.dropdownList { display: inline-block; position: relative; }
+input.dropdownList { width: 250px; }
+div.dropdownList { position: absolute; display: none; margin: 0; padding: 5px; width: 250px; height: 200px; overflow: auto; z-index: 200; background-color: white; border: solid 1px navy; }
+div.dropdownList a { display: block; white-space: nowrap; text-decoration: none; padding: 3px 0; }
+div.dropdownList a:hover, div.dropdownList a.hover { background-color: #f0f8ff; }
+
+span.datePicker { display: inline-block; position: relative; }
+input.datePicker { width: 110px; height: 22px; background: white url('/images/icon-cal.png') no-repeat 97% 4px; }
+div.datePicker { position: absolute; display: none; margin: 0; padding: 0; width: 154px; z-index: 200; background-color: white; border: solid 1px navy; }
+div.datePicker a { text-decoration: none; }
+div.datePicker ul { margin: 0; padding: 0; }
+div.datePicker li { display: inline-block; list-style-type: none; width: 20px; border: solid 1px navy; text-align: center; padding: 4px 0; }
+div.datePicker ul.header li { width: 77px; border: none; background-color: navy; color: white; }
+div.datePicker ul.footer li { width: 154px; border: none; background-color: navy; color: white; }
+div.datePicker ul.header a, div.datePicker ul.footer a { margin: 0 2px; color: white; }
+div.datePicker ul.header a:hover, div.datePicker ul.footer a:hover { color: #00FFFF; }
+div.datePicker ul.detail li { padding: 0; }
+div.datePicker ul.detail a { display: inline-block; width: 20px; padding: 4px 0; }
+div.datePicker ul.detail a:hover { background-color: navy; color: white; }
+div.datePicker ul.caption li { background-color: #C1DBE8; }
+div.datePicker ul.detail li.buffer0 { display: none; }
+div.datePicker ul.detail li.buffer1 { width: 20px; padding: 4px 0; }
+div.datePicker ul.detail li.buffer2 { width: 42px; padding: 4px 0; }
+div.datePicker ul.detail li.buffer3 { width: 64px; padding: 4px 0; }
+div.datePicker ul.detail li.buffer4 { width: 86px; padding: 4px 0; }
+div.datePicker ul.detail li.buffer5 { width: 108px; padding: 4px 0; }
+div.datePicker ul.detail li.buffer6 { width: 130px; padding: 4px 0; }
+
+span.history { display: inline-block; width: 500px; height: 500px; overflow: auto; border-left: 4px groove black; padding-left: 5px; }
+select.history { vertical-align: top; width: 400px; height: 500px; }
+div.history { padding: 0; }
+em.translationCompilationTree { display: inline-block; width: 800px; height: 500px; overflow: auto; border: groove; padding-left: 5px; }
+
+span.metadata, span.bulkAnswers { display: inline-block; padding: 4px; border: 5px groove; }
+input.metadata { margin-left: 5px; font-size: 20pt; }
+
+div.multiselect { display: inline-block; padding: 0; margin: 0; }
+div.multiselect span { display: inline-block; padding: 1px 0; margin: 0; }
+div.multiselect span.column_2 { width: 250px; }
+div.multiselect span.column_3 { width: 170px; }
+
+div.tagger { width: auto; height: auto; min-width: 100px; max-width: 250px; max-height: 200px; }
+ul.tagger { margin: 0; padding: 5px; list-style: none; max-width: 250px; white-space: normal; }
+ul.tagger li { display: inline-block; white-space: nowrap; padding: 3px; margin-right: 7px; background-color: #f0f8ff; }
+ul.tagger li:hover { background-color: #006699; color: white; }
+ul.tagger li a { margin-left: 4px; font-size: 8pt; }
+ul.tagger li:hover a { color: white; }
+
+span.timePicker { display: inline-block; }
+
+span.timestampPicker { display: inline-block; }
+
+.blocked { color: red; }
+.notBlocked { color: green; }
+
+a.config { text-decoration: none; }
+a.config:before { content: "\273F"; font-size: 16pt; margin: 0 3px 0 5px; }
+
+i.error { color: red; }
+i.success { color: green; }
+
+form div { vertical-align: top; padding: 5px; }
+form b { display: inline-block; width: 200px; vertical-align: top; }
+form.upload b { display: inline-block; width: 90px; vertical-align: top; }
+form.admin b, form.people b, form.simpleValue b, form.viewAsText b, form.session b { display: inline-block; width: 100px; vertical-align: top; }
+form b em { vertical-align: top; display: block; font-size: 8pt; font-weight: normal; padding-right: 5px; }
+form b em blockquote { vertical-align: top; display: block; font-size: 8pt; font-weight: normal; margin: 5px 0px 5px 10px; }
+form.noCaption b { display: none; }
+form.login b { width: 120px; }
+form.client b { width: 300px; }
+form b.disabled { color: #BAD1CD; }
