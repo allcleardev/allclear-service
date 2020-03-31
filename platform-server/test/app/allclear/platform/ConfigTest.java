@@ -127,6 +127,46 @@ public class ConfigTest
 	}
 
 	@Test
+	public void prod() throws Exception
+	{
+		var o = load("prod");
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals("prod", o.env, "Check env");
+		Assertions.assertFalse(o.disableSwagger, "Check disableSwagger");
+		Assertions.assertEquals("https://app.allclear.app", o.baseUrl, "Check baseUrl");
+		Assertions.assertEquals("+16466321488", o.registrationPhone, "Check registrationPhone");
+		Assertions.assertEquals("+16466321488", o.authenticationPhone, "Check authenticationPhone");
+		Assertions.assertEquals("Click https://app.allclear.app/register?phone=%s&code=%s to complete your registration.", o.registrationSMSMessage, "Check registrationSMSMessage");
+		Assertions.assertEquals("Click https://app.allclear.app/auth?phone=%s&token=%s to login in.", o.authenticationSMSMessage, "Check authenticationSMSMessage");
+		Assertions.assertNotNull(o.session, "Check session");
+		Assertions.assertEquals("allclear-prod.redis.cache.windows.net", o.session.host, "Check session.host");
+		Assertions.assertEquals(6380, o.session.port, "Check session.port");
+		Assertions.assertEquals(200L, o.session.timeout, "Check session.timeout");
+		Assertions.assertEquals(10, o.session.poolSize, "Check session.poolSize");
+		Assertions.assertEquals("password", o.session.password, "Check session.password");
+		Assertions.assertTrue(o.session.ssl, "Check session.ssl");
+		Assertions.assertTrue(o.session.testWhileIdle, "Check session.testWhileIdle");
+		Assertions.assertFalse(o.session.test, "Check session.test");
+		Assertions.assertNotNull(o.twilio, "Check twilio");
+		Assertions.assertEquals(TwilioConfig.BASE_URL, o.twilio.baseUrl, "Check twilio.baseUrl");
+		Assertions.assertNotNull(o.twilio.accountId, "Check twilio.accountId");	// Could be the real account ID if the environment variable is set.
+		Assertions.assertNotNull(o.twilio.authToken, "Check twilio.authToken");	// Could be the real authorization token if the environment variable is set.
+		Assertions.assertEquals("com.mysql.jdbc.Driver", o.trans.getDriverClass(), "Check trans.driverClass");
+		Assertions.assertEquals("allclear", o.trans.getUser(), "Check trans.user");
+		Assertions.assertEquals("allclearpwd", o.trans.getPassword(), "Check trans.password");
+		Assertions.assertEquals("jdbc:mysql://allclear-prod.mysql.database.azure.com:3306/allclear?useEncoding=true&characterEncoding=UTF-8&prepStmtCacheSize=100&prepStmtCacheSqlLimit=1024&serverTimezone=UTC&useSSL=true&requireSSL=true",  o.trans.getUrl(), "Check trans.url");
+		Assertions.assertEquals(Duration.seconds(1L), o.trans.getMaxWaitForConnection(), "Check trans.maxWaitForConnection");
+		Assertions.assertEquals(Optional.of("SELECT 1"), o.trans.getValidationQuery(), "Check trans.validationQuery");
+		Assertions.assertEquals(Optional.of(Duration.seconds(10L)), o.trans.getValidationQueryTimeout(), "Check trans.validationQueryTimeout");
+		Assertions.assertEquals(10, o.trans.getMinSize(), "Check trans.minSize");
+		Assertions.assertEquals(40, o.trans.getMaxSize(), "Check trans.maxSize");
+		Assertions.assertTrue(o.trans.getCheckConnectionWhileIdle(), "Check trans.checkConnectionWhileIdle");
+		Assertions.assertTrue(o.trans.getCheckConnectionOnBorrow(), "Check trans.checkConnectionOnBorrow");
+		Assertions.assertEquals(TransactionIsolation.READ_COMMITTED, o.trans.getDefaultTransactionIsolation(), "Check trans.defaultTransactionIsolation");
+		assertThat(o.trans.getProperties()).as("Check properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect"));
+	}
+
+	@Test
 	public void test() throws Exception
 	{
 		var o = load("test");
