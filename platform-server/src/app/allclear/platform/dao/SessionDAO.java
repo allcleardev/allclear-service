@@ -70,6 +70,17 @@ public class SessionDAO
 		return add(new SessionValue(rememberMe, person));
 	}
 
+	/** Adds an administrative user session.
+	 * 
+	 * @param admin
+	 * @param rememberMe
+	 * @return never NULL.
+	 */
+	public SessionValue add(final AdminValue admin, final boolean rememberMe)
+	{
+		return add(new SessionValue(rememberMe, admin));
+	}
+
 	SessionValue add(final SessionValue value)
 	{
 		try

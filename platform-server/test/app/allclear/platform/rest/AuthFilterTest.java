@@ -20,8 +20,7 @@ import app.allclear.common.resources.Headers;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.dao.SessionDAO;
 import app.allclear.platform.model.StartRequest;
-import app.allclear.platform.value.PeopleValue;
-import app.allclear.platform.value.SessionValue;
+import app.allclear.platform.value.*;
 
 /** Functional test class that verifies the AuthFilter interceptor.
  * 
@@ -37,14 +36,96 @@ public class AuthFilterTest
 	private static final SessionDAO dao = new SessionDAO(redis, ConfigTest.loadTest());
 	private static final AuthFilter auth = new AuthFilter(dao);
 
+	private static SessionValue ADMIN;
+	private static SessionValue SUPER;
 	private static SessionValue PERSON;
 	private static SessionValue START;
 
 	@BeforeAll
 	public static void up()
 	{
+		ADMIN = dao.add(new AdminValue("randy", false), false);
 		PERSON = dao.add(new PeopleValue("bob", "888-555-0000", true), true);
 		START = dao.add(new StartRequest("888-555-0001", false, true));
+		SUPER = dao.add(new AdminValue("sandy", true), true);
+	}
+
+	public static Stream<Arguments> admin()
+	{
+		return Stream.of(
+			arguments(null, false),
+			arguments("", false),
+			arguments("a", false),
+			arguments("/a", false),
+			arguments("/admins", false),
+			arguments("admins", true),
+			arguments("admins/password", true),
+			arguments("admins/search", true),
+			arguments("/admins", false),
+			arguments("/admins/password", false),
+			arguments("/admins/search", false),
+			arguments("peoples/admin", false),
+			arguments("types/admin", false),
+			arguments("/peoples", false),
+			arguments("types/peopleStatuses", false),
+			arguments("/types/peopleStatuses", false),
+			arguments("types/peopleStatuses", false),
+			arguments("type/peopleStatuses", false),
+			arguments("peoples/auth", false),
+			arguments("peoples/authenticated", false),
+			arguments("peoples/confirm", false),
+			arguments("peoples-confirm", false),
+			arguments("peoples/start", false),
+			arguments("/peoples/start", false),
+			arguments("peoples/starts", false));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void admin(final String path, final boolean expected)
+	{
+		Assertions.assertEquals(expected, auth.admin(path));
+	}
+
+	public static Stream<Arguments> password()
+	{
+		return Stream.of(
+			arguments(null, false),
+			arguments("", false),
+			arguments("a", false),
+			arguments("/a", false),
+			arguments("password", false),
+			arguments("/password", true),
+			arguments("/admins", false),
+			arguments("admins", false),
+			arguments("admins/password", true),
+			arguments("admins/search", false),
+			arguments("/admins", false),
+			arguments("/admins/password", true),
+			arguments("/admins/passwords", false),
+			arguments("/admins/search", false),
+			arguments("peoples/admin", false),
+			arguments("types/admin", false),
+			arguments("/peoples", false),
+			arguments("/peoples/password", true),
+			arguments("types/peopleStatuses", false),
+			arguments("/types/peopleStatuses", false),
+			arguments("types/peopleStatuses", false),
+			arguments("type/peopleStatuses", false),
+			arguments("peoples/auth", false),
+			arguments("peoples/authenticated", false),
+			arguments("peoples/confirm", false),
+			arguments("peoples-confirm", false),
+			arguments("peoples/start", false),
+			arguments("/peoples/start", false),
+			arguments("peoples/starts", false));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void password(final String path, final boolean expected)
+	{
+		Assertions.assertEquals(expected, auth.password(path));
 	}
 
 	public static Stream<Arguments> requiresAuth()
@@ -54,6 +135,9 @@ public class AuthFilterTest
 			arguments("", true),
 			arguments("a", true),
 			arguments("/a", true),
+			arguments("admin", true),
+			arguments("admin/password", true),
+			arguments("admin/search", true),
 			arguments("/peoples", true),
 			arguments("types/peopleStatuses", false),
 			arguments("/types/peopleStatuses", true),
@@ -65,8 +149,7 @@ public class AuthFilterTest
 			arguments("peoples-confirm", true),
 			arguments("peoples/start", false),
 			arguments("/peoples/start", true),
-			arguments("peoples/starts", true)
-			);
+			arguments("peoples/starts", true));
 	}
 
 	@ParameterizedTest
@@ -79,6 +162,17 @@ public class AuthFilterTest
 	public static Stream<Arguments> failure()
 	{
 		return Stream.of(
+			arguments("admins", "", "Session ID is required."),
+			arguments("admins", null, "Session ID is required."),
+			arguments("admins", "INVALID", "The ID 'INVALID' is invalid."),
+			arguments("admins/password", "", "Session ID is required."),
+			arguments("admins/password", null, "Session ID is required."),
+			arguments("admins/password", "INVALID", "The ID 'INVALID' is invalid."),
+			arguments("admins", PERSON.id, "Requires an Administrative Session."),
+			arguments("admins", START.id, "Requires an Administrative Session."),
+			arguments("admins", ADMIN.id, "Requires a Super-Admin Session."),
+			arguments("admins/password", PERSON.id, "Requires an Administrative Session."),
+			arguments("admins/password", START.id, "Requires an Administrative Session."),
 			arguments("peoples", "", "Session ID is required."),
 			arguments("peoples", null, "Session ID is required."),
 			arguments("peoples", "INVALID", "The ID 'INVALID' is invalid."),
@@ -99,6 +193,10 @@ public class AuthFilterTest
 	public static Stream<Arguments> success()
 	{
 		return Stream.of(
+			arguments("admins", SUPER.id),
+			arguments("admins/password", SUPER.id),
+			arguments("admins/search", SUPER.id),
+			arguments("admins/password", ADMIN.id),
 			arguments("peoples/start", ""),
 			arguments("peoples/confirm", null),
 			arguments("peoples/confirm", PERSON.id),

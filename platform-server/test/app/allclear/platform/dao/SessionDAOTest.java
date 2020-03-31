@@ -34,10 +34,12 @@ public class SessionDAOTest
 	private static final TwilioClient twilio = mock(TwilioClient.class);
 	private static final SessionDAO dao = new SessionDAO(redis, twilio, ConfigTest.loadTest());
 
-	private static SessionValue START;
-	private static SessionValue START_1;
+	private static SessionValue ADMIN;
 	private static SessionValue PERSON;
 	private static SessionValue PERSON_1;
+	private static SessionValue START;
+	private static SessionValue START_1;
+	private static SessionValue SUPER;
 	private static SMSResponse LAST_RESPONSE;
 
 	@BeforeAll
@@ -47,10 +49,26 @@ public class SessionDAOTest
 	}
 
 	@Test
+	public void add_admin()
+	{
+		Assertions.assertNotNull(ADMIN = dao.add(new AdminValue("tim", false), false));
+		Assertions.assertNotNull(ADMIN, "Exists");
+		Assertions.assertNotNull(ADMIN.admin, "Check admin");
+		Assertions.assertEquals("tim", ADMIN.admin.id, "Check admin.id");
+		Assertions.assertTrue(ADMIN.admin(), "Check admin()");
+		Assertions.assertFalse(ADMIN.supers(), "Check supers()");
+		Assertions.assertNull(ADMIN.registration, "Check registration");
+		Assertions.assertNull(ADMIN.person, "Check person");
+		Assertions.assertEquals(30 * 60, ADMIN.seconds(), "Check seconds");
+		Assertions.assertEquals(30L * 60L, redis.ttl(SessionDAO.key(ADMIN.id)), "Check expiration");
+	}
+
+	@Test
 	public void add_person()
 	{
 		Assertions.assertNotNull(PERSON = dao.add(new PeopleValue("kim", "888-555-0000", true), false));
 		Assertions.assertNotNull(PERSON, "Exists");
+		Assertions.assertNull(PERSON.admin, "Check admin");
 		Assertions.assertNull(PERSON.registration, "Check registration");
 		Assertions.assertNotNull(PERSON.person, "Check person");
 		Assertions.assertEquals("888-555-0000", PERSON.person.phone, "Check person.phone");
@@ -63,6 +81,7 @@ public class SessionDAOTest
 	{
 		Assertions.assertNotNull(PERSON_1 = dao.add(new PeopleValue("rick", "888-555-0001", true), true));
 		Assertions.assertNotNull(PERSON_1, "Exists");
+		Assertions.assertNull(PERSON_1.admin, "Check admin");
 		Assertions.assertNull(PERSON_1.registration, "Check registration");
 		Assertions.assertNotNull(PERSON_1.person, "Check person");
 		Assertions.assertEquals("888-555-0001", PERSON_1.person.phone, "Check person.phone");
@@ -75,6 +94,7 @@ public class SessionDAOTest
 	{
 		Assertions.assertNotNull(START = dao.add(new StartRequest("888-555-0002", false, false)));
 		Assertions.assertNotNull(START, "Exists");
+		Assertions.assertNull(START.admin, "Check admin");
 		Assertions.assertNotNull(START.registration, "Check registration");
 		Assertions.assertEquals("+18885550002", START.registration.phone, "Check registration.phone");
 		Assertions.assertFalse(START.registration.beenTested, "Check registration.beenTested");
@@ -89,6 +109,7 @@ public class SessionDAOTest
 	{
 		Assertions.assertNotNull(START_1 = dao.add(new StartRequest("888-555-0005", true, true)));
 		Assertions.assertNotNull(START_1, "Exists");
+		Assertions.assertNull(START_1.admin, "Check admin");
 		Assertions.assertNotNull(START_1.registration, "Check registration");
 		Assertions.assertEquals("+18885550005", START_1.registration.phone, "Check registration.phone");
 		Assertions.assertTrue(START_1.registration.beenTested, "Check registration.beenTested");
@@ -96,6 +117,21 @@ public class SessionDAOTest
 		Assertions.assertNull(START_1.person, "Check person");
 		Assertions.assertEquals(30 * 60, START_1.seconds(), "Check seconds");
 		Assertions.assertEquals(30L * 60L, redis.ttl(SessionDAO.key(START_1.id)), "Check expiration");
+	}
+
+	@Test
+	public void add_super()
+	{
+		Assertions.assertNotNull(SUPER = dao.add(new AdminValue("naomi", true), true));
+		Assertions.assertNotNull(SUPER, "Exists");
+		Assertions.assertNotNull(SUPER.admin, "Check admin");
+		Assertions.assertEquals("naomi", SUPER.admin.id, "Check admin.id");
+		Assertions.assertTrue(SUPER.admin(), "Check admin()");
+		Assertions.assertTrue(SUPER.supers(), "Check supers()");
+		Assertions.assertNull(SUPER.registration, "Check registration");
+		Assertions.assertNull(SUPER.person, "Check person");
+		Assertions.assertEquals(30 * 24 * 60 * 60, SUPER.seconds(), "Check seconds");
+		Assertions.assertEquals(30L * 24L * 60L * 60L, redis.ttl(SessionDAO.key(SUPER.id)), "Check expiration");
 	}
 
 	@Test
@@ -157,6 +193,20 @@ public class SessionDAOTest
 	{
 		assertThat(Assertions.assertThrows(NotAuthenticatedException.class, () -> dao.get("invalid")))
 			.hasMessage("The ID 'invalid' is invalid.");
+	}
+
+	@Test
+	public void get_admin()
+	{
+		var v = dao.get(ADMIN.id);
+		Assertions.assertNotNull(v, "Exists");
+		Assertions.assertNotNull(v.admin, "Check admin");
+		Assertions.assertEquals("tim", v.admin.id, "Check admin.id");
+		Assertions.assertTrue(v.admin(), "Check admin()");
+		Assertions.assertFalse(v.supers(), "Check supers()");
+		Assertions.assertNull(v.registration, "Check registration");
+		Assertions.assertNull(v.person, "Check person");
+		Assertions.assertFalse(v.rememberMe, "Check rememberMe");
 	}
 
 	@Test
@@ -222,6 +272,20 @@ public class SessionDAOTest
 	}
 
 	@Test
+	public void get_super()
+	{
+		var v = dao.get(SUPER.id);
+		Assertions.assertNotNull(v, "Exists");
+		Assertions.assertNotNull(v.admin, "Check admin");
+		Assertions.assertEquals("naomi", v.admin.id, "Check admin.id");
+		Assertions.assertTrue(v.admin(), "Check admin()");
+		Assertions.assertTrue(v.supers(), "Check supers()");
+		Assertions.assertNull(v.registration, "Check registration");
+		Assertions.assertNull(v.person, "Check person");
+		Assertions.assertTrue(v.rememberMe, "Check rememberMe");
+	}
+
+	@Test
 	public void promote()
 	{
 		assertThat(Assertions.assertThrows(NotAuthenticatedException.class, () -> dao.promote(new PeopleValue("morty", "888-555-0003", true), true)))
@@ -244,6 +308,14 @@ public class SessionDAOTest
 		assertThat(v.lastAccessedAt).as("Check lastAccessedAt").isCloseTo(new Date(), 100L).isAfter(START.lastAccessedAt);
 		assertThat(v.createdAt).as("Check createdAt").isInSameSecondAs(START.createdAt).isBefore(v.lastAccessedAt);
 		Assertions.assertEquals(30L * 24L * 60L * 60L, redis.ttl(SessionDAO.key(v.id)), "Check expiration");
+	}
+
+	@Test
+	public void remove_admin()
+	{
+		dao.remove(ADMIN.id);
+
+		Assertions.assertThrows(NotAuthenticatedException.class, () -> dao.get(ADMIN.id));
 	}
 
 	@Test
@@ -278,5 +350,13 @@ public class SessionDAOTest
 		dao.remove(START_1.id);
 
 		Assertions.assertThrows(NotAuthenticatedException.class, () -> dao.get(START_1.id));
+	}
+
+	@Test
+	public void remove_super()
+	{
+		dao.remove(SUPER.id);
+
+		Assertions.assertThrows(NotAuthenticatedException.class, () -> dao.get(SUPER.id));
 	}
 }

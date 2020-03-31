@@ -26,6 +26,7 @@ public class SessionValue implements Serializable
 	public final String id;
 	public final boolean rememberMe;
 	public final long duration;	// Millseconds
+	public final AdminValue admin;
 	public final PeopleValue person;
 	public final StartRequest registration;
 	public final Date expiresAt;
@@ -34,6 +35,10 @@ public class SessionValue implements Serializable
 
 	// Accessors
 	public int seconds() { return (int) (duration / 1000L); }
+	public boolean admin() { return (null != admin); }
+	public boolean supers() { return admin() && admin.supers; }
+	public boolean person() { return (null != person); }
+	public boolean registration() { return (null != registration); }
 
 	// Mutators
 	public SessionValue accessed()
@@ -53,6 +58,7 @@ public class SessionValue implements Serializable
 		return new SessionValue(id,
 			rememberMe,
 			duration,
+			null,
 			person,
 			null,
 			new Date(now.getTime() + duration),
@@ -66,7 +72,18 @@ public class SessionValue implements Serializable
 			false,
 			DURATION_SHORT,
 			null,
+			null,
 			registration,
+			new Date());
+	}
+
+	public SessionValue(final boolean rememberMe, final AdminValue admin)
+	{
+		this(rememberMe,
+			rememberMe ? DURATION_LONG : DURATION_SHORT,
+			admin,
+			null,
+			null,
 			new Date());
 	}
 
@@ -74,6 +91,7 @@ public class SessionValue implements Serializable
 	{
 		this(rememberMe,
 			rememberMe ? DURATION_LONG : DURATION_SHORT,
+			null,
 			person,
 			null,
 			new Date());
@@ -81,6 +99,7 @@ public class SessionValue implements Serializable
 
 	public SessionValue(final boolean rememberMe,
 		final long duration,
+		final AdminValue admin,
 		final PeopleValue person,
 		final StartRequest registration,
 		final Date createdAt)
@@ -88,6 +107,7 @@ public class SessionValue implements Serializable
 		this(UUID.randomUUID().toString(),
 			rememberMe,
 			duration,
+			admin,
 			person,
 			registration,
 			new Date(createdAt.getTime() + duration),
@@ -98,6 +118,7 @@ public class SessionValue implements Serializable
 	public SessionValue(@JsonProperty("id") final String id,
 		@JsonProperty("rememberMe") final boolean rememberMe,
 		@JsonProperty("duration") final long duration,
+		@JsonProperty("admin") final AdminValue admin,
 		@JsonProperty("person") final PeopleValue person,
 		@JsonProperty("registration") final StartRequest registration,
 		@JsonProperty("expiresAt") final Date expiresAt,
@@ -107,6 +128,7 @@ public class SessionValue implements Serializable
 		this.id = id;
 		this.rememberMe = rememberMe;
 		this.duration = duration;
+		this.admin = admin;
 		this.person = person;
 		this.registration = registration;
 		this.expiresAt = expiresAt;

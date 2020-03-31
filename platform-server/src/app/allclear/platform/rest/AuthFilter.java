@@ -21,6 +21,8 @@ import app.allclear.platform.dao.SessionDAO;
 
 public class AuthFilter implements ContainerRequestFilter
 {
+	public static final String PATH_ADMINS = "admins";
+	public static final String PATH_PASSWORD = "/password";
 	public static final String PATH_TYPES = "types/";
 	public static final List<String> PATH_NO_AUTH = List.of("info/health", "info/ping", "info/version", "peoples/auth", "peoples/confirm", "peoples/start", "swagger.json");
 	public static final String PATH_REGISTER = "peoples/register";
@@ -48,10 +50,25 @@ public class AuthFilter implements ContainerRequestFilter
 		var session = dao.current(sessionId);
 		if (PATH_REGISTER.equals(path))
 		{
-			if (null == session.registration) throw new NotAuthenticatedException("Requires a Registration Session.");
+			if (!session.registration()) throw new NotAuthenticatedException("Requires a Registration Session.");
 		}
-		else if ((null == session.person) && requiresAuth(path))
+		else if (admin(path))
+		{
+			if (!session.admin()) throw new NotAuthenticatedException("Requires an Administrative Session.");
+			if (!password(path) && !session.supers()) throw new NotAuthenticatedException("Requires a Super-Admin Session.");	// Only super-admins can administer Admins. But allow all admins to change their password.
+		}
+		else if (session.registration() && requiresAuth(path))
 			throw new NotAuthenticatedException("Requires a Non-registration Session.");
+	}
+
+	boolean admin(final String path)
+	{
+		return ((null != path) && path.startsWith(PATH_ADMINS));
+	}
+
+	boolean password(final String path)
+	{
+		return ((null != path) && path.endsWith(PATH_PASSWORD));
 	}
 
 	boolean requiresAuth(final String path)
