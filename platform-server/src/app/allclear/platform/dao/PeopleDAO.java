@@ -46,6 +46,10 @@ public class PeopleDAO extends AbstractDAO<People>
 		"dob", DESC,
 		"statusId", ASC,
 		"statureId", ASC,
+		"sexId", ASC,
+		"latitude", DESC,
+		"longitude", DESC,
+		"alertable", DESC,
 		"active", DESC,
 		"authAt", DESC,
 		"phoneVerifiedAt", DESC,
@@ -61,8 +65,9 @@ public class PeopleDAO extends AbstractDAO<People>
 	String generateId()
 	{
 		int i = 0;
+		var q = namedQuery("existsPeople", String.class);
 		var id = RandomStringUtils.randomAlphanumeric(6).toUpperCase();
-		while (null != namedQuery("existsPeople", String.class).setParameter("id", id).uniqueResult())	// Find an available ID.
+		while (null != q.setParameter("id", id).uniqueResult())	// Find an available ID.
 		{
 			if (10 < i++) throw new IdentifierGenerationException("Failed to generate an available ID after 10 tries.");
 			id = RandomStringUtils.randomAlphanumeric(6).toUpperCase();
@@ -189,6 +194,9 @@ public class PeopleDAO extends AbstractDAO<People>
 			.ensureLength("lastName", "Last Name", value.lastName, PeopleValue.MAX_LEN_LAST_NAME)
 			.ensureLength("statusId", "Status", value.statusId, PeopleValue.MAX_LEN_STATUS_ID)
 			.ensureLength("statureId", "Stature", value.statureId, PeopleValue.MAX_LEN_STATURE_ID)
+			.ensureLength("sexId", "Sex", value.sexId, PeopleValue.MAX_LEN_SEX_ID)
+			.ensureLatitude("latitude", "Latitude", value.latitude)
+			.ensureLongitude("longitude", "Longitude", value.longitude)
 			.check();
 
 		// Check enum values.
@@ -197,6 +205,9 @@ public class PeopleDAO extends AbstractDAO<People>
 
 		if ((null != value.statureId) && (null == (value.stature = PeopleStature.VALUES.get(value.statureId))))
 			validator.add("statureId", "The Stature ID '%s' is invalid.", value.statureId);
+
+		if ((null != value.sexId) && (null == (value.sex = Sex.VALUES.get(value.sexId))))
+			validator.add("sexId", "The Sex ID '%s' is invalid.", value.sexId);
 
 		// Check children.
 		if (CollectionUtils.isNotEmpty(value.conditions))
@@ -374,6 +385,17 @@ public class PeopleDAO extends AbstractDAO<People>
 			.addNotNull("o.statusId", filter.hasStatusId)
 			.add("statureId", "o.statureId = :statureId", filter.statureId)
 			.addNotNull("o.statureId", filter.hasStatureId)
+			.add("sexId", "o.sexId LIKE :sexId", filter.sexId)
+			.addNotNull("o.sexId", filter.hasSexId)
+			.add("latitude", "o.latitude = :latitude", filter.latitude)
+			.addNotNull("o.latitude", filter.hasLatitude)
+			.add("latitudeFrom", "o.latitude >= :latitudeFrom", filter.latitudeFrom)
+			.add("latitudeTo", "o.latitude <= :latitudeTo", filter.latitudeTo)
+			.add("longitude", "o.longitude = :longitude", filter.longitude)
+			.addNotNull("o.longitude", filter.hasLongitude)
+			.add("longitudeFrom", "o.longitude >= :longitudeFrom", filter.longitudeFrom)
+			.add("longitudeTo", "o.longitude <= :longitudeTo", filter.longitudeTo)
+			.add("alertable", "o.alertable = :alertable", filter.alertable)
 			.add("active", "o.active = :active", filter.active)
 			.addNotNull("o.authAt", filter.hasAuthAt)
 			.add("authAtFrom", "o.authAt >= :authAtFrom", filter.authAtFrom)
@@ -413,6 +435,10 @@ public class PeopleDAO extends AbstractDAO<People>
 		record.setDob(value.dob);
 		record.setStatusId(value.statusId);
 		record.setStatureId(value.statureId);
+		record.setSexId(value.sexId);
+		record.setLatitude(value.latitude);
+		record.setLongitude(value.longitude);
+		record.setAlertable(value.alertable);
 		record.setActive(value.active);
 		record.setAuthAt(value.authAt);
 		record.setPhoneVerifiedAt(value.phoneVerifiedAt);

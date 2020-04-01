@@ -3,6 +3,7 @@ package app.allclear.platform.value;
 import static java.util.stream.Collectors.toList;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +35,7 @@ public class PeopleValue implements Serializable
 	public static final int MAX_LEN_LAST_NAME = 32;
 	public static final int MAX_LEN_STATUS_ID = 1;
 	public static final int MAX_LEN_STATURE_ID = 1;
+	public static final int MAX_LEN_SEX_ID = 1;
 	public static final int MAX_LEN_CONDITION_ID = 2;
 
 	// Members
@@ -48,6 +50,11 @@ public class PeopleValue implements Serializable
 	public PeopleStatus status = null;
 	public String statureId = null;
 	public PeopleStature stature = null;
+	public String sexId = null;
+	public Sex sex = null;
+	public BigDecimal latitude = null;
+	public BigDecimal longitude = null;
+	public boolean alertable;
 	public boolean active;
 	public Date authAt = null;
 	public Date phoneVerifiedAt = null;
@@ -70,6 +77,11 @@ public class PeopleValue implements Serializable
 	public PeopleValue withStatus(final PeopleStatus newValue) { status = newValue; return this; }
 	public PeopleValue withStatureId(final String newValue) { statureId = newValue; return this; }
 	public PeopleValue withStature(final PeopleStature newValue) { stature = newValue; return this; }
+	public PeopleValue withSexId(final String newValue) { sexId = newValue; return this; }
+	public PeopleValue withSex(final Sex newValue) { sex = newValue; return this; }
+	public PeopleValue withLatitude(final BigDecimal newValue) { latitude = newValue; return this; }
+	public PeopleValue withLongitude(final BigDecimal newValue) { longitude = newValue; return this; }
+	public PeopleValue withAlertable(final boolean newValue) { alertable = newValue; return this; }
 	public PeopleValue withActive(final boolean newValue) { active = newValue; return this; }
 	public PeopleValue withAuthAt(final Date newValue) { authAt = newValue; return this; }
 	public PeopleValue withPhoneVerifiedAt(final Date newValue) { phoneVerifiedAt = newValue; return this; }
@@ -98,6 +110,8 @@ public class PeopleValue implements Serializable
 		return withSymptoms(Arrays.asList(newValues).stream().map(v -> v.created()).collect(toList()));
 	}
 
+	public PeopleValue registered() { return withActive(true).withAuthAt(new Date()); }
+	public PeopleValue registeredByPhone() { return registered().withPhoneVerifiedAt(authAt).withEmailVerifiedAt(null); }
 	public PeopleValue initDates()
 	{
 		this.createdAt = this.updatedAt = new Date();
@@ -112,7 +126,7 @@ public class PeopleValue implements Serializable
 		final String phone,
 		final boolean active)
 	{
-		this(name, phone, null, null, null, null, null, null, active);
+		this(name, phone, null, null, null, null, null, null, null, null, null, false, active);
 	}
 
 	public PeopleValue(
@@ -124,9 +138,13 @@ public class PeopleValue implements Serializable
 		final Date dob,
 		final String statusId,
 		final String statureId,
+		final String sexId,
+		final BigDecimal latitude,
+		final BigDecimal longitude,
+		final boolean alertable,
 		final boolean active)
 	{
-		this(null, name, phone, email, firstName, lastName, dob, statusId, null, statureId, null, active, null, null, null, null, null);
+		this(null, name, phone, email, firstName, lastName, dob, statusId, null, statureId, null, sexId, null, latitude, longitude, alertable, active, null, null, null, null, null);
 	}
 
 	public PeopleValue(final String id,
@@ -140,6 +158,11 @@ public class PeopleValue implements Serializable
 		final PeopleStatus status,
 		final String statureId,
 		final PeopleStature stature,
+		final String sexId,
+		final Sex sex,
+		final BigDecimal latitude,
+		final BigDecimal longitude,
+		final boolean alertable,
 		final boolean active,
 		final Date authAt,
 		final Date phoneVerifiedAt,
@@ -158,6 +181,11 @@ public class PeopleValue implements Serializable
 		this.status = status;
 		this.statureId = statureId;
 		this.stature = stature;
+		this.sexId = sexId;
+		this.sex = sex;
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.alertable = alertable;
 		this.active = active;
 		this.authAt = authAt;
 		this.phoneVerifiedAt = phoneVerifiedAt;
@@ -177,6 +205,7 @@ public class PeopleValue implements Serializable
 		lastName = StringUtils.trimToNull(lastName);
 		statusId = StringUtils.trimToNull(statusId);
 		statureId = StringUtils.trimToNull(statureId);
+		sexId = StringUtils.trimToNull(sexId);
 	}
 
 	@Override
@@ -194,6 +223,10 @@ public class PeopleValue implements Serializable
 			((dob == v.dob) || DateUtils.truncatedEquals(dob, v.dob, Calendar.DATE)) &&
 			Objects.equals(statusId, v.statusId) &&
 			Objects.equals(statureId, v.statureId) &&
+			Objects.equals(sexId, v.sexId) &&
+			((latitude == v.latitude) || (0 == Objects.compare(latitude, v.latitude, (a, b) -> a.compareTo(b)))) &&
+			((longitude == v.longitude) || (0 == Objects.compare(longitude, v.longitude, (a, b) -> a.compareTo(b)))) &&
+			(alertable == v.alertable) &&
 			(active == v.active) &&
 			((authAt == v.authAt) || DateUtils.truncatedEquals(authAt, v.authAt, Calendar.SECOND)) &&
 			((phoneVerifiedAt == v.phoneVerifiedAt) || DateUtils.truncatedEquals(phoneVerifiedAt, v.phoneVerifiedAt, Calendar.SECOND)) &&
@@ -216,6 +249,11 @@ public class PeopleValue implements Serializable
 			.append(", status: ").append(status)
 			.append(", statureId: ").append(statureId)
 			.append(", stature: ").append(stature)
+			.append(", sexId: ").append(sexId)
+			.append(", sex: ").append(sex)
+			.append(", latitude: ").append(latitude)
+			.append(", longitude: ").append(longitude)
+			.append(", alertable: ").append(alertable)
 			.append(", active: ").append(active)
 			.append(", authAt: ").append(authAt)
 			.append(", phoneVerifiedAt: ").append(phoneVerifiedAt)

@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static app.allclear.testing.TestingUtils.*;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Stream;
 
@@ -28,8 +29,7 @@ import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.App;
 import app.allclear.platform.entity.People;
 import app.allclear.platform.filter.PeopleFilter;
-import app.allclear.platform.type.PeopleStature;
-import app.allclear.platform.type.PeopleStatus;
+import app.allclear.platform.type.*;
 import app.allclear.platform.value.PeopleValue;
 
 /**********************************************************************************
@@ -54,6 +54,8 @@ public class PeopleDAOTest
 	private static final Date DOB_1 = utc(1990, 7, 15);
 	private static PeopleValue VALUE = null;
 
+	private static BigDecimal bg(final String value) { return new BigDecimal(value); }
+
 	@BeforeAll
 	public static void up()
 	{
@@ -65,7 +67,7 @@ public class PeopleDAOTest
 	public void add()
 	{
 		var value = dao.add(VALUE = new PeopleValue("ronny", "888-555-1000", "ronny@gmail.com", "Ronald", "Howard",
-			DOB, PeopleStatus.INFECTED.id, PeopleStature.INFLUENCER.id, true));
+			DOB, PeopleStatus.INFECTED.id, PeopleStature.INFLUENCER.id, Sex.MALE.id, bg("86.5"), bg("-37.1"), false, true));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
@@ -76,7 +78,7 @@ public class PeopleDAOTest
 	public static PeopleValue createValid()
 	{
 		return new PeopleValue("bryce", "888-555-1001", "dallas@gmail.com", "Dallas", "Drawoh",
-			DOB_1, PeopleStatus.RECOVERED.id, PeopleStature.CELEBRITY.id, false);
+			DOB_1, PeopleStatus.RECOVERED.id, PeopleStature.CELEBRITY.id, Sex.FEMALE.id, bg("-86.5"), bg("37.1"), true, false);
 	}
 
 	@Test
@@ -155,6 +157,42 @@ public class PeopleDAOTest
 	public void add_longStatureId()
 	{
 		assertThrows(ValidationException.class, () -> dao.add(createValid().withStatureId(StringUtils.repeat("A", PeopleValue.MAX_LEN_STATURE_ID + 1))));
+	}
+
+	@Test
+	public void add_invalidSexId()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withSexId("$")));
+	}
+
+	@Test
+	public void add_longSexId()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withSexId(StringUtils.repeat("A", PeopleValue.MAX_LEN_SEX_ID + 1))));
+	}
+
+	@Test
+	public void add_tooHighLatitude()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withLatitude(bg("91"))));
+	}
+
+	@Test
+	public void add_tooLowLatitude()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withLatitude(bg("-91"))));
+	}
+
+	@Test
+	public void add_tooHighLongitude()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withLatitude(bg("181"))));
+	}
+
+	@Test
+	public void add_tooLowLongitude()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withLatitude(bg("-181"))));
 	}
 
 	public static Stream<Arguments> add_invalidConditions()
@@ -383,6 +421,10 @@ public class PeopleDAOTest
 		count(new PeopleFilter().withDob(VALUE.dob), 1L);
 		count(new PeopleFilter().withStatusId(VALUE.statusId), 1L);
 		count(new PeopleFilter().withStatureId(VALUE.statureId), 1L);
+		count(new PeopleFilter().withSexId(VALUE.sexId), 1L);
+		count(new PeopleFilter().withLatitude(VALUE.latitude), 1L);
+		count(new PeopleFilter().withLongitude(VALUE.longitude), 1L);
+		count(new PeopleFilter().withAlertable(VALUE.alertable), 1L);
 		count(new PeopleFilter().withActive(VALUE.active), 1L);
 
 		var v = createValid();
@@ -394,6 +436,10 @@ public class PeopleDAOTest
 		count(new PeopleFilter().withDob(v.dob), 0L);
 		count(new PeopleFilter().withStatusId(v.statusId), 0L);
 		count(new PeopleFilter().withStatureId(v.statureId), 0L);
+		count(new PeopleFilter().withSexId(v.sexId), 0L);
+		count(new PeopleFilter().withLatitude(v.latitude), 0L);
+		count(new PeopleFilter().withLongitude(v.longitude), 0L);
+		count(new PeopleFilter().withAlertable(v.alertable), 0L);
 		count(new PeopleFilter().withActive(v.active), 0L);
 
 		var value = dao.update(v.withId(VALUE.id));
@@ -413,6 +459,10 @@ public class PeopleDAOTest
 		count(new PeopleFilter().withDob(VALUE.dob), 0L);
 		count(new PeopleFilter().withStatusId(VALUE.statusId), 0L);
 		count(new PeopleFilter().withStatureId(VALUE.statureId), 0L);
+		count(new PeopleFilter().withSexId(VALUE.sexId), 0L);
+		count(new PeopleFilter().withLatitude(VALUE.latitude), 0L);
+		count(new PeopleFilter().withLongitude(VALUE.longitude), 0L);
+		count(new PeopleFilter().withAlertable(VALUE.alertable), 0L);
 		count(new PeopleFilter().withActive(VALUE.active), 0L);
 
 		var v = createValid();
@@ -424,6 +474,10 @@ public class PeopleDAOTest
 		count(new PeopleFilter().withDob(v.dob), 1L);
 		count(new PeopleFilter().withStatusId(v.statusId), 1L);
 		count(new PeopleFilter().withStatureId(v.statureId), 1L);
+		count(new PeopleFilter().withSexId(v.sexId), 1L);
+		count(new PeopleFilter().withLatitude(v.latitude), 1L);
+		count(new PeopleFilter().withLongitude(v.longitude), 1L);
+		count(new PeopleFilter().withAlertable(v.alertable), 1L);
 		count(new PeopleFilter().withActive(v.active), 1L);
 
 		VALUE = dao.getById(VALUE.id);
@@ -444,6 +498,10 @@ public class PeopleDAOTest
 		Assertions.assertEquals(v.dob, record.getDob(), "Check dob");
 		Assertions.assertEquals(v.statusId, record.getStatusId(), "Check statusId");
 		Assertions.assertEquals(v.statureId, record.getStatureId(), "Check statureId");
+		Assertions.assertEquals(v.sexId, record.getSexId(), "Check sexId");
+		assertThat(record.getLatitude()).as("Check latitude").isEqualByComparingTo(v.latitude);
+		assertThat(record.getLongitude()).as("Check longitude").isEqualByComparingTo(v.longitude);
+		Assertions.assertEquals(v.alertable, record.isAlertable(), "Check alertable");
 		Assertions.assertEquals(v.active, record.isActive(), "Check active");
 		assertThat(record.getUpdatedAt()).as("Check updatedAt").isAfter(record.getCreatedAt());
 		check(VALUE, record);
@@ -453,6 +511,11 @@ public class PeopleDAOTest
 	{
 		var hourAgo = hourAgo();
 		var hourAhead = hourAhead();
+		var five = new BigDecimal("5");
+		var upLat = VALUE.latitude.add(five);
+		var upLng = VALUE.longitude.add(five);
+		var downLat = VALUE.latitude.subtract(five);
+		var downLng = VALUE.longitude.subtract(five);
 
 		return Stream.of(
 			arguments(new PeopleFilter(1, 20).withId(VALUE.id), 1L),
@@ -474,6 +537,17 @@ public class PeopleDAOTest
 			arguments(new PeopleFilter(1, 20).withStatureId(VALUE.statureId), 1L),
 			arguments(new PeopleFilter(1, 20).withHasStatureId(true), 1L),
 			arguments(new PeopleFilter(1, 20).withActive(VALUE.active), 1L),
+			arguments(new PeopleFilter(1, 20).withSexId(VALUE.sexId), 1L),
+			arguments(new PeopleFilter(1, 20).withHasSexId(true), 1L),
+			arguments(new PeopleFilter(1, 20).withLatitude(VALUE.latitude), 1L),
+			arguments(new PeopleFilter(1, 20).withHasLatitude(true), 1L),
+			arguments(new PeopleFilter(1, 20).withLatitudeFrom(downLat), 1L),
+			arguments(new PeopleFilter(1, 20).withLatitudeTo(upLat), 1L),
+			arguments(new PeopleFilter(1, 20).withLongitude(VALUE.longitude), 1L),
+			arguments(new PeopleFilter(1, 20).withHasLongitude(true), 1L),
+			arguments(new PeopleFilter(1, 20).withLongitudeFrom(downLng), 1L),
+			arguments(new PeopleFilter(1, 20).withLongitudeTo(upLng), 1L),
+			arguments(new PeopleFilter(1, 20).withAlertable(VALUE.alertable), 1L),
 			arguments(new PeopleFilter(1, 20).withHasAuthAt(false), 1L),
 			/* arguments(new PeopleFilter(1, 20).withAuthAtFrom(hourAgo), 1L),
 			arguments(new PeopleFilter(1, 20).withAuthAtTo(hourAhead), 1L),
@@ -513,6 +587,17 @@ public class PeopleDAOTest
 			arguments(new PeopleFilter(1, 20).withStatureId("invalid"), 0L),
 			arguments(new PeopleFilter(1, 20).withHasStatureId(false), 0L),
 			arguments(new PeopleFilter(1, 20).withActive(!VALUE.active), 0L),
+			arguments(new PeopleFilter(1, 20).withSexId("invalid"), 0L),
+			arguments(new PeopleFilter(1, 20).withHasSexId(false), 0L),
+			arguments(new PeopleFilter(1, 20).withLatitude(upLat), 0L),
+			arguments(new PeopleFilter(1, 20).withHasLatitude(false), 0L),
+			arguments(new PeopleFilter(1, 20).withLatitudeFrom(upLat), 0L),
+			arguments(new PeopleFilter(1, 20).withLatitudeTo(downLat), 0L),
+			arguments(new PeopleFilter(1, 20).withLongitude(downLng), 0L),
+			arguments(new PeopleFilter(1, 20).withHasLongitude(false), 0L),
+			arguments(new PeopleFilter(1, 20).withLongitudeFrom(upLng), 0L),
+			arguments(new PeopleFilter(1, 20).withLongitudeTo(downLng), 0L),
+			arguments(new PeopleFilter(1, 20).withAlertable(!VALUE.alertable), 0L),
 			arguments(new PeopleFilter(1, 20).withHasAuthAt(true), 0L),
 			/* arguments(new PeopleFilter(1, 20).withAuthAtFrom(hourAhead), 0L),
 			arguments(new PeopleFilter(1, 20).withAuthAtTo(hourAgo), 0L),
@@ -622,6 +707,34 @@ public class PeopleDAOTest
 			arguments(new PeopleFilter("statureId", "invalid"), "statureId", "ASC"),	// Invalid sort direction is converted to the default.
 			arguments(new PeopleFilter("statureId", "DESC"), "statureId", "DESC"),
 			arguments(new PeopleFilter("statureId", "desc"), "statureId", "DESC"),
+
+			arguments(new PeopleFilter("sexId", null), "sexId", "ASC"), // Missing sort direction is converted to the default.
+			arguments(new PeopleFilter("sexId", "ASC"), "sexId", "ASC"),
+			arguments(new PeopleFilter("sexId", "asc"), "sexId", "ASC"),
+			arguments(new PeopleFilter("sexId", "invalid"), "sexId", "ASC"),	// Invalid sort direction is converted to the default.
+			arguments(new PeopleFilter("sexId", "DESC"), "sexId", "DESC"),
+			arguments(new PeopleFilter("sexId", "desc"), "sexId", "DESC"),
+
+			arguments(new PeopleFilter("latitude", null), "latitude", "DESC"), // Missing sort direction is converted to the default.
+			arguments(new PeopleFilter("latitude", "ASC"), "latitude", "ASC"),
+			arguments(new PeopleFilter("latitude", "asc"), "latitude", "ASC"),
+			arguments(new PeopleFilter("latitude", "invalid"), "latitude", "DESC"),	// Invalid sort direction is converted to the default.
+			arguments(new PeopleFilter("latitude", "DESC"), "latitude", "DESC"),
+			arguments(new PeopleFilter("latitude", "desc"), "latitude", "DESC"),
+
+			arguments(new PeopleFilter("longitude", null), "longitude", "DESC"), // Missing sort direction is converted to the default.
+			arguments(new PeopleFilter("longitude", "ASC"), "longitude", "ASC"),
+			arguments(new PeopleFilter("longitude", "asc"), "longitude", "ASC"),
+			arguments(new PeopleFilter("longitude", "invalid"), "longitude", "DESC"),	// Invalid sort direction is converted to the default.
+			arguments(new PeopleFilter("longitude", "DESC"), "longitude", "DESC"),
+			arguments(new PeopleFilter("longitude", "desc"), "longitude", "DESC"),
+
+			arguments(new PeopleFilter("alertable", null), "alertable", "DESC"), // Missing sort direction is converted to the default.
+			arguments(new PeopleFilter("alertable", "ASC"), "alertable", "ASC"),
+			arguments(new PeopleFilter("alertable", "asc"), "alertable", "ASC"),
+			arguments(new PeopleFilter("alertable", "invalid"), "alertable", "DESC"),	// Invalid sort direction is converted to the default.
+			arguments(new PeopleFilter("alertable", "DESC"), "alertable", "DESC"),
+			arguments(new PeopleFilter("alertable", "desc"), "alertable", "DESC"),
 
 			arguments(new PeopleFilter("active", null), "active", "DESC"), // Missing sort direction is converted to the default.
 			arguments(new PeopleFilter("active", "ASC"), "active", "ASC"),
@@ -1069,6 +1182,10 @@ public class PeopleDAOTest
 		Assertions.assertEquals(expected.dob, record.getDob(), assertId + "Check dob");
 		Assertions.assertEquals(expected.statusId, record.getStatusId(), assertId + "Check statusId");
 		Assertions.assertEquals(expected.statureId, record.getStatureId(), assertId + "Check statureId");
+		Assertions.assertEquals(expected.sexId, record.getSexId(), assertId + "Check sexId");
+		assertThat(record.getLatitude()).as(assertId + "Check latitude").isEqualByComparingTo(expected.latitude);
+		assertThat(record.getLongitude()).as(assertId + "Check longitude").isEqualByComparingTo(expected.longitude);
+		Assertions.assertEquals(expected.alertable, record.isAlertable(), assertId + "Check alertable");
 		Assertions.assertEquals(expected.active, record.isActive(), assertId + "Check active");
 		Assertions.assertEquals(expected.authAt, record.getAuthAt(), assertId + "Check authAt");
 		Assertions.assertEquals(expected.phoneVerifiedAt, record.getPhoneVerifiedAt(), assertId + "Check phoneVerifiedAt");
@@ -1092,6 +1209,11 @@ public class PeopleDAOTest
 		Assertions.assertEquals(expected.status, value.status, assertId + "Check status");
 		Assertions.assertEquals(expected.statureId, value.statureId, assertId + "Check statureId");
 		Assertions.assertEquals(expected.stature, value.stature, assertId + "Check stature");
+		Assertions.assertEquals(expected.sexId, value.sexId, assertId + "Check sexId");
+		Assertions.assertEquals(expected.sex, value.sex, assertId + "Check sex");
+		Assertions.assertEquals(expected.latitude, value.latitude, assertId + "Check latitude");
+		assertThat(value.latitude).as(assertId + "Check latitude").isEqualByComparingTo(expected.latitude);
+		assertThat(value.longitude).as(assertId + "Check longitude").isEqualByComparingTo(expected.longitude);
 		Assertions.assertEquals(expected.active, value.active, assertId + "Check active");
 		Assertions.assertEquals(expected.authAt, value.authAt, assertId + "Check authAt");
 		Assertions.assertEquals(expected.phoneVerifiedAt, value.phoneVerifiedAt, assertId + "Check phoneVerifiedAt");

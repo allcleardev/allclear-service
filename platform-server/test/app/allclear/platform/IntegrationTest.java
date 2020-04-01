@@ -76,6 +76,12 @@ public class IntegrationTest
 	}
 
 	@Test
+	public void getSexes()
+	{
+		assertThat(request(types.path("sexes")).get(Sex[].class)).hasSize(Sex.LIST.size());
+	}
+
+	@Test
 	public void getSymptoms()
 	{
 		assertThat(request(types.path("symptoms")).get(Symptom[].class)).hasSize(Symptom.LIST.size());

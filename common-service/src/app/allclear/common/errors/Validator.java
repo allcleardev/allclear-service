@@ -17,8 +17,10 @@ import org.apache.commons.lang3.StringUtils;
 
 public class Validator
 {
-	public static final BigDecimal MAX_GEO_COORD = new BigDecimal(180);
-	public static final BigDecimal MIN_GEO_COORD = new BigDecimal(-180);
+	public static final BigDecimal MAX_LATITUDE = new BigDecimal(90);
+	public static final BigDecimal MIN_LATITUDE = new BigDecimal(-90);
+	public static final BigDecimal MAX_LONGITUDE = new BigDecimal(180);
+	public static final BigDecimal MIN_LONGITUDE = new BigDecimal(-180);
 	public static final Pattern PATTERN_LOWER_CASE = Pattern.compile("[a-z]");
 	public static final Pattern PATTERN_NUMERIC = Pattern.compile("[\\d]");
 	public static final Pattern PATTERN_PASSWORD_SYMBOLS = Pattern.compile("[\\~\\!\\@\\#\\$\\%\\^\\&\\*\\(\\)\\-\\_\\+\\=]");
@@ -336,47 +338,90 @@ public class Validator
 		return this;
 	}
 
-	/** Ensures that a Geo coordinate exists and is within the valid range.
+	/** Ensures that a Latitude coordinate exists and is within the valid range.
 	 *
 	 * @param name
 	 * @param caption
 	 * @param value
 	 * @return SELF
 	 */
-	public Validator ensureExistsAndGeoCoord(String name, String caption, BigDecimal value)
+	public Validator ensureExistsAndLatitude(String name, String caption, BigDecimal value)
 	{
 		if (null == value)
 			addWithCode(CODE_MISSING_FIELD, name, NOT_SET, caption);
 		else
-			ensureGeoCoord_(name, caption, value);
+			ensureLatitude_(name, caption, value);
 
 		return this;
 	}
 
-	/** Ensures that a Geo coordinate is within the valid range.
+	/** Ensures that a Latitude coordinate is within the valid range.
 	 *
 	 * @param name
 	 * @param caption
 	 * @param value
 	 * @return SELF
 	 */
-	public Validator ensureGeoCoord(String name, String caption, BigDecimal value)
+	public Validator ensureLatitude(String name, String caption, BigDecimal value)
 	{
 		if (null != value)
-			ensureGeoCoord_(name, caption, value);
+			ensureLatitude_(name, caption, value);
 
 		return this;
 	}
 
-	/** Helper method - validates the Geo coord.
+	/** Helper method - validates the Latitude coord.
 	 *
 	 * @param name
 	 * @param caption
 	 * @param value
 	 */
-	private void ensureGeoCoord_(String name, String caption, BigDecimal value)
+	private void ensureLatitude_(String name, String caption, BigDecimal value)
 	{
-		ensureRange_(name, caption, value, MIN_GEO_COORD, MAX_GEO_COORD);
+		ensureRange_(name, caption, value, MIN_LATITUDE, MAX_LATITUDE);
+	}
+
+	/** Ensures that a Longitude coordinate exists and is within the valid range.
+	 *
+	 * @param name
+	 * @param caption
+	 * @param value
+	 * @return SELF
+	 */
+	public Validator ensureExistsAndLongitude(String name, String caption, BigDecimal value)
+	{
+		if (null == value)
+			addWithCode(CODE_MISSING_FIELD, name, NOT_SET, caption);
+		else
+			ensureLongitude_(name, caption, value);
+
+		return this;
+	}
+
+	/** Ensures that a Longitude coordinate is within the valid range.
+	 *
+	 * @param name
+	 * @param caption
+	 * @param value
+	 * @return SELF
+	 */
+	public Validator ensureLongitude(String name, String caption, BigDecimal value)
+	{
+		if (null != value)
+			ensureLongitude_(name, caption, value);
+
+		return this;
+	}
+
+	/** Helper method - validates the Longitude coord.
+	 *
+	 * @param name
+	 * @param caption
+	 * @param value
+	 */
+	private void ensureLongitude_(String name, String caption, BigDecimal value)
+	{
+		ensureRange_(name, caption, value, MIN_LATITUDE, MAX_LATITUDE);
 	}
 
 	/** Ensures that a value exists and is within the valid range.

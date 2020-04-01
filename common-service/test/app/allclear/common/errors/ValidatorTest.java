@@ -17,6 +17,11 @@ public class ValidatorTest
 {
 	public static final Map<String, String> MAP = Map.of("1", "One", "2", "Two", "3", "Three");
 
+	private static BigDecimal bg(final int value) { return new BigDecimal(value); }
+	private static BigDecimal bg(final float value) { return new BigDecimal(value); }
+	private static BigDecimal bg(final double value) { return new BigDecimal(value); }
+	private static BigDecimal bg(final String value) { return new BigDecimal(value); }
+
 	@Test
 	public void ensureExists()
 	{
@@ -263,57 +268,112 @@ public class ValidatorTest
 	}
 
 	@Test
-	public void ensureExistsAndGeoCoord_missing()
+	public void ensureExistsAndLatitude_missing()
 	{
-		checkSingle(new Validator().ensureExistsAndGeoCoord("latitude", "Latitude", null), "latitude", "Latitude is not set.");
+		checkSingle(new Validator().ensureExistsAndLatitude("latitude", "Latitude", null), "latitude", "Latitude is not set.");
 	}
 
 	@Test
-	public void ensureExistsAndGeoCoord_tooHigh()
+	public void ensureExistsAndLatitude_tooHigh()
 	{
-		checkSingle(new Validator().ensureExistsAndGeoCoord("latitude", "Latitude", new BigDecimal("180.5")), "latitude", "Latitude '180.5' is greater than the accepted value of 180.");
+		checkSingle(new Validator().ensureExistsAndLatitude("latitude", "Latitude", bg("90.5")), "latitude", "Latitude '90.5' is greater than the accepted value of 180.");
 	}
 
 	@Test
-	public void ensureExistsAndGeoCoord_tooLow()
+	public void ensureExistsAndLatitude_tooLow()
 	{
-		checkSingle(new Validator().ensureExistsAndGeoCoord("latitude", "Latitude", new BigDecimal("-180.5")), "latitude", "Latitude '-180.5' is less than the accepted value of -180.");
+		checkSingle(new Validator().ensureExistsAndLatitude("latitude", "Latitude", bg("-90.5")), "latitude", "Latitude '-90.5' is less than the accepted value of -180.");
 	}
 
 	@Test
-	public void ensureExistsAndGeoCoord_success()
+	public void ensureExistsAndLatitude_success()
 	{
-		checkSuccess(new Validator().ensureExistsAndGeoCoord("latitude", "Latitude", new BigDecimal(0)));
-		checkSuccess(new Validator().ensureExistsAndGeoCoord("latitude", "Latitude", new BigDecimal(4.58484f)));
-		checkSuccess(new Validator().ensureExistsAndGeoCoord("latitude", "Latitude", new BigDecimal(4.58484d)));
-		checkSuccess(new Validator().ensureExistsAndGeoCoord("latitude", "Latitude", new BigDecimal(-45)));
-		checkSuccess(new Validator().ensureExistsAndGeoCoord("latitude", "Latitude", new BigDecimal(45)));
-		checkSuccess(new Validator().ensureExistsAndGeoCoord("latitude", "Latitude", new BigDecimal(90)));
-		checkSuccess(new Validator().ensureExistsAndGeoCoord("latitude", "Latitude", new BigDecimal(-90)));
+		checkSuccess(new Validator().ensureExistsAndLatitude("latitude", "Latitude", bg(0)));
+		checkSuccess(new Validator().ensureExistsAndLatitude("latitude", "Latitude", bg(4.58484f)));
+		checkSuccess(new Validator().ensureExistsAndLatitude("latitude", "Latitude", bg(4.58484d)));
+		checkSuccess(new Validator().ensureExistsAndLatitude("latitude", "Latitude", bg(-45)));
+		checkSuccess(new Validator().ensureExistsAndLatitude("latitude", "Latitude", bg(45)));
+		checkSuccess(new Validator().ensureExistsAndLatitude("latitude", "Latitude", bg(90)));
+		checkSuccess(new Validator().ensureExistsAndLatitude("latitude", "Latitude", bg(-90)));
 	}
 
 	@Test
-	public void ensureGeoCoord_tooHigh()
+	public void ensureLatitude_tooHigh()
 	{
-		checkSingle(new Validator().ensureGeoCoord("latitude", "Latitude", new BigDecimal("180.5")), "latitude", "Latitude '180.5' is greater than the accepted value of 180.");
+		checkSingle(new Validator().ensureLatitude("latitude", "Latitude", bg("90.5")), "latitude", "Latitude '90.5' is greater than the accepted value of 180.");
 	}
 
 	@Test
-	public void ensureGeoCoord_tooLow()
+	public void ensureLatitude_tooLow()
 	{
-		checkSingle(new Validator().ensureGeoCoord("latitude", "Latitude", new BigDecimal("-180.5")), "latitude", "Latitude '-180.5' is less than the accepted value of -180.");
+		checkSingle(new Validator().ensureLatitude("latitude", "Latitude", bg("-90.5")), "latitude", "Latitude '-90.5' is less than the accepted value of -180.");
 	}
 
 	@Test
-	public void ensureGeoCoord_success()
+	public void ensureLatitude_success()
 	{
-		checkSuccess(new Validator().ensureGeoCoord("latitude", "Latitude", null));
-		checkSuccess(new Validator().ensureGeoCoord("latitude", "Latitude", new BigDecimal(4.58484f)));
-		checkSuccess(new Validator().ensureGeoCoord("latitude", "Latitude", new BigDecimal(4.58484d)));
-		checkSuccess(new Validator().ensureGeoCoord("latitutde", "Latitude", new BigDecimal(-45)));
-		checkSuccess(new Validator().ensureGeoCoord("latitude", "Latitude", new BigDecimal(45)));
-		checkSuccess(new Validator().ensureGeoCoord("latitude", "Latitude", new BigDecimal(90)));
-		checkSuccess(new Validator().ensureGeoCoord("latitude", "Latitude", new BigDecimal(-90)));
+		checkSuccess(new Validator().ensureLatitude("latitude", "Latitude", null));
+		checkSuccess(new Validator().ensureLatitude("latitude", "Latitude", bg(4.58484f)));
+		checkSuccess(new Validator().ensureLatitude("latitude", "Latitude", bg(4.58484d)));
+		checkSuccess(new Validator().ensureLatitude("latitutde", "Latitude", bg(-45)));
+		checkSuccess(new Validator().ensureLatitude("latitude", "Latitude", bg(45)));
+		checkSuccess(new Validator().ensureLatitude("latitude", "Latitude", bg(90)));
+		checkSuccess(new Validator().ensureLatitude("latitude", "Latitude", bg(-90)));
+	}
+
+
+	@Test
+	public void ensureExistsAndLongitude_missing()
+	{
+		checkSingle(new Validator().ensureExistsAndLongitude("longitude", "Longitude", null), "longitude", "Longitude is not set.");
+	}
+
+	@Test
+	public void ensureExistsAndLongitude_tooHigh()
+	{
+		checkSingle(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg("180.5")), "longitude", "Longitude '180.5' is greater than the accepted value of 180.");
+	}
+
+	@Test
+	public void ensureExistsAndLongitude_tooLow()
+	{
+		checkSingle(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg("-180.5")), "longitude", "Longitude '-180.5' is less than the accepted value of -180.");
+	}
+
+	@Test
+	public void ensureExistsAndLongitude_success()
+	{
+		checkSuccess(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg(0)));
+		checkSuccess(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg(4.58484f)));
+		checkSuccess(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg(4.58484d)));
+		checkSuccess(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg(-45)));
+		checkSuccess(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg(45)));
+		checkSuccess(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg(90)));
+		checkSuccess(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg(-90)));
+	}
+
+	@Test
+	public void ensureLongitude_tooHigh()
+	{
+		checkSingle(new Validator().ensureLongitude("longitude", "Longitude", bg("180.5")), "longitude", "Longitude '180.5' is greater than the accepted value of 180.");
+	}
+
+	@Test
+	public void ensureLongitude_tooLow()
+	{
+		checkSingle(new Validator().ensureLongitude("longitude", "Longitude", bg("-180.5")), "longitude", "Longitude '-180.5' is less than the accepted value of -180.");
+	}
+
+	@Test
+	public void ensureLongitude_success()
+	{
+		checkSuccess(new Validator().ensureLongitude("longitude", "Longitude", null));
+		checkSuccess(new Validator().ensureLongitude("longitude", "Longitude", bg(4.58484f)));
+		checkSuccess(new Validator().ensureLongitude("longitude", "Longitude", bg(4.58484d)));
+		checkSuccess(new Validator().ensureLongitude("latitutde", "Longitude", bg(-45)));
+		checkSuccess(new Validator().ensureLongitude("longitude", "Longitude", bg(45)));
+		checkSuccess(new Validator().ensureLongitude("longitude", "Longitude", bg(90)));
+		checkSuccess(new Validator().ensureLongitude("longitude", "Longitude", bg(-90)));
 	}
 
 	@Test

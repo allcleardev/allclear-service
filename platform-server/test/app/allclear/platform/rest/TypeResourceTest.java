@@ -71,6 +71,15 @@ public class TypeResourceTest
 	}
 
 	@Test
+	public void getSexes()
+	{
+		var response = request("sexes").get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		assertThat(response.readEntity(new GenericType<List<Sex>>() {})).isEqualTo(Sex.LIST);
+	}
+
+	@Test
 	public void getSymptoms()
 	{
 		var response = request("symptoms").get();

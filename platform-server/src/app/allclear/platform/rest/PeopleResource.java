@@ -101,7 +101,7 @@ public class PeopleResource
 	public SessionValue register(@QueryParam("rememberMe") @ApiParam(name="rememberMe", value="Indicates to use a long term session if TRUE.", defaultValue="false", required=false) @DefaultValue("false") final Boolean rememberMe,
 		final PeopleValue value) throws ValidationException
 	{
-		return sessionDao.promote(dao.add(value.withPhone(sessionDao.get().registration.phone)),	// The AuthFilter ensures that this is a Registration session. DLS on 3/29/2020.
+		return sessionDao.promote(dao.add(value.withPhone(sessionDao.get().registration.phone).registeredByPhone()),	// The AuthFilter ensures that this is a Registration session. DLS on 3/29/2020.
 			Boolean.TRUE.equals(rememberMe));
 	}
 

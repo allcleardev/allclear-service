@@ -1,5 +1,6 @@
 package app.allclear.platform.filter;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
@@ -38,6 +39,17 @@ public class PeopleFilter extends QueryFilter
 	public Boolean hasStatusId = null;
 	public String statureId = null;
 	public Boolean hasStatureId = null;
+	public String sexId = null;
+	public Boolean hasSexId = null;
+	public BigDecimal latitude = null;
+	public Boolean hasLatitude = null;
+	public BigDecimal latitudeFrom = null;
+	public BigDecimal latitudeTo = null;
+	public BigDecimal longitude = null;
+	public Boolean hasLongitude = null;
+	public BigDecimal longitudeFrom = null;
+	public BigDecimal longitudeTo = null;
+	public Boolean alertable = null;
 	public Boolean active = null;
 	public Boolean hasAuthAt = null;
 	public Date authAtFrom = null;
@@ -77,6 +89,17 @@ public class PeopleFilter extends QueryFilter
 	public PeopleFilter withHasStatusId(final Boolean newValue) { hasStatusId = newValue; return this; }
 	public PeopleFilter withStatureId(final String newValue) { statureId = newValue; return this; }
 	public PeopleFilter withHasStatureId(final Boolean newValue) { hasStatureId = newValue; return this; }
+	public PeopleFilter withSexId(final String newValue) { sexId = newValue; return this; }
+	public PeopleFilter withHasSexId(final Boolean newValue) { hasSexId = newValue; return this; }
+	public PeopleFilter withLatitude(final BigDecimal newValue) { latitude = newValue; return this; }
+	public PeopleFilter withHasLatitude(final Boolean newValue) { hasLatitude = newValue; return this; }
+	public PeopleFilter withLatitudeFrom(final BigDecimal newValue) { latitudeFrom = newValue; return this; }
+	public PeopleFilter withLatitudeTo(final BigDecimal newValue) { latitudeTo = newValue; return this; }
+	public PeopleFilter withLongitude(final BigDecimal newValue) { longitude = newValue; return this; }
+	public PeopleFilter withHasLongitude(final Boolean newValue) { hasLongitude = newValue; return this; }
+	public PeopleFilter withLongitudeFrom(final BigDecimal newValue) { longitudeFrom = newValue; return this; }
+	public PeopleFilter withLongitudeTo(final BigDecimal newValue) { longitudeTo = newValue; return this; }
+	public PeopleFilter withAlertable(final Boolean newValue) { alertable = newValue; return this; }
 	public PeopleFilter withActive(final Boolean newValue) { active = newValue; return this; }
 	public PeopleFilter withHasAuthAt(final Boolean newValue) { hasAuthAt = newValue; return this; }
 	public PeopleFilter withAuthAtFrom(final Date newValue) { authAtFrom = newValue; return this; }
@@ -145,6 +168,14 @@ public class PeopleFilter extends QueryFilter
 		@param dobTo represents the "dob" field - upper boundary.
 		@param statusId represents the "status_id" field.
 		@param statureId represents the "stature_id" field.
+		@param sexId represents the "sex_id" field.
+		@param latitude represents the "latitude" field.
+		@param latitudeFrom represents the "latitude" field - lower boundary.
+		@param latitudeTo represents the "latitude" field - upper boundary.
+		@param longitude represents the "longitude" field.
+		@param longitudeFrom represents the "longitude" field - lower boundary.
+		@param longitudeTo represents the "longitude" field - upper boundary.
+		@param alertable represents the "alertable" field.
 		@param active represents the "active" field.
 		@param authAtFrom represents the "auth_at" field - lower boundary.
 		@param authAtTo represents the "auth_at" field - upper boundary.
@@ -168,6 +199,14 @@ public class PeopleFilter extends QueryFilter
 		final Date dobTo,
 		final String statusId,
 		final String statureId,
+		final String sexId,
+		final BigDecimal latitude,
+		final BigDecimal latitudeFrom,
+		final BigDecimal latitudeTo,
+		final BigDecimal longitude,
+		final BigDecimal longitudeFrom,
+		final BigDecimal longitudeTo,
+		final Boolean alertable,
 		final Boolean active,
 		final Date authAtFrom,
 		final Date authAtTo,
@@ -191,6 +230,14 @@ public class PeopleFilter extends QueryFilter
 		this.dobTo = dobTo;
 		this.statusId = statusId;
 		this.statureId = statureId;
+		this.sexId = sexId;
+		this.latitude = latitude;
+		this.latitudeFrom = latitudeFrom;
+		this.latitudeTo = latitudeTo;
+		this.longitude = longitude;
+		this.longitudeFrom = longitudeFrom;
+		this.longitudeTo = longitudeTo;
+		this.alertable = alertable;
 		this.active = active;
 		this.authAtFrom = authAtFrom;
 		this.authAtTo = authAtTo;
@@ -221,6 +268,7 @@ public class PeopleFilter extends QueryFilter
 		lastName = StringUtils.trimToNull(lastName);
 		statusId = StringUtils.trimToNull(statusId);
 		statureId = StringUtils.trimToNull(statureId);
+		sexId = StringUtils.trimToNull(sexId);
 
 		return this;
 	}
@@ -251,6 +299,17 @@ public class PeopleFilter extends QueryFilter
 			.append(", hasStatusId: ").append(hasStatusId)
 			.append(", statureId: ").append(statureId)
 			.append(", hasStatureId: ").append(hasStatureId)
+			.append(", sexId: ").append(sexId)
+			.append(", hasSexId: ").append(hasSexId)
+			.append(", latitude: ").append(latitude)
+			.append(", hasLatitude: ").append(hasLatitude)
+			.append(", latitudeFrom: ").append(latitudeFrom)
+			.append(", latitudeTo: ").append(latitudeTo)
+			.append(", longitude: ").append(longitude)
+			.append(", hasLongitude: ").append(hasLongitude)
+			.append(", longitudeFrom: ").append(longitudeFrom)
+			.append(", longitudeTo: ").append(longitudeTo)
+			.append(", alertable: ").append(alertable)
 			.append(", active: ").append(active)
 			.append(", hasAuthAt: ").append(hasAuthAt)
 			.append(", authAtFrom: ").append(authAtFrom)

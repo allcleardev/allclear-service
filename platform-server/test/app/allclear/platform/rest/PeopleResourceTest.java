@@ -108,6 +108,7 @@ public class PeopleResourceTest
 		assertThat(value.id).as("Check ID").hasSize(6);
 		Assertions.assertNull(value.status, "Check status");
 		Assertions.assertNull(value.stature, "Check stature");
+		Assertions.assertNull(value.sex, "Check sex");
 		assertThat(value.createdAt).as("Check createdAt").isCloseTo(new Date(), 500L);
 		assertThat(value.updatedAt).as("Check updatedAt").isEqualTo(value.createdAt);
 		check(VALUE.withId(value.id).withCreatedAt(value.createdAt).withUpdatedAt(value.updatedAt), value);
@@ -200,6 +201,10 @@ public class PeopleResourceTest
 			arguments(new PeopleFilter(1, 20).withHasDob(false), 1L),
 			arguments(new PeopleFilter(1, 20).withHasStatusId(false), 1L),
 			arguments(new PeopleFilter(1, 20).withHasStatureId(false), 1L),
+			arguments(new PeopleFilter(1, 20).withHasSexId(false), 1L),
+			arguments(new PeopleFilter(1, 20).withHasLatitude(false), 1L),
+			arguments(new PeopleFilter(1, 20).withHasLongitude(false), 1L),
+			arguments(new PeopleFilter(1, 20).withAlertable(VALUE.alertable), 1L),
 			arguments(new PeopleFilter(1, 20).withActive(VALUE.active), 1L),
 			arguments(new PeopleFilter(1, 20).withAuthAtFrom(hours(AUTH_AT, -1)), 1L),
 			arguments(new PeopleFilter(1, 20).withAuthAtTo(hours(AUTH_AT, 1)), 1L),
@@ -227,6 +232,10 @@ public class PeopleResourceTest
 			arguments(new PeopleFilter(1, 20).withHasDob(true), 0L),
 			arguments(new PeopleFilter(1, 20).withHasStatusId(true), 0L),
 			arguments(new PeopleFilter(1, 20).withHasStatureId(true), 0L),
+			arguments(new PeopleFilter(1, 20).withHasSexId(true), 0L),
+			arguments(new PeopleFilter(1, 20).withHasLatitude(true), 0L),
+			arguments(new PeopleFilter(1, 20).withHasLongitude(true), 0L),
+			arguments(new PeopleFilter(1, 20).withAlertable(!VALUE.alertable), 0L),
 			arguments(new PeopleFilter(1, 20).withActive(!VALUE.active), 0L),
 			arguments(new PeopleFilter(1, 20).withAuthAtFrom(hours(AUTH_AT, 1)), 0L),
 			arguments(new PeopleFilter(1, 20).withAuthAtTo(hours(AUTH_AT, -1)), 0L),
@@ -324,6 +333,7 @@ public class PeopleResourceTest
 		response = request("register").post(Entity.json(VALUE = PeopleDAOTest.createValid()));
 		Assertions.assertEquals(HTTP_STATUS_AUTHENTICATE, response.getStatus(), "Status: register - fail");
 
+		var now = new Date();
 		sessionDao.current(session);
 		response = request("register").post(Entity.json(VALUE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status: register - success");
@@ -331,8 +341,14 @@ public class PeopleResourceTest
 		Assertions.assertNotNull(registered, "Exists: registered");
 		Assertions.assertNull(registered.registration, "Exists: registered.registration");
 		Assertions.assertNotNull(registered.person, "Exists: registered.person");
-		Assertions.assertEquals("+18885552000", registered.person.phone, "Check registerd.person.phone");
+		Assertions.assertEquals("+18885552000", registered.person.phone, "Check registered.person.phone");
 		Assertions.assertNotEquals(VALUE.phone, registered.person.phone, "Phone fixed");
+		Assertions.assertTrue(registered.person.active, "Check registered.person.active");
+		assertThat(registered.person.authAt).as("Check registered.person.authAt").isCloseTo(now, 200L);
+		assertThat(registered.person.phoneVerifiedAt).as("Check registered.person.phoneVerifiedAt").isCloseTo(now, 200L);
+		Assertions.assertNull(registered.person.emailVerifiedAt, "Check registered.person.emailVerifiedAt");
+		assertThat(registered.person.createdAt).as("Check registered.person.createdAt").isCloseTo(now, 200L);
+		assertThat(registered.person.updatedAt).as("Check registered.person.updatedAt").isCloseTo(now, 200L);
 	}
 
 	@Test
@@ -407,6 +423,16 @@ public class PeopleResourceTest
 			assertThat(value.dob).as(assertId + "Check dob").isCloseTo(expected.dob, 500L);
 		Assertions.assertEquals(expected.statusId, value.statusId, assertId + "Check statusId");
 		Assertions.assertEquals(expected.statureId, value.statureId, assertId + "Check statureId");
+		Assertions.assertEquals(expected.sexId, value.sexId, assertId + "Check sexId");
+		if (null == expected.latitude)
+			Assertions.assertNull(value.latitude, assertId + "Check latitude");
+		else
+			assertThat(value.latitude).as(assertId + "Check latitude").isEqualByComparingTo(expected.latitude);
+		if (null == expected.longitude)
+			Assertions.assertNull(value.longitude, assertId + "Check longitude");
+		else
+			assertThat(value.longitude).as(assertId + "Check longitude").isEqualByComparingTo(expected.longitude);
+		Assertions.assertEquals(expected.alertable, value.alertable, assertId + "Check alertable");
 		Assertions.assertEquals(expected.active, value.active, assertId + "Check active");
 		if (null == expected.authAt)
 			Assertions.assertNull(value.authAt, assertId + "Check authAt");

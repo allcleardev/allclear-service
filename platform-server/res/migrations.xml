@@ -96,4 +96,22 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.0.11_people" author="smalleyd">
+		<addColumn tableName="people">
+			<column name="sex_id" type="CHAR(1)" remarks="Represents the biological gender of the user." />
+			<column name="latitude" type="DECIMAL(12,5)" remarks="Represents the GEO coordinates of the user's primary location - latitude property." />
+			<column name="longitude" type="DECIMAL(12,5)" remarks="Represents the GEO coordinates of the user's primary location - longitude property." />
+			<column name="alertable" type="BOOLEAN" defaultValueBoolean="false" remarks="Indicates that a user wishes to be notified with pertinent information.">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+
+		<rollback>
+			<dropColumn tableName="people" columnName="alertable" />
+			<dropColumn tableName="people" columnName="longitude" />
+			<dropColumn tableName="people" columnName="latitude" />
+			<dropColumn tableName="people" columnName="sex_id" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

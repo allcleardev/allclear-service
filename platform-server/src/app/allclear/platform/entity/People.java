@@ -3,6 +3,7 @@ package app.allclear.platform.entity;
 import static java.util.stream.Collectors.toList;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.*;
 
 import javax.persistence.*;
@@ -15,6 +16,7 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.type.PeopleStatus;
+import app.allclear.platform.type.Sex;
 import app.allclear.platform.type.PeopleStature;
 import app.allclear.platform.value.PeopleValue;
 
@@ -91,6 +93,26 @@ public class People implements Serializable
 	public String statureId;
 	public void setStatureId(final String newValue) { statureId = newValue; }
 
+	@Column(name="sex_id", columnDefinition="CHAR(1)", nullable=true)
+	public String getSexId() { return sexId; }
+	public String sexId;
+	public void setSexId(final String newValue) { sexId = newValue; }
+
+	@Column(name="latitude", columnDefinition="DECIMAL(12, 5)", nullable=true)
+	public BigDecimal getLatitude() { return latitude; }
+	public BigDecimal latitude;
+	public void setLatitude(final BigDecimal newValue) { latitude = newValue; }
+
+	@Column(name="longitude", columnDefinition="DECIMAL(12, 5)", nullable=true)
+	public BigDecimal getLongitude() { return longitude; }
+	public BigDecimal longitude;
+	public void setLongitude(final BigDecimal newValue) { longitude = newValue; }
+
+	@Column(name="alertable", columnDefinition="BIT", nullable=false)
+	public boolean isAlertable() { return alertable; }
+	public boolean alertable;
+	public void setAlertable(final boolean newValue) { alertable = newValue; }
+
 	@Column(name="active", columnDefinition="BIT", nullable=false)
 	public boolean isActive() { return active; }
 	public boolean active;
@@ -147,6 +169,10 @@ public class People implements Serializable
 		final Date dob,
 		final String statusId,
 		final String statureId,
+		final String sexId,
+		final BigDecimal latitude,
+		final BigDecimal longitude,
+		final boolean alertable,
 		final boolean active,
 		final Date authAt,
 		final Date phoneVerifiedAt,
@@ -162,6 +188,10 @@ public class People implements Serializable
 		this.dob = dob;
 		this.statusId = statusId;
 		this.statureId = statureId;
+		this.sexId = sexId;
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.alertable = alertable;
 		this.active = active;
 		this.authAt = authAt;
 		this.phoneVerifiedAt = phoneVerifiedAt;
@@ -173,7 +203,8 @@ public class People implements Serializable
 	{
 		this(value.id, value.name, value.phone, value.email,
 			value.firstName, value.lastName, value.dob,
-			value.statusId, value.statureId,
+			value.statusId, value.statureId, value.sexId,
+			value.latitude, value.longitude, value.alertable,
 			value.active, value.authAt, value.phoneVerifiedAt,
 			value.emailVerifiedAt, value.createdAt);
 	}
@@ -193,6 +224,10 @@ public class People implements Serializable
 			DateUtils.truncatedEquals(dob, v.dob, Calendar.SECOND) &&
 			Objects.equals(statusId, v.statusId) &&
 			Objects.equals(statureId, v.statureId) &&
+			Objects.equals(sexId, v.sexId) &&
+			Objects.equals(latitude, v.latitude) &&
+			Objects.equals(longitude, v.longitude) &&
+			(alertable == v.alertable) &&
 			(active == v.active) &&
 			DateUtils.truncatedEquals(authAt, v.authAt, Calendar.SECOND) &&
 			DateUtils.truncatedEquals(phoneVerifiedAt, v.phoneVerifiedAt, Calendar.SECOND) &&
@@ -226,6 +261,11 @@ public class People implements Serializable
 			(null != getStatusId()) ? PeopleStatus.VALUES.get(getStatusId()) : null,
 			getStatureId(),
 			(null != getStatureId()) ? PeopleStature.VALUES.get(getStatureId()) : null,
+			getSexId(),
+			(null != getSexId()) ? Sex.VALUES.get(getSexId()) : null,
+			getLatitude(),
+			getLongitude(),
+			isAlertable(),
 			isActive(),
 			getAuthAt(),
 			getPhoneVerifiedAt(),
