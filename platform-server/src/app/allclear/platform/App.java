@@ -65,8 +65,8 @@ public class App extends Application<Config>
 		bootstrap.setConfigurationSourceProvider(new SubstitutingSourceProvider(bootstrap.getConfigurationSourceProvider(), new EnvironmentVariableSubstitutor(false)));
 
 		bootstrap.addBundle(transHibernateBundle);
+		bootstrap.addBundle(new AssetsBundle("/assets/web", "/manager", "index.html", "admin-app"));	// MUST use /manager as the context because anything that begins with 'admin' apparently collides with config "server.adminContextPath: admin". DLS on 4/1/2020.
 		bootstrap.addBundle(new AssetsBundle("/assets/swagger_ui", "/swagger-ui/", "index.html", "swagger-ui"));
-		bootstrap.addBundle(new AssetsBundle("/assets/web", "/admin-app/", "index.html", "admin-app"));
 		bootstrap.addBundle(new MigrationsBundle<Config>() {
 			@Override
 			public DataSourceFactory getDataSourceFactory(final Config conf) { return conf.trans; }

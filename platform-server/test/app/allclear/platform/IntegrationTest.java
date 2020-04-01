@@ -1,14 +1,18 @@
 package app.allclear.platform;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static app.allclear.testing.TestingUtils.*;
 
 import java.util.Date;
-
+import java.util.stream.Stream;
 import javax.ws.rs.client.*;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import io.dropwizard.testing.junit5.DropwizardAppExtension;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
@@ -43,6 +47,27 @@ public class IntegrationTest
 		info = home.path("info");
 		people = home.path("people");
 		types = home.path("types");
+	}
+
+	public static Stream<Arguments> assets()
+	{
+		return Stream.of(
+			arguments("manager", HTTP_STATUS_OK),
+			arguments("managers", HTTP_STATUS_NOT_FOUND),
+			arguments("manager/index.html", HTTP_STATUS_OK),
+			arguments("managers/index.html", HTTP_STATUS_NOT_FOUND),
+			arguments("swagger-ui", HTTP_STATUS_OK),
+			arguments("swagger_ui", HTTP_STATUS_NOT_FOUND),
+			arguments("swagger-ui/index.html", HTTP_STATUS_OK),
+			arguments("swagger_ui/index.html", HTTP_STATUS_NOT_FOUND),
+			arguments("swagger.json", HTTP_STATUS_OK));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void assets(final String path, final int status)
+	{
+		Assertions.assertEquals(status, request(home.path(path)).get().getStatus(), "Check " + path);
 	}
 
 	@Test
@@ -109,18 +134,6 @@ public class IntegrationTest
 	public void ping()
 	{
 		Assertions.assertEquals(HTTP_STATUS_OK, request(info.path("ping")).get().getStatus());
-	}
-
-	@Test
-	public void swagger()
-	{
-		Assertions.assertEquals(HTTP_STATUS_OK, request(home.path("swagger-ui/index.html")).get().getStatus());
-	}
-
-	@Test
-	public void swaggerJson()
-	{
-		Assertions.assertEquals(HTTP_STATUS_OK, request(home.path("swagger.json")).get().getStatus());
 	}
 
 	private Invocation.Builder request(final WebTarget target) { return target.request(UTF8MediaType.APPLICATION_JSON_TYPE); }
