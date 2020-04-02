@@ -38,7 +38,7 @@ import app.allclear.platform.value.SessionValue;
 @Api(value="Admin")
 public class AdminResource
 {
-	private static final Logger log = LoggerFactory.getLogger(AdminDAO.class);
+	private static final Logger log = LoggerFactory.getLogger(AdminResource.class);
 
 	private final AdminDAO dao;
 	private final SessionDAO sessionDao;

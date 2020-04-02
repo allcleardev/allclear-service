@@ -29,7 +29,7 @@ import app.allclear.platform.value.AdminValue;
 public class AdminDAO
 {
 	private static final Logger log = LoggerFactory.getLogger(AdminDAO.class);
-	public static final String TABLE = "allclear_admins";
+	public static final String TABLE = "admins";
 
 	private final CloudTable table;
 

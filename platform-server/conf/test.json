@@ -32,7 +32,7 @@
         "bindHost": null
     },
     "applicationContextPath": "/",
-    "adminContextPath": "/admin",
+    "adminContextPath": "/internals",
     "requestLog": {
         "appenders": [
             {
