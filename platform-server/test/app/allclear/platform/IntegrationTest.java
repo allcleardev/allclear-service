@@ -29,7 +29,6 @@ import app.allclear.platform.type.*;
  *
  */
 
-@Disabled
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class IntegrationTest

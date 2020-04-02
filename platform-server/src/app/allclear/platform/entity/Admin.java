@@ -45,7 +45,7 @@ public class Admin extends TableServiceEntity implements Serializable
 	public String lastName;
 	public void setLastName(final String newValue) { lastName = newValue; }
 
-	public boolean isSupers() { return supers; }
+	public boolean getSupers() { return supers; }
 	public boolean supers;
 	public void setSupers(final boolean newValue) { supers = newValue; }
 
@@ -74,7 +74,9 @@ public class Admin extends TableServiceEntity implements Serializable
 		this.firstName = value.firstName;
 		this.lastName = value.lastName;
 		this.supers = value.supers;
-		this.createdAt = value.createdAt = value.updatedAt = now;
+		this.createdAt = this.updatedAt = value.createdAt = value.updatedAt = now;
+
+		value.password = null;	// Do NOT reflect back the user password.
 	}
 
 	@Override
@@ -95,7 +97,12 @@ public class Admin extends TableServiceEntity implements Serializable
 
 	public Admin update(final AdminValue value)
 	{
-		if (null != value.password) setPassword(saltAndHash(identifier, value.password));
+		if (null != value.password)
+		{
+			setPassword(saltAndHash(identifier, value.password));
+			value.password = null;	// Do NOT reflect back the user password.
+		}
+
 		setEmail(value.email);
 		setFirstName(value.firstName);
 		setLastName(value.lastName);
@@ -124,7 +131,7 @@ public class Admin extends TableServiceEntity implements Serializable
 			getEmail(),
 			getFirstName(),
 			getLastName(),
-			isSupers(),
+			getSupers(),
 			getCreatedAt(),
 			getUpdatedAt());
 	}

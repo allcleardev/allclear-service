@@ -1,14 +1,21 @@
 package app.allclear.platform.dao;
 
+import static com.microsoft.azure.storage.table.TableOperation.*;
+import static com.microsoft.azure.storage.table.TableQuery.*;
+import static com.microsoft.azure.storage.table.TableQuery.Operators.*;
+import static com.microsoft.azure.storage.table.TableQuery.QueryComparisons.*;
+
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import org.slf4j.*;
 
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.table.CloudTable;
-import com.microsoft.azure.storage.table.TableOperation;
+import com.microsoft.azure.storage.table.TableQuery;
 
 import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.ValidationException;
@@ -91,11 +98,11 @@ public class AdminDAO
 				validator	// MUST have password on addition.
 					.ensureExistsAndLength("password", "Password", value.password, AdminValue.MAX_LEN_PASSWORD).check();
 	
-				table.execute(TableOperation.insert(record = new Admin(value)));
+				table.execute(insert(record = new Admin(value)));
 			}
 			else
 			{
-				table.execute(TableOperation.merge(record.update(value)));
+				table.execute(merge(record.update(value)));
 			}
 		}
 		catch (final StorageException ex) { throw new RuntimeException(ex); }
@@ -145,7 +152,7 @@ public class AdminDAO
 			var record = find(id);
 			if (null == record) return false;
 	
-			table.execute(TableOperation.delete(record));
+			table.execute(delete(record));
 		}
 		catch (final StorageException ex) { throw new RuntimeException(ex); }
 
@@ -154,7 +161,7 @@ public class AdminDAO
 
 	Admin find(final String id) throws StorageException
 	{
-		return table.execute(TableOperation.retrieve(Admin.PARTITION, id, Admin.class)).getResultAsType();
+		return table.execute(retrieve(Admin.PARTITION, id, Admin.class)).getResultAsType();
 	}
 
 	/** Finds a single Admin entity by identifier.
@@ -210,7 +217,10 @@ public class AdminDAO
 	 */
 	public QueryResults<AdminValue, AdminFilter> search(final AdminFilter filter) throws ValidationException
 	{
-		return null;
+		var values = new LinkedList<AdminValue>();
+		for (var o : table.execute(createQueryBuilder(filter))) values.add(o.toValue());
+
+		return values.isEmpty() ? new QueryResults<>(0L, filter) : new QueryResults<>(values, filter);
 	}
 
 	/** Counts the number of Admin entities based on the supplied filter.
@@ -219,8 +229,31 @@ public class AdminDAO
 	 * @return zero if none found.
 	 * @throws ValidationException
 	 */
+	@SuppressWarnings("unused")
 	public long count(final AdminFilter filter) throws ValidationException
 	{
-		return 0L;
+		long i = 0;
+		for (var o : table.execute(createQueryBuilder(filter))) i++;
+
+		return i;
+	}
+
+	public TableQuery<Admin> createQueryBuilder(final AdminFilter filter) throws ValidationException
+	{
+		var filters = new LinkedList<String>();
+		filters.add(generateFilterCondition("PartitionKey", EQUAL, Admin.PARTITION));
+		if (null != filter.id) filters.add(generateFilterCondition("RowKey", EQUAL, filter.id));
+		if (null != filter.email) filters.add(generateFilterCondition("email", EQUAL, filter.email));
+		if (null != filter.firstName) filters.add(generateFilterCondition("firstName", EQUAL, filter.firstName));
+		if (null != filter.lastName) filters.add(generateFilterCondition("lastName", EQUAL, filter.lastName));
+		if (null != filter.supers) filters.add(generateFilterCondition("supers", EQUAL, filter.supers));
+		if (null != filter.createdAtFrom) filters.add(generateFilterCondition("createdAt", GREATER_THAN_OR_EQUAL, filter.createdAtFrom));
+		if (null != filter.createdAtTo) filters.add(generateFilterCondition("createdAt", LESS_THAN_OR_EQUAL, filter.createdAtTo));
+		if (null != filter.updatedAtFrom) filters.add(generateFilterCondition("updatedAt", GREATER_THAN_OR_EQUAL, filter.updatedAtFrom));
+		if (null != filter.updatedAtTo) filters.add(generateFilterCondition("updatedAt", LESS_THAN_OR_EQUAL, filter.updatedAtTo));
+
+		var query = from(Admin.class).where(filters.stream().map(o -> "(" + o + ") ").collect(Collectors.joining(AND)));
+
+		return query;
 	}
 }
