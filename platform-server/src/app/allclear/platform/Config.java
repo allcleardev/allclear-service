@@ -43,6 +43,7 @@ public class Config extends Configuration implements Serializable
 	public final String registrationSMSMessage;
 	public final String authenticationSMSMessage;
 
+	public final String admins;
 	public final RedisConfig session;
 	public final TwilioConfig twilio;
 
@@ -54,6 +55,7 @@ public class Config extends Configuration implements Serializable
 		@JsonProperty("baseUrl") final String baseUrl,
 		@JsonProperty("registrationPhone") final String registrationPhone,
 		@JsonProperty("authenticationPhone") final String authenticationPhone,
+		@JsonProperty("admins") final String admins,
 		@JsonProperty("session") final RedisConfig session,
 		@JsonProperty("twilio") final TwilioConfig twilio)
 	{
@@ -68,6 +70,7 @@ public class Config extends Configuration implements Serializable
 		this.registrationSMSMessage = baseUrl("/messages/sms/registration.txt", baseUrl);
 		this.authenticationSMSMessage = baseUrl("/messages/sms/authentication.txt", baseUrl);
 
+		this.admins = admins;
 		this.session = session;
 		this.twilio = twilio;
 	}

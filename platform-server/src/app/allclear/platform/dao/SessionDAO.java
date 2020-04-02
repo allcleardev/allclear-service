@@ -1,5 +1,8 @@
 package app.allclear.platform.dao;
 
+import static java.net.URLEncoder.encode;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.io.IOException;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -101,7 +104,7 @@ public class SessionDAO
 	{
 		var token = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
 
-		twilio.send(new SMSRequest(authFrom, String.format(authMessage, phone, token), phone));
+		twilio.send(new SMSRequest(authFrom, String.format(authMessage, encode(phone, UTF_8), encode(token, UTF_8)), phone));
 		redis.put(authKey(phone, token), phone, AUTH_DURATION);
 
 		return token;

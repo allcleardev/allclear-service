@@ -1,5 +1,8 @@
 package app.allclear.platform.dao;
 
+import static java.net.URLEncoder.encode;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
@@ -72,7 +75,7 @@ public class RegistrationDAO
 				key = key(request.phone, code = RandomStringUtils.randomAlphanumeric(CODE_LENGTH).toUpperCase());
 			}
 
-			twilio.send(new SMSRequest(from, String.format(message, request.phone, code), request.phone));
+			twilio.send(new SMSRequest(from, String.format(message, encode(request.phone, UTF_8), encode(code, UTF_8)), request.phone));
 			c.hset(key, mapper.convertValue(request, TYPE_MAP));
 			c.expire(key, EXPIRATION);
 

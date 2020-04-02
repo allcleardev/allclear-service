@@ -1,5 +1,7 @@
 package app.allclear.platform.dao;
 
+import static java.net.URLEncoder.encode;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.*;
@@ -74,7 +76,7 @@ public class RegistrationDAOTest
 		var code = dao.start(new StartRequest(phone, beenTested, haveSymptoms));
 		assertThat(code).hasSize(10).matches(PATTERN_CODE);
 		Assertions.assertNotNull(LAST_RESPONSE, "Check lastResponse");
-		Assertions.assertEquals(String.format(MESSAGE, expectedPhone, code), LAST_RESPONSE.body, "Check lastResponse.body");
+		Assertions.assertEquals(String.format(MESSAGE, encode(expectedPhone, UTF_8), code), LAST_RESPONSE.body, "Check lastResponse.body");
 
 		var o = dao.confirm(expectedPhone, code);
 		Assertions.assertNotNull(o, "Exists");

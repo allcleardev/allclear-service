@@ -1,5 +1,4 @@
 dependencies {
-  compile "commons-codec:commons-codec:${commonsCodecVersion}"
   testCompile "commons-io:commons-io:${commonsIOVersion}"
   testCompile "org.easytesting:fest-assert-core:${festVersion}"
   compile "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"

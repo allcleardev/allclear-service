@@ -5,6 +5,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
 /** Value object that represents an internal administrator.
@@ -18,6 +19,14 @@ import org.apache.commons.lang3.time.DateUtils;
 public class AdminValue implements Serializable
 {
 	private static final long serialVersionUID = 1L;
+
+	public static final String TABLE = "admin";
+	public static final int MAX_LEN_ID = 64;
+	public static final int MAX_LEN_PASSWORD = 30;
+	public static final int MIN_LEN_PASSWORD = 8;
+	public static final int MAX_LEN_EMAIL = 128;
+	public static final int MAX_LEN_FIRST_NAME = 32;
+	public static final int MAX_LEN_LAST_NAME = 32;
 
 	public String id = null;
 	public String password = null;
@@ -68,6 +77,16 @@ public class AdminValue implements Serializable
 		this.supers = supers;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
+	}
+
+	/** Helper method - trims all string fields and converts empty strings to NULL. */
+	public void clean()
+	{
+		id = StringUtils.trimToNull(id);
+		password = StringUtils.trimToNull(password);
+		email = StringUtils.trimToNull(email);
+		firstName = StringUtils.trimToNull(firstName);
+		lastName = StringUtils.trimToNull(lastName);
 	}
 
 	@Override

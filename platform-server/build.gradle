@@ -21,6 +21,7 @@ test {
 }
 
 dependencies {
+  compile "com.microsoft.azure:azure-storage:${azureStorageVersion}"
   compile "commons-io:commons-io:${commonsIOVersion}"
   compile "io.dropwizard:dropwizard-assets:${dropwizardVersion}"
   compile "io.dropwizard:dropwizard-hibernate:${dropwizardVersion}"

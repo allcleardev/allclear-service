@@ -5,6 +5,7 @@
   "registrationPhone": "+16466321488",
   "authenticationPhone": "+16466321488",
 
+  "admins": "DefaultEndpointsProtocol=https;AccountName=allclear-admins;AccountKey=${COSMOS_ACCOUNT_KEY:-accountKey};TableEndpoint=https://allclear-admins.table.cosmos.azure.com:443/;",
   "session": { "host": "allclear-prod.redis.cache.windows.net", "port": 6380, "timeout": 200, "poolSize": 10, "password": "${REDIS_PASSWORD:-password}", "ssl": true, "testWhileIdle": true },
   "twilio": { "baseUrl": "${twilio.baseUrl:-https://api.twilio.com/2010-04-01}", "accountId": "${TWILIO_ACCOUNT_ID:-123}", "authToken": "${TWILIO_AUTH_TOKEN:-token}" },
 

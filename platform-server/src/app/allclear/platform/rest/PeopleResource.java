@@ -13,6 +13,7 @@ import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.mediatype.UTF8MediaType;
+import app.allclear.common.resources.Headers;
 import app.allclear.common.value.OperationResponse;
 import app.allclear.platform.dao.*;
 import app.allclear.platform.filter.PeopleFilter;
@@ -54,7 +55,8 @@ public class PeopleResource
 	@GET
 	@Path("/{id}") @Timed @UnitOfWork(readOnly=true, transactional=false)
 	@ApiOperation(value="get", notes="Gets a single People by its primary key.", response=PeopleValue.class)
-	public PeopleValue get(@PathParam("id") final String id) throws ObjectNotFoundException
+	public PeopleValue get(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@PathParam("id") final String id) throws ObjectNotFoundException
 	{
 		return dao.getByIdWithException(id);
 	}
@@ -62,7 +64,8 @@ public class PeopleResource
 	@GET
 	@Timed @UnitOfWork(readOnly=true, transactional=false)
 	@ApiOperation(value="find", notes="Finds Peoples by wildcard name search.", response=PeopleValue.class, responseContainer="List")
-	public List<PeopleValue> find(@QueryParam("name") @ApiParam(name="name", value="Value for the wildcard search") final String name)
+	public List<PeopleValue> find(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@QueryParam("name") @ApiParam(name="name", value="Value for the wildcard search") final String name)
 	{
 		return dao.getActiveByIdOrName(name);
 	}
@@ -70,7 +73,8 @@ public class PeopleResource
 	@POST
 	@Timed @UnitOfWork
 	@ApiOperation(value="add", notes="Adds a single People. Returns the supplied People value with the auto generated identifier populated.", response=PeopleValue.class)
-	public PeopleValue add(final PeopleValue value) throws ValidationException
+	public PeopleValue add(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final PeopleValue value) throws ValidationException
 	{
 		return dao.add(value);
 	}
@@ -98,7 +102,8 @@ public class PeopleResource
 	@POST
 	@Path("/register") @Timed @UnitOfWork
 	@ApiOperation(value="register", notes="Completes the user registration process.", response=SessionValue.class)
-	public SessionValue register(@QueryParam("rememberMe") @ApiParam(name="rememberMe", value="Indicates to use a long term session if TRUE.", defaultValue="false", required=false) @DefaultValue("false") final Boolean rememberMe,
+	public SessionValue register(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@QueryParam("rememberMe") @ApiParam(name="rememberMe", value="Indicates to use a long term session if TRUE.", defaultValue="false", required=false) @DefaultValue("false") final Boolean rememberMe,
 		final PeopleValue value) throws ValidationException
 	{
 		return sessionDao.promote(dao.add(value.withPhone(sessionDao.get().registration.phone).registeredByPhone()),	// The AuthFilter ensures that this is a Registration session. DLS on 3/29/2020.
@@ -121,7 +126,8 @@ public class PeopleResource
 	@PUT
 	@Timed @UnitOfWork
 	@ApiOperation(value="set", notes="Updates an existing single People. Returns the supplied People value with the auto generated identifier populated.", response=PeopleValue.class)
-	public PeopleValue set(final PeopleValue value) throws ValidationException
+	public PeopleValue set(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final PeopleValue value) throws ValidationException
 	{
 		return dao.update(value);
 	}
@@ -142,7 +148,8 @@ public class PeopleResource
 	@DELETE
 	@Path("/{id}") @Timed @UnitOfWork
 	@ApiOperation(value="remove", notes="Removes/deactivates a single People by its primary key.")
-	public OperationResponse remove(@PathParam("id") final String id) throws ValidationException
+	public OperationResponse remove(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@PathParam("id") final String id) throws ValidationException
 	{
 		return new OperationResponse(dao.remove(id));
 	}
@@ -150,7 +157,8 @@ public class PeopleResource
 	@POST
 	@Path("/search") @Timed @UnitOfWork(readOnly=true, transactional=false)
 	@ApiOperation(value="search", notes="Searches the Peoples based on the supplied filter.", response=QueryResults.class)
-	public QueryResults<PeopleValue, PeopleFilter> search(final PeopleFilter filter) throws ValidationException
+	public QueryResults<PeopleValue, PeopleFilter> search(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final PeopleFilter filter) throws ValidationException
 	{
 		return dao.search(filter);
 	}
