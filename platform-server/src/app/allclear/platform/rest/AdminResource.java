@@ -85,7 +85,7 @@ public class AdminResource
 
 	@POST
 	@Path("/auth") @Timed
-	@ApiOperation(value="add", notes="Authenticates a user.", response=AdminValue.class)
+	@ApiOperation(value="add", notes="Authenticates a user.", response=SessionValue.class)
 	public SessionValue authenticate(final AuthenticationRequest request) throws ValidationException
 	{
 		if (null != sessionDao.current()) throw new ValidationException("You are already authenticated.");
