@@ -2,7 +2,8 @@ package app.allclear.platform.dao;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static app.allclear.testing.TestingUtils.*;
+import static app.allclear.common.crypto.Hasher.saltAndHash;
+// import static app.allclear.testing.TestingUtils.*;
 
 import java.util.stream.Stream;
 
@@ -19,6 +20,7 @@ import app.allclear.common.errors.ValidationException;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.entity.Admin;
 import app.allclear.platform.filter.AdminFilter;
+import app.allclear.platform.model.AuthenticationRequest;
 import app.allclear.platform.value.AdminValue;
 
 /**********************************************************************************
@@ -38,6 +40,7 @@ public class AdminDAOTest
 {
 	private static AdminDAO dao;
 	private static AdminValue VALUE = null;
+	private static String CURRENT_PASSWORD;
 
 	@BeforeAll
 	public static void up() throws Exception
@@ -48,7 +51,7 @@ public class AdminDAOTest
 	@Test
 	public void add()
 	{
-		var value = dao.add(VALUE = new AdminValue("dsmall", "Password_1", "dsmall@allclear.app", "Dave", "Small", true));
+		var value = dao.add(VALUE = new AdminValue("tester-b", CURRENT_PASSWORD = "Password_1", "dsmall@allclear.app", "Dave", "Small", true));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
@@ -128,6 +131,30 @@ public class AdminDAOTest
 	}
 
 	@Test
+	public void authenticate()
+	{
+		var value = dao.authenticate(new AuthenticationRequest("tester-b", "Password_1", false));
+		Assertions.assertNotNull(value, "Exists");
+		check(VALUE, value);
+	}
+
+	public static Stream<Arguments> authenticate_fail()
+	{
+		return Stream.of(
+				arguments("tester-b", "Password_2"),
+				arguments("tester-a", "Password_1"),
+				arguments("kathy", "Password_2")
+			);
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void authenticate_fail(final String userName, final String password)
+	{
+		assertThrows(ValidationException.class, () -> dao.authenticate(new AuthenticationRequest(userName, password, false)));
+	}
+
+	@Test
 	public void find()
 	{
 		var record = dao.findWithException(VALUE.id);
@@ -158,20 +185,14 @@ public class AdminDAOTest
 	@Test
 	public void modify()
 	{
-		// TODO: fill in search details // count(new AdminFilter(), 1L);
-		// TODO: fill in search details // count(new AdminFilter(), 0L);
-
-		// TODO: provide a change to the VALUE.
 		var value = dao.update(VALUE.withFirstName("David"));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
 
-	@Test
+	@Test @Disabled
 	public void modify_count()
 	{
-		// TODO: fill in search details // count(new AdminFilter(), 0L);
-		// TODO: fill in search details // count(new AdminFilter(), 1L);
 	}
 
 	@Test
@@ -185,12 +206,12 @@ public class AdminDAOTest
 
 	public static Stream<Arguments> search()
 	{
-		var hourAgo = hourAgo();
-		var hourAhead = hourAhead();
+		// var hourAgo = hourAgo();
+		// var hourAhead = hourAhead();
 
 		return Stream.of(
 			arguments(new AdminFilter(1, 20).withId(VALUE.id), 1L),
-			arguments(new AdminFilter(1, 20).withEmail(VALUE.email), 1L),
+			/* arguments(new AdminFilter(1, 20).withEmail(VALUE.email), 1L),
 			arguments(new AdminFilter(1, 20).withFirstName(VALUE.firstName), 1L),
 			arguments(new AdminFilter(1, 20).withLastName(VALUE.lastName), 1L),
 			arguments(new AdminFilter(1, 20).withSupers(VALUE.supers), 1L),
@@ -199,10 +220,10 @@ public class AdminDAOTest
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
 			arguments(new AdminFilter(1, 20).withUpdatedAtFrom(hourAgo), 1L),
 			arguments(new AdminFilter(1, 20).withUpdatedAtTo(hourAhead), 1L),
-			arguments(new AdminFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 1L),
+			arguments(new AdminFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 1L), */
 
 			// Negative tests
-			arguments(new AdminFilter(1, 20).withId("invalid"), 0L),
+			arguments(new AdminFilter(1, 20).withId("invalid"), 0L) /*,
 			arguments(new AdminFilter(1, 20).withEmail("invalid"), 0L),
 			arguments(new AdminFilter(1, 20).withFirstName("invalid"), 0L),
 			arguments(new AdminFilter(1, 20).withLastName("invalid"), 0L),
@@ -212,7 +233,7 @@ public class AdminDAOTest
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
 			arguments(new AdminFilter(1, 20).withUpdatedAtFrom(hourAhead), 0L),
 			arguments(new AdminFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
-			arguments(new AdminFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L));
+			arguments(new AdminFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L) */);
 	}
 
 	@ParameterizedTest
@@ -331,7 +352,6 @@ public class AdminDAOTest
 	public void testRemove_search()
 	{
 		count(new AdminFilter().withId(VALUE.id), 0L);
-		// TODO: provide secondary test count.
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.
@@ -349,11 +369,11 @@ public class AdminDAOTest
 	{
 		var assertId = "ID (" + expected.id + "): ";
 		Assertions.assertEquals(expected.id, record.id(), assertId + "Check id");
-		Assertions.assertEquals(expected.password, record.getPassword(), assertId + "Check password");
+		Assertions.assertEquals(saltAndHash(record.getIdentifier(), CURRENT_PASSWORD), record.getPassword(), assertId + "Check password");
 		Assertions.assertEquals(expected.email, record.getEmail(), assertId + "Check email");
 		Assertions.assertEquals(expected.firstName, record.getFirstName(), assertId + "Check firstName");
 		Assertions.assertEquals(expected.lastName, record.getLastName(), assertId + "Check lastName");
-		Assertions.assertEquals(expected.supers, record.isSupers(), assertId + "Check supers");
+		Assertions.assertEquals(expected.supers, record.getSupers(), assertId + "Check supers");
 		Assertions.assertEquals(expected.createdAt, record.getCreatedAt(), assertId + "Check createdAt");
 		Assertions.assertEquals(expected.updatedAt, record.getUpdatedAt(), assertId + "Check updatedAt");
 	}
@@ -363,7 +383,7 @@ public class AdminDAOTest
 	{
 		var assertId = "ID (" + expected.id + "): ";
 		Assertions.assertEquals(expected.id, value.id, assertId + "Check id");
-		Assertions.assertEquals(expected.password, value.password, assertId + "Check password");
+		Assertions.assertNull(value.password, assertId + "Check password");	// Should always be NULL.
 		Assertions.assertEquals(expected.email, value.email, assertId + "Check email");
 		Assertions.assertEquals(expected.firstName, value.firstName, assertId + "Check firstName");
 		Assertions.assertEquals(expected.lastName, value.lastName, assertId + "Check lastName");
