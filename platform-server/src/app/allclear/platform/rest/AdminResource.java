@@ -4,6 +4,9 @@ import java.util.List;
 
 import javax.ws.rs.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.swagger.annotations.*;
 
 import com.codahale.metrics.annotation.Timed;
@@ -35,6 +38,8 @@ import app.allclear.platform.value.SessionValue;
 @Api(value="Admin")
 public class AdminResource
 {
+	private static final Logger log = LoggerFactory.getLogger(AdminDAO.class);
+
 	private final AdminDAO dao;
 	private final SessionDAO sessionDao;
 
@@ -46,6 +51,8 @@ public class AdminResource
 	{
 		this.dao = dao;
 		this.sessionDao = sessionDao;
+
+		log.info("INITIALIZED");
 	}
 
 	@GET

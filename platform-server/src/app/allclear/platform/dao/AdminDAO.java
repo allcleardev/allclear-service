@@ -3,6 +3,8 @@ package app.allclear.platform.dao;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 
+import org.slf4j.*;
+
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.table.CloudTable;
@@ -26,6 +28,7 @@ import app.allclear.platform.value.AdminValue;
 
 public class AdminDAO
 {
+	private static final Logger log = LoggerFactory.getLogger(AdminDAO.class);
 	public static final String TABLE = "allclear_admins";
 
 	private final CloudTable table;
@@ -33,6 +36,7 @@ public class AdminDAO
 	public AdminDAO(final String connectionString) throws InvalidKeyException, StorageException, URISyntaxException
 	{
 		(table = CloudStorageAccount.parse(connectionString).createCloudTableClient().getTableReference(TABLE)).createIfNotExists();
+		log.info("TABLE: " + table);
 	}
 
 	/** Adds a single Admin value.
