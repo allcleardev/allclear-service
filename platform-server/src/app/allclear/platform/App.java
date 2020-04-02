@@ -29,6 +29,7 @@ import app.allclear.common.resources.*;
 import app.allclear.platform.dao.*;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.rest.*;
+import app.allclear.platform.value.AdminValue;
 import app.allclear.twilio.client.TwilioClient;
 
 /** Represents the Dropwizard application entry point.
@@ -95,9 +96,13 @@ public class App extends Application<Config>
 		lifecycle.manage(new AutoCloseableManager(twilio));
 
 		var factory = transHibernateBundle.getSessionFactory();
+		var adminDao = new AdminDAO(conf.admins);
 		var peopleDao = new PeopleDAO(factory);
 		var sessionDao = new SessionDAO(session, twilio, conf);
 		var registrationDao = new RegistrationDAO(session, twilio, conf);
+
+		// First admin. // TODO: seed the first administrator. Remove in near future.
+		adminDao.add(new AdminValue("smalleyd", "Password_1", "bokenrunner@gmail.com", "David", "Small", true));
 
 		var jersey = env.jersey();
         jersey.register(MultiPartFeature.class);
@@ -115,7 +120,7 @@ public class App extends Application<Config>
         jersey.register(new HeapDumpResource());
         jersey.register(new HibernateResource(factory));
         jersey.register(new AuthFilter(sessionDao));
-        jersey.register(new AdminResource(new AdminDAO(conf.admins), sessionDao));
+        jersey.register(new AdminResource(adminDao, sessionDao));
 		jersey.register(new PeopleResource(peopleDao, registrationDao, sessionDao));
 		jersey.register(new TypeResource());
 
