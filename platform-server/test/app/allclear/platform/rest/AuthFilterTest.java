@@ -59,10 +59,10 @@ public class AuthFilterTest
 			arguments("/a", false),
 			arguments("/admins", false),
 			arguments("admins", true),
-			arguments("admins/password", true),
+			arguments("admins/self", true),
 			arguments("admins/search", true),
 			arguments("/admins", false),
-			arguments("/admins/password", false),
+			arguments("/admins/self", false),
 			arguments("/admins/search", false),
 			arguments("peoples/admin", false),
 			arguments("types/admin", false),
@@ -87,47 +87,6 @@ public class AuthFilterTest
 		Assertions.assertEquals(expected, auth.admin(path));
 	}
 
-	public static Stream<Arguments> password()
-	{
-		return Stream.of(
-			arguments(null, false),
-			arguments("", false),
-			arguments("a", false),
-			arguments("/a", false),
-			arguments("password", false),
-			arguments("/password", true),
-			arguments("/admins", false),
-			arguments("admins", false),
-			arguments("admins/password", true),
-			arguments("admins/search", false),
-			arguments("/admins", false),
-			arguments("/admins/password", true),
-			arguments("/admins/passwords", false),
-			arguments("/admins/search", false),
-			arguments("peoples/admin", false),
-			arguments("types/admin", false),
-			arguments("/peoples", false),
-			arguments("/peoples/password", true),
-			arguments("types/peopleStatuses", false),
-			arguments("/types/peopleStatuses", false),
-			arguments("types/peopleStatuses", false),
-			arguments("type/peopleStatuses", false),
-			arguments("peoples/auth", false),
-			arguments("peoples/authenticated", false),
-			arguments("peoples/confirm", false),
-			arguments("peoples-confirm", false),
-			arguments("peoples/start", false),
-			arguments("/peoples/start", false),
-			arguments("peoples/starts", false));
-	}
-
-	@ParameterizedTest
-	@MethodSource
-	public void password(final String path, final boolean expected)
-	{
-		Assertions.assertEquals(expected, auth.password(path));
-	}
-
 	public static Stream<Arguments> requiresAuth()
 	{
 		return Stream.of(
@@ -135,9 +94,11 @@ public class AuthFilterTest
 			arguments("", true),
 			arguments("a", true),
 			arguments("/a", true),
-			arguments("admin", true),
-			arguments("admin/password", true),
-			arguments("admin/search", true),
+			arguments("admins", true),
+			arguments("admins/self", true),
+			arguments("admins/search", true),
+			arguments("admins/auth", false),
+			arguments("admin/auth", true),
 			arguments("/peoples", true),
 			arguments("types/peopleStatuses", false),
 			arguments("/types/peopleStatuses", true),
@@ -159,20 +120,64 @@ public class AuthFilterTest
 		Assertions.assertEquals(expected, auth.requiresAuth(path));
 	}
 
+	public static Stream<Arguments> self()
+	{
+		return Stream.of(
+			arguments(null, false),
+			arguments("", false),
+			arguments("a", false),
+			arguments("/a", false),
+			arguments("self", false),
+			arguments("/self", true),
+			arguments("/admins", false),
+			arguments("admins", false),
+			arguments("admins/self", true),
+			arguments("admins/search", false),
+			arguments("/admins", false),
+			arguments("/admins/self", true),
+			arguments("/admins/selfs", false),
+			arguments("/admins/search", false),
+			arguments("peoples/admin", false),
+			arguments("types/admin", false),
+			arguments("/peoples", false),
+			arguments("/peoples/self", true),
+			arguments("types/peopleStatuses", false),
+			arguments("/types/peopleStatuses", false),
+			arguments("types/peopleStatuses", false),
+			arguments("type/peopleStatuses", false),
+			arguments("peoples/auth", false),
+			arguments("peoples/authenticated", false),
+			arguments("peoples/confirm", false),
+			arguments("peoples-confirm", false),
+			arguments("peoples/start", false),
+			arguments("/peoples/start", false),
+			arguments("peoples/starts", false));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void self(final String path, final boolean expected)
+	{
+		Assertions.assertEquals(expected, auth.self(path));
+	}
+
 	public static Stream<Arguments> failure()
 	{
 		return Stream.of(
 			arguments("admins", "", "Session ID is required."),
 			arguments("admins", null, "Session ID is required."),
 			arguments("admins", "INVALID", "The ID 'INVALID' is invalid."),
-			arguments("admins/password", "", "Session ID is required."),
-			arguments("admins/password", null, "Session ID is required."),
-			arguments("admins/password", "INVALID", "The ID 'INVALID' is invalid."),
+			arguments("admins/self", "", "Session ID is required."),
+			arguments("admins/self", null, "Session ID is required."),
+			arguments("admins/self", "INVALID", "The ID 'INVALID' is invalid."),
 			arguments("admins", PERSON.id, "Requires an Administrative Session."),
 			arguments("admins", START.id, "Requires an Administrative Session."),
 			arguments("admins", ADMIN.id, "Requires a Super-Admin Session."),
-			arguments("admins/password", PERSON.id, "Requires an Administrative Session."),
-			arguments("admins/password", START.id, "Requires an Administrative Session."),
+			arguments("admins/auth", PERSON.id, "Requires an Administrative Session."),	// admins/auth if NO session is provided.
+			arguments("admins/auth", START.id, "Requires an Administrative Session."),
+			arguments("admins/auth", ADMIN.id, "Requires a Super-Admin Session."),
+			arguments("admins/self", PERSON.id, "Requires an Administrative Session."),
+			arguments("admins/self", START.id, "Requires an Administrative Session."),
 			arguments("peoples", "", "Session ID is required."),
 			arguments("peoples", null, "Session ID is required."),
 			arguments("peoples", "INVALID", "The ID 'INVALID' is invalid."),
@@ -194,9 +199,12 @@ public class AuthFilterTest
 	{
 		return Stream.of(
 			arguments("admins", SUPER.id),
-			arguments("admins/password", SUPER.id),
+			arguments("admins/auth", ""),
+			arguments("admins/auth", null),
+			arguments("admins/auth", SUPER.id),
+			arguments("admins/self", SUPER.id),
 			arguments("admins/search", SUPER.id),
-			arguments("admins/password", ADMIN.id),
+			arguments("admins/self", ADMIN.id),
 			arguments("peoples/start", ""),
 			arguments("peoples/confirm", null),
 			arguments("peoples/confirm", PERSON.id),

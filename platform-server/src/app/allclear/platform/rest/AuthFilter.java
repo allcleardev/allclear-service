@@ -22,9 +22,9 @@ import app.allclear.platform.dao.SessionDAO;
 public class AuthFilter implements ContainerRequestFilter
 {
 	public static final String PATH_ADMINS = "admins";
-	public static final String PATH_PASSWORD = "/password";
+	public static final String PATH_SELF = "/self";
 	public static final String PATH_TYPES = "types/";
-	public static final List<String> PATH_NO_AUTH = List.of("info/health", "info/ping", "info/version", "peoples/auth", "peoples/confirm", "peoples/start", "swagger.json");
+	public static final List<String> PATH_NO_AUTH = List.of("admins/auth", "info/health", "info/ping", "info/version", "peoples/auth", "peoples/confirm", "peoples/start", "swagger.json");
 	public static final String PATH_REGISTER = "peoples/register";
 
 	private final SessionDAO dao;
@@ -55,7 +55,7 @@ public class AuthFilter implements ContainerRequestFilter
 		else if (admin(path))
 		{
 			if (!session.admin()) throw new NotAuthenticatedException("Requires an Administrative Session.");
-			if (!password(path) && !session.supers()) throw new NotAuthenticatedException("Requires a Super-Admin Session.");	// Only super-admins can administer Admins. But allow all admins to change their password.
+			if (!self(path) && !session.supers()) throw new NotAuthenticatedException("Requires a Super-Admin Session.");	// Only super-admins can administer Admins. But allow all admins to administer themselves.
 		}
 		else if (session.registration() && requiresAuth(path))
 			throw new NotAuthenticatedException("Requires a Non-registration Session.");
@@ -66,13 +66,13 @@ public class AuthFilter implements ContainerRequestFilter
 		return ((null != path) && path.startsWith(PATH_ADMINS));
 	}
 
-	boolean password(final String path)
-	{
-		return ((null != path) && path.endsWith(PATH_PASSWORD));
-	}
-
 	boolean requiresAuth(final String path)
 	{
 		return ((null == path) || !(path.startsWith(PATH_TYPES) || PATH_NO_AUTH.contains(path)));
+	}
+
+	boolean self(final String path)
+	{
+		return ((null != path) && path.endsWith(PATH_SELF));
 	}
 }

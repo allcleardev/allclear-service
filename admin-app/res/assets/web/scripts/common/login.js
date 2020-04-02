@@ -2,7 +2,7 @@ var LoginHandler = new EditTemplate({
 	NAME: 'login',
 	SINGULAR: 'Login',
 	PLURAL: 'Login',
-	RESOURCE: 'sessions',
+	RESOURCE: 'admins/self',
 
 	getTitle: function(c) { return this.SINGULAR; },
 
@@ -24,7 +24,7 @@ var LoginHandler = new EditTemplate({
 			if (cb)
 				cb();
 		};
-		this.run({ filter: { isAdd: true }, value: { value: {} }, callback: callback }, body);
+		this.run({ filter: { isAdd: true }, value: { value: {} }, callback: callback, submitUrl: 'admins/auth' }, body);
 	},
 	doLogout: function() {
 		var me = this;
@@ -52,7 +52,7 @@ var LoginHandler = new EditTemplate({
 			{
 				a.innerHTML = v.name;
 				a.myRecord = v;
-				a.onclick = function(ev) { var t = this; SessionsHandler.EDITOR.doEdit(this.myRecord.id); };
+				a.onclick = function(ev) { var t = this; AdminsHandler.EDITOR.doEdit(this.myRecord.id); };
 				e.innerHTML = 'Logout';
 				e.onclick = function(ev) { me.doLogout(); return false; };
 			}
