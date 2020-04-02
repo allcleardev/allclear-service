@@ -50,5 +50,6 @@
 
   "logging": { "level": "INFO",
     "loggers": { "com.sun.jersey.api.container.filter.LoggingFilter": "INFO",
-                 "org.hibernate.engine.internal.StatisticalLoggingSessionEventListener": "WARN" } }
+                 "org.hibernate.engine.internal.StatisticalLoggingSessionEventListener": "WARN",
+                 "org.reflections.Reflections": "ERROR" } }
 }

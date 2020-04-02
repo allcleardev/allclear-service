@@ -53,6 +53,15 @@ public class TypeResourceTest
 	}
 
 	@Test
+	public void getFacilityTypes()
+	{
+		var response = request("facilityTypes").get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		assertThat(response.readEntity(new GenericType<List<FacilityType>>() {})).isEqualTo(FacilityType.LIST);
+	}
+
+	@Test
 	public void getPeopleStatuses()
 	{
 		var response = request("peopleStatuses").get();
@@ -86,5 +95,14 @@ public class TypeResourceTest
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		assertThat(response.readEntity(new GenericType<List<Symptom>>() {})).isEqualTo(Symptom.LIST);
+	}
+
+	@Test
+	public void getTestCriteria()
+	{
+		var response = request("testCriteria").get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		assertThat(response.readEntity(new GenericType<List<TestCriteria>>() {})).isEqualTo(TestCriteria.LIST);
 	}
 }

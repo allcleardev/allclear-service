@@ -29,7 +29,7 @@ import app.allclear.platform.type.*;
  *
  */
 
-@Disabled
+// @Disabled
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class IntegrationTest
@@ -84,6 +84,12 @@ public class IntegrationTest
 	}
 
 	@Test
+	public void getFacilityTypes()
+	{
+		assertThat(request(types.path("facilityTypes")).get(FacilityType[].class)).hasSize(FacilityType.LIST.size());
+	}
+
+	@Test
 	public void getPeopleStatuses()
 	{
 		assertThat(request(types.path("peopleStatuses")).get(PeopleStatus[].class)).hasSize(PeopleStatus.LIST.size());
@@ -111,6 +117,12 @@ public class IntegrationTest
 	public void getSymptoms()
 	{
 		assertThat(request(types.path("symptoms")).get(Symptom[].class)).hasSize(Symptom.LIST.size());
+	}
+
+	@Test
+	public void getTestCriteria()
+	{
+		assertThat(request(types.path("testCriteria")).get(TestCriteria[].class)).hasSize(TestCriteria.LIST.size());
 	}
 
 	@Test

@@ -35,6 +35,11 @@ public class TypeResource
 	public List<Exposure> getExposures() { return Exposure.LIST; }
 
 	@GET
+	@Path("/facilityTypes") @Timed
+	@ApiOperation(value="getFacilityTypes", notes="Gets a list of facility types.", response=FacilityType.class, responseContainer="List")
+	public List<FacilityType> getFacilityTypes() { return FacilityType.LIST; }
+
+	@GET
 	@Path("/peopleStatuses") @Timed
 	@ApiOperation(value="getPeopleStatuses", notes="Gets a list of statures that can be associated with a person.", response=PeopleStatus.class, responseContainer="List")
 	public List<PeopleStatus> getPeopleStatuses() { return PeopleStatus.LIST; }
@@ -53,4 +58,9 @@ public class TypeResource
 	@Path("/symptoms") @Timed
 	@ApiOperation(value="getSymptoms", notes="Gets a list of symptoms that a person can have.", response=Symptom.class, responseContainer="List")
 	public List<Symptom> getSymptoms() { return Symptom.LIST; }
+
+	@GET
+	@Path("/testCriteria") @Timed
+	@ApiOperation(value="getTestCriteria", notes="Gets a list of test criteria that a facility follows.", response=TestCriteria.class, responseContainer="List")
+	public List<TestCriteria> getTestCriteria() { return TestCriteria.LIST; }
 }

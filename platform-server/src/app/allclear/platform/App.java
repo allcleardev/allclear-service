@@ -115,7 +115,7 @@ public class App extends Application<Config>
         jersey.register(new HeapDumpResource());
         jersey.register(new HibernateResource(factory));
         jersey.register(new AuthFilter(sessionDao));
-        jersey.register(new AdminResource(new AdminDAO(conf.admins), sessionDao));
+        // jersey.register(new AdminResource(new AdminDAO(conf.admins), sessionDao));
 		jersey.register(new PeopleResource(peopleDao, registrationDao, sessionDao));
 		jersey.register(new TypeResource());
 
