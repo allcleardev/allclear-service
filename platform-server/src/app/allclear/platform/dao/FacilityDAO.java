@@ -69,7 +69,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		"active", DESC,
 		"createdAt", DESC,
 		"updatedAt", DESC,
-		"meters", ASC);
+		"meters", ASC + ",meters");	// Need to leave off the "o." alias.
 
 	/** Native SQL clauses. */
 	public static final String FROM_ALIAS = "o";
