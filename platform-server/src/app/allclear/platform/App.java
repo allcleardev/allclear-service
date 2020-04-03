@@ -83,6 +83,7 @@ public class App extends Application<Config>
 		{
 			new Liquibase("migrations.xml", new ClassLoaderResourceAccessor(), new JdbcConnection(connection)).update("");
 		}
+		ds.stop();	// Kill this data source pool after migration is completed. A new one will be created when the session factory is created. DLS on 4/3/2020.
 		log.info("Migrations: completed");
 
 		var lifecycle = env.lifecycle();
