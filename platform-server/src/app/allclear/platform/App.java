@@ -81,9 +81,7 @@ public class App extends Application<Config>
 		var ds = conf.trans.build(env.metrics(), "migrations-init");
 		try (var connection = ds.getConnection())
 		{
-			var migrator = new Liquibase("migrations.xml", new ClassLoaderResourceAccessor(), new JdbcConnection(connection));
-			migrator.dropAll();
-			migrator.update("");
+			new Liquibase("migrations.xml", new ClassLoaderResourceAccessor(), new JdbcConnection(connection)).update("");
 		}
 		log.info("Migrations: completed");
 
