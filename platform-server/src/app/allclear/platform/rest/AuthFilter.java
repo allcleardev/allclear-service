@@ -22,6 +22,7 @@ import app.allclear.platform.dao.SessionDAO;
 public class AuthFilter implements ContainerRequestFilter
 {
 	public static final String PATH_ADMINS = "admins";
+	public static final String PATH_INFO_CONFIG = "info/config";
 	public static final String PATH_SELF = "/self";
 	public static final String PATH_TYPES = "types/";
 	public static final List<String> PATH_NO_AUTH = List.of("admins/auth", "info/health", "info/ping", "info/version", "peoples/auth", "peoples/confirm", "peoples/start", "swagger.json");
@@ -63,7 +64,7 @@ public class AuthFilter implements ContainerRequestFilter
 
 	boolean admin(final String path)
 	{
-		return ((null != path) && path.startsWith(PATH_ADMINS));
+		return ((null != path) && (path.equals(PATH_INFO_CONFIG) || path.startsWith(PATH_ADMINS)));
 	}
 
 	boolean requiresAuth(final String path)
