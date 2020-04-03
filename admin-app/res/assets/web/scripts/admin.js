@@ -263,6 +263,18 @@ var ConfigurationHandler = new EditTemplate({
 
 	init: function(body) { this.doEdit('config', undefined, body); },
 
+	onEditorPreGenerate: c => {
+		var admins = {};
+		c.value.admins.split(';').map(v => {
+			var i = v.indexOf('=');
+			if (1 > i) return null;
+			return [ v.substring(0, i), v.substring(i + 1) ];
+		}).filter(v => (null != v) && ('AccountKey' != v[0]))
+			.forEach(v => admins[v[0]] = v[1]);
+
+		c.value.admins = admins;
+	},
+
 	FIELDS: [ new TextField('env', 'Environment'),
 	          new TextField('version', 'Version'),
 	          new TextField('baseUrl', 'Base URL'),
@@ -270,15 +282,11 @@ var ConfigurationHandler = new EditTemplate({
 	          new TextField('authenticationPhone', 'Authentication Phone'),
 	          new TextField('registrationSMSMessage', 'Registration SMS Message'),
 	          new TextField('authenticationSMSMessage', 'Authentication SMS Message'),
-	          new TextField('admins', 'Cosmos Table Connection String'),
+	          new TextField('admins', 'Cosmos Table Account', (v, p) => p.AccountName),
+	          new TextField('admins', 'Cosmos Table Endpoint', (v, p) => p.TableEndpoint),
 	          new TextField('session', 'Session Redis Host', (v, p) => p.host),
 	          new TextField('twilio', 'Twilio', (v, p) => p.baseUrl),
-	          new TextField('trans', 'mySQL URL', (v, p) => p.url) /* ,
-	          new TextField('appES', 'App Elasticsearch User', (v, p) => p.userName),
-	          new TextField('jobES', 'Job Elasticsearch Host', (v, p) => p.host),
-	          new TextField('jobES', 'Job Elasticsearch Port', (v, p) => p.port),
-	          new TextField('jobES', 'Job Elasticsearch SSL', (v, p) => p.ssl),
-	          new TextField('task', 'Task Threads', (v, p) => p.threads) */ ],
+	          new TextField('trans', 'mySQL URL', (v, p) => p.url) ],
 
 	CAPTION_SUBMIT: undefined,
 	CAPTION_CANCEL: undefined,
