@@ -50,7 +50,7 @@ var LoginHandler = new EditTemplate({
 			}
 			else
 			{
-				a.innerHTML = v.name;
+				a.innerHTML = v.id;
 				a.myRecord = v;
 				a.onclick = function(ev) { var t = this; AdminsHandler.EDITOR.doEdit(this.myRecord.id); };
 				e.innerHTML = 'Logout';

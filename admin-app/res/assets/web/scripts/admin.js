@@ -1,12 +1,14 @@
 var AdminApp = new TabTemplate();
 
 AdminApp.TABS = [ { id: 'doPeople', caption: 'People' },
+	{ id: 'doFacilities', caption: 'Facilities' },
 	{ id: 'doLogs', caption: 'Logs', children: [ { id: 'doQueueStats', caption: 'Queue Stats' } ] },
 	{ id: 'doSessions', caption: 'Sessions', children: [ { id: 'doAdmins', caption: 'Admins' } ] },
 	{ id: 'doConfig', caption: 'Config', children: [ { id: 'doHibernate', caption: 'Hibernate' },
 	                                                 { id: 'doHeapDump', caption: 'Heap Dump' } ] } ];
 
 AdminApp.doPeople = function(body) { PeopleHandler.filter({ pageSize: 100 }, body); }
+AdminApp.doFacilities = function(body) { FacilitiesHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doLogs = function(body) { LogsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doSessions = function(body) { SessionsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doAdmins = function(body) { AdminsHandler.init(body); }
@@ -17,7 +19,7 @@ AdminApp.doHeapDump = function(body) { HeapDumpHandler.init(body); }
 AdminApp.doQueueStats = function(body) { QueuesHandler.init(body); }
 
 AdminApp.onPostInit = function(c) {
-	this.loadLists([ 'conditions', 'exposures', 'peopleStatuses', 'peopleStatures', 'symptoms' ]);
+	this.loadLists([ 'conditions', 'exposures', 'facilityTypes', 'peopleStatuses', 'peopleStatures', 'sexes', 'symptoms', 'testCriteria' ]);
 }
 
 var UPLOAD_SOURCES_INSTRUCTIONS = 'Add comma separated text that is split by type, name, and code in that order.<br /><br />Types:<blockquote>';
@@ -74,6 +76,118 @@ var AdminsHandler = new ListTemplate({
 		          new ListField('supers', 'Super?', false, 'yesNoOptions', undefined, 'No Search'),
 		          new DatesField('createdAt', 'Created At'),
 		          new DatesField('updatedAt', 'Updated At') ]
+	}
+});
+
+var FacilitiesHandler = new ListTemplate({
+	NAME: 'facility',
+	SINGULAR: 'Facility',
+	PLURAL: 'Facilities',
+	RESOURCE: 'facilities',
+
+	CAN_ADD: true,
+	CAN_EDIT: true,
+	CAN_REMOVE: true,
+	EDIT_METHOD: 'put',
+
+	COLUMNS: [ new IdColumn('id', 'ID', true),
+	           new EditColumn('name', 'Name'),
+	           new EditColumn('city', 'City'),
+	           new EditColumn('state', 'State'),
+	           new EditColumn('phone', 'Phone'),
+	           new EditColumn('email', 'Email'),
+	           new TextColumn('createdAt', 'Created At', 'toDateTime'),
+	           new TextColumn('updatedAt', 'Updated At', 'toDateTime') ],
+	FIELDS: [ new TextField('id', 'ID'),
+	          new EditField('name', 'Name', true, false, 128, 50),
+	          new EditField('address', 'Address', true, false, 128, 50),
+	          new EditField('city', 'City', true, false, 128, 50),
+	          new EditField('state', 'State', true, false, 128, 50),
+	          new EditField('latitude', 'Latitude', true, false, 9, 9),
+	          new EditField('longitude', 'Longitude', true, false, 10, 10),
+	          new EditField('phone', 'Phone Number', false, false, 32, 20),
+	          new EditField('appointmentPhone', 'Appointment Phone', false, false, 32, 20),
+	          new EditField('email', 'Email Address', false, false, 128, 50),
+	          new EditField('url', 'URL', false, false, 128, 50),
+	          new EditField('appointmentUrl', 'Appointment URL', false, false, 128, 50),
+	          new EditField('hours', 'Hours of Operation', false, true, 60, 5),
+	          new ListField('typeId', 'Type', false, 'facilityTypes', undefined, 'None'),
+	          new BoolField('driveThru', 'Has Drive-thru?', true),
+	          new ListField('appointmentRequired', 'Appointment Required?', false, 'yesNoOptions', undefined, 'None'),
+	          new ListField('acceptsThirdParty', 'Accepts Third Party?', false, 'yesNoOptions', undefined, 'None'),
+	          new BoolField('referralRequired', 'Referral Required?', true),
+	          new ListField('testCriteriaId', 'Testing Criteria', false, 'testCriteria', undefined, 'None'),
+	          new EditField('otherTestCriteria', 'Other Test Criteria', false, true, 60, 5),
+	          new EditField('testsPerDay', 'Tests per Day', false, false, 10, 10),
+	          new BoolField('governmentIdRequired', 'Government Identification Required', true),
+	          new EditField('minimumAge', 'Minimum Age', false, false, 3, 3),
+	          new EditField('doctorReferralCriteria', 'Doctor Referral Criteria', false, true, 60, 5),
+	          new BoolField('firstResponderFriendly', 'First Responder Friendly?', true),
+	          new BoolField('telescreeningAvailable', 'Telescreening Available?', true),
+	          new BoolField('acceptsInsurance', 'Accepts Insurance?', true),
+	          new EditField('insuranceProvidersAccepted', 'Insurance Providers Accepted', false, true, 60, 5),
+	          new BoolField('freeOrLowCost', 'Free or Low-Cost?', true),
+	          new EditField('notes', 'Notes', false, true, 60, 5),
+	          new BoolField('active', 'Active?', true),
+	          new TextField('createdAt', 'Created At', 'toDateTime'),
+	          new TextField('updatedAt', 'Updated At', 'toDateTime') ],
+	SEARCH: {
+		NAME: 'facility',
+		SINGULAR: 'Facility',
+		PLURAL: 'Facilities',
+		RESOURCE: 'facilities',
+
+		FIELDS: [ new EditField('id', 'ID', false, false, 20, 10),
+		      new EditField('name', 'Name', false, false, 128, 50),
+		      new EditField('address', 'Address', false, false, 128, 50),
+		      new EditField('city', 'City', false, false, 128, 50),
+		      new EditField('state', 'State', false, false, 128, 50),
+		      new RangeField('latitude', 'Latitude', false, 9, 9),
+		      new RangeField('longitude', 'Longitude', false, 10, 10),
+		      new EditField('phone', 'Phone Number', false, false, 32, 20),
+		      new ListField('hasPhone', 'Has Phone Number', false, 'yesNoOptions', undefined, 'No Search'),
+		      new EditField('appointmentPhone', 'Appointment Phone', false, false, 32, 20),
+		      new ListField('hasAppointmentPhone', 'Has Appointment Phone', false, 'yesNoOptions', undefined, 'No Search'),
+		      new EditField('email', 'Email Address', false, false, 128, 50),
+		      new ListField('hasEmail', 'Has Email Address', false, 'yesNoOptions', undefined, 'No Search'),
+		      new EditField('url', 'URL', false, false, 128, 50),
+		      new ListField('hasUrl', 'Has URL', false, 'yesNoOptions', undefined, 'No Search'),
+		      new EditField('appointmentUrl', 'Appointment URL', false, false, 128, 50),
+		      new ListField('hasAppointmentUrl', 'Has Appointment URL', false, 'yesNoOptions', undefined, 'No Search'),
+		      new EditField('hours', 'Hours of Operation', false, false, 60, 5),
+		      new ListField('hasHours', 'Has Hours', false, 'yesNoOptions', undefined, 'No Search'),
+		      new ListField('typeId', 'Type', false, 'facilityTypes', undefined, 'No Search'),
+		      new ListField('hasTypeId', 'Has Type', false, 'yesNoOptions', undefined, 'No Search'),
+		      new BoolField('driveThru', 'Has Drive-thru?', true),
+		      new ListField('appointmentRequired', 'Appointment Required?', false, 'yesNoOptions', undefined, 'No Search'),
+		      new ListField('hasAppointmentRequired', 'Has Appointment Required', false, 'yesNoOptions', undefined, 'No Search'),
+		      new ListField('acceptsThirdParty', 'Accepts Third Party?', false, 'yesNoOptions', undefined, 'No Search'),
+		      new ListField('hasAcceptsThirdParty', 'Has Accepts Third Party', false, 'yesNoOptions', undefined, 'No Search'),
+		      new BoolField('referralRequired', 'Referral Required?', true),
+		      new ListField('testCriteriaId', 'Testing Criteria', false, 'testCriteria', undefined, 'No Search'),
+		      new ListField('hasTestCriteria', 'Has Test Criteria', false, 'yesNoOptions', undefined, 'No Search'),
+		      new EditField('otherTestCriteria', 'Other Test Criteria', false, false, 60, 5),
+		      new ListField('hasOtherTestCriteria', 'Has Other Test Criteria', false, 'yesNoOptions', undefined, 'No Search'),
+		      new EditField('testsPerDay', 'Tests per Day', false, false, 10, 10),
+		      new ListField('hasTestsPerDay', 'Has Tests per Day', false, 'yesNoOptions', undefined, 'No Search'),
+		      new RangeField('testsPerDay', 'Tests per Day', false, 10, 10),
+		      new BoolField('governmentIdRequired', 'Government Identification Required', true),
+		      new EditField('minimumAge', 'Minimum Age', false, false, 3, 3),
+		      new RangeField('minimumAge', 'Minimum Age', false, 3, 3),
+		      new ListField('hasMinimumAge', 'Has Minimum Age', false, 'yesNoOptions', undefined, 'No Search'),
+		      new EditField('doctorReferralCriteria', 'Doctor Referral Criteria', false, false, 60, 5),
+		      new ListField('hasDoctorReferralCriteria', 'Has Doctor Referral Criteria', false, 'yesNoOptions', undefined, 'No Search'),
+		      new BoolField('firstResponderFriendly', 'First Responder Friendly?', false),
+		      new BoolField('telescreeningAvailable', 'Telescreening Available?', false),
+		      new BoolField('acceptsInsurance', 'Accepts Insurance?', false),
+		      new EditField('insuranceProvidersAccepted', 'Insurance Providers Accepted', false, false, 128, 50),
+		      new ListField('hasInsuranceProvidersAccepted', 'Has Insurance Providers Accepted', false, 'yesNoOptions', undefined, 'No Search'),
+		      new BoolField('freeOrLowCost', 'Free or Low-Cost?', true),
+		      new EditField('notes', 'Notes', false, false, 128, 50),
+		      new ListField('hasNotes', 'Has Notes', false, 'yesNoOptions', undefined, 'No Search'),
+		      new BoolField('active', 'Active?', true),
+		      new DatesField('createdAt', 'Created At'),
+		      new DatesField('updatedAt', 'Updated At') ],
 	}
 });
 
