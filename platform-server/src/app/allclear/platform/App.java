@@ -29,7 +29,6 @@ import app.allclear.common.resources.*;
 import app.allclear.platform.dao.*;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.rest.*;
-import app.allclear.platform.value.AdminValue;
 import app.allclear.twilio.client.TwilioClient;
 
 /** Represents the Dropwizard application entry point.
