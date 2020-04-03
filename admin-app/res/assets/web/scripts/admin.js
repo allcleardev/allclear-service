@@ -144,7 +144,7 @@ var FacilitiesHandler = new ListTemplate({
 				c.value.from = { latitude: v.fromLatitude, longitude: v.fromLongitude, miles: v.fromMiles, km: v.fromKm };
 
 			console.log('SEARCH', v);
-		};
+		},
 
 		FIELDS: [ new EditField('id', 'ID', false, false, 20, 10),
 		      new EditField('name', 'Name', false, false, 128, 50),
