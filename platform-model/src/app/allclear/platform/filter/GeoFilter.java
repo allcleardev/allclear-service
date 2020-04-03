@@ -1,5 +1,7 @@
 package app.allclear.platform.filter;
 
+import static app.allclear.common.value.Constants.*;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -33,6 +35,7 @@ public class GeoFilter implements Serializable
 		this.km = km;
 	}
 
+	public long meters() { return ((null != miles) ? milesToMeters(miles) : kmToMeters(km)); }
 	public boolean valid()
 	{
 		return ((null != latitude) && (null != longitude) && ((null != miles) || (null != km)));

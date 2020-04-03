@@ -12,6 +12,7 @@ import app.allclear.common.dao.*;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.errors.Validator;
 import app.allclear.common.hibernate.AbstractDAO;
+import app.allclear.common.hibernate.NativeQueryBuilder;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.filter.FacilityFilter;
 import app.allclear.platform.type.FacilityType;
@@ -32,6 +33,8 @@ public class FacilityDAO extends AbstractDAO<Facility>
 {
 	private static final String SELECT = "SELECT OBJECT(o) FROM Facility o";
 	private static final String COUNT = "SELECT COUNT(o.id) FROM Facility o";
+	private static final String COUNT_ = "SELECT COUNT(o.id) FROM facility o";
+	private static final String SELECT_ = "SELECT o.id, o.name, o.address, o.city, o.state, o.latitude, o.longitude, o.phone, o.appointment_phone, o.email, o.url, o.appointment_url, o.hours, o.type_id, o.drive_thru, o.appointment_required, o.accepts_third_party, o.referral_required, o.test_criteria_id, o.other_test_criteria, o.tests_per_day, o.government_id_required, o.minimum_age, o.doctor_referral_criteria, o.first_responder_friendly, o.telescreening_available, o.accepts_insurance, o.insurance_providers_accepted, o.free_or_low_cost, o.notes, o.active, o.created_at, o.updated_at, ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:fromLongitude, :fromLatitude)) AS meters FROM facility o";
 	private static final OrderByBuilder ORDER = new OrderByBuilder('o', 
 		"id", DESC,
 		"name", ASC,
@@ -65,7 +68,8 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		"notes", ASC,
 		"active", DESC,
 		"createdAt", DESC,
-		"updatedAt", DESC);
+		"updatedAt", DESC,
+		"meters", ASC);
 
 	/** Native SQL clauses. */
 	public static final String FROM_ALIAS = "o";
@@ -252,11 +256,23 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	 */
 	public QueryResults<FacilityValue, FacilityFilter> search(final FacilityFilter filter) throws ValidationException
 	{
-		var builder = createQueryBuilder(filter.clean(), SELECT);
-		var v = new QueryResults<FacilityValue, FacilityFilter>(builder.aggregate(COUNT), filter);
-		if (v.isEmpty()) return v;
+		if ((null != filter.from) && filter.from.valid())
+		{
+			filter.sortOn = "meters";	// Only sort by meters. Default to returning the closest first. DLS on 4/3/2020.
+			var builder = createNativeQuery(filter.clean(), SELECT_, FacilityX.class);
+			var v = new QueryResults<FacilityValue, FacilityFilter>(builder.aggregate(COUNT_), filter);
+			if (v.isEmpty()) return v;
 
-		return v.withRecords(builder.orderBy(ORDER.normalize(v)).run(v).stream().map(o -> o.toValue()).collect(Collectors.toList()));
+			return v.withRecords(builder.orderBy(ORDER.normalize(v)).run(v).stream().map(o -> o.toValue()).collect(Collectors.toList()));
+		}
+		else
+		{
+			var builder = createQueryBuilder(filter.clean(), SELECT);
+			var v = new QueryResults<FacilityValue, FacilityFilter>(builder.aggregate(COUNT), filter);
+			if (v.isEmpty()) return v;
+
+			return v.withRecords(builder.orderBy(ORDER.normalize(v)).run(v).stream().map(o -> o.toValue()).collect(Collectors.toList()));
+		}
 	}
 
 	/** Counts the number of Facility entities based on the supplied filter.
@@ -332,5 +348,75 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.add("createdAtTo", "o.createdAt <= :createdAtTo", filter.createdAtTo)
 			.add("updatedAtFrom", "o.updatedAt >= :updatedAtFrom", filter.updatedAtFrom)
 			.add("updatedAtTo", "o.updatedAt <= :updatedAtTo", filter.updatedAtTo);
+	}
+
+	/** Helper method - creates the a native SQL query. */
+	private <T> QueryBuilder<T> createNativeQuery(final FacilityFilter filter, final String select, final Class<T> entityClass)
+		throws ValidationException
+	{
+		var o = new NativeQueryBuilder<>(currentSession(), select, entityClass, FROM_ALIAS, null)
+			.add("id", "o.id = :id", filter.id)
+			.addContains("name", "o.name LIKE :name", filter.name)
+			.addContains("address", "o.address LIKE :address", filter.address)
+			.addContains("city", "o.city LIKE :city", filter.city)
+			.addContains("state", "o.state LIKE :state", filter.state)
+			.add("latitudeFrom", "o.latitude >= :latitudeFrom", filter.latitudeFrom)
+			.add("latitudeTo", "o.latitude <= :latitudeTo", filter.latitudeTo)
+			.add("longitudeFrom", "o.longitude >= :longitudeFrom", filter.longitudeFrom)
+			.add("longitudeTo", "o.longitude <= :longitudeTo", filter.longitudeTo)
+			.addContains("phone", "o.phone LIKE :phone", filter.phone)
+			.addNotNull("o.phone", filter.hasPhone)
+			.addContains("appointmentPhone", "o.appointment_phone LIKE :appointmentPhone", filter.appointmentPhone)
+			.addNotNull("o.appointment_phone", filter.hasAppointmentPhone)
+			.addContains("email", "o.email LIKE :email", filter.email)
+			.addNotNull("o.email", filter.hasEmail)
+			.addContains("url", "o.url LIKE :url", filter.url)
+			.addNotNull("o.url", filter.hasUrl)
+			.addContains("appointmentUrl", "o.appointment_url LIKE :appointmentUrl", filter.appointmentUrl)
+			.addNotNull("o.appointment_url", filter.hasAppointmentUrl)
+			.addContains("hours", "o.hours LIKE :hours", filter.hours)
+			.addNotNull("o.hours", filter.hasHours)
+			.addContains("typeId", "o.type_id LIKE :typeId", filter.typeId)
+			.addNotNull("o.type_id", filter.hasTypeId)
+			.add("driveThru", "o.drive_thru = :driveThru", filter.driveThru)
+			.add("appointmentRequired", "o.appointment_required = :appointmentRequired", filter.appointmentRequired)
+			.addNotNull("o.appointment_required", filter.hasAppointmentRequired)
+			.add("acceptsThirdParty", "o.accepts_third_party = :acceptsThirdParty", filter.acceptsThirdParty)
+			.addNotNull("o.accepts_third_party", filter.hasAcceptsThirdParty)
+			.add("referralRequired", "o.referral_required = :referralRequired", filter.referralRequired)
+			.addContains("testCriteriaId", "o.test_criteria_id LIKE :testCriteriaId", filter.testCriteriaId)
+			.addNotNull("o.test_criteria_id", filter.hasTestCriteriaId)
+			.addContains("otherTestCriteria", "o.other_test_criteria LIKE :otherTestCriteria", filter.otherTestCriteria)
+			.addNotNull("o.other_test_criteria", filter.hasOtherTestCriteria)
+			.add("testsPerDay", "o.tests_per_day = :testsPerDay", filter.testsPerDay)
+			.addNotNull("o.tests_per_day", filter.hasTestsPerDay)
+			.add("testsPerDayFrom", "o.tests_per_day >= :testsPerDayFrom", filter.testsPerDayFrom)
+			.add("testsPerDayTo", "o.tests_per_day <= :testsPerDayTo", filter.testsPerDayTo)
+			.add("governmentIdRequired", "o.government_id_required = :governmentIdRequired", filter.governmentIdRequired)
+			.add("minimumAge", "o.minimum_age = :minimumAge", filter.minimumAge)
+			.addNotNull("o.minimum_age", filter.hasMinimumAge)
+			.add("minimumAgeFrom", "o.minimum_age >= :minimumAgeFrom", filter.minimumAgeFrom)
+			.add("minimumAgeTo", "o.minimum_age <= :minimumAgeTo", filter.minimumAgeTo)
+			.addContains("doctorReferralCriteria", "o.doctor_referral_criteria LIKE :doctorReferralCriteria", filter.doctorReferralCriteria)
+			.addNotNull("o.doctor_referral_criteria", filter.hasDoctorReferralCriteria)
+			.add("firstResponderFriendly", "o.first_responder_friendly = :firstResponderFriendly", filter.firstResponderFriendly)
+			.add("telescreeningAvailable", "o.telescreening_available = :telescreeningAvailable", filter.telescreeningAvailable)
+			.add("acceptsInsurance", "o.accepts_insurance = :acceptsInsurance", filter.acceptsInsurance)
+			.addContains("insuranceProvidersAccepted", "o.insurance_providers_accepted LIKE :insuranceProvidersAccepted", filter.insuranceProvidersAccepted)
+			.addNotNull("o.insurance_providers_accepted", filter.hasInsuranceProvidersAccepted)
+			.add("freeOrLowCost", "o.free_or_low_cost = :freeOrLowCost", filter.freeOrLowCost)
+			.addContains("notes", "o.notes LIKE :notes", filter.notes)
+			.addNotNull("o.notes", filter.hasNotes)
+			.add("active", "o.active = :active", filter.active)
+			.add("createdAtFrom", "o.created_at >= :createdAtFrom", filter.createdAtFrom)
+			.add("createdAtTo", "o.created_at <= :createdAtTo", filter.createdAtTo)
+			.add("updatedAtFrom", "o.updated_at >= :updatedAtFrom", filter.updatedAtFrom)
+			.add("updatedAtTo", "o.updated_at <= :updatedAtTo", filter.updatedAtTo)
+			.add("fromMeters", "ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:fromLongitude, :fromLatitude)) <= :fromMeters", filter.from.meters());
+
+		o.parameters.put("fromLatitude", filter.from.latitude);
+		o.parameters.put("fromLongitude", filter.from.longitude);
+
+		return o;
 	}
 }

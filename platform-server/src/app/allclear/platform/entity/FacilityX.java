@@ -20,7 +20,7 @@ import app.allclear.platform.value.FacilityValue;
 
 @Entity
 @NamedNativeQueries(@NamedNativeQuery(name="findActiveFacilitiesByNameAndDistance",
-	query="SELECT o.*, ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:longitude, :latitude)) AS meters FROM facility o WHERE o.name LIKE :name AND o.active = TRUE AND meters <= :meters ORDER BY meters",
+	query="SELECT o.*, ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:longitude, :latitude)) AS meters FROM facility o WHERE o.name LIKE :name AND o.active = TRUE AND ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:longitude, :latitude)) <= :meters ORDER BY meters",
 	resultClass=FacilityX.class))
 public class FacilityX implements Serializable
 {

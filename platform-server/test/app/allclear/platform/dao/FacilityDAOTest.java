@@ -25,6 +25,7 @@ import app.allclear.common.errors.ValidationException;
 import app.allclear.platform.App;
 import app.allclear.platform.entity.Facility;
 import app.allclear.platform.filter.FacilityFilter;
+import app.allclear.platform.filter.GeoFilter;
 import app.allclear.platform.value.FacilityValue;
 
 /**********************************************************************************
@@ -484,6 +485,13 @@ public class FacilityDAOTest
 			}
 			Assertions.assertEquals(total, results.records.size(), "Check records.size");
 		}
+	}
+
+	@Test
+	public void search_from()
+	{
+		// Function "ST_DISTANCE_SPHERE" not found ON H2 database.
+		assertThrows(PersistenceException.class, () -> dao.search(new FacilityFilter().WithFrom(new GeoFilter(bg("45.7"), bg("-35.42"), 50, null))));
 	}
 
 	public static Stream<Arguments> search_sort()

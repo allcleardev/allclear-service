@@ -32,3 +32,5 @@ java -cp $MYSQL_JDBC/mysql.jar:$SMALL_LIBRARY_JAR com.small.library.ejb.gen.Enti
 java -cp $MYSQL_JDBC/mysql.jar:$SMALL_LIBRARY_JAR com.small.library.ejb.gen.EntityJerseyResourceTest out "${URL}" $DBUSER $DBPWD $DRIVER $AUTHOR $PACKAGE.rest "1.0.$2" $1
 
 java -cp $MYSQL_JDBC/mysql.jar:$SMALL_LIBRARY_JAR com.small.library.ejb.gen.JDBiMapper out "${URL}" $DBUSER $DBPWD $DRIVER $AUTHOR $PACKAGE.mapper "1.0.$2" $1
+
+java -cp $MYSQL_JDBC/mysql.jar:$SMALL_LIBRARY_JAR com.small.library.ejb.gen.JDBiSqlObject out "${URL}" $DBUSER $DBPWD $DRIVER $AUTHOR $PACKAGE.mapper "1.0.$2" $1
