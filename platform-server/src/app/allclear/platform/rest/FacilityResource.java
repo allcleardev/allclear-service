@@ -14,6 +14,7 @@ import com.codahale.metrics.annotation.Timed;
 import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.mediatype.UTF8MediaType;
+import app.allclear.common.resources.Headers;
 import app.allclear.common.value.OperationResponse;
 import app.allclear.platform.dao.FacilityDAO;
 import app.allclear.platform.filter.FacilityFilter;
@@ -49,7 +50,8 @@ public class FacilityResource
 	@GET
 	@Path("/{id}") @Timed @UnitOfWork(readOnly=true, transactional=false)
 	@ApiOperation(value="get", notes="Gets a single Facility by its primary key.", response=FacilityValue.class)
-	public FacilityValue get(@PathParam("id") final Long id) throws ValidationException
+	public FacilityValue get(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@PathParam("id") final Long id) throws ValidationException
 	{
 		return dao.getByIdWithException(id);
 	}
@@ -57,7 +59,8 @@ public class FacilityResource
 	@GET
 	@Timed @UnitOfWork(readOnly=true, transactional=false)
 	@ApiOperation(value="find", notes="Finds Facilitys by wildcard name search.", response=FacilityValue.class, responseContainer="List")
-	public List<FacilityValue> find(@QueryParam("name") @ApiParam(name="name", value="Value for the wildcard search") final String name,
+	public List<FacilityValue> find(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@QueryParam("name") @ApiParam(name="name", value="Value for the wildcard search") final String name,
 		@QueryParam("latitude") @ApiParam(name="latitude", value="Optional, GEO latitude of the locaiton to be searched") final BigDecimal latitude,
 		@QueryParam("longitude") @ApiParam(name="longitude", value="Optional, GEO longitude of the locaiton to be searched") final BigDecimal longitude,
 		@QueryParam("miles") @ApiParam(name="miles", value="Optional, max miles from the GEO location to included in the search") final Integer miles,
@@ -72,7 +75,8 @@ public class FacilityResource
 	@POST
 	@Timed @UnitOfWork
 	@ApiOperation(value="add", notes="Adds a single Facility. Returns the supplied Facility value with the auto generated identifier populated.", response=FacilityValue.class)
-	public FacilityValue add(final FacilityValue value) throws ValidationException
+	public FacilityValue add(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final FacilityValue value) throws ValidationException
 	{
 		return dao.add(value);
 	}
@@ -80,7 +84,8 @@ public class FacilityResource
 	@PUT
 	@Timed @UnitOfWork
 	@ApiOperation(value="set", notes="Updates an existing single Facility. Returns the supplied Facility value with the auto generated identifier populated.", response=FacilityValue.class)
-	public FacilityValue set(final FacilityValue value) throws ValidationException
+	public FacilityValue set(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final FacilityValue value) throws ValidationException
 	{
 		return dao.update(value);
 	}
@@ -88,7 +93,8 @@ public class FacilityResource
 	@DELETE
 	@Path("/{id}") @Timed @UnitOfWork
 	@ApiOperation(value="remove", notes="Removes/deactivates a single Facility by its primary key.")
-	public OperationResponse remove(@PathParam("id") final Long id) throws ValidationException
+	public OperationResponse remove(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@PathParam("id") final Long id) throws ValidationException
 	{
 		return new OperationResponse(dao.remove(id));
 	}
@@ -96,7 +102,8 @@ public class FacilityResource
 	@POST
 	@Path("/search") @Timed @UnitOfWork(readOnly=true, transactional=false)
 	@ApiOperation(value="search", notes="Searches the Facilitys based on the supplied filter.", response=QueryResults.class)
-	public QueryResults<FacilityValue, FacilityFilter> search(final FacilityFilter filter) throws ValidationException
+	public QueryResults<FacilityValue, FacilityFilter> search(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final FacilityFilter filter) throws ValidationException
 	{
 		return dao.search(filter);
 	}

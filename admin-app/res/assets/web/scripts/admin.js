@@ -137,8 +137,21 @@ var FacilitiesHandler = new ListTemplate({
 		PLURAL: 'Facilities',
 		RESOURCE: 'facilities',
 
+		onEditorPreSubmit: c => {
+			var v = c.value;
+
+			if (v.fromLatitude && v.fromLongitude && (v.fromMiles || v.fromKm))
+				c.value.from = { latitude: v.fromLatitude, longitude: v.fromLongitude, miles: v.fromMiles, km: v.fromKm };
+
+			console.log('SEARCH', v);
+		};
+
 		FIELDS: [ new EditField('id', 'ID', false, false, 20, 10),
 		      new EditField('name', 'Name', false, false, 128, 50),
+		      new EditField('fromLatitude', 'FROM Latitude', false, false, 9, 9),
+		      new EditField('fromLongitude', 'FROM Longitude', false, false, 10, 10),
+		      new EditField('fromMiles', 'FROM Miles', false, false, 5, 5),
+		      new EditField('fromKm', 'FROM km', false, false, 5, 5),
 		      new EditField('address', 'Address', false, false, 128, 50),
 		      new EditField('city', 'City', false, false, 128, 50),
 		      new EditField('state', 'State', false, false, 128, 50),

@@ -193,7 +193,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 
 	List<Facility> findActiveByName(final String name)
 	{
-		return namedQuery("findActiveFacilitiesByName").setParameter("name", "%" + name + "%").list();
+		return namedQuery("findActiveFacilitiesByName").setParameter("name", "%" + name + "%").setMaxResults(100).list();
 	}
 
 	List<FacilityX> findActiveByNameAndDistance(final String name, final BigDecimal latitude, final BigDecimal longitude, final long meters)
@@ -203,6 +203,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.setParameter("latitude", latitude)
 			.setParameter("longitude", longitude)
 			.setParameter("meters", meters)
+			.setMaxResults(100)
 			.list();
 	}
 
