@@ -1,1 +1,3 @@
-Click ${baseUrl}/register?phone=%s&code=%s to complete your registration.
+%s
+Use this code for AllClear verification or click this link:
+${baseUrl}/register?phone=%s&code=%s

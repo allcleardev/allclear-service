@@ -376,9 +376,8 @@ public class PeopleResourceTest
 	private String code()
 	{
 		var body = LAST_SMS_RESPONSE.body;
-		var i = body.indexOf("code=") + 5;
 
-		return body.substring(i, body.indexOf(' ', i));
+		return body.substring(0, body.indexOf("\n"));
 	}
 
 	private String token()

@@ -37,7 +37,7 @@ import app.allclear.twilio.model.*;
 public class RegistrationDAOTest
 {
 	public static final Pattern PATTERN_CODE = Pattern.compile("[A-Z0-9]{10}");
-	public static final String MESSAGE = "Click https://app-test.allclear.app/register?phone=%s&code=%s to complete your registration.";
+	public static final String MESSAGE = "%s\nUse this code for AllClear verification or click this link:\nhttps://app-test.allclear.app/register?phone=%s&code=%s";
 
 	private static RegistrationDAO dao;
 	private static FakeRedisClient redis;
@@ -76,7 +76,7 @@ public class RegistrationDAOTest
 		var code = dao.start(new StartRequest(phone, beenTested, haveSymptoms));
 		assertThat(code).hasSize(10).matches(PATTERN_CODE);
 		Assertions.assertNotNull(LAST_RESPONSE, "Check lastResponse");
-		Assertions.assertEquals(String.format(MESSAGE, encode(expectedPhone, UTF_8), code), LAST_RESPONSE.body, "Check lastResponse.body");
+		Assertions.assertEquals(String.format(MESSAGE, code, encode(expectedPhone, UTF_8), code), LAST_RESPONSE.body, "Check lastResponse.body");
 
 		var o = dao.confirm(expectedPhone, code);
 		Assertions.assertNotNull(o, "Exists");
