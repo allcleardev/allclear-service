@@ -9,8 +9,8 @@ if [ -z "$2" ]; then
 fi
 
 DB=allclear
-DBUSER=allclear
-DBPWD=allclear
+DBUSER=root
+DBPWD=password
 AUTHOR=smalleyd
 PACKAGE=app.allclear.platform
 # DRIVER=om.mysql.jdbc.Driver

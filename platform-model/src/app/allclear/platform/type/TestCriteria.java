@@ -23,6 +23,8 @@ public class TestCriteria implements Serializable
 
 	public static final List<TestCriteria> LIST = List.of(CDC_CRITERIA, OTHER);
 	public static final Map<String, TestCriteria> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
+	public static TestCriteria get(final String id) { return VALUES.get(id); }
+	public static boolean exists(final String id) { return VALUES.containsKey(id); }
 
 	public final String id;
 	public final String name;

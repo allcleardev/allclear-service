@@ -27,6 +27,8 @@ public class FacilityType implements Serializable
 
 	public static final List<FacilityType> LIST = List.of(COMMUNITY_HEALTH_CLINIC, HOSPITAL, MEDICAL_CENTER, POP_UP_MOBILE_SITE, PUBLIC_HEALTH_DEPT, URGENT_CARE);
 	public static final Map<String, FacilityType> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
+	public static FacilityType get(final String id) { return VALUES.get(id); }
+	public static boolean exists(final String id) { return VALUES.containsKey(id); }
 
 	public final String id;
 	public final String name;

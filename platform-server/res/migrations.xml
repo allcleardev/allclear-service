@@ -114,4 +114,80 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.0.23_ALLCLEAR-143" author="smalleyd">
+		<createTable tableName="facility" remarks="Represents locations to be tested or receive treatment.">
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true" primaryKeyName="pk_facility" />
+			</column>
+			<column name="name" type="VARCHAR(128)" remarks="Represents the name of the facility.">
+				<constraints nullable="false" />
+			</column>
+			<column name="address" type="VARCHAR(128)" remarks="Represents the street address of the facility.">
+				<constraints nullable="false" />
+			</column>
+			<column name="city" type="VARCHAR(128)" remarks="Represents the city where the facility is located.">
+				<constraints nullable="false" />
+			</column>
+			<column name="state" type="VARCHAR(128)" remarks="Represents the state where the facility is located.">
+				<constraints nullable="false" />
+			</column>
+			<column name="latitude" type="DECIMAL(12,5)" remarks="Represents the GEO coordinates of the facility's location - latitude property.">
+				<constraints nullable="false" />
+			</column>
+			<column name="longitude" type="DECIMAL(12,5)" remarks="Represents the GEO coordinates of the facility's location - longitude property.">
+				<constraints nullable="false" />
+			</column>
+			<column name="phone" type="VARCHAR(32)" remarks="Represents the phone number of the facility." />
+			<column name="appointment_phone" type="VARCHAR(32)" remarks="Represents the appointment phone number of the facility." />
+			<column name="email" type="VARCHAR(128)" remarks="Represents the contact email of the facility." />
+			<column name="url" type="VARCHAR(128)" remarks="Represents the main web site URL of the facility." />
+			<column name="appointment_url" type="VARCHAR(128)" remarks="Represents the appointment web site URL of the facility." />
+			<column name="hours" type="TEXT" remarks="Represents the hours of operation of the facility." />
+			<column name="type_id" type="CHAR(2)" remarks="Represents the facility type indicator." />
+			<column name="drive_thru" type="BOOLEAN" defaultValueBoolean="false" remarks="Does the facility have a drive-thru at this location?">
+				<constraints nullable="false" />
+			</column>
+			<column name="appointment_required" type="BOOLEAN" remarks="Does the facility require an appointment?" />
+			<column name="accepts_third_party" type="BOOLEAN" remarks="Does the facility accept third party referrals?" />
+			<column name="referral_required" type="BOOLEAN" defaultValueBoolean="false" remarks="Does the facility require a referral?">
+				<constraints nullable="false" />
+			</column>
+			<column name="test_criteria_id" type="CHAR(2)" remarks="Refers to the Testing Criteria." />
+			<column name="other_test_criteria" type="TEXT" remarks="Represents the other testing criteria details for the facility." />
+			<column name="tests_per_day" type="INTEGER" remarks="Represents the facility's daily testing capacity." />
+			<column name="government_id_required" type="BOOLEAN" defaultValueBoolean="false" remarks="Does the facility require government identification?">
+				<constraints nullable="false" />
+			</column>
+			<column name="minimum_age" type="INTEGER" remarks="Represents the facility's minimum age to perform tests." />
+			<column name="doctor_referral_criteria" type="TEXT" remarks="Represents the critera the doctors require for a referral." />
+			<column name="first_responder_friendly" type="BOOLEAN" defaultValueBoolean="false" remarks="Does the facility provide courtesy services for healthcare workers and first responders?">
+				<constraints nullable="false" />
+			</column>
+			<column name="telescreening_available" type="BOOLEAN" defaultValueBoolean="false" remarks="Does the facility provide telescreening?">
+				<constraints nullable="false" />
+			</column>
+			<column name="accepts_insurance" type="BOOLEAN" defaultValueBoolean="false" remarks="Does the facility accept insurance?">
+				<constraints nullable="false" />
+			</column>
+			<column name="insurance_providers_accepted" type="TEXT" remarks="Represents the insurance providers the facility accepts." />
+			<column name="free_or_low_cost" type="BOOLEAN" defaultValueBoolean="false" remarks="Does the facility provide free or low cost tests?">
+				<constraints nullable="false" />
+			</column>
+			<column name="notes" type="TEXT" remarks="Represents additional notes about the facility." />
+			<column name="active" type="BOOLEAN" defaultValueBoolean="true" remarks="Indicates activity status.">
+				<constraints nullable="false" />
+			</column>
+			<column name="created_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was created.">
+				<constraints nullable="false" />
+			</column>
+			<column name="updated_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was last modified.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<rollback>
+			<dropTable tableName="facility" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>
