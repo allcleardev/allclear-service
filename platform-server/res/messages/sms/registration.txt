@@ -1,3 +1,2 @@
 %s
-Use this code for AllClear verification or click this link:
-${baseUrl}/register?phone=%s&code=%s
+Use this code for AllClear verification or click ${baseUrl}/register?phone=%s&code=%s
