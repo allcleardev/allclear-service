@@ -9,6 +9,7 @@ import static app.allclear.platform.type.TestCriteria.*;
 
 import java.math.BigDecimal;
 import java.util.stream.Stream;
+import javax.persistence.PersistenceException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -278,6 +279,12 @@ public class FacilityDAOTest
 	public void getActiveByName_invalid()
 	{
 		assertThat(dao.getActiveByName("Eve")).isEmpty();
+	}
+
+	@Test
+	public void getActiveByNameAndDistance()
+	{
+		assertThrows(PersistenceException.class, () -> dao.getActiveByNameAndDistance("da", bg("45.5"), bg("-35.7"), 100000L));	// Function "ST_DISTANCE_SPHERE" not found
 	}
 
 	@Test

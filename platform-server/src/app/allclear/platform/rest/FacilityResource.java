@@ -1,5 +1,8 @@
 package app.allclear.platform.rest;
 
+import static app.allclear.common.value.Constants.*;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.ws.rs.*;
@@ -54,8 +57,15 @@ public class FacilityResource
 	@GET
 	@Timed @UnitOfWork(readOnly=true, transactional=false)
 	@ApiOperation(value="find", notes="Finds Facilitys by wildcard name search.", response=FacilityValue.class, responseContainer="List")
-	public List<FacilityValue> find(@QueryParam("name") @ApiParam(name="name", value="Value for the wildcard search") final String name)
+	public List<FacilityValue> find(@QueryParam("name") @ApiParam(name="name", value="Value for the wildcard search") final String name,
+		@QueryParam("latitude") @ApiParam(name="latitude", value="Optional, GEO latitude of the locaiton to be searched") final BigDecimal latitude,
+		@QueryParam("longitude") @ApiParam(name="longitude", value="Optional, GEO longitude of the locaiton to be searched") final BigDecimal longitude,
+		@QueryParam("miles") @ApiParam(name="miles", value="Optional, max miles from the GEO location to included in the search") final Integer miles,
+		@QueryParam("km") @ApiParam(name="miles", value="Optional, max kilometers from the GEO location to included in the search") final Integer km)
 	{
+		if ((null != latitude) && (null != longitude) && ((null != miles) || (null != km)))
+			return dao.getActiveByNameAndDistance(name, latitude, longitude, (null != miles) ? milesToMeters(miles) : kmToMeters(km));
+
 		return dao.getActiveByName(name);
 	}
 

@@ -79,6 +79,7 @@ public class FacilityFilter extends QueryFilter
 	public Date createdAtTo = null;
 	public Date updatedAtFrom = null;
 	public Date updatedAtTo = null;
+	public GeoFilter from = null;
 
 	// Mutators
 	public FacilityFilter withId(final Long newValue) { id = newValue; return this; }
@@ -138,6 +139,7 @@ public class FacilityFilter extends QueryFilter
 	public FacilityFilter withCreatedAtTo(final Date newValue) { createdAtTo = newValue; return this; }
 	public FacilityFilter withUpdatedAtFrom(final Date newValue) { updatedAtFrom = newValue; return this; }
 	public FacilityFilter withUpdatedAtTo(final Date newValue) { updatedAtTo = newValue; return this; }
+	public FacilityFilter WithFrom(final GeoFilter newValue) { from = newValue; return this; }
 
 	/**************************************************************************
 	*
@@ -393,6 +395,7 @@ public class FacilityFilter extends QueryFilter
 			.append(", createdAtTo: ").append(createdAtTo)
 			.append(", updatedAtFrom: ").append(updatedAtFrom)
 			.append(", updatedAtTo: ").append(updatedAtTo)
+			.append(", from: ").append(from)
 			.append(" }").toString();
 	}
 }

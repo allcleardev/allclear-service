@@ -2,6 +2,7 @@ package app.allclear.platform.dao;
 
 import static app.allclear.common.dao.OrderByBuilder.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -191,6 +192,16 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		return namedQuery("findActiveFacilitiesByName").setParameter("name", "%" + name + "%").list();
 	}
 
+	List<FacilityX> findActiveByNameAndDistance(final String name, final BigDecimal latitude, final BigDecimal longitude, final long meters)
+	{
+		return namedQuery("findActiveFacilitiesByNameAndDistance", FacilityX.class)
+			.setParameter("name", "%" + name + "%")
+			.setParameter("latitude", latitude)
+			.setParameter("longitude", longitude)
+			.setParameter("meters", meters)
+			.list();
+	}
+
 	/** Gets a single Facility value by identifier.
 	 *
 	 * @param id
@@ -222,6 +233,17 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	{
 		return findActiveByName(name).stream().map(o -> o.toValue()).collect(Collectors.toList());
 	}
+
+	/** Gets a list of active Facility values by wild card name search and distance search.
+	 * 
+	 * @param name
+	 * @return never NULL.
+	 */
+	public List<FacilityValue> getActiveByNameAndDistance(final String name, final BigDecimal latitude, final BigDecimal longitude, final long meters)
+	{
+		return findActiveByNameAndDistance(name, latitude, longitude, meters).stream().map(o -> o.toValue()).collect(Collectors.toList());
+	}
+
 	/** Searches the Facility entity based on the supplied filter.
 	 *
 	 * @param filter

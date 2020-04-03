@@ -105,6 +105,26 @@ public class FacilityResourceTest
 	}
 
 	@Test
+	public void find_afterActive_withKm()
+	{
+		var response = request(target().queryParam("name", "ul")
+			.queryParam("latitude", bg("-35.7"))
+			.queryParam("longitude", bg("52.24"))
+			.queryParam("km", 75)).get();
+		Assertions.assertEquals(HTTP_STATUS_RUNTIME_EXCEPTION, response.getStatus(), "Status");	// ST_DISTANCE_SPHERE is not available on H2.
+	}
+
+	@Test
+	public void find_afterActive_withMiles()
+	{
+		var response = request(target().queryParam("name", "ul")
+			.queryParam("latitude", bg("-35.7"))
+			.queryParam("longitude", bg("52.24"))
+			.queryParam("miles", 55)).get();
+		Assertions.assertEquals(HTTP_STATUS_RUNTIME_EXCEPTION, response.getStatus(), "Status");	// ST_DISTANCE_SPHERE is not available on H2.
+	}
+
+	@Test
 	public void get()
 	{
 		var response = get(VALUE.id);
