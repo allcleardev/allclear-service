@@ -101,9 +101,6 @@ public class App extends Application<Config>
 		var sessionDao = new SessionDAO(session, twilio, conf);
 		var registrationDao = new RegistrationDAO(session, twilio, conf);
 
-		// First admin. // TODO: seed the first administrator. Remove in near future.
-		adminDao.add(new AdminValue("smalleyd", "Password_1", "bokenrunner@gmail.com", "David", "Small", true));
-
 		var jersey = env.jersey();
         jersey.register(MultiPartFeature.class);
         jersey.register(new ObjectMapperProvider());
