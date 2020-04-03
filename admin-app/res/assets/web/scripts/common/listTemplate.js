@@ -31,6 +31,9 @@ function ListTemplate(properties)
 		this.search.handleSubmit = function(criteria, form) {
 			this.populate(criteria, form);
 
+			// Allow child classes to preprocess data before submission. DLS on 4/3/2020.
+			if (this.onEditorPreSubmit) this.onEditorPreSubmit(criteria);
+
 			// Do NOT call handleCancel since on non-modals it will also call the callback,
 			// which duplicates the call below.
 			// DLS - 1/21/2011.
