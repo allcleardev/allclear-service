@@ -190,4 +190,13 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.0.38_FACILITY_unique_name" author="smalleyd">
+		<sql dbms="mysql">TRUNCATE TABLE facility</sql>
+		<addUniqueConstraint tableName="facility" columnNames="name" constraintName="unq_facility" />
+
+		<rollback>
+			<dropUniqueConstraint tableName="facility" constraintName="unq_facility" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

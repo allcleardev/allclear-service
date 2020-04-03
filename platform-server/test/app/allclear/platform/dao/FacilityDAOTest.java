@@ -257,6 +257,20 @@ public class FacilityDAOTest
 	}
 
 	@Test
+	public void findByName()
+	{
+		var record = dao.find("Adam");
+		Assertions.assertNotNull(record, "Exists");
+		check(VALUE, record);
+	}
+
+	@Test
+	public void findByName_invalid()
+	{
+		Assertions.assertNull(dao.find("Eve"));
+	}
+
+	@Test
 	public void get()
 	{
 		var value = dao.getByIdWithException(VALUE.id);
@@ -770,6 +784,35 @@ public class FacilityDAOTest
 		count(new FacilityFilter().withId(VALUE.id), 0L);
 		count(new FacilityFilter().withName(VALUE.name), 0L);
 		count(new FacilityFilter().withActive(VALUE.active), 0L);
+	}
+
+	@Test
+	public void z_00_add()
+	{
+		VALUE = dao.add(createValid());
+		Assertions.assertNotNull(VALUE, "Exists");
+		Assertions.assertEquals(2L, VALUE.id, "Check ID");
+	}
+
+	@Test
+	public void z_00_add_check()
+	{
+		count(new FacilityFilter(), 1L);
+		Assertions.assertNotNull(dao.getById(2L), "Exists");
+	}
+
+	@Test
+	public void z_00_modify()
+	{
+		VALUE = dao.add(createValid().withId(20L));
+		Assertions.assertNotNull(VALUE, "Exists");
+		Assertions.assertEquals(2L, VALUE.id, "Check ID");
+	}
+
+	@Test
+	public void z_00_modify_check()
+	{
+		z_00_add_check();
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.

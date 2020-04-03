@@ -87,8 +87,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	 */
 	public FacilityValue add(final FacilityValue value) throws ValidationException
 	{
-		_validate(value.withId(null));
-		return value.withId(persist(new Facility(value)).getId());
+		return update(value);
 	}
 
 	/** Updates a single Facility value.
@@ -98,13 +97,15 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	 */
 	public FacilityValue update(final FacilityValue value) throws ValidationException
 	{
-		 _validate(value)
-		 	.ensureExists("id", "ID", value.id)
-		 	.check();
+		var cmrs = _validate(value);
+		var record = (Facility) cmrs[0];
+		if ((null == record) && (null != value.id))
+			record = findWithException(value.id);
 
-		var record = findWithException(value.id);
+		if (null != record) record.update(value);
+		else record = persist(new Facility(value));
 
-		return value.withId(record.update(value).getId());
+		return value.withId(record.getId());
 	}
 
 	/** Validates a single Facility value.
@@ -123,7 +124,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	 * @return array of CMRs entities.
 	 * @throws ValidationException
 	 */
-	private Validator _validate(final FacilityValue value) throws ValidationException
+	private Object[] _validate(final FacilityValue value) throws ValidationException
 	{
 		value.clean();
 		var validator = new Validator();
@@ -157,7 +158,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 
 		validator.check();
 
-		return validator;
+		return new Object[] { find(value.name) };
 	}
 
 	/** Removes a single Facility value.
@@ -189,6 +190,12 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			throw new ValidationException("id", "Could not find the Facility because id '" + id + "' is invalid.");
 
 		return record;
+	}
+
+	/** Finds a single Facility entity by name. */
+	Facility find(final String name)
+	{
+		return namedQuery("findFacility").setParameter("name", name).uniqueResult();
 	}
 
 	List<Facility> findActiveByName(final String name)

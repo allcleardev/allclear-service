@@ -28,9 +28,10 @@ import app.allclear.platform.value.FacilityValue;
 @Entity
 @Cacheable
 @DynamicUpdate
-@Table(name="facility")
+@Table(name="facility", uniqueConstraints=@UniqueConstraint(name="unq_facility", columnNames="name"))
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE, region="facility")
-@NamedQueries(@NamedQuery(name="findActiveFacilitiesByName", query="SELECT OBJECT(o) FROM Facility o WHERE o.name LIKE :name AND o.active = TRUE ORDER BY o.name"))
+@NamedQueries({@NamedQuery(name="findActiveFacilitiesByName", query="SELECT OBJECT(o) FROM Facility o WHERE o.name LIKE :name AND o.active = TRUE ORDER BY o.name"),
+	@NamedQuery(name="findFacility", query="SELECT OBJECT(o) FROM Facility o WHERE o.name = :name")})
 public class Facility implements Serializable
 {
 	private final static long serialVersionUID = 1L;

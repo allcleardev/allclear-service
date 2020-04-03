@@ -64,7 +64,7 @@ public class FacilityResource
 		@QueryParam("latitude") @ApiParam(name="latitude", value="Optional, GEO latitude of the locaiton to be searched") final BigDecimal latitude,
 		@QueryParam("longitude") @ApiParam(name="longitude", value="Optional, GEO longitude of the locaiton to be searched") final BigDecimal longitude,
 		@QueryParam("miles") @ApiParam(name="miles", value="Optional, max miles from the GEO location to included in the search") final Integer miles,
-		@QueryParam("km") @ApiParam(name="miles", value="Optional, max kilometers from the GEO location to included in the search") final Integer km)
+		@QueryParam("km") @ApiParam(name="km", value="Optional, max kilometers from the GEO location to included in the search") final Integer km)
 	{
 		if ((null != latitude) && (null != longitude) && ((null != miles) || (null != km)))
 			return dao.getActiveByNameAndDistance(name, latitude, longitude, (null != miles) ? milesToMeters(miles) : kmToMeters(km));
