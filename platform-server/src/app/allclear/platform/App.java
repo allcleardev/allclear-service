@@ -118,6 +118,7 @@ public class App extends Application<Config>
         jersey.register(new AdminResource(adminDao, sessionDao));
         jersey.register(new FacilityResource(new FacilityDAO(factory)));
 		jersey.register(new PeopleResource(peopleDao, registrationDao, sessionDao));
+		jersey.register(new RegistrationResource(registrationDao));
 		jersey.register(new TypeResource());
 
 		setupSwagger(conf, env);
