@@ -289,7 +289,15 @@ var RegistrationsHandler = new ListTemplate({
 	          new TextColumn('phone', 'Phone'),
 	          new TextColumn('beenTested', 'Been Tested'),
 	          new TextColumn('haveSymptoms', 'Have Symptoms'),
-	          new TextColumn('ttl', 'TTL', 'fromSeconds') ]
+	          new TextColumn('ttl', 'TTL', 'fromSeconds') ],
+	SEARCH: {
+		NAME: 'registration',
+		SINGULAR: 'Registration Request',
+		PLURAL: 'Registration Requests',
+		RESOURCE: 'registrations',
+
+		FIELDS: [ new EditField('phone', 'Phone', false, false, 32, 15) ]
+	}
 });
 
 var ConfigurationHandler = new EditTemplate({
