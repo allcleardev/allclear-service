@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.MapUtils;
 
-import redis.clients.jedis.Jedis;
+import redis.clients.jedis.*;
 
 /** RedisClient implementation that uses non-remote data structures. Used for unit tests.
  * 
@@ -422,9 +422,29 @@ public class FakeRedisClient extends RedisClient
 			@Override public Boolean exists(final String key) { return me.containsKey(key); }
 			@Override public Long expire(final String key, final int seconds) { me.expire(key, seconds); return 1L; }
 			@Override public String get(final String key) { return me.get(key); }
+			@Override public ScanResult<Map.Entry<String, String>> hscan(final String key, final String cursor, final ScanParams params) { return new ScanResult<Map.Entry<String, String>>("0", new ArrayList<>(me.maps.get(key).entrySet())); };
 			@Override public Map<String, String> hgetAll(final String key) { return me.hash(key); }
 			@Override public Long hset(final String key, final Map<String, String> values) { me.hash(key, values); return 1L; }
+			@Override public ScanResult<String> scan(final String cursor, final ScanParams params) {
+				var keys = me.map.keySet();
+				if (keys.isEmpty()) keys = me.maps.keySet();
+
+				var m = new HashMap<byte[], String>(2);
+				var l = new ArrayList<>(params.getParams());
+				for (int i = 0; i < l.size(); i+= 2)
+					m.put(l.get(i), new String(l.get(i + 1)));
+
+				var key = m.get(Protocol.Keyword.MATCH.raw);
+				if ((null != key) && key.endsWith("*")) key = key.substring(0, key.length() - 1);	// Remove trailing asterisk (*).
+				var k = key;
+
+				return new ScanResult<>("0", keys.stream().filter(v -> (null == k) || v.startsWith(k)).collect(Collectors.toList()));
+			}
 			@Override public String setex(final String key, final int seconds, final String value) { return me.put(key, value, seconds); }
+			@Override public Long ttl(final String key) {
+				var o = me.expirations.get(key);
+				return (null != o) ? o.longValue() : null;
+			}
 		});
 	}
 

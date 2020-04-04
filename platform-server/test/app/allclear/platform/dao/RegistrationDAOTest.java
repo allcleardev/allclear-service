@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 
 import java.util.*;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.*;
@@ -20,7 +21,9 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.platform.ConfigTest;
+import app.allclear.platform.filter.RegistrationFilter;
 import app.allclear.platform.model.StartRequest;
+import app.allclear.platform.value.RegistrationValue;
 import app.allclear.twilio.client.TwilioClient;
 import app.allclear.twilio.model.*;
 
@@ -45,6 +48,7 @@ public class RegistrationDAOTest
 	private static SMSResponse LAST_RESPONSE;
 
 	private static Map<String, String> codes = new HashMap<>();
+	private static Map<String, RegistrationValue> VALUES = new HashMap<>();
 
 	@BeforeAll
 	public static void up()
@@ -77,6 +81,7 @@ public class RegistrationDAOTest
 		assertThat(code).hasSize(10).matches(PATTERN_CODE);
 		Assertions.assertNotNull(LAST_RESPONSE, "Check lastResponse");
 		Assertions.assertEquals(String.format(MESSAGE, code, encode(expectedPhone, UTF_8), code), LAST_RESPONSE.body, "Check lastResponse.body");
+		Assertions.assertEquals(1L, dao.search(new RegistrationFilter().withPhone(expectedPhone)).total, "Check search: before");
 
 		var o = dao.confirm(expectedPhone, code);
 		Assertions.assertNotNull(o, "Exists");
@@ -88,6 +93,7 @@ public class RegistrationDAOTest
 		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.confirm(expectedPhone, code)))
 			.as("Check confirm: after confirm")
 			.hasMessage("The supplied code is invalid.");
+		Assertions.assertEquals(0L, dao.search(new RegistrationFilter().withPhone(expectedPhone)).total, "Check search: before");
 	}
 
 	@ParameterizedTest
@@ -95,12 +101,20 @@ public class RegistrationDAOTest
 	public void add_again(final String phone, final Boolean beenTested, final Boolean haveSymptoms,
 		final String expectedPhone, final boolean expectedBeenTested, final boolean expectedHaveSymptoms)
 	{
-		codes.put(expectedPhone, dao.start(new StartRequest(phone, beenTested, haveSymptoms)));
+		var request = new StartRequest(phone, beenTested, haveSymptoms);
+		var code = dao.start(request);
+
+		codes.put(expectedPhone, code);
+		VALUES.put(expectedPhone, new RegistrationValue(dao.key(expectedPhone, code), request, (long) RegistrationDAO.EXPIRATION));
 	}
 
 	@Test
 	public void add_again_check()
 	{
+		Assertions.assertEquals(9L, dao.search(new RegistrationFilter(1, 100)).total, "Check total: All");
+		Assertions.assertEquals(1L, dao.search(new RegistrationFilter(1, 100).withPhone("+18885551000")).total, "Check total: +18885551000");
+		Assertions.assertEquals(1L, dao.search(new RegistrationFilter(1, 100).withPhone("+18885551008")).total, "Check total: +18885551008");
+
 		var code = codes.get("+18885551008");
 		assertThat(code).as("Check code").hasSize(10);
 
@@ -110,5 +124,34 @@ public class RegistrationDAOTest
 		Assertions.assertNotNull(dao.confirm("+18885551008", code), "Check correct phone number");
 		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.confirm("+18885551000", code)))
 			.hasMessage("The supplied code is invalid.");
+
+		Assertions.assertEquals(1L, dao.search(new RegistrationFilter(1, 100).withPhone("+18885551000")).total, "Check total: +18885551000");
+		Assertions.assertEquals(0L, dao.search(new RegistrationFilter(1, 100).withPhone("+18885551008")).total, "Check total: +18885551008");
+		Assertions.assertEquals(8L, dao.search(new RegistrationFilter(1, 100)).total, "Check total: All");
+	}
+
+	@Test
+	public void search()
+	{
+		assertThat(dao.search(new RegistrationFilter(1, 100)).records)
+			.containsAll(VALUES.values().stream().filter(v -> !v.phone.equals("+18885551008")).collect(Collectors.toList()));
+	}
+
+	@Test
+	public void testRemove()
+	{
+		var phone = "+18885551002";
+		Assertions.assertNotNull(dao.request(phone, codes.get(phone)));
+		Assertions.assertNotNull(dao.request("+18885551003", codes.get("+18885551003")));
+
+		dao.remove(dao.key(phone, codes.get(phone)));
+	}
+
+	@Test
+	public void testRemove_check()
+	{
+		Assertions.assertNull(dao.request("+18885551002", codes.get("+18885551002")));
+		Assertions.assertNotNull(dao.request("+18885551003", codes.get("+18885551003")));
+		Assertions.assertEquals(7L, dao.search(new RegistrationFilter(1, 100)).total, "Check total: All");
 	}
 }
