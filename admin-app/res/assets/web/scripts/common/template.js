@@ -743,6 +743,35 @@ Template.prototype.toPercent = function(value)
 	return this.toNumber(this.round(value * 100, 2), 2);
 }
 
+Template.prototype.fromSeconds = function(value)
+{
+	if (undefined == value) return '';
+
+	var o = '';
+	var v = Math.floor(value / 3600);
+	if (0 < v)
+	{
+		o = (v + ' hours');
+		value%= 3600;
+	}
+
+	v = Math.floor(value / 60);
+	if (0 < v)
+	{
+		if (o) o+= ', ';
+		o+= (v + ' minutes');
+		value%= 60;
+	}
+
+	if (0 < value)
+	{
+		if (o) o+= ', ';
+		o+= (value + ' seconds');
+	}
+
+	return o;
+}
+
 /** Converts milliseconds to seconds with three decimal places. */
 Template.prototype.toSeconds = function(value)
 {

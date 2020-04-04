@@ -1,6 +1,6 @@
 var AdminApp = new TabTemplate();
 
-AdminApp.TABS = [ { id: 'doPeople', caption: 'People' },
+AdminApp.TABS = [ { id: 'doPeople', caption: 'People', children: [ { id: 'doRegistrations', 'Registrations' } ] },
 	{ id: 'doFacilities', caption: 'Facilities' },
 	{ id: 'doLogs', caption: 'Logs', children: [ { id: 'doQueueStats', caption: 'Queue Stats' } ] },
 	{ id: 'doSessions', caption: 'Sessions', children: [ { id: 'doAdmins', caption: 'Admins' } ] },
@@ -8,6 +8,7 @@ AdminApp.TABS = [ { id: 'doPeople', caption: 'People' },
 	                                                 { id: 'doHeapDump', caption: 'Heap Dump' } ] } ];
 
 AdminApp.doPeople = function(body) { PeopleHandler.filter({ pageSize: 100 }, body); }
+AdminApp.doRegistrations = function(body) { RegistrationsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doFacilities = function(body) { FacilitiesHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doLogs = function(body) { LogsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doSessions = function(body) { SessionsHandler.filter({ pageSize: 100 }, body); }
@@ -142,8 +143,6 @@ var FacilitiesHandler = new ListTemplate({
 
 			if (v.fromLatitude && v.fromLongitude && (v.fromMiles || v.fromKm))
 				c.value.from = { latitude: v.fromLatitude, longitude: v.fromLongitude, miles: v.fromMiles, km: v.fromKm };
-
-			console.log('SEARCH', v);
 		},
 
 		FIELDS: [ new EditField('id', 'ID', false, false, 20, 10),
@@ -266,6 +265,23 @@ var PeopleHandler = new ListTemplate({
 		          new DatesField('updatedAt', 'Updated At', false),
 		          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ]
 	}
+});
+
+var RegistrationsHandler = new ListTemplate({
+	NAME: 'registration',
+	SINGULAR: 'Registration Request',
+	PLURAL: 'Registration Requests',
+	RESOURCE: 'registrations',
+
+	CAN_ADD: false,
+	CAN_EDIT: false,
+	CAN_REMOVE: true,
+
+	SEARCH: [ new TextColumn('key', 'Key'),
+	          new TextColumn('phone', 'Phone'),
+	          new TextColumn('beenTested', 'Been Tested'),
+	          new TextColumn('haveSymptoms', 'Have Symptoms'),
+	          new TextColumn('ttl', 'TTL', 'fromSeconds') ]
 });
 
 var ConfigurationHandler = new EditTemplate({
