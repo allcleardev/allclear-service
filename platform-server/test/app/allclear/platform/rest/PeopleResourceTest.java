@@ -30,9 +30,9 @@ import app.allclear.platform.App;
 import app.allclear.platform.Config;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.dao.*;
-import app.allclear.platform.filter.PeopleFilter;
+import app.allclear.platform.filter.*;
 import app.allclear.platform.model.*;
-import app.allclear.platform.value.PeopleValue;
+import app.allclear.platform.value.*;
 import app.allclear.platform.value.SessionValue;
 import app.allclear.twilio.client.TwilioClient;
 import app.allclear.twilio.model.*;
@@ -66,21 +66,26 @@ public class PeopleResourceTest
 	private static Date EMAIL_VERIFIED_AT;
 	private static Date PHONE_VERIFIED_AT;
 	private static SMSResponse LAST_SMS_RESPONSE;
+	private static RegistrationValue REGISTRATION;
 	private static SessionValue SESSION;
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
 		.addResource(new AuthenticationExceptionMapper())
 		.addResource(new NotFoundExceptionMapper())
 		.addResource(new ValidationExceptionMapper())
-		.addResource(new PeopleResource(dao, registrationDao, sessionDao)).build();
+		.addResource(new PeopleResource(dao, registrationDao, sessionDao))
+		.addResource(new RegistrationResource(registrationDao)).build();
 
 	/** Primary URI to test. */
 	private static final String TARGET = "/peoples";
+	private static final String REGISTRATIONS = "/registrations";
 
 	/** Generic types for reading values from responses. */
 	private static final GenericType<List<PeopleValue>> TYPE_LIST_VALUE = new GenericType<List<PeopleValue>>() {};
 	private static final GenericType<QueryResults<PeopleValue, PeopleFilter>> TYPE_QUERY_RESULTS =
 		new GenericType<QueryResults<PeopleValue, PeopleFilter>>() {};
+	private static final GenericType<QueryResults<RegistrationValue, RegistrationFilter>> TYPE_QUERY_RESULTS_ =
+			new GenericType<QueryResults<RegistrationValue, RegistrationFilter>>() {};
 
 	@BeforeAll
 	public static void up() throws Exception
@@ -305,6 +310,46 @@ public class PeopleResourceTest
 	}
 
 	@Test
+	public void start()
+	{
+		Assertions.assertEquals(HTTP_STATUS_OK,
+			request("start").post(Entity.json(new StartRequest("888-555-2100", false, false))).getStatus());
+	}
+
+	@Test
+	public void start_count()
+	{
+		var response = registrations("search").post(Entity.json(new RegistrationFilter()));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var results = response.readEntity(TYPE_QUERY_RESULTS_);
+		Assertions.assertNotNull(results, "Exists");
+		Assertions.assertEquals(1L, results.total, "Check results.total");
+		assertThat(results.records).as("Check results.records").hasSize(1);
+
+		REGISTRATION = results.records.get(0);
+	}
+
+	@Test
+	public void start_remove()
+	{
+		var response = registrations(REGISTRATION.key).delete();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+	}
+
+	@Test
+	public void start_remove_search()
+	{
+		var response = registrations("search").post(Entity.json(new RegistrationFilter()));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var results = response.readEntity(TYPE_QUERY_RESULTS_);
+		Assertions.assertNotNull(results, "Exists");
+		Assertions.assertNull(results.records, "Check results.records");
+		Assertions.assertEquals(0L, results.total, "Check results.total");
+	}
+
+	@Test
 	public void testRemove_get()
 	{
 		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, get(VALUE.id).getStatus(), "Status");
@@ -390,11 +435,13 @@ public class PeopleResourceTest
 
 	/** Helper method - creates the base WebTarget. */
 	private WebTarget target() { return RULE.client().target(TARGET); }
+	private WebTarget registration() { return RULE.client().target(REGISTRATIONS); }
 
 	/** Helper method - creates the request from the WebTarget. */
 	private Invocation.Builder request() { return request(target()); }
 	private Invocation.Builder request(final String path) { return request(target().path(path)); }
 	private Invocation.Builder request(final WebTarget target) { return target.request(UTF8MediaType.APPLICATION_JSON_TYPE); }
+	private Invocation.Builder registrations(final String path) { return request(registration().path(path)); }
 
 	/** Helper method - calls the DAO count call and compares the expected total value.
 	 *

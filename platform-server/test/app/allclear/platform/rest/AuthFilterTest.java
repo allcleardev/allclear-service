@@ -82,7 +82,11 @@ public class AuthFilterTest
 			arguments("peoples-confirm", false),
 			arguments("peoples/start", false),
 			arguments("/peoples/start", false),
-			arguments("peoples/starts", false));
+			arguments("peoples/starts", false),
+			arguments("registrations", false),
+			arguments("/registrations", false),
+			arguments("registrations/key", false),
+			arguments("registrations/search", false));
 	}
 
 	@ParameterizedTest
@@ -90,6 +94,52 @@ public class AuthFilterTest
 	public void admin(final String path, final boolean expected)
 	{
 		Assertions.assertEquals(expected, auth.admin(path));
+	}
+
+	public static Stream<Arguments> admins()
+	{
+		return Stream.of(
+			arguments(null, false),
+			arguments("", false),
+			arguments("a", false),
+			arguments("/a", false),
+			arguments("/admins", false),
+			arguments("admins", false),
+			arguments("admins/self", false),
+			arguments("admins/search", false),
+			arguments("/admins", false),
+			arguments("/admins/self", false),
+			arguments("/admins/search", false),
+			arguments("info/config", false),
+			arguments("/info/config", false),
+			arguments("info/health", false),
+			arguments("info/ping", false),
+			arguments("info/version", false),
+			arguments("peoples/admin", false),
+			arguments("types/admin", false),
+			arguments("/peoples", false),
+			arguments("types/peopleStatuses", false),
+			arguments("/types/peopleStatuses", false),
+			arguments("types/peopleStatuses", false),
+			arguments("type/peopleStatuses", false),
+			arguments("peoples/auth", false),
+			arguments("peoples/authenticated", false),
+			arguments("peoples/confirm", false),
+			arguments("peoples-confirm", false),
+			arguments("peoples/start", false),
+			arguments("/peoples/start", false),
+			arguments("peoples/starts", false),
+			arguments("registrations", true),
+			arguments("/registrations", false),
+			arguments("registrations/key", true),
+			arguments("registrations/search", true));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void admins(final String path, final boolean expected)
+	{
+		Assertions.assertEquals(expected, auth.admins(path));
 	}
 
 	public static Stream<Arguments> requiresAuth()
@@ -120,7 +170,11 @@ public class AuthFilterTest
 			arguments("peoples-confirm", true),
 			arguments("peoples/start", false),
 			arguments("/peoples/start", true),
-			arguments("peoples/starts", true));
+			arguments("peoples/starts", true),
+			arguments("registrations", true),
+			arguments("/registrations", true),
+			arguments("registrations/key", true),
+			arguments("registrations/search", true));
 	}
 
 	@ParameterizedTest
@@ -161,7 +215,11 @@ public class AuthFilterTest
 			arguments("peoples-confirm", false),
 			arguments("peoples/start", false),
 			arguments("/peoples/start", false),
-			arguments("peoples/starts", false));
+			arguments("peoples/starts", false),
+			arguments("registrations", false),
+			arguments("/registrations", false),
+			arguments("registrations/key", false),
+			arguments("registrations/search", false));
 	}
 
 	@ParameterizedTest
@@ -196,8 +254,11 @@ public class AuthFilterTest
 			arguments("peoples", "INVALID", "The ID 'INVALID' is invalid."),
 			arguments("types/peopleStatuses", "INVALID", "The ID 'INVALID' is invalid."),
 			arguments("peoples/register", PERSON.id, "Requires a Registration Session."),
-			arguments("peoples", START.id, "Requires a Non-registration Session.")
-			);
+			arguments("peoples", START.id, "Requires a Non-registration Session."),
+			arguments("registrations", PERSON.id, "Requires an Administrative Session."),
+			arguments("registrations", START.id, "Requires an Administrative Session."),
+			arguments("registrations/key", PERSON.id, "Requires an Administrative Session."),
+			arguments("registrations/search", START.id, "Requires an Administrative Session."));
 	}
 
 	@ParameterizedTest
@@ -225,6 +286,10 @@ public class AuthFilterTest
 			arguments("peoples/confirm", START.id),
 			arguments("peoples", PERSON.id),
 			arguments("peoples/register", START.id),
+			arguments("registrations", ADMIN.id),
+			arguments("registrations", SUPER.id),
+			arguments("registrations/key", ADMIN.id),
+			arguments("registrations/search", SUPER.id),
 			arguments("types/peopleStatuses", null),
 			arguments("types/peopleStatuses", START.id),
 			arguments("types/peopleStatuses", PERSON.id)
