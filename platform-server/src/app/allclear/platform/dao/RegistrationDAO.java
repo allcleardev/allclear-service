@@ -68,7 +68,7 @@ public class RegistrationDAO
 	 */
 	public String start(final StartRequest request) throws ValidationException
 	{
-		new Validator().ensureLength("phone", "Phone", request.phone, 10, 32)
+		new Validator().ensureExistsAndLength("phone", "Phone", request.phone, 10, 32)
 			.ensurePattern("phone", "Phone", request.phone, Validator.PATTERN_PHONE)
 			.check();
 		

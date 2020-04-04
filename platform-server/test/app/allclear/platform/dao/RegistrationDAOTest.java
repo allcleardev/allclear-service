@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -135,6 +136,23 @@ public class RegistrationDAOTest
 	{
 		assertThat(dao.search(new RegistrationFilter(1, 100)).records)
 			.containsAll(VALUES.values().stream().filter(v -> !v.phone.equals("+18885551008")).collect(Collectors.toList()));
+	}
+
+	public static Stream<Arguments> start_invalid()
+	{
+		return Stream.of(
+			arguments(null, "Phone is not set."),
+			arguments(StringUtils.repeat('5', 6), "Phone cannot be shorter than 10 characters."),
+			arguments(StringUtils.repeat('a', 12), "Phone is not set."),
+			arguments(StringUtils.repeat('5', 33), "Phone cannot be longer than 32 characters."));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void start_invalid(final String phone, final String message)
+	{
+		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.start(new StartRequest(phone, false, false))))
+			.hasMessage(message);
 	}
 
 	@Test

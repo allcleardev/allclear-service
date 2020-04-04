@@ -1,6 +1,6 @@
 var AdminApp = new TabTemplate();
 
-AdminApp.TABS = [ { id: 'doPeople', caption: 'People', children: [ { id: 'doRegistrations', 'Registrations' } ] },
+AdminApp.TABS = [ { id: 'doPeople', caption: 'People', children: [ { id: 'doRegistrations', caption: 'Registrations' } ] },
 	{ id: 'doFacilities', caption: 'Facilities' },
 	{ id: 'doLogs', caption: 'Logs', children: [ { id: 'doQueueStats', caption: 'Queue Stats' } ] },
 	{ id: 'doSessions', caption: 'Sessions', children: [ { id: 'doAdmins', caption: 'Admins' } ] },
