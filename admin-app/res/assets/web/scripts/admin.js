@@ -285,7 +285,7 @@ var RegistrationsHandler = new ListTemplate({
 	CAN_EDIT: false,
 	CAN_REMOVE: true,
 
-	SEARCH: [ new TextColumn('key', 'Key'),
+	COLUMNS: [ new TextColumn('key', 'Key'),
 	          new TextColumn('phone', 'Phone'),
 	          new TextColumn('beenTested', 'Been Tested'),
 	          new TextColumn('haveSymptoms', 'Have Symptoms'),
