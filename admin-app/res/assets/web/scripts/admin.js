@@ -1,6 +1,7 @@
 var AdminApp = new TabTemplate();
 
-AdminApp.TABS = [ { id: 'doPeople', caption: 'People', children: [ { id: 'doRegistrations', caption: 'Registrations' } ] },
+AdminApp.TABS = [ { id: 'doPeople', caption: 'People', children: [ { id: 'doRegistrations', caption: 'Registrations' },
+	                                                               { id: 'doTests', caption: 'Tests' } ] },
 	{ id: 'doFacilities', caption: 'Facilities' },
 	{ id: 'doLogs', caption: 'Logs', children: [ { id: 'doQueueStats', caption: 'Queue Stats' } ] },
 	{ id: 'doSessions', caption: 'Sessions', children: [ { id: 'doAdmins', caption: 'Admins' } ] },
@@ -9,6 +10,7 @@ AdminApp.TABS = [ { id: 'doPeople', caption: 'People', children: [ { id: 'doRegi
 
 AdminApp.doPeople = function(body) { PeopleHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doRegistrations = function(body) { RegistrationsHandler.filter({ pageSize: 100 }, body); }
+AdminApp.doTests = function(body) { TestsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doFacilities = function(body) { FacilitiesHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doLogs = function(body) { LogsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doSessions = function(body) { SessionsHandler.filter({ pageSize: 100 }, body); }
@@ -20,7 +22,7 @@ AdminApp.doHeapDump = function(body) { HeapDumpHandler.init(body); }
 AdminApp.doQueueStats = function(body) { QueuesHandler.init(body); }
 
 AdminApp.onPostInit = function(c) {
-	this.loadLists([ 'conditions', 'exposures', 'facilityTypes', 'peopleStatuses', 'peopleStatures', 'sexes', 'symptoms', 'testCriteria' ]);
+	this.loadLists([ 'conditions', 'exposures', 'facilityTypes', 'peopleStatuses', 'peopleStatures', 'sexes', 'symptoms', 'testCriteria', 'testTypes' ]);
 }
 
 var UPLOAD_SOURCES_INSTRUCTIONS = 'Add comma separated text that is split by type, name, and code in that order.<br /><br />Types:<blockquote>';
@@ -29,6 +31,11 @@ function toCreator(value, property, me) { return property + ' @ ' + me.toDateTim
 function toUpdater(value, property, me) { return property + ' @ ' + me.toDateTime(value.updatedAt); }
 
 // Global function to load People type-ahead list.
+function fillFacilitiesDropdownList(c)
+{
+	Template.get('facilities', { name: c.field.value }, function(data) { c.caller.fill(c, data); });
+}
+
 function fillPeopleDropdownList(c)
 {
 	Template.get('people', { name: c.field.value }, function(data) { c.caller.fill(c, data); });
@@ -296,7 +303,60 @@ var RegistrationsHandler = new ListTemplate({
 		PLURAL: 'Registration Requests',
 		RESOURCE: 'registrations',
 
-		FIELDS: [ new EditField('phone', 'Phone', false, false, 32, 15) ]
+		FIELDS: [ new EditField('phone', 'Phone', false, false, 32, 15),
+		          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ]
+	}
+});
+
+var TestsHandler = new ListTemplate({
+	NAME: 'tests',
+	SINGULAR: 'Test',
+	PLURAL: 'Tests',
+	RESOURCE: 'tests',
+
+	CAN_ADD: true,
+	CAN_EDIT: true,
+	CAN_REMOVE: true,
+	EDIT_METHOD: 'put',
+
+	toType: v => (null != v) ? v.name : '';
+
+	COLUMNS: [ new IdColumn('id', 'ID', true),
+	           new TextColumn('personName', 'Person', undefined, false, false, 'openPerson'),
+	           new TextColumn('type', 'Type', 'toType'),
+	           new TextColumn('takenOn', 'Taken On', 'toDate'),
+	           new TextColumn('facilityName', 'Facility', undefined, false, false, 'openFacility'),
+	           new TextColumn('positive', 'Positive?') ],
+	FIELDS: [ new IdField('id', 'ID'),
+	          new DropField('personId', 'Person', true, fillPeopleDropdownList, 'personName'),
+	          new TextField('personName', '', undefined, undefined, true),
+	          new ListField('typeId', 'Type', true, 'testTypes'),
+	          new DateField('takenOn', 'Taken on', true),
+	          new DropField('facilityId', 'Facility', true, fillFacilitiesDropdownList, 'facilityName'),
+	          new TextField('facilityName', '', undefined, undefined, true),
+	          new BoolField('positive', 'Positive?', true),
+	          new EditField('notes', 'Notes', false, true, 60, 5),
+	          new TextField('createdAt', 'Created At', 'toDateTime'),
+	          new TextField('updatedAt', 'Updated At', 'toDateTime') ],
+	SEARCH: {
+		NAME: 'tests',
+		SINGULAR: 'Test',
+		PLURAL: 'Tests',
+		RESOURCE: 'tests',
+
+		FIELDS: [ new EditField('id', 'ID', false, false, 19, 10),
+	          new DropField('personId', 'Person', false, fillPeopleDropdownList, 'personName'),
+	          new TextField('personName', '', undefined, undefined, true),
+	          new ListField('typeId', 'Type', false, 'testTypes', undefined, 'No Search'),
+	          new DateField('takenOn', 'Taken on', false),
+	          new DatesField('takenOn', 'Taken on', false),
+	          new DropField('facilityId', 'Facility', false, fillFacilitiesDropdownList, 'facilityName'),
+	          new TextField('facilityName', '', undefined, undefined, true),
+	          new ListField('positive', 'Positive?', false, 'yesNoOptions', undefined, 'No Search'),
+	          new EditField('notes', 'Notes', false, false, 255, 50),
+	          new DatesField('createdAt', 'Created At', false),
+	          new DatesField('updatedAt', 'Updated At', false),
+	          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ]
 	}
 });
 
