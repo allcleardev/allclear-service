@@ -319,7 +319,7 @@ var TestsHandler = new ListTemplate({
 	CAN_REMOVE: true,
 	EDIT_METHOD: 'put',
 
-	toType: v => (null != v) ? v.name : '';
+	toType: v => (null != v) ? v.name : '',
 
 	COLUMNS: [ new IdColumn('id', 'ID', true),
 	           new TextColumn('personName', 'Person', undefined, false, false, 'openPerson'),
