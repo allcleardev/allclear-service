@@ -2,7 +2,6 @@ package app.allclear.platform.dao;
 
 import static app.allclear.common.dao.OrderByBuilder.*;
 
-import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -47,6 +46,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		"statusId", ASC,
 		"statureId", ASC,
 		"sexId", ASC,
+		"healthWorkerStatusId", ASC,
 		"latitude", DESC,
 		"longitude", DESC,
 		"alertable", DESC,
@@ -84,7 +84,8 @@ public class PeopleDAO extends AbstractDAO<People>
 	 */
 	public PeopleValue add(final PeopleValue value) throws ValidationException
 	{
-		var record = persist(toEntity(value, _validate(value.withId(generateId()))));
+		_validate(value.withId(generateId()));
+		var record = persist(new People(value));
 
 		// Save children.
 		var s = currentSession();
@@ -119,7 +120,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		update(s, record, value.exposures, record.getExposures(), "deleteExposuresByPerson", v -> new Exposures(r, v));
 		update(s, record, value.symptoms, record.getSymptoms(), "deleteSymptomsByPerson", v -> new Symptoms(r, v));
 
-		return value.withId(toEntity(value, record, cmrs).getId());
+		return value.withId(record.update(value).getId());
 	}
 
 	private int update(final Session s,
@@ -195,19 +196,23 @@ public class PeopleDAO extends AbstractDAO<People>
 			.ensureLength("statusId", "Status", value.statusId, PeopleValue.MAX_LEN_STATUS_ID)
 			.ensureLength("statureId", "Stature", value.statureId, PeopleValue.MAX_LEN_STATURE_ID)
 			.ensureLength("sexId", "Sex", value.sexId, PeopleValue.MAX_LEN_SEX_ID)
+			.ensureLength("healthWorkerStatusId", "HealthWorkerStatusId", value.healthWorkerStatusId, PeopleValue.MAX_LEN_HEALTH_WORKER_STATUS_ID)
 			.ensureLatitude("latitude", "Latitude", value.latitude)
 			.ensureLongitude("longitude", "Longitude", value.longitude)
 			.check();
 
 		// Check enum values.
-		if ((null != value.statusId) && (null == (value.status = PeopleStatus.VALUES.get(value.statusId))))
+		if ((null != value.statusId) && (null == (value.status = PeopleStatus.get(value.statusId))))
 			validator.add("statusId", "The Status ID '%s' is invalid.", value.statusId);
 
-		if ((null != value.statureId) && (null == (value.stature = PeopleStature.VALUES.get(value.statureId))))
+		if ((null != value.statureId) && (null == (value.stature = PeopleStature.get(value.statureId))))
 			validator.add("statureId", "The Stature ID '%s' is invalid.", value.statureId);
 
-		if ((null != value.sexId) && (null == (value.sex = Sex.VALUES.get(value.sexId))))
+		if ((null != value.sexId) && (null == (value.sex = Sex.get(value.sexId))))
 			validator.add("sexId", "The Sex ID '%s' is invalid.", value.sexId);
+
+		if ((null != value.healthWorkerStatusId) && (null == (value.healthWorkerStatus = HealthWorkerStatus.get(value.healthWorkerStatusId))))
+			validator.add("healthWorkerStatusId", "The Health Worker Status ID '%s' is invalid.", value.healthWorkerStatusId);
 
 		// Check children.
 		if (CollectionUtils.isNotEmpty(value.conditions))
@@ -349,7 +354,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		var v = new QueryResults<PeopleValue, PeopleFilter>(builder.aggregate(COUNT), filter);
 		if (v.isEmpty()) return v;
 
-		return v.withRecords(builder.orderBy(ORDER.normalize(v)).run(v).stream().map(o -> toValue(o)).collect(Collectors.toList()));
+		return v.withRecords(builder.orderBy(ORDER.normalize(v)).run(v).stream().map(o -> o.toValue()).collect(Collectors.toList()));
 	}
 
 	/** Counts the number of People entities based on the supplied filter.
@@ -387,6 +392,8 @@ public class PeopleDAO extends AbstractDAO<People>
 			.addNotNull("o.statureId", filter.hasStatureId)
 			.add("sexId", "o.sexId LIKE :sexId", filter.sexId)
 			.addNotNull("o.sexId", filter.hasSexId)
+			.addContains("healthWorkerStatusId", "o.healthWorkerStatusId LIKE :healthWorkerStatusId", filter.healthWorkerStatusId)
+			.addNotNull("o.healthWorkerStatusId", filter.hasHealthWorkerStatusId)
 			.add("latitude", "o.latitude = :latitude", filter.latitude)
 			.addNotNull("o.latitude", filter.hasLatitude)
 			.add("latitudeFrom", "o.latitude >= :latitudeFrom", filter.latitudeFrom)
@@ -416,36 +423,5 @@ public class PeopleDAO extends AbstractDAO<People>
 			.addIn("excludeExposures", "NOT EXISTS (SELECT 1 FROM Exposures c WHERE c.personId = o.id AND c.exposureId IN {})", filter.excludeExposures)
 			.addIn("includeSymptoms", "EXISTS (SELECT 1 FROM Symptoms c WHERE c.personId = o.id AND c.symptomId IN {})", filter.includeSymptoms)
 			.addIn("excludeSymptoms", "NOT EXISTS (SELECT 1 FROM Symptoms c WHERE c.personId = o.id AND c.symptomId IN {})", filter.excludeSymptoms);
-	}
-
-	/** Helper method - creates a non-transactional value from a transactional entity. */
-	private PeopleValue toValue(final People record) { return record.toValue(); }
-
-	/** Helper method - creates a transactional entity from a non-transactional value. */
-	public People toEntity(final PeopleValue value, final Object[] cmrs) { return new People(value.initDates()); }
-
-	/** Helper method - populates the transactional entity from the non-transactional value. */
-	public People toEntity(final PeopleValue value, final People record, final Object[] cmrs)
-	{
-		record.setName(value.name);
-		record.setPhone(value.phone);
-		record.setEmail(value.email);
-		record.setFirstName(value.firstName);
-		record.setLastName(value.lastName);
-		record.setDob(value.dob);
-		record.setStatusId(value.statusId);
-		record.setStatureId(value.statureId);
-		record.setSexId(value.sexId);
-		record.setLatitude(value.latitude);
-		record.setLongitude(value.longitude);
-		record.setAlertable(value.alertable);
-		record.setActive(value.active);
-		record.setAuthAt(value.authAt);
-		record.setPhoneVerifiedAt(value.phoneVerifiedAt);
-		record.setEmailVerifiedAt(value.emailVerifiedAt);
-		value.createdAt = record.getCreatedAt();
-		record.setUpdatedAt(value.updatedAt = new Date());
-
-		return record;
 	}
 }

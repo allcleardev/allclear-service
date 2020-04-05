@@ -40,6 +40,11 @@ public class TypeResource
 	public List<FacilityType> getFacilityTypes() { return FacilityType.LIST; }
 
 	@GET
+	@Path("/healthWorkerStatuses") @Timed
+	@ApiOperation(value="getHealthWorkerStatuses", notes="Gets a list of statures that can be associated with a person.", response=HealthWorkerStatus.class, responseContainer="List")
+	public List<HealthWorkerStatus> getHealthWorkerStatuses() { return HealthWorkerStatus.LIST; }
+
+	@GET
 	@Path("/peopleStatuses") @Timed
 	@ApiOperation(value="getPeopleStatuses", notes="Gets a list of statures that can be associated with a person.", response=PeopleStatus.class, responseContainer="List")
 	public List<PeopleStatus> getPeopleStatuses() { return PeopleStatus.LIST; }

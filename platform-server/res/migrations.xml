@@ -255,4 +255,14 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.0.53-health_worker_status" author="smalleyd">
+		<addColumn tableName="people">
+			<column name="health_worker_status_id" type="CHAR(1)" remarks="Refers to the state of employment as a healthcare worker." />
+		</addColumn>
+
+		<rollback>
+			<dropColumn tableName="people" columnName="health_worker_status_id" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

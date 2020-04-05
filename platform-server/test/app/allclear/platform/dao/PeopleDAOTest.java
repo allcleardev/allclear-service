@@ -67,7 +67,8 @@ public class PeopleDAOTest
 	public void add()
 	{
 		var value = dao.add(VALUE = new PeopleValue("ronny", "888-555-1000", "ronny@gmail.com", "Ronald", "Howard",
-			DOB, PeopleStatus.INFECTED.id, PeopleStature.INFLUENCER.id, Sex.MALE.id, bg("86.5"), bg("-37.1"), false, true));
+			DOB, PeopleStatus.INFECTED.id, PeopleStature.INFLUENCER.id, Sex.MALE.id, HealthWorkerStatus.LIVE_WITH.id,
+			bg("86.5"), bg("-37.1"), false, true));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
@@ -78,7 +79,8 @@ public class PeopleDAOTest
 	public static PeopleValue createValid()
 	{
 		return new PeopleValue("bryce", "888-555-1001", "dallas@gmail.com", "Dallas", "Drawoh",
-			DOB_1, PeopleStatus.RECOVERED.id, PeopleStature.CELEBRITY.id, Sex.FEMALE.id, bg("-86.5"), bg("37.1"), true, false);
+			DOB_1, PeopleStatus.RECOVERED.id, PeopleStature.CELEBRITY.id, Sex.FEMALE.id, HealthWorkerStatus.HEALTH_WORKER.id,
+			bg("-86.5"), bg("37.1"), true, false);
 	}
 
 	@Test
@@ -169,6 +171,18 @@ public class PeopleDAOTest
 	public void add_longSexId()
 	{
 		assertThrows(ValidationException.class, () -> dao.add(createValid().withSexId(StringUtils.repeat("A", PeopleValue.MAX_LEN_SEX_ID + 1))));
+	}
+
+	@Test
+	public void add_invalidHealthWorkerStatusId()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withHealthWorkerStatusId("$")));
+	}
+
+	@Test
+	public void add_longHealthWorkerStatusId()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withHealthWorkerStatusId(StringUtils.repeat("A", PeopleValue.MAX_LEN_HEALTH_WORKER_STATUS_ID + 1))));
 	}
 
 	@Test
@@ -422,6 +436,7 @@ public class PeopleDAOTest
 		count(new PeopleFilter().withStatusId(VALUE.statusId), 1L);
 		count(new PeopleFilter().withStatureId(VALUE.statureId), 1L);
 		count(new PeopleFilter().withSexId(VALUE.sexId), 1L);
+		count(new PeopleFilter().withHealthWorkerStatusId(VALUE.healthWorkerStatusId), 1L);
 		count(new PeopleFilter().withLatitude(VALUE.latitude), 1L);
 		count(new PeopleFilter().withLongitude(VALUE.longitude), 1L);
 		count(new PeopleFilter().withAlertable(VALUE.alertable), 1L);
@@ -437,6 +452,7 @@ public class PeopleDAOTest
 		count(new PeopleFilter().withStatusId(v.statusId), 0L);
 		count(new PeopleFilter().withStatureId(v.statureId), 0L);
 		count(new PeopleFilter().withSexId(v.sexId), 0L);
+		count(new PeopleFilter().withHealthWorkerStatusId(v.healthWorkerStatusId), 0L);
 		count(new PeopleFilter().withLatitude(v.latitude), 0L);
 		count(new PeopleFilter().withLongitude(v.longitude), 0L);
 		count(new PeopleFilter().withAlertable(v.alertable), 0L);
@@ -460,6 +476,7 @@ public class PeopleDAOTest
 		count(new PeopleFilter().withStatusId(VALUE.statusId), 0L);
 		count(new PeopleFilter().withStatureId(VALUE.statureId), 0L);
 		count(new PeopleFilter().withSexId(VALUE.sexId), 0L);
+		count(new PeopleFilter().withHealthWorkerStatusId(VALUE.healthWorkerStatusId), 0L);
 		count(new PeopleFilter().withLatitude(VALUE.latitude), 0L);
 		count(new PeopleFilter().withLongitude(VALUE.longitude), 0L);
 		count(new PeopleFilter().withAlertable(VALUE.alertable), 0L);
@@ -475,6 +492,7 @@ public class PeopleDAOTest
 		count(new PeopleFilter().withStatusId(v.statusId), 1L);
 		count(new PeopleFilter().withStatureId(v.statureId), 1L);
 		count(new PeopleFilter().withSexId(v.sexId), 1L);
+		count(new PeopleFilter().withHealthWorkerStatusId(v.healthWorkerStatusId), 1L);
 		count(new PeopleFilter().withLatitude(v.latitude), 1L);
 		count(new PeopleFilter().withLongitude(v.longitude), 1L);
 		count(new PeopleFilter().withAlertable(v.alertable), 1L);
@@ -499,6 +517,7 @@ public class PeopleDAOTest
 		Assertions.assertEquals(v.statusId, record.getStatusId(), "Check statusId");
 		Assertions.assertEquals(v.statureId, record.getStatureId(), "Check statureId");
 		Assertions.assertEquals(v.sexId, record.getSexId(), "Check sexId");
+		Assertions.assertEquals(v.healthWorkerStatusId, record.getHealthWorkerStatusId(), "Check healthWorkerStatusId");
 		assertThat(record.getLatitude()).as("Check latitude").isEqualByComparingTo(v.latitude);
 		assertThat(record.getLongitude()).as("Check longitude").isEqualByComparingTo(v.longitude);
 		Assertions.assertEquals(v.alertable, record.isAlertable(), "Check alertable");
@@ -539,6 +558,8 @@ public class PeopleDAOTest
 			arguments(new PeopleFilter(1, 20).withActive(VALUE.active), 1L),
 			arguments(new PeopleFilter(1, 20).withSexId(VALUE.sexId), 1L),
 			arguments(new PeopleFilter(1, 20).withHasSexId(true), 1L),
+			arguments(new PeopleFilter(1, 20).withHealthWorkerStatusId(VALUE.healthWorkerStatusId), 1L),
+			arguments(new PeopleFilter(1, 20).withHasHealthWorkerStatusId(true), 1L),
 			arguments(new PeopleFilter(1, 20).withLatitude(VALUE.latitude), 1L),
 			arguments(new PeopleFilter(1, 20).withHasLatitude(true), 1L),
 			arguments(new PeopleFilter(1, 20).withLatitudeFrom(downLat), 1L),
@@ -589,6 +610,8 @@ public class PeopleDAOTest
 			arguments(new PeopleFilter(1, 20).withActive(!VALUE.active), 0L),
 			arguments(new PeopleFilter(1, 20).withSexId("invalid"), 0L),
 			arguments(new PeopleFilter(1, 20).withHasSexId(false), 0L),
+			arguments(new PeopleFilter(1, 20).withHealthWorkerStatusId("invalid"), 0L),
+			arguments(new PeopleFilter(1, 20).withHasHealthWorkerStatusId(false), 0L),
 			arguments(new PeopleFilter(1, 20).withLatitude(upLat), 0L),
 			arguments(new PeopleFilter(1, 20).withHasLatitude(false), 0L),
 			arguments(new PeopleFilter(1, 20).withLatitudeFrom(upLat), 0L),
@@ -721,6 +744,13 @@ public class PeopleDAOTest
 			arguments(new PeopleFilter("sexId", "invalid"), "sexId", "ASC"),	// Invalid sort direction is converted to the default.
 			arguments(new PeopleFilter("sexId", "DESC"), "sexId", "DESC"),
 			arguments(new PeopleFilter("sexId", "desc"), "sexId", "DESC"),
+
+			arguments(new PeopleFilter("healthWorkerStatusId", null), "healthWorkerStatusId", "ASC"), // Missing sort direction is converted to the default.
+			arguments(new PeopleFilter("healthWorkerStatusId", "ASC"), "healthWorkerStatusId", "ASC"),
+			arguments(new PeopleFilter("healthWorkerStatusId", "asc"), "healthWorkerStatusId", "ASC"),
+			arguments(new PeopleFilter("healthWorkerStatusId", "invalid"), "healthWorkerStatusId", "ASC"),	// Invalid sort direction is converted to the default.
+			arguments(new PeopleFilter("healthWorkerStatusId", "DESC"), "healthWorkerStatusId", "DESC"),
+			arguments(new PeopleFilter("healthWorkerStatusId", "desc"), "healthWorkerStatusId", "DESC"),
 
 			arguments(new PeopleFilter("latitude", null), "latitude", "DESC"), // Missing sort direction is converted to the default.
 			arguments(new PeopleFilter("latitude", "ASC"), "latitude", "ASC"),
@@ -1190,6 +1220,7 @@ public class PeopleDAOTest
 		Assertions.assertEquals(expected.statusId, record.getStatusId(), assertId + "Check statusId");
 		Assertions.assertEquals(expected.statureId, record.getStatureId(), assertId + "Check statureId");
 		Assertions.assertEquals(expected.sexId, record.getSexId(), assertId + "Check sexId");
+		Assertions.assertEquals(expected.healthWorkerStatusId, record.getHealthWorkerStatusId(), assertId + "Check healthWorkerStatusId");
 		assertThat(record.getLatitude()).as(assertId + "Check latitude").isEqualByComparingTo(expected.latitude);
 		assertThat(record.getLongitude()).as(assertId + "Check longitude").isEqualByComparingTo(expected.longitude);
 		Assertions.assertEquals(expected.alertable, record.isAlertable(), assertId + "Check alertable");
@@ -1218,6 +1249,8 @@ public class PeopleDAOTest
 		Assertions.assertEquals(expected.stature, value.stature, assertId + "Check stature");
 		Assertions.assertEquals(expected.sexId, value.sexId, assertId + "Check sexId");
 		Assertions.assertEquals(expected.sex, value.sex, assertId + "Check sex");
+		Assertions.assertEquals(expected.healthWorkerStatusId, value.healthWorkerStatusId, assertId + "Check healthWorkerStatusId");
+		Assertions.assertEquals(expected.healthWorkerStatus, value.healthWorkerStatus, assertId + "Check healthWorkerStatus");
 		Assertions.assertEquals(expected.latitude, value.latitude, assertId + "Check latitude");
 		assertThat(value.latitude).as(assertId + "Check latitude").isEqualByComparingTo(expected.latitude);
 		assertThat(value.longitude).as(assertId + "Check longitude").isEqualByComparingTo(expected.longitude);

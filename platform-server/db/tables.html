@@ -23,7 +23,7 @@
 <TR>
 <TD CLASS="header" COLSPAN="1">No.</TD><TD CLASS="header" COLSPAN="1">Table Name</TD><TD CLASS="header" COLSPAN="1">Comments</TD><TD CLASS="header" COLSPAN="1"># Records</TD></TR>
 <TR>
-<TD CLASS="detail">1</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOG">DATABASECHANGELOG</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">6</TD></TR>
+<TD CLASS="detail">1</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOG">DATABASECHANGELOG</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">8</TD></TR>
 <TR>
 <TD CLASS="detail">2</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOGLOCK">DATABASECHANGELOGLOCK</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">1</TD></TR>
 <TR>
@@ -595,9 +595,9 @@
 <TR>
 <TD CLASS="detail">10</TD><TD CLASS="detail">email</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">128</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the contact email of the facility.</TD></TR>
 <TR>
-<TD CLASS="detail">11</TD><TD CLASS="detail">url</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">128</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the main web site URL of the facility.</TD></TR>
+<TD CLASS="detail">11</TD><TD CLASS="detail">url</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">255</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the main web site URL of the facility.</TD></TR>
 <TR>
-<TD CLASS="detail">12</TD><TD CLASS="detail">appointment_url</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">128</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the appointment web site URL of the facility.</TD></TR>
+<TD CLASS="detail">12</TD><TD CLASS="detail">appointment_url</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">255</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the appointment web site URL of the facility.</TD></TR>
 <TR>
 <TD CLASS="detail">13</TD><TD CLASS="detail">hours</TD><TD CLASS="detail">TEXT</TD><TD CLASS="detail">65535</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the hours of operation of the facility.</TD></TR>
 <TR>
@@ -712,6 +712,8 @@
 <TD CLASS="detail">18</TD><TD CLASS="detail">longitude</TD><TD CLASS="detail">DECIMAL</TD><TD CLASS="detail">12</TD><TD CLASS="detail">5</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the GEO coordinates of the user's primary location - longitude property.</TD></TR>
 <TR>
 <TD CLASS="detail">19</TD><TD CLASS="detail">alertable</TD><TD CLASS="detail">BIT</TD><TD CLASS="detail">1</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail">Indicates that a user wishes to be notified with pertinent information.</TD></TR>
+<TR>
+<TD CLASS="detail">20</TD><TD CLASS="detail">health_worker_status_id</TD><TD CLASS="detail">CHAR</TD><TD CLASS="detail">1</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Refers to the state of employment as a healthcare worker.</TD></TR>
 </TABLE>
 <BR><TABLE CELLSPACING="0">
 <TR>

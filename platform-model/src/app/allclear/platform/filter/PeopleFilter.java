@@ -41,6 +41,8 @@ public class PeopleFilter extends QueryFilter
 	public Boolean hasStatureId = null;
 	public String sexId = null;
 	public Boolean hasSexId = null;
+	public String healthWorkerStatusId = null;
+	public Boolean hasHealthWorkerStatusId = null;
 	public BigDecimal latitude = null;
 	public Boolean hasLatitude = null;
 	public BigDecimal latitudeFrom = null;
@@ -91,6 +93,8 @@ public class PeopleFilter extends QueryFilter
 	public PeopleFilter withHasStatureId(final Boolean newValue) { hasStatureId = newValue; return this; }
 	public PeopleFilter withSexId(final String newValue) { sexId = newValue; return this; }
 	public PeopleFilter withHasSexId(final Boolean newValue) { hasSexId = newValue; return this; }
+	public PeopleFilter withHealthWorkerStatusId(final String newValue) { healthWorkerStatusId = newValue; return this; }
+	public PeopleFilter withHasHealthWorkerStatusId(final Boolean newValue) { hasHealthWorkerStatusId = newValue; return this; }
 	public PeopleFilter withLatitude(final BigDecimal newValue) { latitude = newValue; return this; }
 	public PeopleFilter withHasLatitude(final Boolean newValue) { hasLatitude = newValue; return this; }
 	public PeopleFilter withLatitudeFrom(final BigDecimal newValue) { latitudeFrom = newValue; return this; }
@@ -169,6 +173,7 @@ public class PeopleFilter extends QueryFilter
 		@param statusId represents the "status_id" field.
 		@param statureId represents the "stature_id" field.
 		@param sexId represents the "sex_id" field.
+		@param healthWorkerStatusId represents the "health_worker_status_id" field.
 		@param latitude represents the "latitude" field.
 		@param latitudeFrom represents the "latitude" field - lower boundary.
 		@param latitudeTo represents the "latitude" field - upper boundary.
@@ -200,6 +205,7 @@ public class PeopleFilter extends QueryFilter
 		final String statusId,
 		final String statureId,
 		final String sexId,
+		final String healthWorkerStatusId,
 		final BigDecimal latitude,
 		final BigDecimal latitudeFrom,
 		final BigDecimal latitudeTo,
@@ -231,6 +237,7 @@ public class PeopleFilter extends QueryFilter
 		this.statusId = statusId;
 		this.statureId = statureId;
 		this.sexId = sexId;
+		this.healthWorkerStatusId = healthWorkerStatusId;
 		this.latitude = latitude;
 		this.latitudeFrom = latitudeFrom;
 		this.latitudeTo = latitudeTo;
@@ -269,6 +276,7 @@ public class PeopleFilter extends QueryFilter
 		statusId = StringUtils.trimToNull(statusId);
 		statureId = StringUtils.trimToNull(statureId);
 		sexId = StringUtils.trimToNull(sexId);
+		healthWorkerStatusId = StringUtils.trimToNull(healthWorkerStatusId);
 
 		return this;
 	}
@@ -301,6 +309,8 @@ public class PeopleFilter extends QueryFilter
 			.append(", hasStatureId: ").append(hasStatureId)
 			.append(", sexId: ").append(sexId)
 			.append(", hasSexId: ").append(hasSexId)
+			.append(", healthWorkerStatusId: ").append(healthWorkerStatusId)
+			.append(", hasHealthWorkerStatusId: ").append(hasHealthWorkerStatusId)
 			.append(", latitude: ").append(latitude)
 			.append(", hasLatitude: ").append(hasLatitude)
 			.append(", latitudeFrom: ").append(latitudeFrom)

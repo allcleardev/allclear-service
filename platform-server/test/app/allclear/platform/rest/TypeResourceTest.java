@@ -62,6 +62,15 @@ public class TypeResourceTest
 	}
 
 	@Test
+	public void getHealthWorkerStatuses()
+	{
+		var response = request("healthWorkerStatuses").get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		assertThat(response.readEntity(new GenericType<List<HealthWorkerStatus>>() {})).isEqualTo(HealthWorkerStatus.LIST);
+	}
+
+	@Test
 	public void getPeopleStatuses()
 	{
 		var response = request("peopleStatuses").get();

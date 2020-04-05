@@ -15,9 +15,7 @@ import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 
 import app.allclear.common.value.CreatedValue;
-import app.allclear.platform.type.PeopleStatus;
-import app.allclear.platform.type.Sex;
-import app.allclear.platform.type.PeopleStature;
+import app.allclear.platform.type.*;
 import app.allclear.platform.value.PeopleValue;
 
 /**********************************************************************************
@@ -98,6 +96,11 @@ public class People implements Serializable
 	public String sexId;
 	public void setSexId(final String newValue) { sexId = newValue; }
 
+	@Column(name="health_worker_status_id", columnDefinition="CHAR(1)", nullable=true)
+	public String getHealthWorkerStatusId() { return healthWorkerStatusId; }
+	public String healthWorkerStatusId;
+	public void setHealthWorkerStatusId(final String newValue) { healthWorkerStatusId = newValue; }
+
 	@Column(name="latitude", columnDefinition="DECIMAL(12, 5)", nullable=true)
 	public BigDecimal getLatitude() { return latitude; }
 	public BigDecimal latitude;
@@ -170,6 +173,7 @@ public class People implements Serializable
 		final String statusId,
 		final String statureId,
 		final String sexId,
+		final String healthWorkerStatusId,
 		final BigDecimal latitude,
 		final BigDecimal longitude,
 		final boolean alertable,
@@ -189,6 +193,7 @@ public class People implements Serializable
 		this.statusId = statusId;
 		this.statureId = statureId;
 		this.sexId = sexId;
+		this.healthWorkerStatusId = healthWorkerStatusId;
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.alertable = alertable;
@@ -204,9 +209,35 @@ public class People implements Serializable
 		this(value.id, value.name, value.phone, value.email,
 			value.firstName, value.lastName, value.dob,
 			value.statusId, value.statureId, value.sexId,
+			value.healthWorkerStatusId,
 			value.latitude, value.longitude, value.alertable,
 			value.active, value.authAt, value.phoneVerifiedAt,
-			value.emailVerifiedAt, value.createdAt);
+			value.emailVerifiedAt, value.initDates());
+	}
+
+	public People update(final PeopleValue value)
+	{
+		setName(value.name);
+		setPhone(value.phone);
+		setEmail(value.email);
+		setFirstName(value.firstName);
+		setLastName(value.lastName);
+		setDob(value.dob);
+		setStatusId(value.statusId);
+		setStatureId(value.statureId);
+		setSexId(value.sexId);
+		setHealthWorkerStatusId(value.healthWorkerStatusId);
+		setLatitude(value.latitude);
+		setLongitude(value.longitude);
+		setAlertable(value.alertable);
+		setActive(value.active);
+		setAuthAt(value.authAt);
+		setPhoneVerifiedAt(value.phoneVerifiedAt);
+		setEmailVerifiedAt(value.emailVerifiedAt);
+		value.createdAt = getCreatedAt();
+		setUpdatedAt(value.updatedAt = new Date());
+
+		return this;
 	}
 
 	@Override
@@ -225,6 +256,7 @@ public class People implements Serializable
 			Objects.equals(statusId, v.statusId) &&
 			Objects.equals(statureId, v.statureId) &&
 			Objects.equals(sexId, v.sexId) &&
+			Objects.equals(healthWorkerStatusId, v.healthWorkerStatusId) &&
 			Objects.equals(latitude, v.latitude) &&
 			Objects.equals(longitude, v.longitude) &&
 			(alertable == v.alertable) &&
@@ -258,11 +290,13 @@ public class People implements Serializable
 			getLastName(),
 			getDob(),
 			getStatusId(),
-			(null != getStatusId()) ? PeopleStatus.VALUES.get(getStatusId()) : null,
+			(null != getStatusId()) ? PeopleStatus.get(getStatusId()) : null,
 			getStatureId(),
-			(null != getStatureId()) ? PeopleStature.VALUES.get(getStatureId()) : null,
+			(null != getStatureId()) ? PeopleStature.get(getStatureId()) : null,
 			getSexId(),
-			(null != getSexId()) ? Sex.VALUES.get(getSexId()) : null,
+			(null != getSexId()) ? Sex.get(getSexId()) : null,
+			getHealthWorkerStatusId(),
+			(null != getHealthWorkerStatusId()) ? HealthWorkerStatus.get(getHealthWorkerStatusId()) : null,
 			getLatitude(),
 			getLongitude(),
 			isAlertable(),

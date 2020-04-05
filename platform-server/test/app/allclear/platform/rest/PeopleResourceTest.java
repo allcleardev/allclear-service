@@ -207,6 +207,7 @@ public class PeopleResourceTest
 			arguments(new PeopleFilter(1, 20).withHasStatusId(false), 1L),
 			arguments(new PeopleFilter(1, 20).withHasStatureId(false), 1L),
 			arguments(new PeopleFilter(1, 20).withHasSexId(false), 1L),
+			arguments(new PeopleFilter(1, 20).withHasHealthWorkerStatusId(false), 1L),
 			arguments(new PeopleFilter(1, 20).withHasLatitude(false), 1L),
 			arguments(new PeopleFilter(1, 20).withHasLongitude(false), 1L),
 			arguments(new PeopleFilter(1, 20).withAlertable(VALUE.alertable), 1L),
@@ -238,6 +239,7 @@ public class PeopleResourceTest
 			arguments(new PeopleFilter(1, 20).withHasStatusId(true), 0L),
 			arguments(new PeopleFilter(1, 20).withHasStatureId(true), 0L),
 			arguments(new PeopleFilter(1, 20).withHasSexId(true), 0L),
+			arguments(new PeopleFilter(1, 20).withHasHealthWorkerStatusId(true), 0L),
 			arguments(new PeopleFilter(1, 20).withHasLatitude(true), 0L),
 			arguments(new PeopleFilter(1, 20).withHasLongitude(true), 0L),
 			arguments(new PeopleFilter(1, 20).withAlertable(!VALUE.alertable), 0L),
@@ -470,6 +472,7 @@ public class PeopleResourceTest
 		Assertions.assertEquals(expected.statusId, value.statusId, assertId + "Check statusId");
 		Assertions.assertEquals(expected.statureId, value.statureId, assertId + "Check statureId");
 		Assertions.assertEquals(expected.sexId, value.sexId, assertId + "Check sexId");
+		Assertions.assertEquals(expected.healthWorkerStatusId, value.healthWorkerStatusId, assertId + "Check healthWorkerStatusId");
 		if (null == expected.latitude)
 			Assertions.assertNull(value.latitude, assertId + "Check latitude");
 		else
