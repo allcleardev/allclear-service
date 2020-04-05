@@ -63,4 +63,9 @@ public class TypeResource
 	@Path("/testCriteria") @Timed
 	@ApiOperation(value="getTestCriteria", notes="Gets a list of test criteria that a facility follows.", response=TestCriteria.class, responseContainer="List")
 	public List<TestCriteria> getTestCriteria() { return TestCriteria.LIST; }
+
+	@GET
+	@Path("/testTypes") @Timed
+	@ApiOperation(value="getTestTypes", notes="Gets a list of test types.", response=TestType.class, responseContainer="List")
+	public List<TestType> getTestTypes() { return TestType.LIST; }
 }

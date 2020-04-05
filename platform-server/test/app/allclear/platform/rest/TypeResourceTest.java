@@ -105,4 +105,13 @@ public class TypeResourceTest
 
 		assertThat(response.readEntity(new GenericType<List<TestCriteria>>() {})).isEqualTo(TestCriteria.LIST);
 	}
+
+	@Test
+	public void getTestTypes()
+	{
+		var response = request("testTypes").get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		assertThat(response.readEntity(new GenericType<List<TestType>>() {})).isEqualTo(TestType.LIST);
+	}
 }
