@@ -28,6 +28,8 @@ public class Condition implements Serializable
 
 	public static final List<Condition> LIST = List.of(CARDIO_RESPIRATORY_DISEASE, DIABETIC, KIDNEY_CIRRHOSIS, PREGNANT, WEAKENED_IMMUNE_SYSTEM);
 	public static final Map<String, Condition> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
+	public static Condition get(final String id) { return VALUES.get(id); }
+	public static boolean exists(final String id) { return VALUES.containsKey(id); }
 
 	public final String id;
 	public final String name;

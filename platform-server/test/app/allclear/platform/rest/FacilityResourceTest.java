@@ -22,6 +22,7 @@ import io.dropwizard.testing.junit5.ResourceExtension;
 
 import app.allclear.junit.hibernate.*;
 import app.allclear.common.dao.QueryResults;
+import app.allclear.common.errors.NotFoundExceptionMapper;
 import app.allclear.common.errors.ValidationExceptionMapper;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.value.OperationResponse;
@@ -51,6 +52,7 @@ public class FacilityResourceTest
 	private static FacilityValue VALUE = null;
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
+		.addResource(new NotFoundExceptionMapper())
 		.addResource(new ValidationExceptionMapper())
 		.addResource(new FacilityResource(dao)).build();
 
@@ -144,7 +146,7 @@ public class FacilityResourceTest
 	@Test
 	public void getWithException()
 	{
-		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, get(VALUE.id + 1000L).getStatus(), "Status");
+		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, get(VALUE.id + 1000L).getStatus(), "Status");
 	}
 
 	@Test
@@ -335,7 +337,7 @@ public class FacilityResourceTest
 	@Test
 	public void testRemove_get()
 	{
-		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, get(VALUE.id).getStatus(), "Status");
+		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, get(VALUE.id).getStatus(), "Status");
 	}
 
 	@Test

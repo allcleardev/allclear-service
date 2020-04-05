@@ -14,22 +14,22 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 
-public class PeopleStature implements Serializable
+public class TestType implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	public static final PeopleStature CELEBRITY = new PeopleStature("c", "Celebrity");
-	public static final PeopleStature INFLUENCER = new PeopleStature("i", "Influencer");
+	public static final TestType FIRST = new TestType("fs", "First");
+	public static final TestType SECOND = new TestType("sd", "Second");
 
-	public static final List<PeopleStature> LIST = List.of(CELEBRITY, INFLUENCER);
-	public static final Map<String, PeopleStature> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
-	public static PeopleStature get(final String id) { return VALUES.get(id); }
+	public static final List<TestType> LIST = List.of(FIRST, SECOND);
+	public static final Map<String, TestType> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
+	public static TestType get(final String id) { return VALUES.get(id); }
 	public static boolean exists(final String id) { return VALUES.containsKey(id); }
 
 	public final String id;
 	public final String name;
 
-	public PeopleStature(@JsonProperty("id") final String id,
+	public TestType(@JsonProperty("id") final String id,
 		@JsonProperty("name") final String name)
 	{
 		this.id = id;
@@ -47,9 +47,9 @@ public class PeopleStature implements Serializable
 	@Override
 	public boolean equals(final Object o)
 	{
-		if (!(o instanceof PeopleStature)) return false;
+		if (!(o instanceof TestType)) return false;
 
-		var v = (PeopleStature) o;
+		var v = (TestType) o;
 		return Objects.equals(id, v.id) && Objects.equals(name, v.name); 
 	}
 }

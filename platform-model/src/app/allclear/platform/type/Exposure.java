@@ -27,6 +27,8 @@ public class Exposure implements Serializable
 
 	public static final List<Exposure> LIST = List.of(CLOSE_CONTACT, LIVE_WITH, NO_EXPOSURE, UNSURE);
 	public static final Map<String, Exposure> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
+	public static Exposure get(final String id) { return VALUES.get(id); }
+	public static boolean exists(final String id) { return VALUES.containsKey(id); }
 
 	public final String id;
 	public final String name;

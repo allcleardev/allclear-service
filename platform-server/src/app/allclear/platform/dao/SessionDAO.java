@@ -161,6 +161,8 @@ public class SessionDAO
 		return value;
 	}
 
+	SessionValue current(final PeopleValue value) { return current(new SessionValue(false, value)); }	// For tests
+
 	/** Set the current threads associated session based on the supplied session ID.
 	 * 
 	 * @param id

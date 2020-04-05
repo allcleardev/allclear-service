@@ -232,7 +232,7 @@ public class TestingUtils
 
 	public static Date days(final Date value, final int i) { return days(value, (long) i); }
 	public static Date days(final Date value, final long i) { return new Date(value.getTime() + (i * MILLISECONDS_DAY)); }
-	public static Date hours(final Date value, final int i) { return days(value, (long) i); }
+	public static Date hours(final Date value, final int i) { return hours(value, (long) i); }
 	public static Date hours(final Date value, final long i) { return new Date(value.getTime() + (i * MILLISECONDS_HOUR)); }
 	public static Date hourAgo() { return new Date(System.currentTimeMillis() - MILLISECONDS_HOUR); }
 	public static Date hourAhead() { return new Date(System.currentTimeMillis() + MILLISECONDS_HOUR); }

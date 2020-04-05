@@ -21,6 +21,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
 import app.allclear.junit.hibernate.*;
+import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.platform.App;
 import app.allclear.platform.entity.Facility;
@@ -72,7 +73,7 @@ public class FacilityDAOTest
 	/** Creates a valid Facility value for the validation tests.
 	 *	@return never NULL.
 	*/
-	private FacilityValue createValid()
+	public static FacilityValue createValid()
 	{
 		return new FacilityValue("Eve", "909 Stuart St", "Atlanta", "GA", bg("-45"), bg("35"),
 			"888-555-2000", "888-555-2001", "eve@test.net", "http://www.eve.net", "http://www.eve.net/calendar", "10AM to 8PM",
@@ -253,7 +254,7 @@ public class FacilityDAOTest
 	@Test
 	public void findWithException()
 	{
-		assertThrows(ValidationException.class, () -> dao.findWithException(VALUE.id + 1000L));
+		assertThrows(ObjectNotFoundException.class, () -> dao.findWithException(VALUE.id + 1000L));
 	}
 
 	@Test
@@ -281,7 +282,7 @@ public class FacilityDAOTest
 	@Test
 	public void getWithException()
 	{
-		assertThrows(ValidationException.class, () -> dao.getByIdWithException(VALUE.id + 1000L));
+		assertThrows(ObjectNotFoundException.class, () -> dao.getByIdWithException(VALUE.id + 1000L));
 	}
 
 	@Test
@@ -774,7 +775,7 @@ public class FacilityDAOTest
 	@Test
 	public void testRemove_find()
 	{
-		assertThrows(ValidationException.class, () -> dao.findWithException(VALUE.id));
+		assertThrows(ObjectNotFoundException.class, () -> dao.findWithException(VALUE.id));
 	}
 
 	/** Test removal after the search. */

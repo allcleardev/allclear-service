@@ -25,6 +25,8 @@ public class PeopleStatus implements Serializable
 
 	public static final List<PeopleStatus> LIST = List.of(HEALTHY, INFECTED, RECOVERED, SYMPTOMATIC);
 	public static final Map<String, PeopleStatus> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
+	public static PeopleStatus get(final String id) { return VALUES.get(id); }
+	public static boolean exists(final String id) { return VALUES.containsKey(id); }
 
 	public final String id;
 	public final String name;

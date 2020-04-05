@@ -6,11 +6,10 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.hibernate.*;
+import org.hibernate.SessionFactory;
 
 import app.allclear.common.dao.*;
-import app.allclear.common.errors.ValidationException;
-import app.allclear.common.errors.Validator;
+import app.allclear.common.errors.*;
 import app.allclear.common.hibernate.AbstractDAO;
 import app.allclear.common.hibernate.NativeQueryBuilder;
 import app.allclear.platform.entity.*;
@@ -181,13 +180,13 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	 *
 	 * @param id
 	 * @return never NULL.
-	 * @throws ValidationException if the identifier is invalid.
+	 * @throws ObjectNotFoundException if the identifier is invalid.
 	 */
-	Facility findWithException(final Long id) throws ValidationException
+	Facility findWithException(final Long id) throws ObjectNotFoundException
 	{
 		var record = get(id);
 		if (null == record)
-			throw new ValidationException("id", "Could not find the Facility because id '" + id + "' is invalid.");
+			throw new ObjectNotFoundException("Could not find the Facility because id '" + id + "' is invalid.");
 
 		return record;
 	}
@@ -229,9 +228,9 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	 *
 	 * @param id
 	 * @return never NULL.
-	 * @throws ValidationException if the identifier is valid.
+	 * @throws ObjectNotFoundException if the identifier is valid.
 	 */
-	public FacilityValue getByIdWithException(final Long id) throws ValidationException
+	public FacilityValue getByIdWithException(final Long id) throws ObjectNotFoundException
 	{
 		return findWithException(id).toValue();
 	}

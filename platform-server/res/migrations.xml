@@ -199,4 +199,38 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.0.44_ALLCLEAR-142" author="smalleyd">
+		<createTable tableName="tests" remarks="Represents tests taken.">
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true" primaryKeyName="pk_tests" />
+			</column>
+			<column name="person_id" type="VARCHAR(10)" remarks="Refers to the person.">
+				<constraints nullable="false" referencedTableName="people" referencedColumnNames="id" foreignKeyName="fk_tests_person" />
+			</column>
+			<column name="type_id" type="CHAR(2)" remarks="Refers to the test type.">
+				<constraints nullable="false" />
+			</column>
+			<column name="taken_on" type="DATE" remarks="Represents the date on which the test was taken.">
+				<constraints nullable="false" />
+			</column>
+			<column name="facility_id" type="BIGINT" remarks="Refers to the testing facility.">
+				<constraints nullable="false" referencedTableName="facility" referencedColumnNames="id" foreignKeyName="fk_tests_facility" />
+			</column>
+			<column name="positive" type="BOOLEAN" defaultValueBoolean="false" remarks="Indicates whether the results were affirmative.">
+				<constraints nullable="false" />
+			</column>
+			<column name="notes" type="TEXT" remarks="Represents additional details." />
+			<column name="created_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was created.">
+				<constraints nullable="false" />
+			</column>
+			<column name="updated_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was last modified.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+
+		<rollback>
+			<dropTable tableName="tests" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

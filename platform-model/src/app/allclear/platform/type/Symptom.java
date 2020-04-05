@@ -32,6 +32,8 @@ public class Symptom implements Serializable
 
 	public static final List<Symptom> LIST = List.of(DIARRHEA, DRY_COUGH, FATIGUE, FEVER, MUSCLE_ACHE, NAUSEA_VOMITING, RUNNY_NOSE, SHORTNESS_OF_BREATH, SORE_THROAT);
 	public static final Map<String, Symptom> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
+	public static Symptom get(final String id) { return VALUES.get(id); }
+	public static boolean exists(final String id) { return VALUES.containsKey(id); }
 
 	public final String id;
 	public final String name;

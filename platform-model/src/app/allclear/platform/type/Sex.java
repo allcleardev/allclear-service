@@ -24,6 +24,8 @@ public class Sex implements Serializable
 
 	public static final List<Sex> LIST = List.of(FEMALE, MALE, INTERSEX);
 	public static final Map<String, Sex> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
+	public static Sex get(final String id) { return VALUES.get(id); }
+	public static boolean exists(final String id) { return VALUES.containsKey(id); }
 
 	public final String id;
 	public final String name;
