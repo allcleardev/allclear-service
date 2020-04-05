@@ -114,6 +114,7 @@ public class App extends Application<Config>
         jersey.register(new InfoResource(conf, env.healthChecks(), List.of(HibernateBundle.DEFAULT_NAME), conf.getVersion()));
         jersey.register(new HeapDumpResource());
         jersey.register(new HibernateResource(factory));
+        jersey.register(new LogResource());
         jersey.register(new AuthFilter(sessionDao));
         jersey.register(new AdminResource(adminDao, sessionDao));
         jersey.register(new FacilityResource(new FacilityDAO(factory)));

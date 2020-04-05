@@ -70,4 +70,14 @@ public class QueryFilter implements Serializable
 		this.sortOn = sortOn;
 		this.sortDir = sortDir;
 	}
+
+	@Override
+	public String toString()
+	{
+		return new StringBuilder("{ page: ").append(page)
+			.append(", pageSize: ").append(pageSize)
+			.append(", sortOn: ").append(sortOn)
+			.append(", sortDir: ").append(sortDir)
+			.append(" }").toString();
+	}
 }
