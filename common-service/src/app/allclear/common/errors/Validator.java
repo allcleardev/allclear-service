@@ -421,7 +421,7 @@ public class Validator
 	 */
 	private void ensureLongitude_(String name, String caption, BigDecimal value)
 	{
-		ensureRange_(name, caption, value, MIN_LATITUDE, MAX_LATITUDE);
+		ensureRange_(name, caption, value, MIN_LONGITUDE, MAX_LONGITUDE);
 	}
 
 	/** Ensures that a value exists and is within the valid range.

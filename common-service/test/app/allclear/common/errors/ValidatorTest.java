@@ -3,7 +3,8 @@ package app.allclear.common.errors;
 import java.math.BigDecimal;
 import java.util.Map;
 
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.jupiter.api.*;
 
 /** Unit test class that verifies the Validator component.
  * 
@@ -276,13 +277,13 @@ public class ValidatorTest
 	@Test
 	public void ensureExistsAndLatitude_tooHigh()
 	{
-		checkSingle(new Validator().ensureExistsAndLatitude("latitude", "Latitude", bg("90.5")), "latitude", "Latitude '90.5' is greater than the accepted value of 180.");
+		checkSingle(new Validator().ensureExistsAndLatitude("latitude", "Latitude", bg("90.5")), "latitude", "Latitude '90.5' is greater than the accepted value of 90.");
 	}
 
 	@Test
 	public void ensureExistsAndLatitude_tooLow()
 	{
-		checkSingle(new Validator().ensureExistsAndLatitude("latitude", "Latitude", bg("-90.5")), "latitude", "Latitude '-90.5' is less than the accepted value of -180.");
+		checkSingle(new Validator().ensureExistsAndLatitude("latitude", "Latitude", bg("-90.5")), "latitude", "Latitude '-90.5' is less than the accepted value of -90.");
 	}
 
 	@Test
@@ -300,13 +301,13 @@ public class ValidatorTest
 	@Test
 	public void ensureLatitude_tooHigh()
 	{
-		checkSingle(new Validator().ensureLatitude("latitude", "Latitude", bg("90.5")), "latitude", "Latitude '90.5' is greater than the accepted value of 180.");
+		checkSingle(new Validator().ensureLatitude("latitude", "Latitude", bg("90.5")), "latitude", "Latitude '90.5' is greater than the accepted value of 90.");
 	}
 
 	@Test
 	public void ensureLatitude_tooLow()
 	{
-		checkSingle(new Validator().ensureLatitude("latitude", "Latitude", bg("-90.5")), "latitude", "Latitude '-90.5' is less than the accepted value of -180.");
+		checkSingle(new Validator().ensureLatitude("latitude", "Latitude", bg("-90.5")), "latitude", "Latitude '-90.5' is less than the accepted value of -90.");
 	}
 
 	@Test
@@ -344,12 +345,12 @@ public class ValidatorTest
 	public void ensureExistsAndLongitude_success()
 	{
 		checkSuccess(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg(0)));
-		checkSuccess(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg(4.58484f)));
-		checkSuccess(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg(4.58484d)));
+		checkSuccess(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg(34.58484f)));
+		checkSuccess(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg(34.58484d)));
 		checkSuccess(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg(-45)));
 		checkSuccess(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg(45)));
-		checkSuccess(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg(90)));
-		checkSuccess(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg(-90)));
+		checkSuccess(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg(180)));
+		checkSuccess(new Validator().ensureExistsAndLongitude("longitude", "Longitude", bg(-180)));
 	}
 
 	@Test
@@ -368,12 +369,12 @@ public class ValidatorTest
 	public void ensureLongitude_success()
 	{
 		checkSuccess(new Validator().ensureLongitude("longitude", "Longitude", null));
-		checkSuccess(new Validator().ensureLongitude("longitude", "Longitude", bg(4.58484f)));
-		checkSuccess(new Validator().ensureLongitude("longitude", "Longitude", bg(4.58484d)));
-		checkSuccess(new Validator().ensureLongitude("latitutde", "Longitude", bg(-45)));
-		checkSuccess(new Validator().ensureLongitude("longitude", "Longitude", bg(45)));
+		checkSuccess(new Validator().ensureLongitude("longitude", "Longitude", bg(14.58484f)));
+		checkSuccess(new Validator().ensureLongitude("longitude", "Longitude", bg(14.58484d)));
+		checkSuccess(new Validator().ensureLongitude("latitutde", "Longitude", bg(-90)));
 		checkSuccess(new Validator().ensureLongitude("longitude", "Longitude", bg(90)));
-		checkSuccess(new Validator().ensureLongitude("longitude", "Longitude", bg(-90)));
+		checkSuccess(new Validator().ensureLongitude("longitude", "Longitude", bg(180)));
+		checkSuccess(new Validator().ensureLongitude("longitude", "Longitude", bg(-180)));
 	}
 
 	@Test
@@ -517,10 +518,10 @@ public class ValidatorTest
 		checkSingle(new Validator().add("field", "%s cannot be longer than %d characters.", "Caption", 5), "field", "Caption cannot be longer than 5 characters.");
 	}
 
-	@Test(expected=ValidationException.class)
+	@Test
 	public void check()
 	{
-		new Validator().ensureExists("field", "Caption", null).check();
+		Assertions.assertThrows(ValidationException.class, () -> new Validator().ensureExists("field", "Caption", null).check());
 	}
 
 	@Test
