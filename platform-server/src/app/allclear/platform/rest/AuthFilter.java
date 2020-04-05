@@ -22,7 +22,7 @@ import app.allclear.platform.dao.SessionDAO;
 public class AuthFilter implements ContainerRequestFilter
 {
 	public static final String PATH_ADMINS = "admins";
-	public static final List<String> PATHS_ADMINS = List.of("registrations");
+	public static final List<String> PATHS_ADMINS = List.of("logs", "registrations");
 	public static final String PATH_INFO_CONFIG = "info/config";
 	public static final String PATH_SELF = "/self";
 	public static final String PATH_TYPES = "types/";
