@@ -233,4 +233,26 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.0.47_mysql" author="smalleyd" dbms="mysql">
+		<sql>
+			ALTER TABLE facility MODIFY COLUMN url VARCHAR(255) DEFAULT NULL COMMENT 'Represents the main web site URL of the facility.';
+			ALTER TABLE facility MODIFY COLUMN appointment_url VARCHAR(255) DEFAULT NULL COMMENT 'Represents the appointment web site URL of the facility.';
+		</sql>
+
+		<rollback>
+			<sql>
+				ALTER TABLE facility MODIFY COLUMN url VARCHAR(128) DEFAULT NULL COMMENT 'Represents the main web site URL of the facility.';
+				ALTER TABLE facility MODIFY COLUMN appointment_url VARCHAR(128) DEFAULT NULL COMMENT 'Represents the appointment web site URL of the facility.';
+			</sql>
+		</rollback>
+	</changeSet>
+	<changeSet id="v1.0.47_mysql" author="smalleyd" dbms="h2">
+		<modifyDataType tableName="facility" columnName="url" newDataType="VARCHAR(255)" />
+		<modifyDataType tableName="facility" columnName="appointment_url" newDataType="VARCHAR(255)" />
+		<rollback>
+			<modifyDataType tableName="facility" columnName="url" newDataType="VARCHAR(128)" />
+			<modifyDataType tableName="facility" columnName="appointment_url" newDataType="VARCHAR(128)" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

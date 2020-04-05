@@ -144,13 +144,13 @@ public class FacilityDAOTest
 	@Test
 	public void add_highLongitude()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withLongitude(bg("180"))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withLongitude(bg("181"))));
 	}
 
 	@Test
 	public void add_lowLongitude()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withLongitude(bg("-180"))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withLongitude(bg("-181"))));
 	}
 
 	@Test

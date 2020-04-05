@@ -32,8 +32,8 @@ public class FacilityValue implements Serializable
 	public static final int MAX_LEN_PHONE = 32;
 	public static final int MAX_LEN_APPOINTMENT_PHONE = 32;
 	public static final int MAX_LEN_EMAIL = 128;
-	public static final int MAX_LEN_URL = 128;
-	public static final int MAX_LEN_APPOINTMENT_URL = 128;
+	public static final int MAX_LEN_URL = 255;
+	public static final int MAX_LEN_APPOINTMENT_URL = 255;
 	public static final int MAX_LEN_HOURS = 65535;
 	public static final int MAX_LEN_TYPE_ID = 2;
 	public static final int MAX_LEN_TEST_CRITERIA_ID = 2;
