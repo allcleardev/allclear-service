@@ -320,6 +320,8 @@ var TestsHandler = new ListTemplate({
 	EDIT_METHOD: 'put',
 
 	toType: v => (null != v) ? v.name : '',
+	openPerson: (c, e) => { PeopleHandler.EDITOR.doEdit(e.myRecord.personId); },
+	openFacility: (c, e) => { FacilitiesHandler.EDITOR.doEdit(e.myRecord.facilityId); },
 
 	COLUMNS: [ new IdColumn('id', 'ID', true),
 	           new TextColumn('personName', 'Person', undefined, false, false, 'openPerson'),
