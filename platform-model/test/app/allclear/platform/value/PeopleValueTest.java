@@ -71,7 +71,8 @@ public class PeopleValueTest
 		ThreadUtils.sleep(10L);
 
 		var now = new Date();
-		var o = init(active, value).initDates();
+		var o = init(active, value);
+		o.initDates();
 
 		Assertions.assertEquals(active, o.active, "Check active");
 		Assertions.assertEquals(value, o.authAt, "Check authAt");
@@ -122,7 +123,8 @@ public class PeopleValueTest
 		ThreadUtils.sleep(10L);
 
 		var now = new Date();
-		var o = init(active, value).registeredByPhone().initDates();
+		var o = init(active, value).registeredByPhone();
+		o.initDates();
 
 		Assertions.assertTrue(o.active, "Check active");
 		assertThat(o.authAt).as("Check authAt").isCloseTo(now, 100L).isNotEqualTo(value);
