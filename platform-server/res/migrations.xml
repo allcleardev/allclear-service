@@ -246,7 +246,7 @@
 			</sql>
 		</rollback>
 	</changeSet>
-	<changeSet id="v1.0.47_mysql" author="smalleyd" dbms="h2">
+	<changeSet id="v1.0.47_h2" author="smalleyd" dbms="h2">
 		<modifyDataType tableName="facility" columnName="url" newDataType="VARCHAR(255)" />
 		<modifyDataType tableName="facility" columnName="appointment_url" newDataType="VARCHAR(255)" />
 		<rollback>
