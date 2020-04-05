@@ -38,7 +38,7 @@ function fillFacilitiesDropdownList(c)
 
 function fillPeopleDropdownList(c)
 {
-	Template.get('people', { name: c.field.value }, function(data) { c.caller.fill(c, data); });
+	Template.get('peoples', { name: c.field.value }, function(data) { c.caller.fill(c, data); });
 }
 
 var AdminsHandler = new ListTemplate({
