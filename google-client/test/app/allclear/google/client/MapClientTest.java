@@ -39,4 +39,11 @@ public class MapClientTest
 		Assertions.assertEquals(new BigDecimal("40.7487855"), result.geometry.location.lat, "Check result.geometry.location.lat");
 		Assertions.assertEquals(new BigDecimal("-74.0315385"), result.geometry.location.lng, "Check result.geometry.location.lng");
 	}
+
+	@Test
+	public void success_00()
+	{
+		var o = client.geocode("20200 54th Ave W, Lynnwood, WA 98036");
+		Assertions.assertTrue(o.ok(), "Check ok");
+	}
 }

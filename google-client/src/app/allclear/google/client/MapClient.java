@@ -1,5 +1,6 @@
 package app.allclear.google.client;
 
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import javax.ws.rs.client.*;
@@ -51,8 +52,8 @@ public class MapClient implements AutoCloseable
 		this.client = ClientBuilder.newBuilder()
 			.connectTimeout(20L, TimeUnit.SECONDS)
 			.readTimeout(20L, TimeUnit.SECONDS)
-			.build()
-			.register(new JacksonJsonProvider(mapper));
+			.register(new JacksonJsonProvider(mapper))	// Does NOT work for some reason - must use Jackson outside of Jersey. DLS on 4/6/2020.
+			.build();
 		this.geocode = client.target(BASE_URL).path(PATH_GEOCODE).path(FORMAT);
 	}
 
@@ -81,11 +82,16 @@ public class MapClient implements AutoCloseable
 	private <T extends MapResponse> T response(final Response response, final Class<T> clazz) throws MapException
 	{
 		int status = response.getStatus();
-		if (400 <= status) throw new MapException(status, response.readEntity(String.class));
+		var payload = response.readEntity(String.class);
+		if (400 <= status) throw new MapException(status, payload);
 
-		var o = response.readEntity(clazz);
-		if (!(o.ok() || o.zeroResults())) throw new MapException(status, o.status, o.errorMessage);
-
-		return o;
+		try
+		{
+			var o = mapper.readValue(payload, clazz);
+			if (!(o.ok() || o.zeroResults())) throw new MapException(status, o.status, o.errorMessage);
+	
+			return o;
+		}
+		catch (final IOException ex) { throw new RuntimeException(ex); }
 	}
 }
