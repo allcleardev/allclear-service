@@ -52,6 +52,7 @@ public class FacilityFilter extends QueryFilter
 	public Boolean hasAcceptsThirdParty = null;
 	public Boolean referralRequired = null;
 	public String testCriteriaId = null;
+	public String notTestCriteriaId = null;
 	public Boolean hasTestCriteriaId = null;
 	public String otherTestCriteria = null;
 	public Boolean hasOtherTestCriteria = null;
@@ -80,6 +81,7 @@ public class FacilityFilter extends QueryFilter
 	public Date updatedAtFrom = null;
 	public Date updatedAtTo = null;
 	public GeoFilter from = null;
+	public boolean restrictive = false;	// Indicate to restrict the facility search based on the current user profile. DLS on 4/6/2020.
 
 	// Mutators
 	public FacilityFilter withId(final Long newValue) { id = newValue; return this; }
@@ -112,6 +114,7 @@ public class FacilityFilter extends QueryFilter
 	public FacilityFilter withHasAcceptsThirdParty(final Boolean newValue) { hasAcceptsThirdParty = newValue; return this; }
 	public FacilityFilter withReferralRequired(final Boolean newValue) { referralRequired = newValue; return this; }
 	public FacilityFilter withTestCriteriaId(final String newValue) { testCriteriaId = newValue; return this; }
+	public FacilityFilter withNotTestCriteriaId(final String newValue) { notTestCriteriaId = newValue; return this; }
 	public FacilityFilter withHasTestCriteriaId(final Boolean newValue) { hasTestCriteriaId = newValue; return this; }
 	public FacilityFilter withOtherTestCriteria(final String newValue) { otherTestCriteria = newValue; return this; }
 	public FacilityFilter withHasOtherTestCriteria(final Boolean newValue) { hasOtherTestCriteria = newValue; return this; }
@@ -140,6 +143,7 @@ public class FacilityFilter extends QueryFilter
 	public FacilityFilter withUpdatedAtFrom(final Date newValue) { updatedAtFrom = newValue; return this; }
 	public FacilityFilter withUpdatedAtTo(final Date newValue) { updatedAtTo = newValue; return this; }
 	public FacilityFilter withFrom(final GeoFilter newValue) { from = newValue; return this; }
+	public FacilityFilter withRestrictive(final boolean newValue) { restrictive = newValue; return this; }
 
 	/**************************************************************************
 	*
@@ -321,6 +325,7 @@ public class FacilityFilter extends QueryFilter
 		hours = StringUtils.trimToNull(hours);
 		typeId = StringUtils.trimToNull(typeId);
 		testCriteriaId = StringUtils.trimToNull(testCriteriaId);
+		notTestCriteriaId = StringUtils.trimToNull(notTestCriteriaId);
 		otherTestCriteria = StringUtils.trimToNull(otherTestCriteria);
 		doctorReferralCriteria = StringUtils.trimToNull(doctorReferralCriteria);
 		insuranceProvidersAccepted = StringUtils.trimToNull(insuranceProvidersAccepted);
@@ -368,6 +373,7 @@ public class FacilityFilter extends QueryFilter
 			.append(", hasAcceptsThirdParty: ").append(hasAcceptsThirdParty)
 			.append(", referralRequired: ").append(referralRequired)
 			.append(", testCriteriaId: ").append(testCriteriaId)
+			.append(", notTestCriteriaId: ").append(notTestCriteriaId)
 			.append(", hasTestCriteriaId: ").append(hasTestCriteriaId)
 			.append(", otherTestCriteria: ").append(otherTestCriteria)
 			.append(", hasOtherTestCriteria: ").append(hasOtherTestCriteria)
@@ -396,6 +402,7 @@ public class FacilityFilter extends QueryFilter
 			.append(", updatedAtFrom: ").append(updatedAtFrom)
 			.append(", updatedAtTo: ").append(updatedAtTo)
 			.append(", from: ").append(from)
+			.append(", restrictive: ").append(restrictive)
 			.append(" }").toString();
 	}
 }

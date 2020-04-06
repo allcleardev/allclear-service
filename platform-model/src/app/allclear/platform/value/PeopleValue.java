@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
@@ -67,6 +68,15 @@ public class PeopleValue implements Serializable
 	public List<CreatedValue> conditions = null;
 	public List<CreatedValue> exposures = null;
 	public List<CreatedValue> symptoms = null;
+
+	// Accessors
+	public boolean symptomatic()
+	{
+		return CollectionUtils.isNotEmpty(symptoms) &&
+			symptoms.stream().anyMatch(v -> Symptom.FEVER.id.equals(v.id));
+	}
+	public boolean healthWorker() { return (null != healthWorkerStatus) && healthWorkerStatus.staff; }
+	public boolean meetsCdcPriority3() { return healthWorker() && symptomatic(); }
 
 	// Mutators
 	public PeopleValue withId(final String newValue) { id = newValue; return this; }

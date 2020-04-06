@@ -1,10 +1,12 @@
 package app.allclear.platform.value;
 
+import static java.util.stream.Collectors.toList;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static app.allclear.testing.TestingUtils.*;
 
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.*;
@@ -13,6 +15,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import app.allclear.common.ThreadUtils;
+import app.allclear.platform.type.HealthWorkerStatus;
+import app.allclear.platform.type.Symptom;
 
 /** Unit test class that verifies the PeopleValue POJO.
  * 
@@ -132,5 +136,86 @@ public class PeopleValueTest
 		Assertions.assertNull(o.emailVerifiedAt, "Check emailVerifiedAt");
 		assertThat(o.createdAt).as("Check createdAt").isCloseTo(now, 100L).isNotEqualTo(value);
 		assertThat(o.updatedAt).as("Check updatedAt").isCloseTo(now, 100L).isNotEqualTo(value);
+	}
+
+	public static Stream<Arguments> healthWorker()
+	{
+		return Stream.of(
+			arguments(null, false),
+			arguments(HealthWorkerStatus.LIVE_WITH, false),
+			arguments(HealthWorkerStatus.HEALTH_WORKER, true));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void healthWorker(final HealthWorkerStatus status, final boolean expected)
+	{
+		Assertions.assertEquals(expected, new PeopleValue().withHealthWorkerStatus(status).healthWorker());
+	}
+
+	public static Stream<Arguments> meetsCdcPriority3()
+	{
+		return Stream.of(
+			arguments(null, null, false),
+			arguments(null, List.of(), false),
+			arguments(null, List.of(Symptom.DIARRHEA), false),
+			arguments(null, List.of(Symptom.DIARRHEA, Symptom.RUNNY_NOSE), false),
+			arguments(null, List.of(Symptom.DIARRHEA, Symptom.FEVER, Symptom.RUNNY_NOSE), false),
+			arguments(null, List.of(Symptom.DRY_COUGH, Symptom.SORE_THROAT, Symptom.FATIGUE), false),
+			arguments(null, List.of(Symptom.DRY_COUGH, Symptom.SORE_THROAT, Symptom.FATIGUE, Symptom.FEVER), false),
+			arguments(null, List.of(Symptom.FEVER, Symptom.DRY_COUGH, Symptom.SORE_THROAT, Symptom.FATIGUE), false),
+			arguments(null, List.of(Symptom.DIARRHEA, Symptom.DRY_COUGH, Symptom.SORE_THROAT, Symptom.FATIGUE), false),
+			arguments(null, Symptom.LIST, false),
+			arguments(HealthWorkerStatus.LIVE_WITH, null, false),
+			arguments(HealthWorkerStatus.LIVE_WITH, List.of(), false),
+			arguments(HealthWorkerStatus.LIVE_WITH, List.of(Symptom.DIARRHEA), false),
+			arguments(HealthWorkerStatus.LIVE_WITH, List.of(Symptom.DIARRHEA, Symptom.RUNNY_NOSE), false),
+			arguments(HealthWorkerStatus.LIVE_WITH, List.of(Symptom.DIARRHEA, Symptom.FEVER, Symptom.RUNNY_NOSE), false),
+			arguments(HealthWorkerStatus.LIVE_WITH, List.of(Symptom.DRY_COUGH, Symptom.SORE_THROAT, Symptom.FATIGUE), false),
+			arguments(HealthWorkerStatus.LIVE_WITH, List.of(Symptom.DRY_COUGH, Symptom.SORE_THROAT, Symptom.FATIGUE, Symptom.FEVER), false),
+			arguments(HealthWorkerStatus.LIVE_WITH, List.of(Symptom.FEVER, Symptom.DRY_COUGH, Symptom.SORE_THROAT, Symptom.FATIGUE), false),
+			arguments(HealthWorkerStatus.LIVE_WITH, List.of(Symptom.DIARRHEA, Symptom.DRY_COUGH, Symptom.SORE_THROAT, Symptom.FATIGUE), false),
+			arguments(HealthWorkerStatus.LIVE_WITH, Symptom.LIST, false),
+			arguments(HealthWorkerStatus.HEALTH_WORKER, null, false),
+			arguments(HealthWorkerStatus.HEALTH_WORKER, List.of(), false),
+			arguments(HealthWorkerStatus.HEALTH_WORKER, List.of(Symptom.DIARRHEA), false),
+			arguments(HealthWorkerStatus.HEALTH_WORKER, List.of(Symptom.DIARRHEA, Symptom.RUNNY_NOSE), false),
+			arguments(HealthWorkerStatus.HEALTH_WORKER, List.of(Symptom.DIARRHEA, Symptom.FEVER, Symptom.RUNNY_NOSE), true),
+			arguments(HealthWorkerStatus.HEALTH_WORKER, List.of(Symptom.DRY_COUGH, Symptom.SORE_THROAT, Symptom.FATIGUE), false),
+			arguments(HealthWorkerStatus.HEALTH_WORKER, List.of(Symptom.DRY_COUGH, Symptom.SORE_THROAT, Symptom.FATIGUE, Symptom.FEVER), true),
+			arguments(HealthWorkerStatus.HEALTH_WORKER, List.of(Symptom.FEVER, Symptom.DRY_COUGH, Symptom.SORE_THROAT, Symptom.FATIGUE), true),
+			arguments(HealthWorkerStatus.HEALTH_WORKER, List.of(Symptom.DIARRHEA, Symptom.DRY_COUGH, Symptom.SORE_THROAT, Symptom.FATIGUE), false),
+			arguments(HealthWorkerStatus.HEALTH_WORKER, Symptom.LIST, true));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void meetsCdcPriority3(final HealthWorkerStatus status, final List<Symptom> symptoms, final boolean expected)
+	{
+		var items = (null == symptoms) ? null : symptoms.stream().map(o -> o.created()).collect(toList());
+		Assertions.assertEquals(expected, new PeopleValue().withHealthWorkerStatus(status).withSymptoms(items).meetsCdcPriority3());
+	}
+
+	public static Stream<Arguments> symptomatic()
+	{
+		return Stream.of(
+			arguments(null, false),
+			arguments(List.of(), false),
+			arguments(List.of(Symptom.DIARRHEA), false),
+			arguments(List.of(Symptom.DIARRHEA, Symptom.RUNNY_NOSE), false),
+			arguments(List.of(Symptom.DIARRHEA, Symptom.FEVER, Symptom.RUNNY_NOSE), true),
+			arguments(List.of(Symptom.DRY_COUGH, Symptom.SORE_THROAT, Symptom.FATIGUE), false),
+			arguments(List.of(Symptom.DRY_COUGH, Symptom.SORE_THROAT, Symptom.FATIGUE, Symptom.FEVER), true),
+			arguments(List.of(Symptom.FEVER, Symptom.DRY_COUGH, Symptom.SORE_THROAT, Symptom.FATIGUE), true),
+			arguments(List.of(Symptom.DIARRHEA, Symptom.DRY_COUGH, Symptom.SORE_THROAT, Symptom.FATIGUE), false),
+			arguments(Symptom.LIST, true));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void symptomatic(final List<Symptom> symptoms, final boolean expected)
+	{
+		var items = (null == symptoms) ? null : symptoms.stream().map(o -> o.created()).collect(toList());
+		Assertions.assertEquals(expected, new PeopleValue().withSymptoms(items).symptomatic());
 	}
 }

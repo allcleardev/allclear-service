@@ -385,7 +385,8 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter(1, 20).withAcceptsThirdParty(VALUE.acceptsThirdParty), 1L),
 			arguments(new FacilityFilter(1, 20).withHasAcceptsThirdParty(true), 1L),
 			arguments(new FacilityFilter(1, 20).withReferralRequired(VALUE.referralRequired), 1L),
-			arguments(new FacilityFilter(1, 20).withTestCriteriaId(VALUE.testCriteriaId), 1L),
+			arguments(new FacilityFilter(1, 20).withTestCriteriaId(OTHER.id), 1L),
+			arguments(new FacilityFilter(1, 20).withNotTestCriteriaId(CDC_CRITERIA.id), 1L),
 			arguments(new FacilityFilter(1, 20).withHasTestCriteriaId(true), 1L),
 			arguments(new FacilityFilter(1, 20).withOtherTestCriteria(VALUE.otherTestCriteria), 1L),
 			arguments(new FacilityFilter(1, 20).withHasOtherTestCriteria(true), 1L),
@@ -446,7 +447,8 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter(1, 20).withAcceptsThirdParty(!VALUE.acceptsThirdParty), 0L),
 			arguments(new FacilityFilter(1, 20).withHasAcceptsThirdParty(false), 0L),
 			arguments(new FacilityFilter(1, 20).withReferralRequired(!VALUE.referralRequired), 0L),
-			arguments(new FacilityFilter(1, 20).withTestCriteriaId("invalid"), 0L),
+			arguments(new FacilityFilter(1, 20).withTestCriteriaId(CDC_CRITERIA.id), 0L),
+			arguments(new FacilityFilter(1, 20).withNotTestCriteriaId(OTHER.id), 0L),
 			arguments(new FacilityFilter(1, 20).withHasTestCriteriaId(false), 0L),
 			arguments(new FacilityFilter(1, 20).withOtherTestCriteria("invalid"), 0L),
 			arguments(new FacilityFilter(1, 20).withHasOtherTestCriteria(false), 0L),
@@ -820,6 +822,19 @@ public class FacilityDAOTest
 	public void z_00_modify_check()
 	{
 		z_00_add_check();
+	}
+
+	@Test
+	public void z_01_add_others()
+	{
+		dao.add(createValid().withName("restrictive-0").withTestCriteriaId(null));
+		dao.add(createValid().withName("restrictive-1").withTestCriteriaId(CDC_CRITERIA.id));
+	}
+
+	@Test
+	public void z_01_add_others_count()
+	{
+		count(new FacilityFilter(), 3L);
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.

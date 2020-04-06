@@ -18,8 +18,8 @@ public class HealthWorkerStatus implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	public static final HealthWorkerStatus HEALTH_WORKER= new HealthWorkerStatus("h", "Health Worker");
-	public static final HealthWorkerStatus LIVE_WITH = new HealthWorkerStatus("l", "Live With");
+	public static final HealthWorkerStatus HEALTH_WORKER= new HealthWorkerStatus("h", "Health Worker", true);
+	public static final HealthWorkerStatus LIVE_WITH = new HealthWorkerStatus("l", "Live With", false);
 
 	public static final List<HealthWorkerStatus> LIST = List.of(HEALTH_WORKER, LIVE_WITH);
 	public static final Map<String, HealthWorkerStatus> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
@@ -28,12 +28,15 @@ public class HealthWorkerStatus implements Serializable
 
 	public final String id;
 	public final String name;
+	public final boolean staff;	// Indicates that the status represents an actual staff member as opposed to a family member.
 
 	public HealthWorkerStatus(@JsonProperty("id") final String id,
-		@JsonProperty("name") final String name)
+		@JsonProperty("name") final String name,
+		@JsonProperty("staff") final boolean staff)
 	{
 		this.id = id;
 		this.name = name;
+		this.staff = staff;
 	}
 
 	@Override

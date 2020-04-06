@@ -22,6 +22,7 @@ import app.allclear.common.value.OperationResponse;
 import app.allclear.google.client.MapClient;
 import app.allclear.google.model.GeocodeResult;
 import app.allclear.platform.dao.FacilityDAO;
+import app.allclear.platform.dao.SessionDAO;
 import app.allclear.platform.filter.FacilityFilter;
 import app.allclear.platform.value.FacilityValue;
 
@@ -44,15 +45,17 @@ public class FacilityResource
 	private static final Logger log = LoggerFactory.getLogger(FacilityResource.class);
 
 	private final FacilityDAO dao;
+	private final SessionDAO sessionDao;
 	private final MapClient map;
 
 	/** Populator.
 	 * 
 	 * @param dao
 	 */
-	public FacilityResource(final FacilityDAO dao, final MapClient map)
+	public FacilityResource(final FacilityDAO dao, final SessionDAO sessionDao, final MapClient map)
 	{
 		this.dao = dao;
+		this.sessionDao = sessionDao;
 		this.map = map;
 	}
 

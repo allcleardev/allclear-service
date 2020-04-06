@@ -3,6 +3,7 @@ package app.allclear.platform.rest;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.*;
+import static app.allclear.platform.type.TestCriteria.*;
 import static app.allclear.testing.TestingUtils.*;
 
 import java.math.BigDecimal;
@@ -26,11 +27,14 @@ import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.NotFoundExceptionMapper;
 import app.allclear.common.errors.ValidationExceptionMapper;
 import app.allclear.common.mediatype.UTF8MediaType;
+import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.common.value.OperationResponse;
 import app.allclear.google.client.MapClient;
 import app.allclear.google.model.GeocodeResponse;
 import app.allclear.platform.App;
+import app.allclear.platform.ConfigTest;
 import app.allclear.platform.dao.FacilityDAO;
+import app.allclear.platform.dao.SessionDAO;
 import app.allclear.platform.filter.FacilityFilter;
 import app.allclear.platform.filter.GeoFilter;
 import app.allclear.platform.value.FacilityValue;
@@ -53,6 +57,7 @@ public class FacilityResourceTest
 	public final HibernateTransactionRule transRule = new HibernateTransactionRule(DAO_RULE);
 
 	private static FacilityDAO dao = null;
+	private static SessionDAO sessionDao = new SessionDAO(new FakeRedisClient(), ConfigTest.loadTest());
 	private static FacilityValue VALUE = null;
 	private static MapClient map = mock(MapClient.class);
 	private static FacilityResource resource = null;
@@ -60,7 +65,7 @@ public class FacilityResourceTest
 	public final ResourceExtension RULE = ResourceExtension.builder()
 		.addResource(new NotFoundExceptionMapper())
 		.addResource(new ValidationExceptionMapper())
-		.addResource(resource = new FacilityResource(dao, map)).build();
+		.addResource(resource = new FacilityResource(dao, sessionDao, map)).build();
 
 	/** Primary URI to test. */
 	private static final String TARGET = "/facilities";
@@ -313,6 +318,9 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter(1, 20).withAcceptsThirdParty(VALUE.acceptsThirdParty), 1L),
 			arguments(new FacilityFilter(1, 20).withReferralRequired(VALUE.referralRequired), 1L),
 			arguments(new FacilityFilter(1, 20).withTestCriteriaId(VALUE.testCriteriaId), 1L),
+			arguments(new FacilityFilter(1, 20).withNotTestCriteriaId(CDC_CRITERIA.id), 1L),	// NULLs are also included.
+			arguments(new FacilityFilter(1, 20).withNotTestCriteriaId(OTHER.id), 1L),	// NULLs are also included.
+			arguments(new FacilityFilter(1, 20).withHasTestCriteriaId(false), 1L),
 			arguments(new FacilityFilter(1, 20).withOtherTestCriteria(VALUE.otherTestCriteria), 1L),
 			arguments(new FacilityFilter(1, 20).withTestsPerDay(VALUE.testsPerDay), 1L),
 			arguments(new FacilityFilter(1, 20).withTestsPerDayFrom(VALUE.testsPerDay), 1L),
@@ -358,6 +366,7 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter(1, 20).withAcceptsThirdParty(false), 0L),
 			arguments(new FacilityFilter(1, 20).withReferralRequired(!VALUE.referralRequired), 0L),
 			arguments(new FacilityFilter(1, 20).withTestCriteriaId("invalid"), 0L),
+			arguments(new FacilityFilter(1, 20).withHasTestCriteriaId(true), 0L),
 			arguments(new FacilityFilter(1, 20).withOtherTestCriteria("invalid"), 0L),
 			arguments(new FacilityFilter(1, 20).withTestsPerDay(1000), 0L),
 			arguments(new FacilityFilter(1, 20).withTestsPerDayFrom(1), 0L),
