@@ -277,4 +277,23 @@ public class PeopleValue implements Serializable
 			.append(", symptoms: ").append(symptoms)
 			.append(" }").toString();
 	}
+
+	/** Returns true iff the user is symptomatic **/
+	public boolean isSymptomatic()
+	{
+		return this.symptoms.contains(Symptom.FEVER);
+	}
+
+	/** Returns true iff the user qualifies for CDC Priority 3 **/
+	public boolean isCdcPriority3()
+	{
+		boolean isHealthWorker = this.healthWorkerStatus.equals(HealthWorkerStatus.HEALTH_WORKER);
+		return isHealthWorker || this.isSymptomatic()
+	}
+
+	/** Returns true iff the user matches the testing criteria for a facility **/
+	public boolean matchesCriteria(FacilityValue facility)
+	{
+		return facility.testCriteria.equals(TestCriteria.CDC_CRITERIA) && this.isCdcPriority3();
+	}
 }
