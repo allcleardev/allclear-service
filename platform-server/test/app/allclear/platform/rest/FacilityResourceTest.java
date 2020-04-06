@@ -32,6 +32,7 @@ import app.allclear.google.model.GeocodeResponse;
 import app.allclear.platform.App;
 import app.allclear.platform.dao.FacilityDAO;
 import app.allclear.platform.filter.FacilityFilter;
+import app.allclear.platform.filter.GeoFilter;
 import app.allclear.platform.value.FacilityValue;
 
 /**********************************************************************************
@@ -54,11 +55,12 @@ public class FacilityResourceTest
 	private static FacilityDAO dao = null;
 	private static FacilityValue VALUE = null;
 	private static MapClient map = mock(MapClient.class);
+	private static FacilityResource resource = null;
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
 		.addResource(new NotFoundExceptionMapper())
 		.addResource(new ValidationExceptionMapper())
-		.addResource(new FacilityResource(dao, map)).build();
+		.addResource(resource = new FacilityResource(dao, map)).build();
 
 	/** Primary URI to test. */
 	private static final String TARGET = "/facilities";
@@ -76,7 +78,9 @@ public class FacilityResourceTest
 		var factory = DAO_RULE.getSessionFactory();
 		dao = new FacilityDAO(factory);
 
-		when(map.geocode(any(String.class))).thenReturn(loadObject("/google/map/geocode.json", GeocodeResponse.class));
+		when(map.geocode(contains("Street"))).thenReturn(loadObject("/google/map/geocode.json", GeocodeResponse.class));
+		when(map.geocode(contains("Avenue"))).thenReturn(loadObject("/google/map/geocode-requestDenied.json", GeocodeResponse.class));
+		when(map.geocode(contains("Lane"))).thenReturn(loadObject("/google/map/geocode-zeroResults.json", GeocodeResponse.class));
 	}
 
 	@Test
@@ -123,6 +127,24 @@ public class FacilityResourceTest
 	}
 
 	@Test
+	public void find_afterActive_withLocation()
+	{
+		var response = request(target().queryParam("name", "ul")
+			.queryParam("location", "56th Street")
+			.queryParam("km", 75)).get();
+		Assertions.assertEquals(HTTP_STATUS_RUNTIME_EXCEPTION, response.getStatus(), "Status");	// ST_DISTANCE_SPHERE is not available on H2.
+	}
+
+	@Test
+	public void find_afterActive_withLocation_invalid()
+	{
+		var response = request(target().queryParam("name", "ul")
+			.queryParam("location", "56th Avenue")
+			.queryParam("km", 75)).get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");	// Since location is invalid, no lat/lng will be provided.
+	}
+
+	@Test
 	public void find_afterActive_withMiles()
 	{
 		var response = request(target().queryParam("name", "ul")
@@ -130,6 +152,30 @@ public class FacilityResourceTest
 			.queryParam("longitude", bg("52.24"))
 			.queryParam("miles", 55)).get();
 		Assertions.assertEquals(HTTP_STATUS_RUNTIME_EXCEPTION, response.getStatus(), "Status");	// ST_DISTANCE_SPHERE is not available on H2.
+	}
+
+	@Test
+	public void geocode()
+	{
+		Assertions.assertNull(resource.geocode("56 First Avenue"), "Check '56 First Avenue'");
+		Assertions.assertNull(resource.geocode("56 First Lane"), "Check '56 First Lane'");
+
+		var r = resource.geocode("56 First Street");
+		Assertions.assertNotNull(r, "Check '56 First Street'");
+		Assertions.assertEquals("924", r.streetNumber().shortName, "Check result.streetNumber");
+		Assertions.assertEquals("Willow Avenue", r.streetName().longName, "Check result.streetName.longName");
+		Assertions.assertEquals("Willow Ave", r.streetName().shortName, "Check result.streetName.shortName");
+		Assertions.assertEquals("Hoboken", r.city().shortName, "Check result.city");
+		Assertions.assertEquals("Hudson County", r.county().shortName, "Check result.county");
+		Assertions.assertEquals("New Jersey", r.state().longName, "Check result.state.longName");
+		Assertions.assertEquals("NJ", r.state().shortName, "Check result.state.shortName");
+		Assertions.assertEquals("United States", r.country().longName, "Check result.country.longName");
+		Assertions.assertEquals("US", r.country().shortName, "Check result.country.shortName");
+		Assertions.assertEquals("07030", r.postalCode().shortName, "Check result.postalCode");
+
+		var l = r.geometry.location;
+		Assertions.assertEquals(new BigDecimal("40.7487855"), l.lat, "Check result.geometry.location.lat");
+		Assertions.assertEquals(new BigDecimal("-74.0315385"), l.lng, "Check result.geometry.location.lng");
 	}
 
 	@Test
@@ -188,6 +234,52 @@ public class FacilityResourceTest
 		Assertions.assertEquals("New Orleans", value.city, "Check city");
 		Assertions.assertEquals("LA", value.state, "Check state");
 		check(VALUE, value);
+	}
+
+	@Test
+	public void populate_all()
+	{
+		var v = resource.populate(new FacilityValue().withAddress("56 First Street"));
+		Assertions.assertEquals("Hoboken", v.city, "Check city");
+		Assertions.assertEquals("New Jersey", v.state, "Check state");
+		Assertions.assertEquals(bg("40.7487855"), v.latitude, "Check latitude");
+		Assertions.assertEquals(bg("-74.0315385"), v.longitude, "Check longitude");
+	}
+
+	public static Stream<String> populate_invalid()
+	{
+		return Stream.of("56 First Avenue", "56 First Lane");
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void populate_invalid(final String address)
+	{
+		var v = resource.populate(new FacilityValue().withAddress(address));
+		Assertions.assertNull(v.city, "Check city");
+		Assertions.assertNull(v.state, "Check state");
+		Assertions.assertNull(v.latitude, "Check latitude");
+		Assertions.assertNull(v.longitude, "Check longitude");
+	}
+
+	@Test
+	public void populate_none()
+	{
+		var v = resource.populate(new FacilityValue().withAddress("56 First Street").withCity("Manchester").withState("New Hampshire").withLatitude(bg("-78.2")).withLongitude(bg("3.14")));
+		Assertions.assertEquals("Manchester", v.city, "Check city");
+		Assertions.assertEquals("New Hampshire", v.state, "Check state");
+		Assertions.assertEquals(bg("-78.2"), v.latitude, "Check latitude");
+		Assertions.assertEquals(bg("3.14"), v.longitude, "Check longitude");
+	}
+
+	@Test
+	public void populate_some()
+	{
+		var v = resource.populate(new FacilityValue().withAddress("56 First Street").withState("New Hampshire").withLongitude(bg("3.14")));
+		Assertions.assertEquals("Hoboken", v.city, "Check city");
+		Assertions.assertEquals("New Hampshire", v.state, "Check state");
+		Assertions.assertEquals(bg("40.7487855"), v.latitude, "Check latitude");
+		Assertions.assertEquals(bg("3.14"), v.longitude, "Check longitude");
 	}
 
 	public static Stream<Arguments> search()
@@ -317,6 +409,56 @@ public class FacilityResourceTest
 			}
 			Assertions.assertEquals(total, results.records.size(), assertId + "Check records.size");
 		}
+	}
+
+	@Test
+	public void search_withLocation()
+	{
+		var response = request("search").post(Entity.json(new FacilityFilter().withFrom(new GeoFilter(null, null, "56th Street", null, 75))));
+		Assertions.assertEquals(HTTP_STATUS_RUNTIME_EXCEPTION, response.getStatus(), "Status");	// ST_DISTANCE_SPHERE is not available on H2.
+	}
+
+	@Test
+	public void search_withLocation_invalid()
+	{
+		var response = request("search").post(Entity.json(new FacilityFilter().withFrom(new GeoFilter(null, null, "56th Lane", null, 75))));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");	// Lat/Lng won't be populated since the location is invalid.
+	}
+
+	@Test
+	public void set()
+	{
+		var response = request().put(Entity.json(new FacilityValue("Alex", "8th Street", null, null, null, null,
+			true, false, true, false, true, false, true, false)));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var v = response.readEntity(FacilityValue.class);
+		Assertions.assertEquals(2L, v.id, "Check ID");
+		Assertions.assertEquals("Hoboken", v.city, "Check city");
+		Assertions.assertEquals("New Jersey", v.state, "Check state");
+		Assertions.assertEquals(bg("40.7487855"), v.latitude, "Check latitude");
+		Assertions.assertEquals(bg("-74.0315385"), v.longitude, "Check longitude");
+	}
+
+	@Test
+	public void set_check()
+	{
+		var v = get(2L).readEntity(FacilityValue.class);
+		Assertions.assertEquals("Hoboken", v.city, "Check city");
+		Assertions.assertEquals("New Jersey", v.state, "Check state");
+		Assertions.assertEquals(bg("40.74879"), v.latitude, "Check latitude");
+		Assertions.assertEquals(bg("-74.03154"), v.longitude, "Check longitude");
+
+		count(new FacilityFilter().withCity("Hoboken"), 1L);
+		count(new FacilityFilter().withState("New Jersey"), 1L);
+	}
+
+	@Test
+	public void set_invalid()
+	{
+		var response = request().put(Entity.json(new FacilityValue("Alex", "8th Avenue", null, null, null, null,
+			true, false, true, false, true, false, true, false)));
+		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, response.getStatus(), "Status");
 	}
 
 	/** Test removal after the search. */

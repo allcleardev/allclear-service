@@ -17,6 +17,8 @@ public class AddressComponent implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
+	public static AddressComponent EMPTY = new AddressComponent(null, null, null);
+
 	@JsonProperty("long_name") public final String longName;
 	@JsonProperty("short_name") public final String shortName;
 	@JsonProperty("types") public final List<String> types;

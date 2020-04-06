@@ -139,7 +139,7 @@ public class FacilityFilter extends QueryFilter
 	public FacilityFilter withCreatedAtTo(final Date newValue) { createdAtTo = newValue; return this; }
 	public FacilityFilter withUpdatedAtFrom(final Date newValue) { updatedAtFrom = newValue; return this; }
 	public FacilityFilter withUpdatedAtTo(final Date newValue) { updatedAtTo = newValue; return this; }
-	public FacilityFilter WithFrom(final GeoFilter newValue) { from = newValue; return this; }
+	public FacilityFilter withFrom(final GeoFilter newValue) { from = newValue; return this; }
 
 	/**************************************************************************
 	*

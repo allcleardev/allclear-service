@@ -43,8 +43,7 @@ public class GeoFilter implements Serializable
 	public long meters() { return ((null != miles) ? milesToMeters(miles) : kmToMeters(km)); }
 	public boolean valid()
 	{
-		return ((((null != latitude) && (null != longitude)) || (null != location)) &&
-			((null != miles) || (null != km)));
+		return ((null != latitude) && (null != longitude) && ((null != miles) || (null != km)));
 	}
 
 	public GeoFilter copy(final LatLng coord)

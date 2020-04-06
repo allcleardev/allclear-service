@@ -1,0 +1,32 @@
+{
+   "results" : [
+      {
+         "address_components" : [],
+         "formatted_address" : "924 Willow Ave, Hoboken, NJ 07030, USA",
+         "geometry" : {
+            "location" : {
+               "lat" : 40.7487855,
+               "lng" : -74.0315385
+            },
+            "location_type" : "ROOFTOP",
+            "viewport" : {
+               "northeast" : {
+                  "lat" : 40.7501344802915,
+                  "lng" : -74.0301895197085
+               },
+               "southwest" : {
+                  "lat" : 40.7474365197085,
+                  "lng" : -74.03288748029151
+               }
+            }
+         },
+         "place_id" : "ChIJf130aWJXwokRj_yrWtRTDWw",
+         "plus_code" : {
+            "compound_code" : "PXX9+G9 Hoboken, New Jersey, United States",
+            "global_code" : "87G7PXX9+G9"
+         },
+         "types" : [ "street_address" ]
+      }
+   ],
+   "status" : "OK"
+}

@@ -506,8 +506,13 @@ public class FacilityDAOTest
 	public void search_from()
 	{
 		// Function "ST_DISTANCE_SPHERE" not found ON H2 database.
-		assertThrows(PersistenceException.class, () -> dao.search(new FacilityFilter().WithFrom(new GeoFilter(bg("45.7"), bg("-35.42"), null, 50, null))));
-		assertThrows(PersistenceException.class, () -> dao.search(new FacilityFilter().WithFrom(new GeoFilter(null, null, "Philadelphia", 50, null))));
+		assertThrows(PersistenceException.class, () -> dao.search(new FacilityFilter().withFrom(new GeoFilter(bg("45.7"), bg("-35.42"), null, 50, null))));
+	}
+
+	@Test
+	public void search_from_invalid()
+	{
+		Assertions.assertEquals(1L, dao.search(new FacilityFilter().withFrom(new GeoFilter(null, null, "Philadelphia", 50, null))).total);
 	}
 
 	public static Stream<Arguments> search_sort()

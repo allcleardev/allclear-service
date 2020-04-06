@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.function.Predicate;
 
+import org.apache.commons.collections4.CollectionUtils;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /** Value object that represents a single Google Geocode result entry.
@@ -25,7 +27,12 @@ public class GeocodeResult implements Serializable
 	@JsonProperty("plus_code") public final PlusCode plusCode;
 	@JsonProperty("types") public final List<String> types;
 
-	protected AddressComponent addressComponent(final Predicate<AddressComponent> fx) { return addressComponents.stream().filter(fx).findFirst().orElse(null); }
+	protected AddressComponent addressComponent(final Predicate<AddressComponent> fx)
+	{
+		if (CollectionUtils.isEmpty(addressComponents)) return AddressComponent.EMPTY;
+
+		return addressComponents.stream().filter(fx).findFirst().orElse(AddressComponent.EMPTY);
+	}
 	public AddressComponent streetNumber() { return addressComponent(v -> v.streetNumber()); }
 	public AddressComponent streetName() { return addressComponent(v -> v.streetName()); }
 	public AddressComponent city() { return addressComponent(v -> v.city()); }
@@ -47,5 +54,17 @@ public class GeocodeResult implements Serializable
 		this.placeId = placeId;
 		this.plusCode = plusCode;
 		this.types = types;
+	}
+
+	@Override
+	public String toString()
+	{
+		return new StringBuilder("{ addressComponents: ").append(addressComponents)
+			.append(", formattedAddress: ").append(formattedAddress)
+			.append(", geometry: ").append(geometry)
+			.append(", placeId: ").append(placeId)
+			.append(", plusCode: ").append(plusCode)
+			.append(", types: ").append(types)
+			.append(" }").toString();
 	}
 }

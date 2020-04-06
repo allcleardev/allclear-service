@@ -133,7 +133,7 @@ public class FacilityResource
 		return dao.search(filter);
 	}
 
-	private FacilityValue populate(final FacilityValue value)
+	FacilityValue populate(final FacilityValue value)
 	{
 		if ((null != value.address) &&
 		    ((null == value.city) || (null == value.state) || (null == value.latitude) || (null == value.longitude)))
@@ -151,7 +151,7 @@ public class FacilityResource
 		return value;
 	}
 
-	private GeocodeResult geocode(final String location)
+	GeocodeResult geocode(final String location)
 	{
 		try
 		{
