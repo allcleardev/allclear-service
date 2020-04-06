@@ -91,6 +91,19 @@ project(':common-hibernate') {
   }
 }
 
+project(':google-client') {
+  dependencies {
+    compile project(':google-model')
+    testCompile project(':common-testing')
+  }
+}
+
+project(':google-model') {
+  dependencies {
+    testCompile project(':common-testing')
+  }
+}
+
 project(':platform-model') {
   dependencies {
     compile project(':common-model')
@@ -104,6 +117,7 @@ project(':platform-server') {
     compile project(':admin-app')
     compile project(':common-hibernate')
     compile project(':common-service')
+    compile project(':google-client')
     compile project(':platform-model')
     compile project(':twilio-client')
     testCompile project(':common-testing')

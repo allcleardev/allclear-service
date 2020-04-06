@@ -1,2 +1,2 @@
-include 'admin-app', 'common-hibernate', 'common-jersey', 'common-model', 'common-service', 'common-testing', 'platform-model', 'platform-server', 'twilio-client', 'twilio-model'
+include 'admin-app', 'common-hibernate', 'common-jersey', 'common-model', 'common-service', 'common-testing', 'google-client', 'google-model', 'platform-model', 'platform-server', 'twilio-client', 'twilio-model'
 
