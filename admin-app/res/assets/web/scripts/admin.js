@@ -185,6 +185,7 @@ var FacilitiesHandler = new ListTemplate({
 		      new ListField('hasAcceptsThirdParty', 'Has Accepts Third Party', false, 'yesNoOptions', undefined, 'No Search'),
 		      new ListField('referralRequired', 'Referral Required?', false, 'yesNoOptions', undefined, 'No Search'),
 		      new ListField('testCriteriaId', 'Testing Criteria', false, 'testCriteria', undefined, 'No Search'),
+		      new ListField('notTestCriteriaId', 'Exclude Testing Criteria', false, 'testCriteria', undefined, 'No Search'),
 		      new ListField('hasTestCriteria', 'Has Test Criteria', false, 'yesNoOptions', undefined, 'No Search'),
 		      new EditField('otherTestCriteria', 'Other Test Criteria', false, false, 60, 5),
 		      new ListField('hasOtherTestCriteria', 'Has Other Test Criteria', false, 'yesNoOptions', undefined, 'No Search'),
