@@ -24,28 +24,44 @@ public class GeoFilterTest
 	public static Stream<Arguments> valid()
 	{
 		return Stream.of(
-			arguments(null, null, null, null, false, null),
-			arguments("12", null, null, null, false, null),
-			arguments(null, "12", null, null, false, null),
-			arguments(null, null, 10, null, false, milesToMeters(10)),
-			arguments(null, null, null, 10, false, kmToMeters(10)),
-			arguments(null, null, 10, 10, false, milesToMeters(10)),
-			arguments("30", "40", null, null, false, null),
-			arguments(null, "40", 10, null, false, milesToMeters(10)),
-			arguments("30", null, 10, null, false, milesToMeters(10)),
-			arguments(null, "40", null, 10, false, kmToMeters(10)),
-			arguments("30", null, null, 10, false, kmToMeters(10)),
-			arguments("30", "40", 10, null, true, milesToMeters(10)),
-			arguments("30", "40", null, 10, true, kmToMeters(10)),
-			arguments("30", "40", 10, 10, true, milesToMeters(10)));
+			arguments(null, null, null, null, null, false, null),
+			arguments(null, null, "Philadelphia", null, null, false, null),
+			arguments("12", null, null, null, null, false, null),
+			arguments("12", null, "Philadelphia", null, null, false, null),
+			arguments(null, "12", null, null, null, false, null),
+			arguments(null, "12", "Philadelphia", null, null, false, null),
+			arguments(null, null, null, 10, null, false, milesToMeters(10)),
+			arguments(null, null, "Philadelphia", 10, null, true, milesToMeters(10)),
+			arguments(null, null, null, null, 10, false, kmToMeters(10)),
+			arguments(null, null, "Philadelphia", null, 10, true, kmToMeters(10)),
+			arguments(null, null, null, 10, 10, false, milesToMeters(10)),
+			arguments(null, null, "Philadelphia", 10, 10, true, milesToMeters(10)),
+			arguments("30", "40", null, null, null, false, null),
+			arguments("30", "40", "Philadelphia", null, null, false, null),
+			arguments(null, "40", null, 10, null, false, milesToMeters(10)),
+			arguments(null, "40", "Philadelphia", 10, null, true, milesToMeters(10)),
+			arguments("30", null, null, 10, null, false, milesToMeters(10)),
+			arguments("30", null, "Philadelphia", 10, null, true, milesToMeters(10)),
+			arguments(null, "40", null, null, 10, false, kmToMeters(10)),
+			arguments(null, "40", "Philadelphia", null, 10, true, kmToMeters(10)),
+			arguments("30", null, null, null, 10, false, kmToMeters(10)),
+			arguments("30", null, "Philadelphia", null, 10, true, kmToMeters(10)),
+			arguments("30", "40", null, 10, null, true, milesToMeters(10)),
+			arguments("30", "40", "Philadelphia", 10, null, true, milesToMeters(10)),
+			arguments("30", "40", null, null, 10, true, kmToMeters(10)),
+			arguments("30", "40", "Philadelphia", null, 10, true, kmToMeters(10)),
+			arguments("30", "40", null, 10, 10, true, milesToMeters(10)),
+			arguments("30", "40", "Philadelphia", 10, 10, true, milesToMeters(10)));
 	}
 
 	@ParameterizedTest
 	@MethodSource
-	public void valid(final String latitude, final String longitude, final Integer miles, final Integer km, final boolean expected, final Long expectedMeters)
+	public void valid(final String latitude, final String longitude, final String location,
+		final Integer miles, final Integer km, final boolean expected, final Long expectedMeters)
 	{
 		var o = new GeoFilter(null != latitude ? new BigDecimal(latitude) : null,
 			null != longitude ? new BigDecimal(longitude) : null,
+			location,
 			miles,
 			km);
 

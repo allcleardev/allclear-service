@@ -84,7 +84,7 @@ public class MapClient implements AutoCloseable
 		if (400 <= status) throw new MapException(status, response.readEntity(String.class));
 
 		var o = response.readEntity(clazz);
-		if (!o.ok()) throw new MapException(status, o.status, o.errorMessage);
+		if (!(o.ok() || o.zeroResults())) throw new MapException(status, o.status, o.errorMessage);
 
 		return o;
 	}

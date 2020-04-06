@@ -2,6 +2,7 @@ package app.allclear.platform.rest;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.*;
 import static app.allclear.testing.TestingUtils.*;
 
 import java.math.BigDecimal;
@@ -26,6 +27,8 @@ import app.allclear.common.errors.NotFoundExceptionMapper;
 import app.allclear.common.errors.ValidationExceptionMapper;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.value.OperationResponse;
+import app.allclear.google.client.MapClient;
+import app.allclear.google.model.GeocodeResponse;
 import app.allclear.platform.App;
 import app.allclear.platform.dao.FacilityDAO;
 import app.allclear.platform.filter.FacilityFilter;
@@ -50,11 +53,12 @@ public class FacilityResourceTest
 
 	private static FacilityDAO dao = null;
 	private static FacilityValue VALUE = null;
+	private static MapClient map = mock(MapClient.class);
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
 		.addResource(new NotFoundExceptionMapper())
 		.addResource(new ValidationExceptionMapper())
-		.addResource(new FacilityResource(dao)).build();
+		.addResource(new FacilityResource(dao, map)).build();
 
 	/** Primary URI to test. */
 	private static final String TARGET = "/facilities";
@@ -67,10 +71,12 @@ public class FacilityResourceTest
 	private static BigDecimal bg(final String value) { return new BigDecimal(value); }
 
 	@BeforeAll
-	public static void up()
+	public static void up() throws Exception
 	{
 		var factory = DAO_RULE.getSessionFactory();
 		dao = new FacilityDAO(factory);
+
+		when(map.geocode(any(String.class))).thenReturn(loadObject("/google/map/geocode.json", GeocodeResponse.class));
 	}
 
 	@Test

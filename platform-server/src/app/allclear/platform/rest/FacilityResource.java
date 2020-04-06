@@ -7,6 +7,9 @@ import java.util.List;
 
 import javax.ws.rs.*;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.slf4j.*;
+
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 
@@ -16,6 +19,8 @@ import app.allclear.common.errors.ValidationException;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.resources.Headers;
 import app.allclear.common.value.OperationResponse;
+import app.allclear.google.client.MapClient;
+import app.allclear.google.model.GeocodeResult;
 import app.allclear.platform.dao.FacilityDAO;
 import app.allclear.platform.filter.FacilityFilter;
 import app.allclear.platform.value.FacilityValue;
@@ -36,15 +41,19 @@ import app.allclear.platform.value.FacilityValue;
 @Api(value="Facility")
 public class FacilityResource
 {
+	private static final Logger log = LoggerFactory.getLogger(FacilityResource.class);
+
 	private final FacilityDAO dao;
+	private final MapClient map;
 
 	/** Populator.
 	 * 
 	 * @param dao
 	 */
-	public FacilityResource(final FacilityDAO dao)
+	public FacilityResource(final FacilityDAO dao, final MapClient map)
 	{
 		this.dao = dao;
+		this.map = map;
 	}
 
 	@GET
@@ -61,11 +70,22 @@ public class FacilityResource
 	@ApiOperation(value="find", notes="Finds Facilitys by wildcard name search.", response=FacilityValue.class, responseContainer="List")
 	public List<FacilityValue> find(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@QueryParam("name") @ApiParam(name="name", value="Value for the wildcard search") final String name,
-		@QueryParam("latitude") @ApiParam(name="latitude", value="Optional, GEO latitude of the locaiton to be searched") final BigDecimal latitude,
-		@QueryParam("longitude") @ApiParam(name="longitude", value="Optional, GEO longitude of the locaiton to be searched") final BigDecimal longitude,
+		@QueryParam("latitude") @ApiParam(name="latitude", value="Optional, GEO latitude of the locaiton to be searched") BigDecimal latitude,
+		@QueryParam("longitude") @ApiParam(name="longitude", value="Optional, GEO longitude of the locaiton to be searched") BigDecimal longitude,
+		@QueryParam("location") @ApiParam(name="location", value="Optional, GEO location text to be searched") final String location,
 		@QueryParam("miles") @ApiParam(name="miles", value="Optional, max miles from the GEO location to include in the search") final Integer miles,
 		@QueryParam("km") @ApiParam(name="km", value="Optional, max kilometers from the GEO location to include in the search") final Integer km)
 	{
+		if (null != location)
+		{
+			var o = geocode(location);
+			if (null != o)
+			{
+				var l = o.geometry.location;
+				latitude = l.lat;
+				longitude = l.lng;
+			}
+		}
 		if ((null != latitude) && (null != longitude) && ((null != miles) || (null != km)))
 			return dao.getActiveByNameAndDistance(name, latitude, longitude, (null != miles) ? milesToMeters(miles) : kmToMeters(km));
 
@@ -78,7 +98,7 @@ public class FacilityResource
 	public FacilityValue add(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		final FacilityValue value) throws ValidationException
 	{
-		return dao.add(value);
+		return dao.add(populate(value));
 	}
 
 	@PUT
@@ -87,7 +107,7 @@ public class FacilityResource
 	public FacilityValue set(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		final FacilityValue value) throws ValidationException
 	{
-		return dao.update(value);
+		return dao.update(populate(value));
 	}
 
 	@DELETE
@@ -105,6 +125,42 @@ public class FacilityResource
 	public QueryResults<FacilityValue, FacilityFilter> search(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		final FacilityFilter filter) throws ValidationException
 	{
+		if ((null != filter.from) && (null != filter.from.location))
+		{
+			var o = geocode(filter.from.location);
+			if (null != o) filter.from = filter.from.copy(o.geometry.location);
+		}
 		return dao.search(filter);
+	}
+
+	private FacilityValue populate(final FacilityValue value)
+	{
+		if ((null != value.address) &&
+		    ((null == value.city) || (null == value.state) || (null == value.latitude) || (null == value.longitude)))
+		{
+			var o = geocode(value.address);
+			if (null != o)
+			{
+				if (null == value.city) value.city = o.city().shortName;
+				if (null == value.state) value.state = o.state().longName;
+				if (null == value.latitude) value.latitude = o.geometry.location.lat;
+				if (null == value.longitude) value.longitude = o.geometry.location.lng;
+			}
+		}
+
+		return value;
+	}
+
+	private GeocodeResult geocode(final String location)
+	{
+		try
+		{
+			var o = map.geocode(location);
+			if (o.ok() && CollectionUtils.isNotEmpty(o.results))
+				return o.results.get(0);
+		}
+		catch (final Exception ex) { log.warn(ex.getMessage(), ex); }
+
+		return null;
 	}
 }

@@ -107,6 +107,7 @@ project(':google-model') {
 project(':platform-model') {
   dependencies {
     compile project(':common-model')
+    compile project(':google-model')
     compile project(':twilio-model')
     testCompile project(':common-testing')
   }

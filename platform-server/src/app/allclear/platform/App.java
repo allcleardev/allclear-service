@@ -26,6 +26,7 @@ import app.allclear.common.jersey.CrossDomainHeadersFilter;
 import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.common.redis.RedisClient;
 import app.allclear.common.resources.*;
+import app.allclear.google.client.MapClient;
 import app.allclear.platform.dao.*;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.rest.*;
@@ -87,9 +88,11 @@ public class App extends Application<Config>
 		log.info("Migrations: completed");
 
 		var lifecycle = env.lifecycle();
+		var map = new MapClient();
 		var session = conf.session.test ? new FakeRedisClient() : new RedisClient(conf.session);
 		var twilio = new TwilioClient(conf.twilio);
 
+		lifecycle.manage(new AutoCloseableManager(map));
 		lifecycle.manage(new AutoCloseableManager(session));
 		lifecycle.manage(new AutoCloseableManager(twilio));
 
@@ -117,7 +120,7 @@ public class App extends Application<Config>
         jersey.register(new LogResource());
         jersey.register(new AuthFilter(sessionDao));
         jersey.register(new AdminResource(adminDao, sessionDao));
-        jersey.register(new FacilityResource(new FacilityDAO(factory)));
+        jersey.register(new FacilityResource(new FacilityDAO(factory), map));
 		jersey.register(new PeopleResource(peopleDao, registrationDao, sessionDao));
 		jersey.register(new RegistrationResource(registrationDao));
 		jersey.register(new TestsResource(new TestsDAO(factory, sessionDao)));
