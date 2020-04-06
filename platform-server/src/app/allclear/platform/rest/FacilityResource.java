@@ -24,6 +24,7 @@ import app.allclear.google.model.GeocodeResult;
 import app.allclear.platform.dao.FacilityDAO;
 import app.allclear.platform.dao.SessionDAO;
 import app.allclear.platform.filter.FacilityFilter;
+import app.allclear.platform.type.TestCriteria;
 import app.allclear.platform.value.FacilityValue;
 
 /**********************************************************************************
@@ -133,6 +134,13 @@ public class FacilityResource
 			var o = geocode(filter.from.location);
 			if (null != o) filter.from = filter.from.copy(o.geometry.location);
 		}
+
+		if (filter.restrictive)
+		{
+			var s = sessionDao.current();
+			if (s.person() && !s.person.meetsCdcPriority3()) filter.withNotTestCriteriaId(TestCriteria.CDC_CRITERIA.id);
+		}
+
 		return dao.search(filter);
 	}
 

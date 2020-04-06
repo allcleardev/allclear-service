@@ -1,5 +1,6 @@
 package app.allclear.platform.dao;
 
+import static java.util.stream.Collectors.toList;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -835,6 +836,22 @@ public class FacilityDAOTest
 	public void z_01_add_others_count()
 	{
 		count(new FacilityFilter(), 3L);
+		count(new FacilityFilter().withHasTestCriteriaId(true), 2L);
+		count(new FacilityFilter().withHasTestCriteriaId(false), 1L);
+		count(new FacilityFilter().withTestCriteriaId(CDC_CRITERIA.id), 1L);
+		count(new FacilityFilter().withTestCriteriaId(OTHER.id), 1L);
+		count(new FacilityFilter().withNotTestCriteriaId(CDC_CRITERIA.id), 2L);
+		count(new FacilityFilter().withNotTestCriteriaId(OTHER.id), 2L);
+	}
+
+	@Test
+	public void z_01_add_others_search()
+	{
+		var ids = dao.search(new FacilityFilter().withNotTestCriteriaId(CDC_CRITERIA.id)).records.stream().map(v -> v.testCriteriaId).collect(toList());
+		assertThat(ids).hasSize(2).containsOnly(OTHER.id, null);
+
+		ids = dao.search(new FacilityFilter().withNotTestCriteriaId(OTHER.id)).records.stream().map(v -> v.testCriteriaId).collect(toList());
+		assertThat(ids).hasSize(2).containsOnly(CDC_CRITERIA.id, null);
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.
