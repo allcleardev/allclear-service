@@ -133,4 +133,19 @@ public class PeopleValueTest
 		assertThat(o.createdAt).as("Check createdAt").isCloseTo(now, 100L).isNotEqualTo(value);
 		assertThat(o.updatedAt).as("Check updatedAt").isCloseTo(now, 100L).isNotEqualTo(value);
 	}
+
+	@ParameterizedTest
+	@MethodSource("create")
+	public void checkSymptomatic(final boolean active, final Date value)
+	{
+		ThreadUtils.sleep(10L);
+
+		var now = new Date();
+		var o = init(active, value);
+		o.withSymptoms(Symptom.FEVER);
+
+		o.initDates();
+
+		Assertions.assertTrue(o.isSymptomatic());
+	}
 }
