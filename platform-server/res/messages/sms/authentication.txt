@@ -1,1 +1,2 @@
-Click ${baseUrl}/auth?phone=%s&token=%s to login in.
+%s
+Use this code for AllClear verification or click ${baseUrl}/auth?phone=%s&token=%s

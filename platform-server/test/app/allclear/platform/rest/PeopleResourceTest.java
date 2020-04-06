@@ -432,7 +432,7 @@ public class PeopleResourceTest
 		var body = LAST_SMS_RESPONSE.body;
 		var i = body.indexOf("token=") + 6;
 
-		return body.substring(i, body.indexOf(' ', i));
+		return body.substring(i);
 	}
 
 	/** Helper method - creates the base WebTarget. */

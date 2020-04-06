@@ -28,7 +28,7 @@ import app.allclear.twilio.model.SMSResponse;
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class SessionDAOTest
 {
-	public static final String MESSAGE = "Click https://app-test.allclear.app/auth?phone=%s&token=%s to login in.";
+	public static final String MESSAGE = "%s\nUse this code for AllClear verification or click https://app-test.allclear.app/auth?phone=%s&token=%s";
 
 	private static final FakeRedisClient redis = new FakeRedisClient();
 	private static final TwilioClient twilio = mock(TwilioClient.class);
@@ -150,7 +150,7 @@ public class SessionDAOTest
 		Assertions.assertNotNull(token, "Check token");
 		Assertions.assertTrue(redis.containsKey(SessionDAO.authKey("888-555-0011", token)), "Check redis: before");
 		Assertions.assertNotNull(LAST_RESPONSE, "Check lastResponse: after");
-		Assertions.assertEquals(String.format(MESSAGE, "888-555-0011", token), LAST_RESPONSE.body, "Check lastResponse.body");
+		Assertions.assertEquals(String.format(MESSAGE, token, "888-555-0011", token), LAST_RESPONSE.body, "Check lastResponse.body");
 
 		dao.auth("888-555-0011", token);
 		Assertions.assertFalse(redis.containsKey(SessionDAO.authKey("888-555-0011", token)), "Check redis: after");

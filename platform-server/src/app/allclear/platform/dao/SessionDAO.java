@@ -104,7 +104,7 @@ public class SessionDAO
 	{
 		var token = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
 
-		twilio.send(new SMSRequest(authFrom, String.format(authMessage, encode(phone, UTF_8), encode(token, UTF_8)), phone));
+		twilio.send(new SMSRequest(authFrom, String.format(authMessage, token, encode(phone, UTF_8), encode(token, UTF_8)), phone));
 		redis.put(authKey(phone, token), phone, AUTH_DURATION);
 
 		return token;
