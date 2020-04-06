@@ -37,7 +37,8 @@ import app.allclear.platform.dao.FacilityDAO;
 import app.allclear.platform.dao.SessionDAO;
 import app.allclear.platform.filter.FacilityFilter;
 import app.allclear.platform.filter.GeoFilter;
-import app.allclear.platform.value.FacilityValue;
+import app.allclear.platform.type.Symptom;
+import app.allclear.platform.value.*;
 
 /**********************************************************************************
 *
@@ -58,9 +59,12 @@ public class FacilityResourceTest
 
 	private static FacilityDAO dao = null;
 	private static SessionDAO sessionDao = new SessionDAO(new FakeRedisClient(), ConfigTest.loadTest());
-	private static FacilityValue VALUE = null;
 	private static MapClient map = mock(MapClient.class);
 	private static FacilityResource resource = null;
+	private static FacilityValue VALUE = null;
+	private static SessionValue ADMIN = null;
+	private static SessionValue PERSON = null;
+	private static SessionValue PERSON_UNRESTRICTED = null;
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
 		.addResource(new NotFoundExceptionMapper())
@@ -88,6 +92,12 @@ public class FacilityResourceTest
 		when(map.geocode(contains("Lane"))).thenReturn(loadObject("/google/map/geocode-zeroResults.json", GeocodeResponse.class));
 	}
 
+	@BeforeEach
+	public void beforeEach()
+	{
+		if (null != ADMIN) sessionDao.current(ADMIN);
+	}
+
 	@Test
 	public void add()
 	{
@@ -100,6 +110,10 @@ public class FacilityResourceTest
 		var value = response.readEntity(FacilityValue.class);
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE.withId(1L).withCreatedAt(now).withUpdatedAt(now), value);
+
+		ADMIN = sessionDao.add(new AdminValue("admin"), false);
+		PERSON = sessionDao.add(new PeopleValue("person", "888-555-1000", true), false);
+		PERSON_UNRESTRICTED = sessionDao.add(new PeopleValue("person", "888-555-1000", true).withSymptoms(Symptom.FEVER), false);
 	}
 
 	@Test
@@ -435,10 +449,10 @@ public class FacilityResourceTest
 	}
 
 	@Test
-	public void set()
+	public void set_00()
 	{
-		var response = request().put(Entity.json(new FacilityValue("Alex", "8th Street", null, null, null, null,
-			true, false, true, false, true, false, true, false)));
+		var response = request().put(Entity.json(new FacilityValue("Alex", "8th Street",
+			true, false, true, false, true, false, true, false).withTestCriteriaId(CDC_CRITERIA.id)));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var v = response.readEntity(FacilityValue.class);
@@ -450,7 +464,7 @@ public class FacilityResourceTest
 	}
 
 	@Test
-	public void set_check()
+	public void set_00_check()
 	{
 		var v = get(2L).readEntity(FacilityValue.class);
 		Assertions.assertEquals("Hoboken", v.city, "Check city");
@@ -463,11 +477,42 @@ public class FacilityResourceTest
 	}
 
 	@Test
-	public void set_invalid()
+	public void set_00_invalid()
 	{
 		var response = request().put(Entity.json(new FacilityValue("Alex", "8th Avenue", null, null, null, null,
 			true, false, true, false, true, false, true, false)));
 		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, response.getStatus(), "Status");
+	}
+
+	@Test
+	public void set_00_search_restrictive_as_admin()
+	{
+		var o = request("search").post(Entity.json(new FacilityFilter().withRestrictive(true)), TYPE_QUERY_RESULTS);
+		Assertions.assertEquals(2L, o.total, "Check total");
+		Assertions.assertNull(o.filter.notTestCriteriaId, "Check filter.notTestCriteriaId");
+	}
+
+	@Test
+	public void set_00_search_restrictive_as_person()
+	{
+		sessionDao.current(PERSON);
+		Assertions.assertFalse(PERSON.person.meetsCdcPriority3(), "Check meetsCdcPriority3()");
+
+		var o = request("search").post(Entity.json(new FacilityFilter().withRestrictive(true)), TYPE_QUERY_RESULTS);
+		Assertions.assertEquals(1L, o.total, "Check total");
+		Assertions.assertEquals(CDC_CRITERIA.id, o.filter.notTestCriteriaId, "Check filter.notTestCriteriaId");
+	}
+
+	@Test
+	public void set_00_search_restrictive_as_person_unrestricted()
+	{
+		sessionDao.current(PERSON_UNRESTRICTED);
+		Assertions.assertTrue(PERSON_UNRESTRICTED.person.symptomatic(), "Check symptomatic()");
+		Assertions.assertTrue(PERSON_UNRESTRICTED.person.meetsCdcPriority3(), "Check meetsCdcPriority3()");
+
+		var o = request("search").post(Entity.json(new FacilityFilter().withRestrictive(true)), TYPE_QUERY_RESULTS);
+		Assertions.assertEquals(2L, o.total, "Check total");
+		Assertions.assertNull(o.filter.notTestCriteriaId, "Check filter.notTestCriteriaId");
 	}
 
 	/** Test removal after the search. */

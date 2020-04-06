@@ -76,7 +76,7 @@ public class PeopleValue implements Serializable
 			symptoms.stream().anyMatch(v -> Symptom.FEVER.id.equals(v.id));
 	}
 	public boolean healthWorker() { return (null != healthWorkerStatus) && healthWorkerStatus.staff; }
-	public boolean meetsCdcPriority3() { return healthWorker() && symptomatic(); }
+	public boolean meetsCdcPriority3() { return healthWorker() || symptomatic(); }
 
 	// Mutators
 	public PeopleValue withId(final String newValue) { id = newValue; return this; }

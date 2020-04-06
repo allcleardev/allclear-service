@@ -106,7 +106,7 @@ var FacilitiesHandler = new ListTemplate({
 	           new EditColumn('email', 'Email'),
 	           new TextColumn('createdAt', 'Created At', 'toDateTime'),
 	           new TextColumn('updatedAt', 'Updated At', 'toDateTime') ],
-	FIELDS: [ new TextField('id', 'ID'),
+	FIELDS: [ new IdField('id', 'ID'),
 	          new EditField('name', 'Name', true, false, 128, 50),
 	          new EditField('address', 'Address', true, false, 128, 50),
 	          new EditField('city', 'City', true, false, 128, 50),

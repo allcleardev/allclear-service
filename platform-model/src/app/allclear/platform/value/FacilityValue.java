@@ -123,6 +123,22 @@ public class FacilityValue implements Serializable
 	public FacilityValue(
 		final String name,
 		final String address,
+		final boolean driveThru,
+		final boolean referralRequired,
+		final boolean governmentIdRequired,
+		final boolean firstResponderFriendly,
+		final boolean telescreeningAvailable,
+		final boolean acceptsInsurance,
+		final boolean freeOrLowCost,
+		final boolean active)
+	{
+		this(name, address, null, null, null, null, driveThru, referralRequired, governmentIdRequired,
+			firstResponderFriendly, telescreeningAvailable, acceptsInsurance, freeOrLowCost, active);
+	}
+
+	public FacilityValue(
+		final String name,
+		final String address,
 		final String city,
 		final String state,
 		final BigDecimal latitude,
