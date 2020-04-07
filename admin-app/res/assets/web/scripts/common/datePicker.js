@@ -7,6 +7,8 @@ DatePicker.MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Se
 
 DatePicker.create = function(name, value, extra, callback)
 {
+	if (undefined != value) value = value.replace('+0000', 'Z');
+
 	var h, f, e, o = document.createElement('span');
 	var criteria = { name: name, value: value, closed: true, caller: this, extra: extra, callback: callback };
 	o.appendChild(h = criteria.hidden = this.genInput(name, 'hidden'));
@@ -19,7 +21,6 @@ DatePicker.create = function(name, value, extra, callback)
 	// DO full UNDEFINED test since it could be ZERO.
 	if (undefined != value)
 	{
-		value = value.replace('+0000', 'Z');
 		h.value = value;
 		f.value = this.toInputDate(value);
 	}
