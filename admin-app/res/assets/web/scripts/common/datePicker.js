@@ -19,6 +19,10 @@ DatePicker.create = function(name, value, extra, callback)
 	// DO full UNDEFINED test since it could be ZERO.
 	if (undefined != value)
 	{
+		console.log(value, value.replace('+0000', 'Z'), new Date(value.replace('+0000', 'Z')));
+		value = value.replace('+0000', 'Z');
+		console.log(value);
+
 		h.value = value;
 		f.value = this.toInputDate(value);
 	}
@@ -268,10 +272,8 @@ DatePicker.parseInputDate = function(v)
 /** Need to convert the format YYYY-MM-DD to a JavaScript Date object. */
 DatePicker.parseDbDate = function(v)
 {
-console.log(v, v.replace('+0000', 'Z'), new Date(v.replace('+0000', 'Z')));
-	var v = new Date(v.replace('+0000', 'Z'));
+	var v = new Date(v);
 	v.setHours(0, 0, 0, 0);
-console.log(v);
 
 	return v;
 	/*

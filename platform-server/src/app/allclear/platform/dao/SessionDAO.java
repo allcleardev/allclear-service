@@ -9,8 +9,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import app.allclear.common.errors.NotAuthenticatedException;
-import app.allclear.common.errors.ValidationException;
+import app.allclear.common.errors.*;
 import app.allclear.common.jackson.JacksonUtils;
 import app.allclear.common.redis.RedisClient;
 import app.allclear.platform.Config;
@@ -174,7 +173,46 @@ public class SessionDAO
 	{
 		return current(get(id));
 	}
-	
+
+	/** Checks that the current session is associated with an Admin.
+	 * 
+	 * @return never NULL
+	 * @throws NotAuthorizedException
+	 */
+	public AdminValue checkAdmin() throws NotAuthorizedException
+	{
+		var o = current();
+		if (!o.admin()) throw new NotAuthorizedException("Must be an Admin session.");
+
+		return o.admin;
+	}
+
+	/** Checks that the current session is associated with a Person.
+	 * 
+	 * @return never NULL
+	 * @throws NotAuthorizedException
+	 */
+	public PeopleValue checkPerson() throws NotAuthorizedException
+	{
+		var o = current();
+		if (!o.person()) throw new NotAuthorizedException("Must be a Person session.");
+
+		return o.person;
+	}
+
+	/** Checks that the current session is associated with a Super-Admin.
+	 * 
+	 * @return never NULL
+	 * @throws NotAuthorizedException
+	 */
+	public AdminValue checkSuper() throws NotAuthorizedException
+	{
+		var v = checkAdmin();
+		if (!v.supers) throw new NotAuthorizedException("Must be a Super-Admin session.");
+
+		return v;
+	}
+
 	/** Clears the current session. */
 	public void clear()
 	{

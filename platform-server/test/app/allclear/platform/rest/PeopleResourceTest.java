@@ -67,6 +67,7 @@ public class PeopleResourceTest
 	private static Date PHONE_VERIFIED_AT;
 	private static SMSResponse LAST_SMS_RESPONSE;
 	private static RegistrationValue REGISTRATION;
+	private static SessionValue ADMIN;
 	private static SessionValue SESSION;
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
@@ -103,6 +104,8 @@ public class PeopleResourceTest
 	@Test
 	public void add()
 	{
+		sessionDao.current(ADMIN = sessionDao.add(new AdminValue("admin"), false));
+
 		var response = request()
 			.post(Entity.entity(VALUE = new PeopleValue("minimal", "888-minimal", true)
 				.withAuthAt(AUTH_AT).withEmailVerifiedAt(EMAIL_VERIFIED_AT).withPhoneVerifiedAt(PHONE_VERIFIED_AT), UTF8MediaType.APPLICATION_JSON_TYPE));
@@ -312,46 +315,6 @@ public class PeopleResourceTest
 	}
 
 	@Test
-	public void start()
-	{
-		Assertions.assertEquals(HTTP_STATUS_OK,
-			request("start").post(Entity.json(new StartRequest("888-555-2100", false, false))).getStatus());
-	}
-
-	@Test
-	public void start_count()
-	{
-		var response = registrations("search").post(Entity.json(new RegistrationFilter()));
-		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
-
-		var results = response.readEntity(TYPE_QUERY_RESULTS_);
-		Assertions.assertNotNull(results, "Exists");
-		Assertions.assertEquals(1L, results.total, "Check results.total");
-		assertThat(results.records).as("Check results.records").hasSize(1);
-
-		REGISTRATION = results.records.get(0);
-	}
-
-	@Test
-	public void start_remove()
-	{
-		var response = registrations(REGISTRATION.key).delete();
-		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
-	}
-
-	@Test
-	public void start_remove_search()
-	{
-		var response = registrations("search").post(Entity.json(new RegistrationFilter()));
-		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
-
-		var results = response.readEntity(TYPE_QUERY_RESULTS_);
-		Assertions.assertNotNull(results, "Exists");
-		Assertions.assertNull(results.records, "Check results.records");
-		Assertions.assertEquals(0L, results.total, "Check results.total");
-	}
-
-	@Test
 	public void testRemove_get()
 	{
 		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, get(VALUE.id).getStatus(), "Status");
@@ -365,7 +328,63 @@ public class PeopleResourceTest
 	}
 
 	@Test
-	public void z_00_register()
+	public void z_00()
+	{
+		// Non-admin tests
+		sessionDao.clear();
+	}
+
+	@Test
+	public void z_00_start()
+	{
+		Assertions.assertEquals(HTTP_STATUS_OK,
+			request("start").post(Entity.json(new StartRequest("888-555-2100", false, false))).getStatus());
+	}
+
+	@Test
+	public void z_00_start_count()
+	{
+		sessionDao.current(ADMIN);
+
+		var response = registrations("search").post(Entity.json(new RegistrationFilter()));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var results = response.readEntity(TYPE_QUERY_RESULTS_);
+		Assertions.assertNotNull(results, "Exists");
+		Assertions.assertEquals(1L, results.total, "Check results.total");
+		assertThat(results.records).as("Check results.records").hasSize(1);
+
+		REGISTRATION = results.records.get(0);
+	}
+
+	@Test
+	public void z_00_start_remove()
+	{
+		var response = registrations(REGISTRATION.key).delete();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+	}
+
+	@Test
+	public void z_00_start_remove_search()
+	{
+		var response = registrations("search").post(Entity.json(new RegistrationFilter()));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var results = response.readEntity(TYPE_QUERY_RESULTS_);
+		Assertions.assertNotNull(results, "Exists");
+		Assertions.assertNull(results.records, "Check results.records");
+		Assertions.assertEquals(0L, results.total, "Check results.total");
+	}
+
+	@Test
+	public void z_10()
+	{
+		// Non-admin tests
+		sessionDao.clear();
+	}
+
+	@Test
+	public void z_10_register()
 	{
 		var response = request("start").post(Entity.json(new StartRequest("888-555-2000", false, true)));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status: start");
@@ -399,13 +418,13 @@ public class PeopleResourceTest
 	}
 
 	@Test
-	public void z_01_authenticate_fail()
+	public void z_11_authenticate_fail()
 	{
 		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, request("auth").post(Entity.json(new AuthRequest("888-555-2001"))).getStatus());
 	}
 
 	@Test
-	public void z_01_authenticate_success()
+	public void z_11_authenticate_success()
 	{
 		var response = request("auth").post(Entity.json(new AuthRequest("888-555-2000")));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());

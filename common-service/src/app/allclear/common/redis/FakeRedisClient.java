@@ -426,9 +426,7 @@ public class FakeRedisClient extends RedisClient
 			@Override public Map<String, String> hgetAll(final String key) { return me.hash(key); }
 			@Override public Long hset(final String key, final Map<String, String> values) { me.hash(key, values); return 1L; }
 			@Override public ScanResult<String> scan(final String cursor, final ScanParams params) {
-				var keys = me.map.keySet();
-				if (keys.isEmpty()) keys = me.maps.keySet();
-
+				var keys = me.keySet();
 				var m = new HashMap<byte[], String>(2);
 				var l = new ArrayList<>(params.getParams());
 				for (int i = 0; i < l.size(); i+= 2)

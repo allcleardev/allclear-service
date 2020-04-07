@@ -161,6 +161,11 @@ public class People implements Serializable
 	public List<Symptoms> symptoms;
 	public void setSymptoms(final List<Symptoms> newValues) { symptoms = newValues; }
 
+	@OneToMany(cascade={CascadeType.REMOVE}, fetch=FetchType.LAZY, mappedBy="person")
+	public List<Tests> getTests() { return tests; }
+	public List<Tests> tests;
+	public void setTests(final List<Tests> newValues) { tests = newValues; }
+
 	public People() {}
 
 	public People(final String id,

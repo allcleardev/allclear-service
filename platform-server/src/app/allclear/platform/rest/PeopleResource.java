@@ -58,6 +58,9 @@ public class PeopleResource
 	public PeopleValue get(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@PathParam("id") final String id) throws ObjectNotFoundException
 	{
+		var o = sessionDao.current();	// Only admins can see other application users.
+		if (o.person()) return o.person;
+
 		return dao.getByIdWithException(id);
 	}
 
@@ -67,6 +70,9 @@ public class PeopleResource
 	public List<PeopleValue> find(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@QueryParam("name") @ApiParam(name="name", value="Value for the wildcard search") final String name)
 	{
+		var o = sessionDao.current();	// Only admins can see other application users.
+		if (o.person()) return List.of(o.person);
+
 		return dao.getActiveByIdOrName(name);
 	}
 
@@ -76,6 +82,8 @@ public class PeopleResource
 	public PeopleValue add(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		final PeopleValue value) throws ValidationException
 	{
+		sessionDao.checkAdmin();	// Only admins can add application users.
+
 		return dao.add(value);
 	}
 
@@ -129,6 +137,9 @@ public class PeopleResource
 	public PeopleValue set(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		final PeopleValue value) throws ValidationException
 	{
+		var o = sessionDao.current();
+		if (!o.admin()) value.id = o.person.id;	// Non-admins can only update themselves.
+
 		return dao.update(value);
 	}
 
@@ -146,11 +157,24 @@ public class PeopleResource
 	}
 
 	@DELETE
+	@Timed @UnitOfWork
+	@ApiOperation(value="remove", notes="Removes/deactivates the current user.")
+	public Response remove(@HeaderParam(Headers.HEADER_SESSION) final String sessionId) throws ValidationException
+	{
+		dao.remove(sessionDao.checkPerson().id);
+		sessionDao.remove();
+
+		return Response.ok().build();
+	}
+
+	@DELETE
 	@Path("/{id}") @Timed @UnitOfWork
 	@ApiOperation(value="remove", notes="Removes/deactivates a single People by its primary key.")
 	public OperationResponse remove(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@PathParam("id") final String id) throws ValidationException
 	{
+		sessionDao.checkAdmin();	// Only admins can delete application users.
+
 		return new OperationResponse(dao.remove(id));
 	}
 
@@ -160,6 +184,8 @@ public class PeopleResource
 	public QueryResults<PeopleValue, PeopleFilter> search(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		final PeopleFilter filter) throws ValidationException
 	{
+		sessionDao.checkAdmin();	// Only admins can search on application users.
+
 		return dao.search(filter);
 	}
 }
