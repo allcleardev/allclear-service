@@ -268,7 +268,7 @@ DatePicker.parseInputDate = function(v)
 /** Need to convert the format YYYY-MM-DD to a JavaScript Date object. */
 DatePicker.parseDbDate = function(v)
 {
-	var v = new Date(v);
+	var v = new Date(v.replace('+0000', 'Z'));
 	v.setHours(0, 0, 0, 0);
 
 	return v;
