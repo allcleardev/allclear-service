@@ -1,15 +1,19 @@
 package app.allclear.platform.dao;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.*;
 
 import java.util.Date;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import app.allclear.common.errors.NotAuthenticatedException;
-import app.allclear.common.errors.ValidationException;
+import app.allclear.common.errors.*;
 import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.model.StartRequest;
@@ -156,6 +160,81 @@ public class SessionDAOTest
 
 		dao.auth("888-555-0011", token);
 		Assertions.assertFalse(redis.containsKey(SessionDAO.authKey("888-555-0011", token)), "Check redis: after");
+	}
+
+	public static Stream<Arguments> checkAdmin()
+	{
+		return Stream.of(
+			arguments(ADMIN, true),
+			arguments(PERSON, false),
+			arguments(PERSON_1, false),
+			arguments(START, false),
+			arguments(START_1, false),
+			arguments(SUPER, true));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void checkAdmin(final SessionValue value, final boolean success)
+	{
+		dao.current(value);
+		if (success)
+			Assertions.assertNotNull(dao.checkAdmin());
+		else
+			Assertions.assertThrows(NotAuthorizedException.class, () -> dao.checkAdmin());
+	}
+
+	public static Stream<Arguments> checkPerson()
+	{
+		return Stream.of(
+			arguments(ADMIN, false),
+			arguments(PERSON, true),
+			arguments(PERSON_1, true),
+			arguments(START, false),
+			arguments(START_1, false),
+			arguments(SUPER, false));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void checkPerson(final SessionValue value, final boolean success)
+	{
+		dao.current(value);
+		if (success)
+			Assertions.assertNotNull(dao.checkPerson());
+		else
+			Assertions.assertThrows(NotAuthorizedException.class, () -> dao.checkPerson());
+	}
+
+	public static Stream<Arguments> checkSuper()
+	{
+		return Stream.of(
+			arguments(ADMIN, false),
+			arguments(PERSON, false),
+			arguments(PERSON_1, false),
+			arguments(START, false),
+			arguments(START_1, false),
+			arguments(SUPER, true));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void checkSuper(final SessionValue value, final boolean success)
+	{
+		dao.current(value);
+		if (success)
+			Assertions.assertNotNull(dao.checkAdmin());
+		else
+			Assertions.assertThrows(NotAuthorizedException.class, () -> dao.checkSuper());
+	}
+
+	@Test
+	public void clear()
+	{
+		Assertions.assertNotNull(dao.current());
+
+		dao.clear();
+		Assertions.assertNull(dao.current());
 	}
 
 	@Test

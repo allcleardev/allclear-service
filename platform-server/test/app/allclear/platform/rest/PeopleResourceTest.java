@@ -69,9 +69,11 @@ public class PeopleResourceTest
 	private static RegistrationValue REGISTRATION;
 	private static SessionValue ADMIN;
 	private static SessionValue SESSION;
+	private static SessionValue SESSION_1;
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
 		.addResource(new AuthenticationExceptionMapper())
+		.addResource(new AuthorizationExceptionMapper())
 		.addResource(new NotFoundExceptionMapper())
 		.addResource(new ValidationExceptionMapper())
 		.addResource(new PeopleResource(dao, registrationDao, sessionDao))
@@ -120,6 +122,18 @@ public class PeopleResourceTest
 		assertThat(value.createdAt).as("Check createdAt").isCloseTo(new Date(), 500L);
 		assertThat(value.updatedAt).as("Check updatedAt").isEqualTo(value.createdAt);
 		check(VALUE.withId(value.id).withCreatedAt(value.createdAt).withUpdatedAt(value.updatedAt), value);
+
+		SESSION = sessionDao.add(VALUE, false);
+	}
+
+	@Test
+	public void add_as_person()
+	{
+		sessionDao.current(SESSION);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request().post(Entity.json(new PeopleValue("next", "888-next-one", true))).getStatus());
+
+		sessionDao.current(ADMIN);
 	}
 
 	@Test
@@ -192,6 +206,16 @@ public class PeopleResourceTest
 		Assertions.assertEquals(value.email, "min@allclear.app", "Check email");
 		assertThat(value.updatedAt).as("Check updatedAt").isAfter(value.createdAt);
 		check(VALUE, value);
+	}
+
+	@Test
+	public void remove_as_person()
+	{
+		sessionDao.current(SESSION);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request(VALUE.id).delete().getStatus());
+
+		sessionDao.current(ADMIN);
 	}
 
 	public static Stream<Arguments> search()
@@ -293,6 +317,16 @@ public class PeopleResourceTest
 		}
 	}
 
+	@Test
+	public void search_as_person()
+	{
+		sessionDao.current(SESSION);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request("search").post(Entity.json(new PeopleFilter())).getStatus());
+
+		sessionDao.current(ADMIN);
+	}
+
 	/** Test removal after the search. */
 	@Test
 	public void testRemove()
@@ -377,14 +411,14 @@ public class PeopleResourceTest
 	}
 
 	@Test
-	public void z_10()
+	public void z_05()
 	{
 		// Non-admin tests
 		sessionDao.clear();
 	}
 
 	@Test
-	public void z_10_register()
+	public void z_05_register()
 	{
 		var response = request("start").post(Entity.json(new StartRequest("888-555-2000", false, true)));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status: start");
@@ -407,6 +441,8 @@ public class PeopleResourceTest
 		Assertions.assertNotNull(registered, "Exists: registered");
 		Assertions.assertNull(registered.registration, "Exists: registered.registration");
 		Assertions.assertNotNull(registered.person, "Exists: registered.person");
+		Assertions.assertNotNull(registered.person.id, "Check registered.person.id");
+		assertThat(registered.person.name).as("Check registered.person.name").isNotNull().isEqualTo(VALUE.name);
 		Assertions.assertEquals("+18885552000", registered.person.phone, "Check registered.person.phone");
 		Assertions.assertNotEquals(VALUE.phone, registered.person.phone, "Phone fixed");
 		Assertions.assertTrue(registered.person.active, "Check registered.person.active");
@@ -415,16 +451,18 @@ public class PeopleResourceTest
 		Assertions.assertNull(registered.person.emailVerifiedAt, "Check registered.person.emailVerifiedAt");
 		assertThat(registered.person.createdAt).as("Check registered.person.createdAt").isCloseTo(now, 200L);
 		assertThat(registered.person.updatedAt).as("Check registered.person.updatedAt").isCloseTo(now, 200L);
+
+		VALUE.id = registered.person.id;
 	}
 
 	@Test
-	public void z_11_authenticate_fail()
+	public void z_06_authenticate_fail()
 	{
 		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, request("auth").post(Entity.json(new AuthRequest("888-555-2001"))).getStatus());
 	}
 
 	@Test
-	public void z_11_authenticate_success()
+	public void z_06_authenticate_success()
 	{
 		var response = request("auth").post(Entity.json(new AuthRequest("888-555-2000")));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());
@@ -437,6 +475,67 @@ public class PeopleResourceTest
 		Assertions.assertNotNull(session.person, "Exists: session.person");
 		Assertions.assertEquals("+18885552000", session.person.phone, "Check session.person.phone");
 		Assertions.assertNotEquals(SESSION.id, session.id, "New session");
+	}
+
+	@Test
+	public void z_07_add()
+	{
+		sessionDao.current(SESSION_1 = sessionDao.add(dao.add(new PeopleValue("second", "+18885552001", true)), false));
+	}
+
+	@Test
+	public void z_07_find()
+	{
+		assertThat(request(target().queryParam("name", VALUE.name)).get(TYPE_LIST_VALUE)).containsExactly(SESSION_1.person);	// Ignores the search parameter and returns only the curreht application user.
+	}
+
+	@Test
+	public void z_07_get()
+	{
+		Assertions.assertEquals(SESSION_1.person, request(VALUE.id).get(PeopleValue.class));
+	}
+
+	@Test
+	public void z_07_modify()
+	{
+		Assertions.assertEquals(HTTP_STATUS_OK,
+			request().put(Entity.json(new PeopleValue("third", "+18885552002", true).withId(VALUE.id))).getStatus());
+	}
+
+	@Test
+	public void z_07_modify_check()
+	{
+		var now = new Date();
+		var session = sessionDao.find(SESSION_1.id);
+		Assertions.assertNotNull(session, "session Exists");
+		Assertions.assertNotNull(session.person, "Check session.person");
+		Assertions.assertEquals(SESSION_1.person.id, session.person.id, "Check session.person.id");
+		Assertions.assertEquals("third", session.person.name, "Check session.person.name");
+		Assertions.assertEquals("+18885552002", session.person.phone, "Check session.person.phone");
+		assertThat(session.person.updatedAt).as("Check session.person.updatedAt").isCloseTo(now, 1000L).isAfter(SESSION_1.person.updatedAt);
+
+		var value = dao.getById(SESSION_1.person.id);
+		Assertions.assertNotNull(value, "value Exists");
+		Assertions.assertEquals(SESSION_1.person.id, value.id, "Check value.id");
+		Assertions.assertEquals("third", value.name, "Check value.name");
+		Assertions.assertEquals("+18885552002", value.phone, "Check value.phone");
+		assertThat(value.updatedAt).as("Check value.updatedAt").isCloseTo(now, 1000L).isInSameSecondAs(session.person.updatedAt);
+	}
+
+	@Test
+	public void z_07_remove()
+	{
+		Assertions.assertTrue(sessionDao.exists(SESSION_1.id), "Check exists");
+		Assertions.assertNotNull(dao.getById(SESSION_1.person.id), "Check getById");
+
+		Assertions.assertEquals(HTTP_STATUS_OK, request().delete().getStatus());
+	}
+
+	@Test
+	public void z_07_remove_check()
+	{
+		Assertions.assertNull(dao.getById(SESSION_1.person.id), "Check getById");
+		Assertions.assertFalse(sessionDao.exists(SESSION_1.id), "Check exists");
 	}
 
 	private String code()

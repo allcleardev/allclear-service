@@ -219,6 +219,26 @@ public class SessionDAO
 		current.remove();
 	}
 
+	/** Confirms existence of the specified session ID.
+	 * 
+	 * @param id
+	 * @return never NULL
+	 */
+	public boolean exists(final String id) { return redis.containsKey(key(id)); }
+
+	/** Retrieves a session without extending its expiration.
+	 * 
+	 * @param id
+	 * @return NULL if not found.
+	 */
+	public SessionValue find(final String id)
+	{
+		var v = redis.get(key(id));
+
+		try { return (null != v) ? mapper.readValue(v, SessionValue.class) : null; }
+		catch (final IOException ex) { throw new RuntimeException(ex); }
+	}
+
 	/** Gets the current session.
 	 * 
 	 * @return never NULL
@@ -272,5 +292,29 @@ public class SessionDAO
 	public void remove(final String id)
 	{
 		redis.remove(key(id));
+	}
+
+	/** Updates a session - called when an application user updates their profile.
+	 * 
+	 * @param value
+	 * @param person
+	 * @return the new session object.
+	 */
+	public SessionValue update(final SessionValue value, final PeopleValue person)
+	{
+		var o = new SessionValue(value.id,
+			value.rememberMe,
+			value.duration,
+			null,
+			person,
+			null,
+			value.expiresAt,
+			value.lastAccessedAt,
+			value.createdAt);
+
+		try { redis.put(key(o.id), mapper.writeValueAsString(o), o.seconds()); }
+		catch (final IOException ex) { throw new RuntimeException(ex); }
+
+		return o;
 	}
 }
