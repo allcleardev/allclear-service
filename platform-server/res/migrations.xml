@@ -265,4 +265,34 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.0.61_mysql" author="smalleyd" dbms="mysql">
+		<sql>
+			ALTER TABLE facility MODIFY COLUMN latitude DECIMAL(12,8) NOT NULL COMMENT 'Represents the GEO coordinates of the facility''s location - latitude property.';
+			ALTER TABLE facility MODIFY COLUMN longitude DECIMAL(12,8) NOT NULL COMMENT 'Represents the GEO coordinates of the facility''s location - longitude property.';
+			ALTER TABLE people MODIFY COLUMN latitude DECIMAL(12,8) DEFAULT NULL COMMENT 'Represents the GEO coordinates of the user''s primary location - latitude property.';
+			ALTER TABLE people MODIFY COLUMN longitude DECIMAL(12,8) DEFAULT NULL COMMENT 'Represents the GEO coordinates of the user''s primary location - longitude property.';
+		</sql>
+
+		<rollback>
+			<sql>
+				ALTER TABLE facility MODIFY COLUMN latitude DECIMAL(12,5) NOT NULL COMMENT 'Represents the GEO coordinates of the facility''s location - latitude property.';
+				ALTER TABLE facility MODIFY COLUMN longitude DECIMAL(12,5) NOT NULL COMMENT 'Represents the GEO coordinates of the facility''s location - longitude property.';
+				ALTER TABLE people MODIFY COLUMN latitude DECIMAL(12,5) DEFAULT NULL COMMENT 'Represents the GEO coordinates of the user''s primary location - latitude property.';
+				ALTER TABLE people MODIFY COLUMN longitude DECIMAL(12,5) DEFAULT NULL COMMENT 'Represents the GEO coordinates of the user''s primary location - longitude property.';
+			</sql>
+		</rollback>
+	</changeSet>
+	<changeSet id="v1.0.61_h2" author="smalleyd" dbms="h2">
+		<modifyDataType tableName="facility" columnName="latitude" newDataType="DECIMAL(12,8)" />
+		<modifyDataType tableName="facility" columnName="longitude" newDataType="DECIMAL(12,8)" />
+		<modifyDataType tableName="people" columnName="latitude" newDataType="DECIMAL(12,8)" />
+		<modifyDataType tableName="people" columnName="longitude" newDataType="DECIMAL(12,8)" />
+		<rollback>
+			<modifyDataType tableName="facility" columnName="latitude" newDataType="DECIMAL(12,5)" />
+			<modifyDataType tableName="facility" columnName="longitude" newDataType="DECIMAL(12,5)" />
+			<modifyDataType tableName="people" columnName="latitude" newDataType="DECIMAL(12,5)" />
+			<modifyDataType tableName="people" columnName="longitude" newDataType="DECIMAL(12,5)" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

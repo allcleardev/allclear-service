@@ -469,8 +469,8 @@ public class FacilityResourceTest
 		var v = get(2L).readEntity(FacilityValue.class);
 		Assertions.assertEquals("Hoboken", v.city, "Check city");
 		Assertions.assertEquals("New Jersey", v.state, "Check state");
-		Assertions.assertEquals(bg("40.74879"), v.latitude, "Check latitude");
-		Assertions.assertEquals(bg("-74.03154"), v.longitude, "Check longitude");
+		Assertions.assertEquals(bg("40.74878550"), v.latitude, "Check latitude");
+		Assertions.assertEquals(bg("-74.03153850"), v.longitude, "Check longitude");
 
 		count(new FacilityFilter().withCity("Hoboken"), 1L);
 		count(new FacilityFilter().withState("New Jersey"), 1L);

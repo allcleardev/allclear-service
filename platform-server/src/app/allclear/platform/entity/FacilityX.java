@@ -31,8 +31,8 @@ public class FacilityX implements Serializable
 	@Column(name="address", columnDefinition="VARCHAR(128)", nullable=false) public String address;
 	@Column(name="city", columnDefinition="VARCHAR(128)", nullable=false) public String city;
 	@Column(name="state", columnDefinition="VARCHAR(128)", nullable=false) public String state;
-	@Column(name="latitude", columnDefinition="DECIMAL(12, 5)", nullable=false) public BigDecimal latitude;
-	@Column(name="longitude", columnDefinition="DECIMAL(12, 5)", nullable=false) public BigDecimal longitude;
+	@Column(name="latitude", columnDefinition="DECIMAL(12,8)", nullable=false) public BigDecimal latitude;
+	@Column(name="longitude", columnDefinition="DECIMAL(12,8)", nullable=false) public BigDecimal longitude;
 	@Column(name="phone", columnDefinition="VARCHAR(32)", nullable=true) public String phone;
 	@Column(name="appointment_phone", columnDefinition="VARCHAR(32)", nullable=true) public String appointmentPhone;
 	@Column(name="email", columnDefinition="VARCHAR(128)", nullable=true) public String email;

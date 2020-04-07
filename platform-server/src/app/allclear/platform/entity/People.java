@@ -101,12 +101,12 @@ public class People implements Serializable
 	public String healthWorkerStatusId;
 	public void setHealthWorkerStatusId(final String newValue) { healthWorkerStatusId = newValue; }
 
-	@Column(name="latitude", columnDefinition="DECIMAL(12, 5)", nullable=true)
+	@Column(name="latitude", columnDefinition="DECIMAL(12,8)", nullable=true)
 	public BigDecimal getLatitude() { return latitude; }
 	public BigDecimal latitude;
 	public void setLatitude(final BigDecimal newValue) { latitude = newValue; }
 
-	@Column(name="longitude", columnDefinition="DECIMAL(12, 5)", nullable=true)
+	@Column(name="longitude", columnDefinition="DECIMAL(12,8)", nullable=true)
 	public BigDecimal getLongitude() { return longitude; }
 	public BigDecimal longitude;
 	public void setLongitude(final BigDecimal newValue) { longitude = newValue; }

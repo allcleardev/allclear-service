@@ -62,12 +62,12 @@ public class Facility implements Serializable
 	public String state;
 	public void setState(final String newValue) { state = newValue; }
 
-	@Column(name="latitude", columnDefinition="DECIMAL(12, 5)", nullable=false)
+	@Column(name="latitude", columnDefinition="DECIMAL(12,8)", nullable=false)
 	public BigDecimal getLatitude() { return latitude; }
 	public BigDecimal latitude;
 	public void setLatitude(final BigDecimal newValue) { latitude = newValue; }
 
-	@Column(name="longitude", columnDefinition="DECIMAL(12, 5)", nullable=false)
+	@Column(name="longitude", columnDefinition="DECIMAL(12,8)", nullable=false)
 	public BigDecimal getLongitude() { return longitude; }
 	public BigDecimal longitude;
 	public void setLongitude(final BigDecimal newValue) { longitude = newValue; }
