@@ -4,19 +4,26 @@ import static java.net.URLEncoder.encode;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+
+import redis.clients.jedis.Jedis;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.*;
 import app.allclear.common.jackson.JacksonUtils;
 import app.allclear.common.redis.RedisClient;
 import app.allclear.platform.Config;
+import app.allclear.platform.filter.SessionFilter;
 import app.allclear.platform.model.StartRequest;
 import app.allclear.platform.value.*;
 import app.allclear.twilio.client.TwilioClient;
 import app.allclear.twilio.model.SMSRequest;
+import redis.clients.jedis.ScanParams;
 
 /** Data access object that manages user sessions.
  * 
@@ -29,6 +36,7 @@ import app.allclear.twilio.model.SMSRequest;
 public class SessionDAO
 {
 	private static final String ID = "session:%s";
+	private static final String MATCH = "session:*";
 	private static final int AUTH_DURATION = 5 * 60;	// Five minutes
 	private static final String AUTH_KEY = "authentication:%s:%s";
 	private final ObjectMapper mapper = JacksonUtils.createMapper();
@@ -231,9 +239,10 @@ public class SessionDAO
 	 * @param id
 	 * @return NULL if not found.
 	 */
-	public SessionValue find(final String id)
+	public SessionValue find(final String id) { return redis.operation(j -> findByKey(j, key(id))); }
+	private SessionValue findByKey(final Jedis jedis, final String key)
 	{
-		var v = redis.get(key(id));
+		var v = jedis.get(key);
 
 		try { return (null != v) ? mapper.readValue(v, SessionValue.class) : null; }
 		catch (final IOException ex) { throw new RuntimeException(ex); }
@@ -316,5 +325,29 @@ public class SessionDAO
 		catch (final IOException ex) { throw new RuntimeException(ex); }
 
 		return o;
+	}
+
+	/** Searches the user sessions.
+	 * 
+	 * @param filter
+	 * @return never NULL.
+	 */
+	public QueryResults<SessionValue, SessionFilter> search(final SessionFilter filter)
+	{
+		filter.clean();
+		return redis.operation(j -> {
+			var cursor = (filter.page() - 1) + "";
+			var match = (null != filter.id) ? key(filter.id + "*") : MATCH;
+			var o = j.scan(cursor, new ScanParams().count(filter.pageSize(100)).match(match));
+
+			if (CollectionUtils.isEmpty(o.getResult())) return new QueryResults<SessionValue, SessionFilter>(0L, filter);
+
+			var v = o.getResult().stream().map(i -> findByKey(j, i)).collect(Collectors.toList());
+			var r = new QueryResults<SessionValue, SessionFilter>(v, filter);
+			r.page = Integer.parseInt(o.getCursor());
+			r.pages++;	// Always add one.
+
+			return r;
+		});
 	}
 }

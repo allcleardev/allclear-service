@@ -743,6 +743,11 @@ Template.prototype.toPercent = function(value)
 	return this.toNumber(this.round(value * 100, 2), 2);
 }
 
+Template.prototype.fromMilliseconds = function(value)
+{
+	return (undefined != value) ? this.fromSeconds(value / 1000) : '';
+}
+
 Template.prototype.fromSeconds = function(value)
 {
 	if (undefined == value) return '';

@@ -16,6 +16,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import app.allclear.common.errors.*;
 import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.platform.ConfigTest;
+import app.allclear.platform.filter.SessionFilter;
 import app.allclear.platform.model.StartRequest;
 import app.allclear.platform.value.*;
 import app.allclear.twilio.client.TwilioClient;
@@ -57,7 +58,8 @@ public class SessionDAOTest
 	@Test
 	public void add_admin()
 	{
-		Assertions.assertNotNull(ADMIN = dao.add(new AdminValue("tim", false), false));
+		var now = new Date();
+		Assertions.assertNotNull(ADMIN = dao.add(new AdminValue("tim", false).withCreatedAt(now).withUpdatedAt(now), false));
 		Assertions.assertNotNull(ADMIN, "Exists");
 		Assertions.assertNotNull(ADMIN.admin, "Check admin");
 		Assertions.assertEquals("tim", ADMIN.admin.id, "Check admin.id");
@@ -72,7 +74,8 @@ public class SessionDAOTest
 	@Test
 	public void add_person()
 	{
-		Assertions.assertNotNull(PERSON = dao.add(new PeopleValue("kim", "888-555-0000", true), false));
+		var now = new Date();
+		Assertions.assertNotNull(PERSON = dao.add(new PeopleValue("kim", "888-555-0000", true).withCreatedAt(now).withUpdatedAt(now), false));
 		Assertions.assertNotNull(PERSON, "Exists");
 		Assertions.assertNull(PERSON.admin, "Check admin");
 		Assertions.assertNull(PERSON.registration, "Check registration");
@@ -85,7 +88,8 @@ public class SessionDAOTest
 	@Test
 	public void add_person_rememberMe()
 	{
-		Assertions.assertNotNull(PERSON_1 = dao.add(new PeopleValue("rick", "888-555-0001", true), true));
+		var now = new Date();
+		Assertions.assertNotNull(PERSON_1 = dao.add(new PeopleValue("rick", "888-555-0001", true).withCreatedAt(now).withUpdatedAt(now), true));
 		Assertions.assertNotNull(PERSON_1, "Exists");
 		Assertions.assertNull(PERSON_1.admin, "Check admin");
 		Assertions.assertNull(PERSON_1.registration, "Check registration");
@@ -128,7 +132,8 @@ public class SessionDAOTest
 	@Test
 	public void add_super()
 	{
-		Assertions.assertNotNull(SUPER = dao.add(new AdminValue("naomi", true), true));
+		var now = new Date();
+		Assertions.assertNotNull(SUPER = dao.add(new AdminValue("naomi", true).withCreatedAt(now).withUpdatedAt(now), true));
 		Assertions.assertNotNull(SUPER, "Exists");
 		Assertions.assertNotNull(SUPER.admin, "Check admin");
 		Assertions.assertEquals("naomi", SUPER.admin.id, "Check admin.id");
@@ -270,6 +275,36 @@ public class SessionDAOTest
 	}
 
 	@Test
+	public void find()	// MUST do search test after ADD but before the STARTs are promoted. DLS on 4/7/2020.
+	{
+		var results = dao.search(new SessionFilter());
+		Assertions.assertEquals(6L, results.total, "Check total");
+		assertThat(results.records).as("Check records").hasSize(6).containsOnly(ADMIN, PERSON, PERSON_1, START, START_1, SUPER);
+	}
+
+	@Test
+	public void find_invalid()
+	{
+		var results = dao.search(new SessionFilter().withId("invalid"));
+		Assertions.assertEquals(0L, results.total, "Check total");
+		Assertions.assertNull(results.records, "Check records");
+	}
+
+	public static Stream<SessionValue> find_with_filter()
+	{
+		return Stream.of(ADMIN, PERSON, PERSON_1, START, START_1, SUPER);
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void find_with_filter(final SessionValue value)
+	{
+		var results = dao.search(new SessionFilter().withId(value.id));
+		Assertions.assertEquals(1L, results.total, "Check total");
+		assertThat(results.records).as("Check records").hasSize(1).containsExactly(value);
+	}
+
+	@Test
 	public void get_invalid()
 	{
 		assertThat(Assertions.assertThrows(NotAuthenticatedException.class, () -> dao.get("invalid")))
@@ -392,7 +427,7 @@ public class SessionDAOTest
 	}
 
 	@Test
-	public void remove_admin()
+	public void testRemove_admin()
 	{
 		dao.remove(ADMIN.id);
 
@@ -400,7 +435,7 @@ public class SessionDAOTest
 	}
 
 	@Test
-	public void remove_person()
+	public void testRemove_person()
 	{
 		dao.remove(PERSON.id);
 
@@ -408,7 +443,7 @@ public class SessionDAOTest
 	}
 
 	@Test
-	public void remove_person_1()
+	public void testRemove_person_1()
 	{
 		dao.remove(PERSON_1.id);
 
@@ -416,7 +451,7 @@ public class SessionDAOTest
 	}
 
 	@Test
-	public void remove_start()
+	public void testRemove_start()
 	{
 		dao.remove(START.id);
 
@@ -424,7 +459,7 @@ public class SessionDAOTest
 	}
 
 	@Test
-	public void remove_start1()
+	public void testRemove_start1()
 	{
 		Assertions.assertNotNull(dao.get(START_1.id));
 
@@ -434,7 +469,7 @@ public class SessionDAOTest
 	}
 
 	@Test
-	public void remove_super()
+	public void testRemove_super()
 	{
 		dao.remove(SUPER.id);
 

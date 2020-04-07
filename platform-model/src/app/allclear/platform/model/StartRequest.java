@@ -1,6 +1,7 @@
 package app.allclear.platform.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -31,5 +32,25 @@ public class StartRequest implements Serializable
 		this.phone = TwilioUtils.normalize(StringUtils.trimToNull(phone));
 		this.beenTested = Boolean.TRUE.equals(beenTested);
 		this.haveSymptoms = Boolean.TRUE.equals(haveSymptoms);
+	}
+
+	@Override
+	public boolean equals(final Object o)
+	{
+		if (!(o instanceof StartRequest)) return false;
+
+		var v = (StartRequest) o;
+		return Objects.equals(phone, v.phone) &&
+			(beenTested == v.beenTested) &&
+			(haveSymptoms == v.haveSymptoms);
+	}
+
+	@Override
+	public String toString()
+	{
+		return new StringBuilder("{ phone: ").append(phone)
+			.append(", beenTested: ").append(beenTested)
+			.append(", haveSymptoms: ").append(haveSymptoms)
+			.append(" }").toString();
 	}
 }

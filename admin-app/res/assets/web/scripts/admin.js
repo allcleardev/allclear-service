@@ -312,6 +312,43 @@ var RegistrationsHandler = new ListTemplate({
 	}
 });
 
+var SessionsHandler = new ListTemplate({
+	NAME: 'session',
+	SINGULAR: 'Session',
+	PLURAL: 'Sessions',
+	RESOURCE: 'sessions',
+
+	CAN_ADD: false,
+	CAN_EDIT: false,
+	CAN_REMOVE: true,
+
+	openSession: (c, e) => {
+		var v = e.myRecord;
+		if (v.admin) AdminsHandler.EDITOR.doEdit(v.admin.id);
+		else if (v.person) PeopleHandler.EDITOR.doEdit(v.person.id);
+		else window.alert(v.registration);
+	},
+	toSessionType: (p, v) => (v.admin ? 'Admin' : ((v.person) ? 'Person' : 'Registration')),
+	toSessionName: (p, v) => (v.admin ? v.admin.id : ((v.person) ? v.person.name : v.registration.phone)),
+
+	COLUMNS: [ new TextColumn('id', 'ID'),
+	           new TextColumn('rememberMe', 'Remember Me?'),
+	           new TextColumn('duration', 'Duration', 'fromMilliseconds'),
+	           new TextColumn('admin', 'Type', 'toSessionType'),
+	           new TextColumn('name', 'Name', 'toSessionName', false, false, 'openSession'),
+	           new TextColumn('expiresAt', 'Exipres At', 'toDateTime'),
+	           new TextColumn('lastAccessedAt', 'Last Accessed At', 'toDateTime'),
+	           new TextColumn('updatedAt', 'Created At', 'toDateTime') ],
+	SEARCH: {
+		NAME: 'session',
+		SINGULAR: 'Session',
+		PLURAL: 'Sessions',
+		RESOURCE: 'sessions',
+
+		FIELDS: [ new EditField('id', 'ID', false, false, 128, 50) ]
+	}
+});
+
 var TestsHandler = new ListTemplate({
 	NAME: 'tests',
 	SINGULAR: 'Test',

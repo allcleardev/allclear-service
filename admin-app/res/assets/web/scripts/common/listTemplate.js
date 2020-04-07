@@ -332,7 +332,7 @@ ListTemplate.prototype.appendBody = function(criteria, table)
 			if (exclusions[c.id])
 				continue;
 
-			text = this[c.formatter](v = record[c.id]);
+			text = this[c.formatter](v = record[c.id], record);
 
 			// Should an anchor be created as the cell element.
 			var onSelect = undefined;

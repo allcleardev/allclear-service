@@ -70,6 +70,7 @@ public class PeopleResourceTest
 	private static SessionValue ADMIN;
 	private static SessionValue SESSION;
 	private static SessionValue SESSION_1;
+	private static Date LAST_UPDATED_AT = null;
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
 		.addResource(new AuthenticationExceptionMapper())
@@ -498,6 +499,7 @@ public class PeopleResourceTest
 	@Test
 	public void z_07_modify()
 	{
+		LAST_UPDATED_AT = new Date();
 		Assertions.assertEquals(HTTP_STATUS_OK,
 			request().put(Entity.json(new PeopleValue("third", "+18885552002", true).withId(VALUE.id))).getStatus());
 	}
@@ -505,21 +507,20 @@ public class PeopleResourceTest
 	@Test
 	public void z_07_modify_check()
 	{
-		var now = new Date();
 		var session = sessionDao.find(SESSION_1.id);
 		Assertions.assertNotNull(session, "session Exists");
 		Assertions.assertNotNull(session.person, "Check session.person");
 		Assertions.assertEquals(SESSION_1.person.id, session.person.id, "Check session.person.id");
 		Assertions.assertEquals("third", session.person.name, "Check session.person.name");
 		Assertions.assertEquals("+18885552002", session.person.phone, "Check session.person.phone");
-		assertThat(session.person.updatedAt).as("Check session.person.updatedAt").isCloseTo(now, 1000L).isAfter(SESSION_1.person.updatedAt);
+		assertThat(session.person.updatedAt).as("Check session.person.updatedAt").isCloseTo(LAST_UPDATED_AT, 1000L).isAfterOrEqualsTo(session.person.createdAt);
 
 		var value = dao.getById(SESSION_1.person.id);
 		Assertions.assertNotNull(value, "value Exists");
 		Assertions.assertEquals(SESSION_1.person.id, value.id, "Check value.id");
 		Assertions.assertEquals("third", value.name, "Check value.name");
 		Assertions.assertEquals("+18885552002", value.phone, "Check value.phone");
-		assertThat(value.updatedAt).as("Check value.updatedAt").isCloseTo(now, 1000L).isInSameSecondAs(session.person.updatedAt);
+		assertThat(value.updatedAt).as("Check value.updatedAt").isCloseTo(LAST_UPDATED_AT, 1000L).isAfterOrEqualsTo(session.person.createdAt);
 	}
 
 	@Test

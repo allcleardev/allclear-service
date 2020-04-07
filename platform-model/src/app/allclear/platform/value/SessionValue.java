@@ -1,8 +1,9 @@
 package app.allclear.platform.value;
 
 import java.io.Serializable;
-import java.util.Date;
-import java.util.UUID;
+import java.util.*;
+
+import org.apache.commons.lang3.time.DateUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -39,6 +40,7 @@ public class SessionValue implements Serializable
 	public boolean supers() { return admin() && admin.supers; }
 	public boolean person() { return (null != person); }
 	public boolean registration() { return (null != registration); }
+	public String name() { return (admin()) ? admin.id : (person() ? person.name : registration.phone); }
 
 	// Mutators
 	public SessionValue accessed()
@@ -134,5 +136,37 @@ public class SessionValue implements Serializable
 		this.expiresAt = expiresAt;
 		this.lastAccessedAt = lastAccessedAt;
 		this.createdAt = createdAt;
+	}
+
+	@Override
+	public boolean equals(final Object o)
+	{
+		if (!(o instanceof SessionValue)) return false;
+
+		var v = (SessionValue) o;
+		return Objects.equals(id, v.id) &&
+			(rememberMe == v.rememberMe) &&
+			(duration == v.duration) && 
+			Objects.equals(admin, v.admin) &&
+			Objects.equals(person, v.person) &&
+			Objects.equals(registration, v.registration) &&
+			DateUtils.truncatedEquals(expiresAt, v.expiresAt, Calendar.MINUTE) &&
+			DateUtils.truncatedEquals(lastAccessedAt, v.lastAccessedAt, Calendar.MINUTE) &&
+			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.MINUTE);
+	}
+
+	@Override
+	public String toString()
+	{
+		return new StringBuilder("{ id: ").append(id)
+			.append(", rememberMe: ").append(rememberMe)
+			.append(", duration: ").append(duration)
+			.append(", admin: ").append(admin)
+			.append(", person: ").append(person)
+			.append(", registration: ").append(registration)
+			.append(", expiresAt: ").append(expiresAt)
+			.append(", lastAccessedAt: ").append(lastAccessedAt)
+			.append(", createdAt: ").append(createdAt)
+			.append(" }").toString();
 	}
 }
