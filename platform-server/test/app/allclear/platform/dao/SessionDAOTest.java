@@ -4,6 +4,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 import java.util.Date;
+import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.*;
 
@@ -28,6 +29,7 @@ import app.allclear.twilio.model.SMSResponse;
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class SessionDAOTest
 {
+	public static final Pattern PATTERN_TOKEN = Pattern.compile("[A-Z0-9]{6}");
 	public static final String MESSAGE = "%s\nUse this code for AllClear verification or click https://app-test.allclear.app/auth?phone=%s&token=%s";
 
 	private static final FakeRedisClient redis = new FakeRedisClient();
@@ -147,7 +149,7 @@ public class SessionDAOTest
 		Assertions.assertNull(LAST_RESPONSE, "Check lastResponse: before");
 
 		var token = dao.auth("888-555-0011");
-		Assertions.assertNotNull(token, "Check token");
+		assertThat(token).as("Check token").isNotNull().hasSize(6).matches(PATTERN_TOKEN);
 		Assertions.assertTrue(redis.containsKey(SessionDAO.authKey("888-555-0011", token)), "Check redis: before");
 		Assertions.assertNotNull(LAST_RESPONSE, "Check lastResponse: after");
 		Assertions.assertEquals(String.format(MESSAGE, token, "888-555-0011", token), LAST_RESPONSE.body, "Check lastResponse.body");

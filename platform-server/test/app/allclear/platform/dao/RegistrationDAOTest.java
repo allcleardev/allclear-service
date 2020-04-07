@@ -40,7 +40,7 @@ import app.allclear.twilio.model.*;
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class RegistrationDAOTest
 {
-	public static final Pattern PATTERN_CODE = Pattern.compile("[A-Z0-9]{10}");
+	public static final Pattern PATTERN_CODE = Pattern.compile("[A-Z0-9]{6}");
 	public static final String MESSAGE = "%s\nUse this code for AllClear verification or click https://app-test.allclear.app/register?phone=%s&code=%s";
 
 	private static RegistrationDAO dao;
@@ -79,7 +79,7 @@ public class RegistrationDAOTest
 		final String expectedPhone, final boolean expectedBeenTested, final boolean expectedHaveSymptoms)
 	{
 		var code = dao.start(new StartRequest(phone, beenTested, haveSymptoms));
-		assertThat(code).hasSize(10).matches(PATTERN_CODE);
+		assertThat(code).as("Check code").isNotNull().hasSize(6).matches(PATTERN_CODE);
 		Assertions.assertNotNull(LAST_RESPONSE, "Check lastResponse");
 		Assertions.assertEquals(String.format(MESSAGE, code, encode(expectedPhone, UTF_8), code), LAST_RESPONSE.body, "Check lastResponse.body");
 		Assertions.assertEquals(1L, dao.search(new RegistrationFilter().withPhone(expectedPhone)).total, "Check search: before");
@@ -117,7 +117,7 @@ public class RegistrationDAOTest
 		Assertions.assertEquals(1L, dao.search(new RegistrationFilter(1, 100).withPhone("+18885551008")).total, "Check total: +18885551008");
 
 		var code = codes.get("+18885551008");
-		assertThat(code).as("Check code").hasSize(10);
+		assertThat(code).as("Check code").isNotNull().hasSize(6).matches(PATTERN_CODE);
 
 		Assertions.assertNotNull(dao.request("+18885551008", code), "Check correct phone number");
 		Assertions.assertNull(dao.request("+18885551000", code), "Check mismatched phone number");

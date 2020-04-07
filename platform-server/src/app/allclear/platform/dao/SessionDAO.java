@@ -33,6 +33,7 @@ public class SessionDAO
 	private static final int AUTH_DURATION = 5 * 60;	// Five minutes
 	private static final String AUTH_KEY = "authentication:%s:%s";
 	private final ObjectMapper mapper = JacksonUtils.createMapper();
+	public static final int TOKEN_LENGTH = RegistrationDAO.CODE_LENGTH;
 
 	public static String key(final String id) { return String.format(ID, id); }
 	public static String authKey(final String phone, final String token) { return String.format(AUTH_KEY, phone, token); }
@@ -102,7 +103,7 @@ public class SessionDAO
 	 */
 	public String auth(final String phone)
 	{
-		var token = RandomStringUtils.randomAlphanumeric(10).toUpperCase();
+		var token = RandomStringUtils.randomAlphanumeric(TOKEN_LENGTH).toUpperCase();
 
 		twilio.send(new SMSRequest(authFrom, String.format(authMessage, token, encode(phone, UTF_8), encode(token, UTF_8)), phone));
 		redis.put(authKey(phone, token), phone, AUTH_DURATION);

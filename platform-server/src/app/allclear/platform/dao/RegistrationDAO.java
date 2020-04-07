@@ -40,7 +40,7 @@ public class RegistrationDAO
 {
 	private static final String ID = "registration:%s:%s";
 	private static final String MATCH = "registration:*";
-	public static final int CODE_LENGTH = 10;
+	public static final int CODE_LENGTH = 6;
 	public static final int EXPIRATION = 10 * 60;	// Ten minutes
 	private static final ObjectMapper mapper = JacksonUtils.createMapper();
 	private static final TypeReference<Map<String, String>> TYPE_MAP = new TypeReference<Map<String, String>>() {};
