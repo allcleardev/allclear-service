@@ -338,7 +338,7 @@ var SessionsHandler = new ListTemplate({
 	           new TextColumn('name', 'Name', 'toSessionName', false, false, 'openSession'),
 	           new TextColumn('expiresAt', 'Exipres At', 'toDateTime'),
 	           new TextColumn('lastAccessedAt', 'Last Accessed At', 'toDateTime'),
-	           new TextColumn('updatedAt', 'Created At', 'toDateTime') ],
+	           new TextColumn('createdAt', 'Created At', 'toDateTime') ],
 	SEARCH: {
 		NAME: 'session',
 		SINGULAR: 'Session',
