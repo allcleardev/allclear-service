@@ -123,6 +123,7 @@ public class App extends Application<Config>
         jersey.register(new FacilityResource(new FacilityDAO(factory), sessionDao, map));
 		jersey.register(new PeopleResource(peopleDao, registrationDao, sessionDao));
 		jersey.register(new RegistrationResource(registrationDao));
+		jersey.register(new SessionResource(sessionDao));
 		jersey.register(new TestsResource(new TestsDAO(factory, sessionDao)));
 		jersey.register(new TypeResource());
 
