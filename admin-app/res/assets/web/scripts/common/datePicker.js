@@ -19,10 +19,7 @@ DatePicker.create = function(name, value, extra, callback)
 	// DO full UNDEFINED test since it could be ZERO.
 	if (undefined != value)
 	{
-		console.log(value, value.replace('+0000', 'Z'), new Date(value.replace('+0000', 'Z')));
 		value = value.replace('+0000', 'Z');
-		console.log(value);
-
 		h.value = value;
 		f.value = this.toInputDate(value);
 	}
