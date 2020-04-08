@@ -26,11 +26,12 @@ public class Symptom implements Serializable
 	public static final Symptom FEVER = new Symptom("fv", "Fever");
 	public static final Symptom MUSCLE_ACHE = new Symptom("ma", "Muscle ache");
 	public static final Symptom NAUSEA_VOMITING = new Symptom("nv", "Nausea and/or vomiting");
+	public static final Symptom NONE = new Symptom("no", "None");
 	public static final Symptom RUNNY_NOSE = new Symptom("rn", "Runny Nose/Nasal Congestion");
 	public static final Symptom SHORTNESS_OF_BREATH = new Symptom("sb", "Shortness of Breath");
 	public static final Symptom SORE_THROAT = new Symptom("st", "Sore Throat");
 
-	public static final List<Symptom> LIST = List.of(DIARRHEA, DRY_COUGH, FATIGUE, FEVER, MUSCLE_ACHE, NAUSEA_VOMITING, RUNNY_NOSE, SHORTNESS_OF_BREATH, SORE_THROAT);
+	public static final List<Symptom> LIST = List.of(FEVER, SHORTNESS_OF_BREATH, DRY_COUGH, FATIGUE, RUNNY_NOSE, SORE_THROAT, NAUSEA_VOMITING, MUSCLE_ACHE, DIARRHEA, NONE);
 	public static final Map<String, Symptom> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
 	public static Symptom get(final String id) { return VALUES.get(id); }
 	public static boolean exists(final String id) { return VALUES.containsKey(id); }

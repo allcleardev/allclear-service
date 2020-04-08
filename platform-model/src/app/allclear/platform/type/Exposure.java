@@ -20,12 +20,12 @@ public class Exposure implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	public static final Exposure CLOSE_CONTACT = new Exposure("cc", "Close contact");
-	public static final Exposure LIVE_WITH = new Exposure("lw", "Live with");
+	public static final Exposure CLOSE_CONTACT = new Exposure("cc", "Close contact with someone");
+	public static final Exposure LIVE_WITH = new Exposure("lw", "Live with someone");
 	public static final Exposure NO_EXPOSURE = new Exposure("ne", "No Exposure");
 	public static final Exposure UNSURE = new Exposure("us", "Unsure");
 
-	public static final List<Exposure> LIST = List.of(CLOSE_CONTACT, LIVE_WITH, NO_EXPOSURE, UNSURE);
+	public static final List<Exposure> LIST = List.of(LIVE_WITH, CLOSE_CONTACT, UNSURE, NO_EXPOSURE);
 	public static final Map<String, Exposure> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
 	public static Exposure get(final String id) { return VALUES.get(id); }
 	public static boolean exists(final String id) { return VALUES.containsKey(id); }

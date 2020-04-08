@@ -18,8 +18,8 @@ public class HealthWorkerStatus implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	public static final HealthWorkerStatus HEALTH_WORKER= new HealthWorkerStatus("h", "Health Worker", true);
-	public static final HealthWorkerStatus LIVE_WITH = new HealthWorkerStatus("l", "Live With", false);
+	public static final HealthWorkerStatus HEALTH_WORKER= new HealthWorkerStatus("h", "I am a Health Worker or First Responder", true);
+	public static final HealthWorkerStatus LIVE_WITH = new HealthWorkerStatus("l", "I live with Health Worker or First Responder", false);
 
 	public static final List<HealthWorkerStatus> LIST = List.of(HEALTH_WORKER, LIVE_WITH);
 	public static final Map<String, HealthWorkerStatus> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
