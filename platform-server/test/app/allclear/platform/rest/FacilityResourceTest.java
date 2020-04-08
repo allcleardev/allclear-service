@@ -431,6 +431,7 @@ public class FacilityResourceTest
 					total = results.pageSize;
 			}
 			Assertions.assertEquals(total, results.records.size(), assertId + "Check records.size");
+			results.records.forEach(v -> Assertions.assertFalse(v.restricted, "Check restricted: " + v.name));
 		}
 	}
 
@@ -488,8 +489,13 @@ public class FacilityResourceTest
 	public void set_00_search_restrictive_as_admin()
 	{
 		var o = request("search").post(Entity.json(new FacilityFilter().withRestrictive(true)), TYPE_QUERY_RESULTS);
-		Assertions.assertEquals(2L, o.total, "Check total");
-		Assertions.assertNull(o.filter.notTestCriteriaId, "Check filter.notTestCriteriaId");
+		Assertions.assertEquals(2L, o.total, "Check total: restricted");
+		Assertions.assertNull(o.filter.notTestCriteriaId, "Check filter.notTestCriteriaId: restricted");
+		o.records.forEach(v -> Assertions.assertFalse(v.restricted, "Check restricted: " + v.name + " - restricted"));
+
+		o = request("search").post(Entity.json(new FacilityFilter()), TYPE_QUERY_RESULTS);
+		Assertions.assertEquals(2L, o.total, "Check total: unrestricted");
+		o.records.forEach(v -> Assertions.assertFalse(v.restricted, "Check restricted: " + v.name + " - unrestricted"));
 	}
 
 	@Test
@@ -499,8 +505,13 @@ public class FacilityResourceTest
 		Assertions.assertFalse(PERSON.person.meetsCdcPriority3(), "Check meetsCdcPriority3()");
 
 		var o = request("search").post(Entity.json(new FacilityFilter().withRestrictive(true)), TYPE_QUERY_RESULTS);
-		Assertions.assertEquals(1L, o.total, "Check total");
-		Assertions.assertEquals(CDC_CRITERIA.id, o.filter.notTestCriteriaId, "Check filter.notTestCriteriaId");
+		Assertions.assertEquals(1L, o.total, "Check total: restricted");
+		Assertions.assertEquals(CDC_CRITERIA.id, o.filter.notTestCriteriaId, "Check filter.notTestCriteriaId: restricted");
+		o.records.forEach(v -> Assertions.assertFalse(v.restricted, "Check restricted: " + v.name + " - restricted"));
+
+		o = request("search").post(Entity.json(new FacilityFilter()), TYPE_QUERY_RESULTS);
+		Assertions.assertEquals(2L, o.total, "Check total: unrestricted");
+		o.records.forEach(v -> Assertions.assertEquals("Alex".equals(v.name), v.restricted, "Check restricted: " + v.name + " - unrestricted"));
 	}
 
 	@Test
@@ -513,6 +524,11 @@ public class FacilityResourceTest
 		var o = request("search").post(Entity.json(new FacilityFilter().withRestrictive(true)), TYPE_QUERY_RESULTS);
 		Assertions.assertEquals(2L, o.total, "Check total");
 		Assertions.assertNull(o.filter.notTestCriteriaId, "Check filter.notTestCriteriaId");
+		o.records.forEach(v -> Assertions.assertFalse(v.restricted, "Check restricted: " + v.name + " - restricted"));
+
+		o = request("search").post(Entity.json(new FacilityFilter()), TYPE_QUERY_RESULTS);
+		Assertions.assertEquals(2L, o.total, "Check total: unrestricted");
+		o.records.forEach(v -> Assertions.assertFalse(v.restricted, "Check restricted: " + v.name + " - unrestricted"));
 	}
 
 	/** Test removal after the search. */

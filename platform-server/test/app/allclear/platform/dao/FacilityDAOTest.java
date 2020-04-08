@@ -502,6 +502,7 @@ public class FacilityDAOTest
 					total = results.pageSize;
 			}
 			Assertions.assertEquals(total, results.records.size(), "Check records.size");
+			results.records.forEach(v -> Assertions.assertNull(v.restricted, "Check restricted: " + v.name));
 		}
 	}
 
