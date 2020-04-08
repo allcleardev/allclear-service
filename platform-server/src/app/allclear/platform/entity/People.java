@@ -220,7 +220,7 @@ public class People implements Serializable
 			value.emailVerifiedAt, value.initDates());
 	}
 
-	public People update(final PeopleValue value)
+	public People update(final PeopleValue value, final boolean admin)
 	{
 		setName(value.name);
 		setPhone(value.phone);
@@ -235,10 +235,20 @@ public class People implements Serializable
 		setLatitude(value.latitude);
 		setLongitude(value.longitude);
 		setAlertable(value.alertable);
-		setActive(value.active);
-		setAuthAt(value.authAt);
-		setPhoneVerifiedAt(value.phoneVerifiedAt);
-		setEmailVerifiedAt(value.emailVerifiedAt);
+		if (admin)
+		{
+			setActive(value.active);
+			setAuthAt(value.authAt);
+			setPhoneVerifiedAt(value.phoneVerifiedAt);
+			setEmailVerifiedAt(value.emailVerifiedAt);
+		}
+		else
+		{
+			value.active = isActive();
+			value.authAt = getAuthAt();
+			value.phoneVerifiedAt = getPhoneVerifiedAt();
+			value.emailVerifiedAt = getEmailVerifiedAt();
+		}
 		value.createdAt = getCreatedAt();
 		setUpdatedAt(value.updatedAt = new Date());
 

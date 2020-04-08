@@ -481,7 +481,7 @@ public class PeopleResourceTest
 	@Test
 	public void z_07_add()
 	{
-		sessionDao.current(SESSION_1 = sessionDao.add(dao.add(new PeopleValue("second", "+18885552001", true)), false));
+		sessionDao.current(SESSION_1 = sessionDao.add(dao.add(new PeopleValue("second", "+18885552001", true).withAuthAt(utc(2020, 4, 7))), false));
 	}
 
 	@Test
@@ -499,9 +499,10 @@ public class PeopleResourceTest
 	@Test
 	public void z_07_modify()
 	{
+System.out.println("z_07_modify");
 		LAST_UPDATED_AT = new Date();
 		Assertions.assertEquals(HTTP_STATUS_OK,
-			request().put(Entity.json(new PeopleValue("third", "+18885552002", true).withId(VALUE.id))).getStatus());
+			request().put(Entity.json(new PeopleValue("third", "+18885552002", false).withId(VALUE.id).withAuthAt(utc(2020, 4, 8)))).getStatus());
 	}
 
 	@Test
@@ -513,6 +514,8 @@ public class PeopleResourceTest
 		Assertions.assertEquals(SESSION_1.person.id, session.person.id, "Check session.person.id");
 		Assertions.assertEquals("third", session.person.name, "Check session.person.name");
 		Assertions.assertEquals("+18885552002", session.person.phone, "Check session.person.phone");
+		Assertions.assertTrue(session.person.active, "Check session.person.active");	// Ignored if non-admin.
+		Assertions.assertEquals(utc(2020, 4, 7), session.person.authAt, "Check session.person.authAt");	// Ignored if non-admin.
 		assertThat(session.person.updatedAt).as("Check session.person.updatedAt").isCloseTo(LAST_UPDATED_AT, 1000L).isAfterOrEqualsTo(session.person.createdAt);
 
 		var value = dao.getById(SESSION_1.person.id);
@@ -520,12 +523,37 @@ public class PeopleResourceTest
 		Assertions.assertEquals(SESSION_1.person.id, value.id, "Check value.id");
 		Assertions.assertEquals("third", value.name, "Check value.name");
 		Assertions.assertEquals("+18885552002", value.phone, "Check value.phone");
+		Assertions.assertTrue(value.active, "Check session.person.active");	// Ignored if non-admin.
+		Assertions.assertEquals(utc(2020, 4, 7), value.authAt, "Check session.person.authAt");	// Ignored if non-admin.
 		assertThat(value.updatedAt).as("Check value.updatedAt").isCloseTo(LAST_UPDATED_AT, 1000L).isAfterOrEqualsTo(session.person.createdAt);
 	}
 
 	@Test
-	public void z_07_remove()
+	public void z_08_modify()
 	{
+System.out.println("z_08_modify");
+		sessionDao.current(ADMIN);
+
+		LAST_UPDATED_AT = new Date();
+		Assertions.assertEquals(HTTP_STATUS_OK,
+			request().put(Entity.json(new PeopleValue("second", "+18885552001", false).withId(SESSION_1.person.id).withAuthAt(utc(2020, 4, 8)))).getStatus());
+	}
+
+	@Test
+	public void z_08_modify_check()
+	{
+		var value = dao.getById(SESSION_1.person.id);
+		Assertions.assertEquals("second", value.name, "Check value.name");
+		Assertions.assertEquals("+18885552001", value.phone, "Check value.phone");
+		Assertions.assertFalse(value.active, "Check session.person.active");
+		Assertions.assertEquals(utc(2020, 4, 8), value.authAt, "Check session.person.authAt");
+	}
+
+	@Test
+	public void z_09_remove()
+	{
+		sessionDao.current(SESSION_1);
+
 		Assertions.assertTrue(sessionDao.exists(SESSION_1.id), "Check exists");
 		Assertions.assertNotNull(dao.getById(SESSION_1.person.id), "Check getById");
 
@@ -533,7 +561,7 @@ public class PeopleResourceTest
 	}
 
 	@Test
-	public void z_07_remove_check()
+	public void z_09_remove_check()
 	{
 		Assertions.assertNull(dao.getById(SESSION_1.person.id), "Check getById");
 		Assertions.assertFalse(sessionDao.exists(SESSION_1.id), "Check exists");

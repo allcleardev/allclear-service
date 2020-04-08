@@ -1254,6 +1254,7 @@ public class PeopleDAOTest
 		Assertions.assertEquals(expected.latitude, value.latitude, assertId + "Check latitude");
 		assertThat(value.latitude).as(assertId + "Check latitude").isEqualByComparingTo(expected.latitude);
 		assertThat(value.longitude).as(assertId + "Check longitude").isEqualByComparingTo(expected.longitude);
+		Assertions.assertEquals(expected.alertable, value.alertable, assertId + "Check alertable");
 		Assertions.assertEquals(expected.active, value.active, assertId + "Check active");
 		Assertions.assertEquals(expected.authAt, value.authAt, assertId + "Check authAt");
 		Assertions.assertEquals(expected.phoneVerifiedAt, value.phoneVerifiedAt, assertId + "Check phoneVerifiedAt");

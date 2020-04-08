@@ -105,9 +105,10 @@ public class PeopleDAO extends AbstractDAO<People>
 	/** Updates a single People value.
 	 *
 	 * @param value
+	 * @param admin is the current user an administrator.
 	 * @throws ValidationException
 	 */
-	public PeopleValue update(final PeopleValue value) throws ValidationException
+	public PeopleValue update(final PeopleValue value, final boolean admin) throws ValidationException
 	{
 		var cmrs = _validate(value);
 		var record = (People) cmrs[0];
@@ -120,8 +121,10 @@ public class PeopleDAO extends AbstractDAO<People>
 		update(s, record, value.exposures, record.getExposures(), "deleteExposuresByPerson", v -> new Exposures(r, v));
 		update(s, record, value.symptoms, record.getSymptoms(), "deleteSymptomsByPerson", v -> new Symptoms(r, v));
 
-		return value.withId(record.update(value).getId());
+		return value.withId(record.update(value, admin).getId());
 	}
+
+	public PeopleValue update(final PeopleValue value) { return update(value, true); }
 
 	private int update(final Session s,
 		final People record,
