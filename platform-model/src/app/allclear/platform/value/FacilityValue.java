@@ -79,6 +79,10 @@ public class FacilityValue implements Serializable
 	public Date createdAt = null;
 	public Date updatedAt = null;
 	public Long meters = null;	// A result included on distance searches. DLS on 4/3/2020
+	public Boolean restricted = null;	// Is the current user restricted from accessing this site. Populated in FacilityResource.search. DLS on 4/8/2020.
+
+	// Accessors
+	public boolean restricted() { return (null != testCriteria) && testCriteria.restricted; }
 
 	// Mutators
 	public FacilityValue withId(final Long newValue) { id = newValue; return this; }
@@ -117,6 +121,7 @@ public class FacilityValue implements Serializable
 	public FacilityValue withCreatedAt(final Date newValue) { createdAt = newValue; return this; }
 	public FacilityValue withUpdatedAt(final Date newValue) { updatedAt = newValue; return this; }
 	public FacilityValue withMeters(final Long newValue) { meters = newValue; return this; }
+	public FacilityValue withRestricted(final Boolean newValue) { restricted = newValue; return this; }
 
 	public FacilityValue() {}
 
@@ -370,6 +375,7 @@ public class FacilityValue implements Serializable
 			.append(", createdAt: ").append(createdAt)
 			.append(", updatedAt: ").append(updatedAt)
 			.append(", meters: ").append(meters)
+			.append(", restricted: ").append(restricted)
 			.append(" }").toString();
 	}
 }

@@ -18,8 +18,8 @@ public class TestCriteria implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	public static final TestCriteria CDC_CRITERIA = new TestCriteria("cc", "CDC Criteria");
-	public static final TestCriteria OTHER = new TestCriteria("ot", "Other");
+	public static final TestCriteria CDC_CRITERIA = new TestCriteria("cc", "CDC Criteria", true);
+	public static final TestCriteria OTHER = new TestCriteria("ot", "Other", false);
 
 	public static final List<TestCriteria> LIST = List.of(CDC_CRITERIA, OTHER);
 	public static final Map<String, TestCriteria> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
@@ -28,12 +28,15 @@ public class TestCriteria implements Serializable
 
 	public final String id;
 	public final String name;
+	public final boolean restricted;
 
 	public TestCriteria(@JsonProperty("id") final String id,
-		@JsonProperty("name") final String name)
+		@JsonProperty("name") final String name,
+		@JsonProperty("restricted") final boolean restricted)
 	{
 		this.id = id;
 		this.name = name;
+		this.restricted = restricted;
 	}
 
 	@Override
@@ -41,6 +44,7 @@ public class TestCriteria implements Serializable
 	{
 		return new StringBuilder("{ id: ").append(id)
 			.append(", name: ").append(name)
+			.append(", restricted: ").append(restricted)
 			.append(" }").toString();
 	}
 
@@ -50,6 +54,6 @@ public class TestCriteria implements Serializable
 		if (!(o instanceof TestCriteria)) return false;
 
 		var v = (TestCriteria) o;
-		return Objects.equals(id, v.id) && Objects.equals(name, v.name); 
+		return Objects.equals(id, v.id) && Objects.equals(name, v.name) && (restricted == v.restricted); 
 	}
 }

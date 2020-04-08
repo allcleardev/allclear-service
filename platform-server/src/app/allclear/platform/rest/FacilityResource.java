@@ -135,13 +135,20 @@ public class FacilityResource
 			if (null != o) filter.from = filter.from.copy(o.geometry.location);
 		}
 
+		var s = sessionDao.current();
+		var restricted = (s.person() && !s.person.meetsCdcPriority3());	// Does the current user have restrictions imposed with regards to facilities that are open to them?
 		if (filter.restrictive)
 		{
-			var s = sessionDao.current();
 			if (s.person() && !s.person.meetsCdcPriority3()) filter.withNotTestCriteriaId(TestCriteria.CDC_CRITERIA.id);
 		}
 
-		return dao.search(filter);
+		var results = dao.search(filter);
+		if (!filter.restrictive && restricted && !results.noRecords())
+		{
+			results.records.forEach(v -> v.restricted = v.restricted());
+		}
+
+		return results;
 	}
 
 	FacilityValue populate(final FacilityValue value)
