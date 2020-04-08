@@ -1,11 +1,7 @@
 package app.allclear.common.errors;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Maps an NotAuthorizedException to HTTP error output. Used primarily to indicate a lack of permissions to
  *  perform the current operation.
@@ -17,18 +13,9 @@ import org.slf4j.LoggerFactory;
  */
 
 @Provider
-public class AuthorizationExceptionMapper implements ExceptionMapper<NotAuthorizedException>
+public class AuthorizationExceptionMapper extends ExMapper<NotAuthorizedException>
 {
-	private final Logger logger = LoggerFactory.getLogger(AuthorizationExceptionMapper.class);
-
-	/** Populator. */
-	public AuthorizationExceptionMapper() {}
-
-	@Override
-	public Response toResponse(NotAuthorizedException ex)
-	{
-		logger.error(ex.getMessage(), ex);
-
-		return Response.status(Response.Status.UNAUTHORIZED.getStatusCode()).build();
-	}
+	@Override protected int status() { return Response.Status.UNAUTHORIZED.getStatusCode(); }
+	@Override protected ErrorInfo log(final String message) { log.error(message); return new ErrorInfo(message); }
+	@Override protected ErrorInfo log(final Throwable ex) { log.error(ex.getMessage(), ex); return new ErrorInfo(ex); }
 }

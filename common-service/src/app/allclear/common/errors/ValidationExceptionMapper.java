@@ -1,11 +1,6 @@
 package app.allclear.common.errors;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import app.allclear.common.errors.ValidationException;
 
@@ -21,23 +16,9 @@ import app.allclear.common.errors.ValidationException;
  */
 
 @Provider
-public class ValidationExceptionMapper implements ExceptionMapper<ValidationException>
+public class ValidationExceptionMapper extends ExMapper<ValidationException>
 {
-	private static final Logger logger = LoggerFactory.getLogger(ValidationExceptionMapper.class);
-
-	/** Populator. */
 	public ValidationExceptionMapper() { super(); }
 
-	/** ExceptionMapper method - provides the response details. */
-	public Response toResponse(ValidationException ex)
-	{
-		// ValidationException(s) are not as serious as RuntimeException(s) nor ObjectNotFoundException(s).
-		if (logger.isDebugEnabled())
-			logger.warn(ex.getMessage(), ex);
-		else
-			logger.warn(ex.getMessage());
-
-		// Serialize the entire exception for the client UIs.
-		return Response.status(422).entity(ex).build();
-	}
+	@Override protected int status() { return 422; }
 }

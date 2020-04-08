@@ -1,11 +1,7 @@
 package app.allclear.common.errors;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /** Maps an ObjectNotFoundException to HTTP error output.
  *  
@@ -16,18 +12,7 @@ import org.slf4j.LoggerFactory;
  */
 
 @Provider
-public class NotFoundExceptionMapper implements ExceptionMapper<ObjectNotFoundException>
+public class NotFoundExceptionMapper extends ExMapper<ObjectNotFoundException>
 {
-	private final Logger logger = LoggerFactory.getLogger(NotFoundExceptionMapper.class);
-
-	/** Populator. */
-	public NotFoundExceptionMapper() {}
-
-	@Override
-	public Response toResponse(final ObjectNotFoundException ex)
-	{
-		logger.warn(ex.getMessage(), ex);
-
-		return Response.status(Response.Status.NOT_FOUND.getStatusCode()).entity(ex).build();
-	}
+	@Override protected int status() { return Response.Status.NOT_FOUND.getStatusCode(); }
 }

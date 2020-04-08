@@ -162,7 +162,7 @@ public class TaskManagerTest
 
 		operator.maxTries = 1;	// Testing moving of failed requests to the DLQ. DLS on 7/14/2016.
 		operator.callback = x -> {
-			if ("Error 4".equals(x.error))
+			if ("Error 4".equals(x.message))
 				throw new RuntimeException();
 
 			System.out.println(x.stacktrace); return true;
@@ -180,7 +180,7 @@ public class TaskManagerTest
 		Assert.assertEquals("Number of tries", 1, value.tries);
 		Object request = value.value;
 		Assert.assertTrue("Remaining error instanceOf Exception", request instanceof ErrorInfo);
-		Assert.assertEquals("Remaining error", "Error 4", ((ErrorInfo) request).error);
+		Assert.assertEquals("Remaining error", "Error 4", ((ErrorInfo) request).message);
 		checkStats(new OperatorStats(QUEUE_NAME, 0, 1, count - 1, 0, 1));
 
 		processRequests(0, 1);

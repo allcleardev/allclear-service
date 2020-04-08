@@ -1,13 +1,7 @@
 package app.allclear.common.errors;
 
 import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import app.allclear.common.mediatype.UTF8MediaType;
 
 /** Maps an NotAuthenticatedException to HTTP error output. Used primarily to indicate that the client header is missing.
  *  
@@ -18,18 +12,9 @@ import app.allclear.common.mediatype.UTF8MediaType;
  */
 
 @Provider
-public class AuthenticationExceptionMapper implements ExceptionMapper<NotAuthenticatedException>
+public class AuthenticationExceptionMapper extends ExMapper<NotAuthenticatedException>
 {
-	private final Logger logger = LoggerFactory.getLogger(AuthenticationExceptionMapper.class);
-
-	/** Populator. */
-	public AuthenticationExceptionMapper() {}
-
-	@Override
-	public Response toResponse(NotAuthenticatedException ex)
-	{
-		logger.debug(ex.getMessage(), ex);	// No need to log this exception.
-
-		return Response.status(Response.Status.FORBIDDEN.getStatusCode()).type(UTF8MediaType.APPLICATION_JSON).entity(ex).build();
-	}
+	@Override protected int status() { return Response.Status.FORBIDDEN.getStatusCode(); }
+	@Override protected ErrorInfo log(final String message) { log.debug(message); return new ErrorInfo(message); }
+	@Override protected ErrorInfo log(final Throwable ex) { log.debug(ex.getMessage(), ex); return new ErrorInfo(ex); }
 }

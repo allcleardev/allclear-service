@@ -93,7 +93,7 @@ public class ThrowableExceptionMapperTest
 		Assert.assertEquals("Response type", clean(UTF8MediaType.APPLICATION_JSON), clean(response.getMetadata().getFirst("Content-Type").toString()));
 		Assert.assertTrue("Response entity is ErrorInfo", response.getEntity() instanceof ErrorInfo);
 		ErrorInfo results = (ErrorInfo) response.getEntity();
-		Assert.assertEquals("Response entity message", message, results.error);
+		Assert.assertEquals("Response entity message", message, results.message);
 		Assert.assertNotNull("Response entity stacktrace exists", results.stacktrace);
 		Assert.assertEquals("Response entity stacktrace", v.stacktrace, results.stacktrace);
 	}
