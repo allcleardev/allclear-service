@@ -139,14 +139,12 @@ public class FacilityResource
 		var restricted = (s.person() && !s.person.meetsCdcPriority3());	// Does the current user have restrictions imposed with regards to facilities that are open to them?
 		if (filter.restrictive)
 		{
-			if (s.person() && !s.person.meetsCdcPriority3()) filter.withNotTestCriteriaId(TestCriteria.CDC_CRITERIA.id);
+			if (restricted) filter.withNotTestCriteriaId(TestCriteria.CDC_CRITERIA.id);
 		}
 
 		var results = dao.search(filter);
-		if (!filter.restrictive && restricted && !results.noRecords())
-		{
-			results.records.forEach(v -> v.restricted = v.restricted());
-		}
+		if (!results.noRecords())
+			results.records.forEach(v -> v.restricted = (restricted && v.restricted()));
 
 		return results;
 	}
