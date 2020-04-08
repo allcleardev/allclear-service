@@ -10,7 +10,6 @@ import io.dropwizard.assets.AssetsBundle;
 import io.dropwizard.configuration.EnvironmentVariableSubstitutor;
 import io.dropwizard.configuration.SubstitutingSourceProvider;
 import io.dropwizard.db.DataSourceFactory;
-import io.dropwizard.hibernate.HibernateBundle;
 import io.dropwizard.migrations.MigrationsBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
@@ -21,6 +20,7 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import app.allclear.common.AutoCloseableManager;
 import app.allclear.common.errors.*;
+import app.allclear.common.hibernate.HibernateBundle;
 import app.allclear.common.jackson.ObjectMapperProvider;
 import app.allclear.common.jersey.CrossDomainHeadersFilter;
 import app.allclear.common.redis.FakeRedisClient;
@@ -50,6 +50,7 @@ public class App extends Application<Config>
 
 	private final HibernateBundle<Config> transHibernateBundle = new HibernateBundle<>(People.class, ENTITIES) {
 		@Override public DataSourceFactory getDataSourceFactory(final Config conf) { return conf.trans; }
+		@Override public DataSourceFactory getReadSourceFactory(final Config conf) { return conf.read; }
 	};
 
 	public static void main(final String... args) throws Exception
@@ -114,7 +115,7 @@ public class App extends Application<Config>
         jersey.register(new LockAcquisitionExceptionMapper());
         jersey.register(new LockTimeoutExceptionMapper());
         jersey.register(new ThrowableExceptionMapper());
-        jersey.register(new InfoResource(conf, env.healthChecks(), List.of(HibernateBundle.DEFAULT_NAME), conf.getVersion()));
+        jersey.register(new InfoResource(conf, env.healthChecks(), List.of(HibernateBundle.PRIMARY), conf.getVersion()));
         jersey.register(new HeapDumpResource());
         jersey.register(new HibernateResource(factory));
         jersey.register(new LogResource());

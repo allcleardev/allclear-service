@@ -34,6 +34,7 @@ public class Config extends Configuration implements Serializable
 
 	public final String env;
 	public final boolean disableSwagger;
+	public final DataSourceFactory read;
 	public final DataSourceFactory trans;
 	public final ManifestValue manifest;
 
@@ -51,6 +52,7 @@ public class Config extends Configuration implements Serializable
 
 	public Config(@JsonProperty("env") final String env,
 		@JsonProperty("disableSwagger") final Boolean disableSwagger,
+		@JsonProperty("read") final DataSourceFactory read,
 		@JsonProperty("trans") final DataSourceFactory trans,
 		@JsonProperty("baseUrl") final String baseUrl,
 		@JsonProperty("registrationPhone") final String registrationPhone,
@@ -61,6 +63,7 @@ public class Config extends Configuration implements Serializable
 	{
 		this.env = env;
 		this.trans = trans;
+		this.read = (null != read) ? read : trans;
 		this.manifest = ManifestUtils.getInfo(getClass());
 		this.disableSwagger = Boolean.TRUE.equals(disableSwagger);
 

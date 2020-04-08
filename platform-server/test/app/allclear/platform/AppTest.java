@@ -29,10 +29,10 @@ import app.allclear.platform.type.*;
  *
  */
 
-@Disabled
+// @Disabled
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
 @ExtendWith(DropwizardExtensionsSupport.class)
-public class IntegrationTest
+public class AppTest
 {
 	public static final DropwizardAppExtension<Config> APP = new DropwizardAppExtension<>(App.class, "conf/test.json");
 

@@ -72,6 +72,7 @@ public class ConfigTest
 		Assertions.assertEquals(TwilioConfig.BASE_URL, o.twilio.baseUrl, "Check twilio.baseUrl");
 		Assertions.assertNotNull(o.twilio.accountId, "Check twilio.accountId");	// Could be the real account ID if the environment variable is set.
 		Assertions.assertNotNull(o.twilio.authToken, "Check twilio.authToken");	// Could be the real authorization token if the environment variable is set.
+
 		Assertions.assertEquals("com.mysql.jdbc.Driver", o.trans.getDriverClass(), "Check trans.driverClass");
 		Assertions.assertEquals("allclear", o.trans.getUser(), "Check trans.user");
 		Assertions.assertEquals("allclearpwd", o.trans.getPassword(), "Check trans.password");
@@ -81,10 +82,26 @@ public class ConfigTest
 		Assertions.assertEquals(Optional.of(Duration.seconds(10L)), o.trans.getValidationQueryTimeout(), "Check trans.validationQueryTimeout");
 		Assertions.assertEquals(5, o.trans.getMinSize(), "Check trans.minSize");
 		Assertions.assertEquals(20, o.trans.getMaxSize(), "Check trans.maxSize");
+		Assertions.assertNull(o.trans.getReadOnlyByDefault(), "Check trans.readOnlyByDefault");
 		Assertions.assertTrue(o.trans.getCheckConnectionWhileIdle(), "Check trans.checkConnectionWhileIdle");
 		Assertions.assertTrue(o.trans.getCheckConnectionOnBorrow(), "Check trans.checkConnectionOnBorrow");
 		Assertions.assertEquals(TransactionIsolation.READ_COMMITTED, o.trans.getDefaultTransactionIsolation(), "Check trans.defaultTransactionIsolation");
-		assertThat(o.trans.getProperties()).as("Check properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect"));
+		assertThat(o.trans.getProperties()).as("Check trans.properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect"));
+
+		Assertions.assertEquals("com.mysql.jdbc.Driver", o.read.getDriverClass(), "Check read.driverClass");
+		Assertions.assertEquals("allclear", o.read.getUser(), "Check read.user");
+		Assertions.assertEquals("allclearpwd", o.read.getPassword(), "Check read.password");
+		Assertions.assertEquals("jdbc:mysql://allclear-dev.mysql.database.azure.com:3306/allclear?useEncoding=true&characterEncoding=UTF-8&prepStmtCacheSize=100&prepStmtCacheSqlLimit=1024&serverTimezone=UTC&useSSL=true&requireSSL=true",  o.read.getUrl(), "Check read.url");
+		Assertions.assertEquals(Duration.seconds(1L), o.read.getMaxWaitForConnection(), "Check read.maxWaitForConnection");
+		Assertions.assertEquals(Optional.of("SELECT 1"), o.read.getValidationQuery(), "Check read.validationQuery");
+		Assertions.assertEquals(Optional.of(Duration.seconds(10L)), o.read.getValidationQueryTimeout(), "Check read.validationQueryTimeout");
+		Assertions.assertEquals(5, o.read.getMinSize(), "Check read.minSize");
+		Assertions.assertEquals(20, o.read.getMaxSize(), "Check read.maxSize");
+		Assertions.assertNull(o.read.getReadOnlyByDefault(), "Check read.readOnlyByDefault");
+		Assertions.assertTrue(o.read.getCheckConnectionWhileIdle(), "Check read.checkConnectionWhileIdle");
+		Assertions.assertTrue(o.read.getCheckConnectionOnBorrow(), "Check read.checkConnectionOnBorrow");
+		Assertions.assertEquals(TransactionIsolation.READ_COMMITTED, o.read.getDefaultTransactionIsolation(), "Check read.defaultTransactionIsolation");
+		assertThat(o.read.getProperties()).as("Check read.properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect"));
 	}
 
 	@Test
@@ -113,6 +130,7 @@ public class ConfigTest
 		Assertions.assertEquals(TwilioConfig.BASE_URL, o.twilio.baseUrl, "Check twilio.baseUrl");
 		Assertions.assertEquals("123", o.twilio.accountId, "Check twilio.accountId");
 		Assertions.assertEquals("token", o.twilio.authToken, "Check twilio.authToken");
+
 		Assertions.assertEquals("com.mysql.jdbc.Driver", o.trans.getDriverClass(), "Check trans.driverClass");
 		Assertions.assertEquals("allclear", o.trans.getUser(), "Check trans.user");
 		Assertions.assertEquals("allclear", o.trans.getPassword(), "Check trans.password");
@@ -122,10 +140,26 @@ public class ConfigTest
 		Assertions.assertEquals(Optional.of(Duration.seconds(10L)), o.trans.getValidationQueryTimeout(), "Check trans.validationQueryTimeout");
 		Assertions.assertEquals(1, o.trans.getMinSize(), "Check trans.minSize");
 		Assertions.assertEquals(10, o.trans.getMaxSize(), "Check trans.maxSize");
+		Assertions.assertNull(o.trans.getReadOnlyByDefault(), "Check trans.readOnlyByDefault");
 		Assertions.assertTrue(o.trans.getCheckConnectionWhileIdle(), "Check trans.checkConnectionWhileIdle");
 		Assertions.assertTrue(o.trans.getCheckConnectionOnBorrow(), "Check trans.checkConnectionOnBorrow");
 		Assertions.assertEquals(TransactionIsolation.READ_COMMITTED, o.trans.getDefaultTransactionIsolation(), "Check trans.defaultTransactionIsolation");
-		assertThat(o.trans.getProperties()).as("Check properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect"));
+		assertThat(o.trans.getProperties()).as("Check trans.properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect"));
+
+		Assertions.assertEquals("com.mysql.jdbc.Driver", o.read.getDriverClass(), "Check read.driverClass");
+		Assertions.assertEquals("allclear", o.read.getUser(), "Check read.user");
+		Assertions.assertEquals("allclear", o.read.getPassword(), "Check read.password");
+		Assertions.assertEquals("jdbc:mysql://localhost:3306/allclear?useEncoding=true&characterEncoding=UTF-8&prepStmtCacheSize=100&prepStmtCacheSqlLimit=1024&serverTimezone=UTC",  o.read.getUrl(), "Check read.url");
+		Assertions.assertEquals(Duration.seconds(1L), o.read.getMaxWaitForConnection(), "Check read.maxWaitForConnection");
+		Assertions.assertEquals(Optional.of("SELECT 1"), o.read.getValidationQuery(), "Check read.validationQuery");
+		Assertions.assertEquals(Optional.of(Duration.seconds(10L)), o.read.getValidationQueryTimeout(), "Check read.validationQueryTimeout");
+		Assertions.assertEquals(1, o.read.getMinSize(), "Check read.minSize");
+		Assertions.assertEquals(10, o.read.getMaxSize(), "Check read.maxSize");
+		Assertions.assertNull(o.read.getReadOnlyByDefault(), "Check read.readOnlyByDefault");
+		Assertions.assertTrue(o.read.getCheckConnectionWhileIdle(), "Check read.checkConnectionWhileIdle");
+		Assertions.assertTrue(o.read.getCheckConnectionOnBorrow(), "Check read.checkConnectionOnBorrow");
+		Assertions.assertEquals(TransactionIsolation.READ_COMMITTED, o.read.getDefaultTransactionIsolation(), "Check read.defaultTransactionIsolation");
+		assertThat(o.read.getProperties()).as("Check read.properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect"));
 	}
 
 	@Test
@@ -154,6 +188,7 @@ public class ConfigTest
 		Assertions.assertEquals(TwilioConfig.BASE_URL, o.twilio.baseUrl, "Check twilio.baseUrl");
 		Assertions.assertNotNull(o.twilio.accountId, "Check twilio.accountId");	// Could be the real account ID if the environment variable is set.
 		Assertions.assertNotNull(o.twilio.authToken, "Check twilio.authToken");	// Could be the real authorization token if the environment variable is set.
+
 		Assertions.assertEquals("com.mysql.jdbc.Driver", o.trans.getDriverClass(), "Check trans.driverClass");
 		Assertions.assertEquals("allclear", o.trans.getUser(), "Check trans.user");
 		Assertions.assertEquals("allclearpwd", o.trans.getPassword(), "Check trans.password");
@@ -163,10 +198,26 @@ public class ConfigTest
 		Assertions.assertEquals(Optional.of(Duration.seconds(10L)), o.trans.getValidationQueryTimeout(), "Check trans.validationQueryTimeout");
 		Assertions.assertEquals(10, o.trans.getMinSize(), "Check trans.minSize");
 		Assertions.assertEquals(40, o.trans.getMaxSize(), "Check trans.maxSize");
+		Assertions.assertNull(o.trans.getReadOnlyByDefault(), "Check trans.readOnlyByDefault");
 		Assertions.assertTrue(o.trans.getCheckConnectionWhileIdle(), "Check trans.checkConnectionWhileIdle");
 		Assertions.assertTrue(o.trans.getCheckConnectionOnBorrow(), "Check trans.checkConnectionOnBorrow");
 		Assertions.assertEquals(TransactionIsolation.READ_COMMITTED, o.trans.getDefaultTransactionIsolation(), "Check trans.defaultTransactionIsolation");
-		assertThat(o.trans.getProperties()).as("Check properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect"));
+		assertThat(o.trans.getProperties()).as("Check trans.properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect"));
+
+		Assertions.assertEquals("com.mysql.jdbc.Driver", o.read.getDriverClass(), "Check read.driverClass");
+		Assertions.assertEquals("allclear", o.read.getUser(), "Check read.user");
+		Assertions.assertEquals("allclearpwd", o.read.getPassword(), "Check read.password");
+		Assertions.assertEquals("jdbc:mysql://ro-allclear-prod.mysql.database.azure.com:3306/allclear?useEncoding=true&characterEncoding=UTF-8&prepStmtCacheSize=100&prepStmtCacheSqlLimit=1024&serverTimezone=UTC&useSSL=true&requireSSL=true",  o.read.getUrl(), "Check read.url");
+		Assertions.assertEquals(Duration.seconds(1L), o.read.getMaxWaitForConnection(), "Check read.maxWaitForConnection");
+		Assertions.assertEquals(Optional.of("SELECT 1"), o.read.getValidationQuery(), "Check read.validationQuery");
+		Assertions.assertEquals(Optional.of(Duration.seconds(10L)), o.read.getValidationQueryTimeout(), "Check read.validationQueryTimeout");
+		Assertions.assertEquals(10, o.read.getMinSize(), "Check read.minSize");
+		Assertions.assertEquals(40, o.read.getMaxSize(), "Check read.maxSize");
+		Assertions.assertTrue(o.read.getReadOnlyByDefault(), "Check read.readOnlyByDefault");
+		Assertions.assertTrue(o.read.getCheckConnectionWhileIdle(), "Check read.checkConnectionWhileIdle");
+		Assertions.assertTrue(o.read.getCheckConnectionOnBorrow(), "Check read.checkConnectionOnBorrow");
+		Assertions.assertEquals(TransactionIsolation.READ_UNCOMMITTED, o.read.getDefaultTransactionIsolation(), "Check read.defaultTransactionIsolation");
+		assertThat(o.read.getProperties()).as("Check read.properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect"));
 	}
 
 	@Test
@@ -195,6 +246,7 @@ public class ConfigTest
 		Assertions.assertEquals(TwilioConfig.BASE_URL, o.twilio.baseUrl, "Check twilio.baseUrl");
 		Assertions.assertEquals("123", o.twilio.accountId, "Check twilio.accountId");
 		Assertions.assertEquals("token", o.twilio.authToken, "Check twilio.authToken");
+
 		Assertions.assertEquals("org.h2.Driver", o.trans.getDriverClass(), "Check trans.driverClass");
 		Assertions.assertNull(o.trans.getUser(), "Check trans.user");
 		Assertions.assertNull(o.trans.getPassword(), "Check trans.password");
@@ -204,9 +256,25 @@ public class ConfigTest
 		Assertions.assertEquals(Optional.of(Duration.seconds(10L)), o.trans.getValidationQueryTimeout(), "Check trans.validationQueryTimeout");
 		Assertions.assertEquals(1, o.trans.getMinSize(), "Check trans.minSize");
 		Assertions.assertEquals(10, o.trans.getMaxSize(), "Check trans.maxSize");
+		Assertions.assertNull(o.trans.getReadOnlyByDefault(), "Check trans.readOnlyByDefault");
 		Assertions.assertFalse(o.trans.getCheckConnectionWhileIdle(), "Check trans.checkConnectionWhileIdle");
 		Assertions.assertFalse(o.trans.getCheckConnectionOnBorrow(), "Check trans.checkConnectionOnBorrow");
 		Assertions.assertEquals(TransactionIsolation.READ_COMMITTED, o.trans.getDefaultTransactionIsolation(), "Check trans.defaultTransactionIsolation");
-		assertThat(o.trans.getProperties()).as("Check properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.H2Dialect"));
+		assertThat(o.trans.getProperties()).as("Check trans.properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.H2Dialect"));
+
+		Assertions.assertEquals("org.h2.Driver", o.read.getDriverClass(), "Check read.driverClass");
+		Assertions.assertNull(o.read.getUser(), "Check read.user");
+		Assertions.assertNull(o.read.getPassword(), "Check read.password");
+		Assertions.assertEquals("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1",  o.read.getUrl(), "Check read.url");
+		Assertions.assertEquals(Duration.seconds(1L), o.read.getMaxWaitForConnection(), "Check read.maxWaitForConnection");
+		Assertions.assertEquals(Optional.of("SELECT 1"), o.read.getValidationQuery(), "Check read.validationQuery");
+		Assertions.assertEquals(Optional.of(Duration.seconds(10L)), o.read.getValidationQueryTimeout(), "Check read.validationQueryTimeout");
+		Assertions.assertEquals(1, o.read.getMinSize(), "Check read.minSize");
+		Assertions.assertEquals(10, o.read.getMaxSize(), "Check read.maxSize");
+		Assertions.assertNull(o.read.getReadOnlyByDefault(), "Check read.readOnlyByDefault");
+		Assertions.assertFalse(o.read.getCheckConnectionWhileIdle(), "Check read.checkConnectionWhileIdle");
+		Assertions.assertFalse(o.read.getCheckConnectionOnBorrow(), "Check read.checkConnectionOnBorrow");
+		Assertions.assertEquals(TransactionIsolation.READ_COMMITTED, o.read.getDefaultTransactionIsolation(), "Check read.defaultTransactionIsolation");
+		assertThat(o.read.getProperties()).as("Check read.properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.H2Dialect"));
 	}
 }
