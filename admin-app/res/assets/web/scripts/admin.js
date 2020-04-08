@@ -437,7 +437,8 @@ var ConfigurationHandler = new EditTemplate({
 	          new TextField('admins', 'Cosmos Table Endpoint', (v, p) => p.TableEndpoint),
 	          new TextField('session', 'Session Redis Host', (v, p) => p.host),
 	          new TextField('twilio', 'Twilio', (v, p) => p.baseUrl),
-	          new TextField('trans', 'mySQL URL', (v, p) => p.url) ],
+	          new TextField('trans', 'mySQL URL', (v, p) => p.url),
+	          new TextField('read', 'mySQL-ro URL', (v, p) => p.url) ],
 
 	CAPTION_SUBMIT: undefined,
 	CAPTION_CANCEL: undefined,
