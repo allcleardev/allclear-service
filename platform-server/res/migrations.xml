@@ -314,30 +314,7 @@
 		<addUniqueConstraint tableName="symptoms_log" columnNames="person_id, symptom_id, started_at" />
 		<addForeignKeyConstraint baseTableName="symptoms_log" baseColumnNames="person_id" referencedTableName="people" referencedColumnNames="id" constraintName="fk_symptoms_log_1" onDelete="CASCADE" />
 
-		<sql endDelimiter="|" dbms="mysql"><![CDATA[
-			INSERT INTO symptoms_log (person_id, symptom_id, started_at) SELECT person_id, symptom_id, created_at FROM symptoms |
-
-			CREATE TRIGGER ins_symptoms AFTER INSERT ON symptoms
-			FOR EACH ROW
-			BEGIN
-				INSERT INTO symptoms_log (person_id, symptom_id, started_at, ended_at)
-				VALUES (NEW.person_id, NEW.symptom_id, NEW.created_at, NULL);
-			END |
-
-			CREATE TRIGGER del_symptoms AFTER DELETE ON symptoms
-			FOR EACH ROW
-			BEGIN
-				UPDATE symptoms_log SET ended_at = CURRENT_TIMESTAMP
-				WHERE person_id = OLD.person_id AND symptom_id = OLD.symptom_id AND started_at = OLD.created_at;
-			END |
-		]]></sql>
-
 		<rollback>
-			<sql dbms="mysql"><![CDATA[
-				DROP TRIGGER del_symptoms;
-				DROP TRIGGER ins_symptoms;
-			]]></sql>
-
 			<dropTable tableName="symptoms_log" />
 		</rollback>
 	</changeSet>
