@@ -41,7 +41,7 @@ import app.allclear.twilio.model.*;
 public class RegistrationDAOTest
 {
 	public static final Pattern PATTERN_CODE = Pattern.compile("[A-Z0-9]{6}");
-	public static final String MESSAGE = "%s\nUse this code for AllClear verification or click https://app-test.allclear.app/register?phone=%s&code=%s";
+	public static final String MESSAGE = "Your AllClear passcode to register is %s or click this magic link https://app-test.allclear.app/register?phone=%s&code=%s";
 
 	private static RegistrationDAO dao;
 	private static FakeRedisClient redis;

@@ -1,2 +1,1 @@
-%s
-Use this code for AllClear verification or click ${baseUrl}/auth?phone=%s&token=%s
+Your AllClear passcode to login is %s or click this magic link ${baseUrl}/auth?phone=%s&token=%s

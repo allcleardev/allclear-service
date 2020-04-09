@@ -35,7 +35,7 @@ import app.allclear.twilio.model.SMSResponse;
 public class SessionDAOTest
 {
 	public static final Pattern PATTERN_TOKEN = Pattern.compile("[A-Z0-9]{6}");
-	public static final String MESSAGE = "%s\nUse this code for AllClear verification or click https://app-test.allclear.app/auth?phone=%s&token=%s";
+	public static final String MESSAGE = "Your AllClear passcode to login is %s or click this magic link https://app-test.allclear.app/auth?phone=%s&token=%s";
 
 	private static final FakeRedisClient redis = new FakeRedisClient();
 	private static final TwilioClient twilio = mock(TwilioClient.class);

@@ -1,2 +1,1 @@
-%s
-Use this code for AllClear verification or click ${baseUrl}/register?phone=%s&code=%s
+Your AllClear passcode to register is %s or click this magic link ${baseUrl}/register?phone=%s&code=%s
