@@ -74,12 +74,12 @@ public class RegistrationDAO
 		
 		return redis.operation(c -> {
 			int i = 0;
-			var code = RandomStringUtils.randomAlphanumeric(CODE_LENGTH).toUpperCase();
+			var code = RandomStringUtils.randomNumeric(CODE_LENGTH).toUpperCase();
 			var key = key(request.phone, code);
 			while (c.exists(key))
 			{
 				if (10 < i++) throw new IllegalArgumentException("CanNOT generate identifier - 10 tries.");
-				key = key(request.phone, code = RandomStringUtils.randomAlphanumeric(CODE_LENGTH).toUpperCase());
+				key = key(request.phone, code = RandomStringUtils.randomNumeric(CODE_LENGTH).toUpperCase());
 			}
 
 			twilio.send(new SMSRequest(from, String.format(message, code, encode(request.phone, UTF_8), encode(code, UTF_8)), request.phone));
