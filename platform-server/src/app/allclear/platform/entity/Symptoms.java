@@ -46,7 +46,7 @@ public class Symptoms implements PeopleChild
 
 	@Transient @Override public String getChildId() { return getSymptomId(); }
 	@Transient @Override public void setChildId(final String newValue) { setSymptomId(newValue); }
-	@Transient @Override public String getChildName() { return Symptom.VALUES.get(getSymptomId()).name; }
+	@Transient @Override public String getChildName() { return Symptom.get(getSymptomId()).name; }
 	
 	@Column(name="created_at", columnDefinition="DATETIME", nullable=false)
 	public Date getCreatedAt() { return createdAt; }

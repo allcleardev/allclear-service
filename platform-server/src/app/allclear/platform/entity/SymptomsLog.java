@@ -1,6 +1,5 @@
 package app.allclear.platform.entity;
 
-import java.io.Serializable;
 import java.util.*;
 
 import javax.persistence.*;
@@ -10,6 +9,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 
+import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.type.Symptom;
 import app.allclear.platform.value.SymptomsLogValue;
 
@@ -26,9 +26,11 @@ import app.allclear.platform.value.SymptomsLogValue;
 @Entity
 @Cacheable
 @DynamicUpdate
-@Table(name="symptoms_log")
+@Table(name="symptoms_log",
+	uniqueConstraints={@UniqueConstraint(name="unq_symptoms_log", columnNames={"person_id", "symptom_id", "started_at"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE, region="symptoms_log")
-public class SymptomsLog implements Serializable
+@NamedQueries(@NamedQuery(name="updateSymptomsLog", query="UPDATE SymptomsLog o SET o.endedAt = CURRENT_TIMESTAMP WHERE o.personId = :personId AND o.symptomId = :childId AND o.startedAt = :createdAt"))
+public class SymptomsLog implements PeopleChild
 {
 	private final static long serialVersionUID = 1L;
 
@@ -47,6 +49,12 @@ public class SymptomsLog implements Serializable
 	public String getSymptomId() { return symptomId; }
 	public String symptomId;
 	public void setSymptomId(final String newValue) { symptomId = newValue; }
+
+	@Transient @Override public String getChildId() { return getSymptomId(); }
+	@Transient @Override public void setChildId(final String newValue) { setSymptomId(newValue); }
+	@Transient @Override public String getChildName() { return Symptom.get(getSymptomId()).name; }
+	@Transient @Override public Date getCreatedAt() { return getStartedAt(); }
+	@Transient @Override public void setCreatedAt(final Date newValue) { setStartedAt(newValue); }
 
 	@Column(name="started_at", columnDefinition="DATETIME", nullable=false)
 	public Date getStartedAt() { return startedAt; }
@@ -84,6 +92,15 @@ public class SymptomsLog implements Serializable
 		this(person, value.symptomId, value.startedAt, value.endedAt);
 	}
 
+	public SymptomsLog(final People person, final CreatedValue value)
+	{
+		this.personId = (this.person = person).getId();
+		this.symptomId = value.id;
+		this.startedAt = (null != value.createdAt) ? value.createdAt : (value.createdAt = person.getUpdatedAt());
+
+		if (null == value.name) value.name = Symptom.VALUES.get(value.id).name; 
+	}
+
 	@Override
 	public boolean equals(final Object o)
 	{
@@ -98,7 +115,16 @@ public class SymptomsLog implements Serializable
 	}
 
 	@Transient
-	public SymptomsLogValue toValue()
+	public CreatedValue toValue()
+	{
+		return new CreatedValue(
+			getSymptomId(),
+			Symptom.get(getSymptomId()).name,
+			getStartedAt());
+	}
+
+	@Transient
+	public SymptomsLogValue toValueX()
 	{
 		return new SymptomsLogValue(
 			getId(),

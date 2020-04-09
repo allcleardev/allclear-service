@@ -92,6 +92,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		add(s, value.conditions, v -> new Conditions(record, v));
 		add(s, value.exposures, v -> new Exposures(record, v));
 		add(s, value.symptoms, v -> new Symptoms(record, v));
+		add(s, value.symptoms, v -> new SymptomsLog(record, v));
 
 		return value.withId(record.getId());
 	}
@@ -119,7 +120,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		var s = currentSession();
 		update(s, record, value.conditions, record.getConditions(), "deleteConditionsByPerson", v -> new Conditions(r, v));
 		update(s, record, value.exposures, record.getExposures(), "deleteExposuresByPerson", v -> new Exposures(r, v));
-		update(s, record, value.symptoms, record.getSymptoms(), "deleteSymptomsByPerson", v -> new Symptoms(r, v));
+		update(s, record, value.symptoms, record.getSymptoms(), v -> new Symptoms(r, v), v -> new SymptomsLog(r, v), "updateSymptomsLog");
 
 		return value.withId(record.update(value, admin).getId());
 	}
@@ -152,6 +153,45 @@ public class PeopleDAO extends AbstractDAO<People>
 
 		// Remove deleted items.
 		return (int) (count + existing.stream().filter(e -> values.stream().noneMatch(v -> (null != v) && v.id.equals(e.getChildId()))).peek(e -> s.delete(e)).count());
+	}
+
+	private int update(final Session s,
+		final People record,
+		final List<CreatedValue> values,
+		final List<? extends PeopleChild> existing,
+		final Function<CreatedValue, ? extends PeopleChild> toEntity,
+		final Function<CreatedValue, ? extends PeopleChild> toLogEntity,
+		final String updateQuery)
+	{
+		if (null == values) return 0;	// No change
+		// if (values.isEmpty()) return namedQueryX(deleteQuery).setParameter("personId", record.getId()).executeUpdate(); MUST delete each symptom one at a time to log change. DLS on 4/9/2020.
+
+		// Add new items.
+		var count = values.stream().filter(v -> {
+				if (null == v) return false;
+				var o = existing.stream().filter(e -> e.getChildId().equals(v.id)).findFirst().orElse(null);
+
+				if (null == o) return true;
+
+				v.withName(o.getChildName()).withCreatedAt(o.getCreatedAt());	// Denormalize supplied values.
+				return false;
+			})
+			.peek(v -> {
+				s.persist(toEntity.apply(v));
+				s.persist(toLogEntity.apply(v));
+			})
+			.count();
+
+
+		// Remove deleted items.
+		var update = namedQueryX(updateQuery);
+		return (int) (count + existing.stream()
+			.filter(e -> values.stream().noneMatch(v -> (null != v) && v.id.equals(e.getChildId())))
+			.peek(e -> {
+				update.setParameter("personId", e.getPersonId()).setParameter("childId", e.getChildId()).setParameter("createdAt", e.getCreatedAt()).executeUpdate();
+				s.delete(e);
+			})
+			.count());
 	}
 
 	/** Based on the phone number, the Person is retrieved and marked authenticated.

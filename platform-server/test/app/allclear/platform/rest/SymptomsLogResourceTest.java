@@ -1,5 +1,6 @@
 package app.allclear.platform.rest;
 
+import static java.util.stream.Collectors.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static app.allclear.testing.TestingUtils.*;
 import static app.allclear.platform.type.Symptom.*;
@@ -56,6 +57,9 @@ public class SymptomsLogResourceTest
 	private static PeopleValue PERSON_1 = null;
 	private static SessionValue PERSON_1_ = null;
 
+	private static int ENDED_PERSON = 0;
+	private static int ENDED_PERSON_1 = 0;
+
 	public final ResourceExtension RULE = ResourceExtension.builder()
 		.addResource(new ValidationExceptionMapper())
 		.addResource(new SymptomsLogResource(dao, sessionDao)).build();
@@ -75,50 +79,90 @@ public class SymptomsLogResourceTest
 		peopleDao = new PeopleDAO(factory);
 	}
 
+	public static Stream<Arguments> search()
+	{
+		var size = LIST.size();
+		var hourAgo = hourAgo();
+		var hourAhead = hourAhead();
+		var total = LIST.size() * 2;
+
+		return Stream.of(
+			arguments(ADMIN, new SymptomsLogFilter(1, 100), total),
+			arguments(ADMIN, new SymptomsLogFilter(1, 100).withPersonId(PERSON_1.id), LIST.size()),
+			arguments(ADMIN, new SymptomsLogFilter(1, 100).withSymptomId(DIARRHEA.id), 2),
+			arguments(ADMIN, new SymptomsLogFilter(1, 100).withStartedAtFrom(hourAgo), total),
+			arguments(ADMIN, new SymptomsLogFilter(1, 100).withStartedAtTo(hourAhead), total),
+			arguments(ADMIN, new SymptomsLogFilter(1, 100).withStartedAtFrom(hourAhead), 0),
+			arguments(ADMIN, new SymptomsLogFilter(1, 100).withStartedAtTo(hourAgo), 0),
+			arguments(ADMIN, new SymptomsLogFilter(1, 100).withHasEndedAt(true), ENDED_PERSON + ENDED_PERSON_1),
+			arguments(ADMIN, new SymptomsLogFilter(1, 100).withHasEndedAt(false), total - ENDED_PERSON - ENDED_PERSON_1),
+			arguments(ADMIN, new SymptomsLogFilter(1, 100).withEndedAtFrom(hourAgo), ENDED_PERSON + ENDED_PERSON_1),
+			arguments(ADMIN, new SymptomsLogFilter(1, 100).withEndedAtTo(hourAhead), ENDED_PERSON + ENDED_PERSON_1),
+			arguments(PERSON_, new SymptomsLogFilter(1, 100), size),
+			arguments(PERSON_, new SymptomsLogFilter(1, 100).withPersonId(PERSON_1.id), size),
+			arguments(PERSON_, new SymptomsLogFilter(1, 100).withSymptomId(RUNNY_NOSE.id), 1),
+			arguments(PERSON_, new SymptomsLogFilter(1, 100).withStartedAtFrom(hourAgo), size),
+			arguments(PERSON_, new SymptomsLogFilter(1, 100).withStartedAtTo(hourAhead), size),
+			arguments(PERSON_, new SymptomsLogFilter(1, 100).withStartedAtFrom(hourAhead), 0),
+			arguments(PERSON_, new SymptomsLogFilter(1, 100).withStartedAtTo(hourAgo), 0),
+			arguments(PERSON_, new SymptomsLogFilter(1, 100).withHasEndedAt(true), ENDED_PERSON),
+			arguments(PERSON_, new SymptomsLogFilter(1, 100).withHasEndedAt(false), size - ENDED_PERSON),
+			arguments(PERSON_, new SymptomsLogFilter(1, 100).withEndedAtFrom(hourAgo), ENDED_PERSON),
+			arguments(PERSON_, new SymptomsLogFilter(1, 100).withEndedAtTo(hourAhead), ENDED_PERSON),
+			arguments(PERSON_1_, new SymptomsLogFilter(1, 100), size),
+			arguments(PERSON_1_, new SymptomsLogFilter(1, 100).withPersonId(null), size),
+			arguments(PERSON_1_, new SymptomsLogFilter(1, 100).withSymptomId(NONE.id), 1),
+			arguments(PERSON_1_, new SymptomsLogFilter(1, 100).withStartedAtFrom(hourAgo()), size),
+			arguments(PERSON_1_, new SymptomsLogFilter(1, 100).withStartedAtTo(hourAhead), size),
+			arguments(PERSON_1_, new SymptomsLogFilter(1, 100).withStartedAtFrom(hourAhead), 0),
+			arguments(PERSON_1_, new SymptomsLogFilter(1, 100).withStartedAtTo(hourAgo), 0),
+			arguments(PERSON_1_, new SymptomsLogFilter(1, 100).withHasEndedAt(true), ENDED_PERSON_1),
+			arguments(PERSON_1_, new SymptomsLogFilter(1, 100).withHasEndedAt(false), size - ENDED_PERSON_1),
+			arguments(PERSON_1_, new SymptomsLogFilter(1, 100).withEndedAtFrom(hourAgo), ENDED_PERSON_1),
+			arguments(PERSON_1_, new SymptomsLogFilter(1, 100).withEndedAtTo(hourAhead), ENDED_PERSON_1)
+			);
+	}
+
 	@Test
 	public void add()
 	{
 		ADMIN = sessionDao.add(new AdminValue("admin", true), false);
-		PERSON_ = sessionDao.add(PERSON = peopleDao.add(new PeopleValue("once", "888-555-1000", true)), false);
-		PERSON_1_ = sessionDao.add(PERSON_1 = peopleDao.add(new PeopleValue("twice", "888-555-1001", true)), false);
-
-		int i = 0;
-		for (var o : LIST)
-			for (var p : List.of(PERSON, PERSON_1))
-				dao.add(new SymptomsLogValue(p.id, o.id, utc(2020, 4, ++i), (0 == (i % 3)) ? utc(2020, 5, i) : null));
+		PERSON_ = sessionDao.add(PERSON = peopleDao.add(new PeopleValue("once", "888-555-1000", true).withSymptoms(LIST.stream().map(v -> v.created()).collect(toList()))), false);
+		PERSON_1_ = sessionDao.add(PERSON_1 = peopleDao.add(new PeopleValue("twice", "888-555-1001", true).withSymptoms(LIST.stream().map(v -> v.created()).collect(toList()))), false);
 	}
 
-	public static Stream<Arguments> search()
+	@ParameterizedTest
+	@MethodSource("search")
+	public void add_search(final SessionValue user, final SymptomsLogFilter filter, final int total)
 	{
-		return Stream.of(
-			arguments(ADMIN, new SymptomsLogFilter(1, 100), LIST.size() * 2),
-			arguments(ADMIN, new SymptomsLogFilter(1, 100).withPersonId(PERSON_1.id), LIST.size()),
-			arguments(ADMIN, new SymptomsLogFilter(1, 100).withSymptomId(DIARRHEA.id), 2),
-			arguments(ADMIN, new SymptomsLogFilter(1, 100).withStartedAtFrom(utc(2020, 4, 16)), 5),
-			arguments(ADMIN, new SymptomsLogFilter(1, 100).withStartedAtTo(utc(2020, 4, 16)), 16),
-			arguments(ADMIN, new SymptomsLogFilter(1, 100).withHasEndedAt(true), 6),
-			arguments(ADMIN, new SymptomsLogFilter(1, 100).withHasEndedAt(false), 14),
-			arguments(ADMIN, new SymptomsLogFilter(1, 100).withEndedAtFrom(utc(2020, 5, 4)), 5),
-			arguments(ADMIN, new SymptomsLogFilter(1, 100).withEndedAtTo(utc(2020, 5, 4)), 1),
-			arguments(PERSON_, new SymptomsLogFilter(1, 100), LIST.size()),
-			arguments(PERSON_, new SymptomsLogFilter(1, 100).withPersonId(PERSON_1.id), LIST.size()),
-			arguments(PERSON_, new SymptomsLogFilter(1, 100).withSymptomId(RUNNY_NOSE.id), 1),
-			arguments(PERSON_, new SymptomsLogFilter(1, 100).withStartedAtFrom(utc(2020, 4, 16)), 2),
-			arguments(PERSON_, new SymptomsLogFilter(1, 100).withStartedAtTo(utc(2020, 4, 16)), 8),
-			arguments(PERSON_, new SymptomsLogFilter(1, 100).withHasEndedAt(true), 3),
-			arguments(PERSON_, new SymptomsLogFilter(1, 100).withHasEndedAt(false), 7),
-			arguments(PERSON_, new SymptomsLogFilter(1, 100).withEndedAtFrom(utc(2020, 5, 4)), 2),
-			arguments(PERSON_, new SymptomsLogFilter(1, 100).withEndedAtTo(utc(2020, 5, 4)), 1),
-			arguments(PERSON_1_, new SymptomsLogFilter(1, 100), LIST.size()),
-			arguments(PERSON_1_, new SymptomsLogFilter(1, 100).withPersonId(null), LIST.size()),
-			arguments(PERSON_1_, new SymptomsLogFilter(1, 100).withSymptomId(NONE.id), 1),
-			arguments(PERSON_1_, new SymptomsLogFilter(1, 100).withStartedAtFrom(utc(2020, 4, 16)), 3),
-			arguments(PERSON_1_, new SymptomsLogFilter(1, 100).withStartedAtTo(utc(2020, 4, 16)), 8),
-			arguments(PERSON_1_, new SymptomsLogFilter(1, 100).withHasEndedAt(true), 3),
-			arguments(PERSON_1_, new SymptomsLogFilter(1, 100).withHasEndedAt(false), 7),
-			arguments(PERSON_1_, new SymptomsLogFilter(1, 100).withEndedAtFrom(utc(2020, 5, 4)), 3),
-			arguments(PERSON_1_, new SymptomsLogFilter(1, 100).withEndedAtTo(utc(2020, 5, 4)), 0)
-			);
+		sessionDao.current(user);
+
+		var response = request("search").post(Entity.json(filter));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var results = response.readEntity(TYPE_QUERY_RESULTS);
+		Assertions.assertNotNull(results, "Exists");
+		Assertions.assertEquals((long) total, results.total, "Check total");
+	}
+
+	@Test
+	public void modify()
+	{
+		var exclusions = Set.of(FATIGUE.id, NONE.id, RUNNY_NOSE.id);
+
+		peopleDao.update(PERSON.withSymptoms(List.of()));
+		peopleDao.update(PERSON_1.withSymptoms(LIST.stream().filter(v -> !exclusions.contains(v.id)).map(v -> v.created()).collect(toList())));
+
+		ENDED_PERSON = LIST.size();
+		ENDED_PERSON_1 = exclusions.size();
+	}
+
+	@Test
+	public void modify_check()
+	{
+		sessionDao.current(ADMIN);
+		System.out.println("PERSON: " + dao.search(new SymptomsLogFilter().withPersonId(PERSON.id)).records);
+		System.out.println("PERSON_1: " + dao.search(new SymptomsLogFilter().withPersonId(PERSON_1.id)).records);
 	}
 
 	@ParameterizedTest

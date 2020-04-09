@@ -137,7 +137,7 @@ public class SymptomsLogDAO extends AbstractDAO<SymptomsLog>
 		var record = get(id);
 		if (null == record) return null;
 
-		return record.toValue();
+		return record.toValueX();
 	}
 
 	/** Gets a single SymptomsLog value by identifier.
@@ -148,7 +148,7 @@ public class SymptomsLogDAO extends AbstractDAO<SymptomsLog>
 	 */
 	public SymptomsLogValue getByIdWithException(final Long id) throws ObjectNotFoundException
 	{
-		return findWithException(id).toValue();
+		return findWithException(id).toValueX();
 	}
 
 	/** Searches the SymptomsLog entity based on the supplied filter.
@@ -163,7 +163,7 @@ public class SymptomsLogDAO extends AbstractDAO<SymptomsLog>
 		var v = new QueryResults<SymptomsLogValue, SymptomsLogFilter>(builder.aggregate(COUNT), filter);
 		if (v.isEmpty()) return v;
 
-		return v.withRecords(builder.orderBy(ORDER.normalize(v)).run(v).stream().map(o -> o.toValue()).collect(Collectors.toList()));
+		return v.withRecords(builder.orderBy(ORDER.normalize(v)).run(v).stream().map(o -> o.toValueX()).collect(Collectors.toList()));
 	}
 
 	/** Counts the number of SymptomsLog entities based on the supplied filter.

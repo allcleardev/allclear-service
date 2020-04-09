@@ -341,4 +341,10 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.0.84-symptoms_log" author="smalleyd" dbms="mysql">
+		<sql><![CDATA[
+			INSERT INTO symptoms_log (person_id, symptom_id, started_at) SELECT person_id, symptom_id, created_at FROM symptoms;
+		]]></sql>
+	</changeSet>
+
 </databaseChangeLog>
