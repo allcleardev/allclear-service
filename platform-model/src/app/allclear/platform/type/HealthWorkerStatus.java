@@ -20,7 +20,7 @@ public class HealthWorkerStatus implements Serializable
 
 	public static final HealthWorkerStatus HEALTH_WORKER= new HealthWorkerStatus("h", "I am a Health Worker or First Responder", true);
 	public static final HealthWorkerStatus LIVE_WITH = new HealthWorkerStatus("l", "I live with Health Worker or First Responder", false);
-	public static final HealthWorkerStatus NEITHER = new HealthWorkerStatus("", "Neither", false);
+	public static final HealthWorkerStatus NEITHER = new HealthWorkerStatus("n", "Neither", false);
 
 	public static final List<HealthWorkerStatus> LIST = List.of(HEALTH_WORKER, LIVE_WITH, NEITHER);
 	public static final Map<String, HealthWorkerStatus> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));

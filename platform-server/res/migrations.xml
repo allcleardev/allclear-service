@@ -342,4 +342,26 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.0.82_ALLCLEAR-189_mysql" author="smalleyd" dbms="mysql">
+		<sql>
+			UPDATE people SET health_worker_status_id = 'n' WHERE health_worker_status_id IS NULL;
+			ALTER TABLE people MODIFY COLUMN health_worker_status_id CHAR(1) NOT NULL DEFAULT 'n' COMMENT 'Refers to the state of employment as a healthcare worker.';
+		</sql>
+
+		<rollback>
+			<sql>
+				ALTER TABLE people MODIFY COLUMN health_worker_status_id CHAR(1) DEFAULT NULL COMMENT 'Refers to the state of employment as a healthcare worker.';
+				UPDATE people SET health_worker_status_id = NULL WHERE health_worker_status_id = 'n';
+			</sql>
+		</rollback>
+	</changeSet>
+
+	<changeSet id="v1.0.82_ALLCLEAR-189_mysql" author="smalleyd" dbms="h2">
+		<addNotNullConstraint tableName="people" columnName="health_worker_status_id" columnDataType="CHAR(1)" defaultNullValue="n" />	
+
+		<rollback>
+			<dropNotNullConstraint tableName="people" columnName="health_worker_status_id" columnDataType="CHAR(1)" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

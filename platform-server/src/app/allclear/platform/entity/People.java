@@ -311,7 +311,7 @@ public class People implements Serializable
 			getSexId(),
 			(null != getSexId()) ? Sex.get(getSexId()) : null,
 			getHealthWorkerStatusId(),
-			(null != getHealthWorkerStatusId()) ? HealthWorkerStatus.get(getHealthWorkerStatusId()) : null,
+			HealthWorkerStatus.get(getHealthWorkerStatusId()),
 			getLatitude(),
 			getLongitude(),
 			isAlertable(),

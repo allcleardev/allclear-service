@@ -139,7 +139,7 @@ public class PeopleValue implements Serializable
 		final String phone,
 		final boolean active)
 	{
-		this(name, phone, null, null, null, null, null, null, null, null, null, null, false, active);
+		this(name, phone, null, null, null, null, null, null, null, HealthWorkerStatus.NEITHER.id, null, null, false, active);
 	}
 
 	public PeopleValue(

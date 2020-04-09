@@ -199,7 +199,7 @@ public class PeopleDAO extends AbstractDAO<People>
 			.ensureLength("statusId", "Status", value.statusId, PeopleValue.MAX_LEN_STATUS_ID)
 			.ensureLength("statureId", "Stature", value.statureId, PeopleValue.MAX_LEN_STATURE_ID)
 			.ensureLength("sexId", "Sex", value.sexId, PeopleValue.MAX_LEN_SEX_ID)
-			.ensureLength("healthWorkerStatusId", "HealthWorkerStatusId", value.healthWorkerStatusId, PeopleValue.MAX_LEN_HEALTH_WORKER_STATUS_ID)
+			.ensureExistsAndLength("healthWorkerStatusId", "HealthWorkerStatusId", value.healthWorkerStatusId, PeopleValue.MAX_LEN_HEALTH_WORKER_STATUS_ID)
 			.ensureLatitude("latitude", "Latitude", value.latitude)
 			.ensureLongitude("longitude", "Longitude", value.longitude)
 			.check();
@@ -214,7 +214,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		if ((null != value.sexId) && (null == (value.sex = Sex.get(value.sexId))))
 			validator.add("sexId", "The Sex ID '%s' is invalid.", value.sexId);
 
-		if ((null != value.healthWorkerStatusId) && (null == (value.healthWorkerStatus = HealthWorkerStatus.get(value.healthWorkerStatusId))))
+		if (null == (value.healthWorkerStatus = HealthWorkerStatus.get(value.healthWorkerStatusId)))
 			validator.add("healthWorkerStatusId", "The Health Worker Status ID '%s' is invalid.", value.healthWorkerStatusId);
 
 		// Check children.
@@ -393,10 +393,9 @@ public class PeopleDAO extends AbstractDAO<People>
 			.addNotNull("o.statusId", filter.hasStatusId)
 			.add("statureId", "o.statureId = :statureId", filter.statureId)
 			.addNotNull("o.statureId", filter.hasStatureId)
-			.add("sexId", "o.sexId LIKE :sexId", filter.sexId)
+			.add("sexId", "o.sexId = :sexId", filter.sexId)
 			.addNotNull("o.sexId", filter.hasSexId)
-			.addContains("healthWorkerStatusId", "o.healthWorkerStatusId LIKE :healthWorkerStatusId", filter.healthWorkerStatusId)
-			.addNotNull("o.healthWorkerStatusId", filter.hasHealthWorkerStatusId)
+			.add("healthWorkerStatusId", "o.healthWorkerStatusId = :healthWorkerStatusId", filter.healthWorkerStatusId)
 			.add("latitude", "o.latitude = :latitude", filter.latitude)
 			.addNotNull("o.latitude", filter.hasLatitude)
 			.add("latitudeFrom", "o.latitude >= :latitudeFrom", filter.latitudeFrom)

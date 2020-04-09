@@ -186,6 +186,12 @@ public class PeopleDAOTest
 	}
 
 	@Test
+	public void add_missingHealthWorkerStatusId()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withHealthWorkerStatusId(null)));
+	}
+
+	@Test
 	public void add_tooHighLatitude()
 	{
 		assertThrows(ValidationException.class, () -> dao.add(createValid().withLatitude(bg("91"))));
@@ -559,7 +565,6 @@ public class PeopleDAOTest
 			arguments(new PeopleFilter(1, 20).withSexId(VALUE.sexId), 1L),
 			arguments(new PeopleFilter(1, 20).withHasSexId(true), 1L),
 			arguments(new PeopleFilter(1, 20).withHealthWorkerStatusId(VALUE.healthWorkerStatusId), 1L),
-			arguments(new PeopleFilter(1, 20).withHasHealthWorkerStatusId(true), 1L),
 			arguments(new PeopleFilter(1, 20).withLatitude(VALUE.latitude), 1L),
 			arguments(new PeopleFilter(1, 20).withHasLatitude(true), 1L),
 			arguments(new PeopleFilter(1, 20).withLatitudeFrom(downLat), 1L),
@@ -611,7 +616,6 @@ public class PeopleDAOTest
 			arguments(new PeopleFilter(1, 20).withSexId("invalid"), 0L),
 			arguments(new PeopleFilter(1, 20).withHasSexId(false), 0L),
 			arguments(new PeopleFilter(1, 20).withHealthWorkerStatusId("invalid"), 0L),
-			arguments(new PeopleFilter(1, 20).withHasHealthWorkerStatusId(false), 0L),
 			arguments(new PeopleFilter(1, 20).withLatitude(upLat), 0L),
 			arguments(new PeopleFilter(1, 20).withHasLatitude(false), 0L),
 			arguments(new PeopleFilter(1, 20).withLatitudeFrom(upLat), 0L),
