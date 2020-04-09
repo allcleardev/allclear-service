@@ -295,4 +295,51 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.0.81-symptoms_log" author="smalleyd">
+		<createTable tableName="symptoms_log" remarks="Represents the changes of symptoms over time.">
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true" primaryKeyName="pk_symptoms_log" />
+			</column>
+			<column name="person_id" type="VARCHAR(10)" remarks="Refers to the person.">
+				<constraints nullable="false" />
+			</column>
+			<column name="symptom_id" type="CHAR(2)" remarks="Refers to the symptom.">
+				<constraints nullable="false" />
+			</column>
+			<column name="started_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents when this round of a symptom started.">
+				<constraints nullable="false" />
+			</column>
+			<column name="ended_at" type="DATETIME" remarks="Represents when this round of a symptom ended." />
+		</createTable>
+		<addUniqueConstraint tableName="symptoms_log" columnNames="person_id, symptom_id, started_at" />
+		<addForeignKeyConstraint baseTableName="symptoms_log" baseColumnNames="person_id" referencedTableName="people" referencedColumnNames="id" constraintName="fk_symptoms_log_1" onDelete="CASCADE" />
+
+		<sql endDelimiter="|" dbms="mysql"><![CDATA[
+			INSERT INTO symptoms_log (person_id, symptom_id, started_at) SELECT person_id, symptom_id, created_at FROM symptoms |
+
+			CREATE TRIGGER ins_symptoms AFTER INSERT ON symptoms
+			FOR EACH ROW
+			BEGIN
+				INSERT INTO symptoms_log (person_id, symptom_id, started_at, ended_at)
+				VALUES (NEW.person_id, NEW.symptom_id, NEW.created_at, NULL);
+			END |
+
+			CREATE TRIGGER del_symptoms AFTER DELETE ON symptoms
+			FOR EACH ROW
+			BEGIN
+				UPDATE symptoms_log SET ended_at = CURRENT_TIMESTAMP
+				WHERE person_id = OLD.person_id AND symptom_id = OLD.symptom_id AND started_at = OLD.created_at;
+			END |
+		]]></sql>
+
+		<rollback>
+			<sql dbms="mysql"><![CDATA[
+				DROP TRIGGER del_symptoms;
+				DROP TRIGGER ins_symptoms;
+			]]></sql>
+
+			<dropTable tableName="symptoms_log" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

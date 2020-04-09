@@ -25,7 +25,7 @@ public class Symptom implements Serializable
 	public static final Symptom FATIGUE = new Symptom("fg", "Fatigue");
 	public static final Symptom FEVER = new Symptom("fv", "Fever");
 	public static final Symptom MUSCLE_ACHE = new Symptom("ma", "Muscle ache");
-	public static final Symptom NAUSEA_VOMITING = new Symptom("nv", "Nausea and/or vomiting");
+	public static final Symptom NAUSEA_VOMITING = new Symptom("nv", "Nausea and/or Vomiting");
 	public static final Symptom NONE = new Symptom("no", "None");
 	public static final Symptom RUNNY_NOSE = new Symptom("rn", "Runny Nose/Nasal Congestion");
 	public static final Symptom SHORTNESS_OF_BREATH = new Symptom("sb", "Shortness of Breath");

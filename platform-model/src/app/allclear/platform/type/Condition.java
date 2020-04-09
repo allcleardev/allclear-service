@@ -22,7 +22,7 @@ public class Condition implements Serializable
 
 	public static final Condition CARDIO_RESPIRATORY_DISEASE = new Condition("cr", "Cardiovascular/Respiratory Disease");
 	public static final Condition DIABETIC = new Condition("db", "Diabetic");
-	public static final Condition KIDNEY_CIRRHOSIS = new Condition("kc", "Kidney/Cirrhosis failure");
+	public static final Condition KIDNEY_CIRRHOSIS = new Condition("kc", "Kidney Failure or Cirrhosis");
 	public static final Condition NONE = new Condition("no", "None");
 	public static final Condition PREGNANT = new Condition("pg", "Pregnant");
 	public static final Condition WEAKENED_IMMUNE_SYSTEM = new Condition("wi", "Weakened Immune System");
