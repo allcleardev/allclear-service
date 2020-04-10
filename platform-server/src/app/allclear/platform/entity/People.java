@@ -229,7 +229,6 @@ public class People implements Serializable
 		setLastName(value.lastName);
 		setDob(value.dob);
 		setStatusId(value.statusId);
-		setStatureId(value.statureId);
 		setSexId(value.sexId);
 		setHealthWorkerStatusId(value.healthWorkerStatusId);
 		setLatitude(value.latitude);
@@ -239,6 +238,7 @@ public class People implements Serializable
 		{
 			setActive(value.active);
 			setAuthAt(value.authAt);
+			setStatureId(value.statureId);	// Users canNOT set their own stature. That's an admin function. DLS on 4/10/2020.
 			setPhoneVerifiedAt(value.phoneVerifiedAt);
 			setEmailVerifiedAt(value.emailVerifiedAt);
 		}
@@ -248,6 +248,8 @@ public class People implements Serializable
 			value.authAt = getAuthAt();
 			value.phoneVerifiedAt = getPhoneVerifiedAt();
 			value.emailVerifiedAt = getEmailVerifiedAt();
+
+			if (null != (value.statureId = getStatureId())) value.stature = PeopleStature.get(value.statureId);
 		}
 		value.createdAt = getCreatedAt();
 		setUpdatedAt(value.updatedAt = new Date());
