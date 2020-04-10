@@ -347,4 +347,16 @@
 		]]></sql>
 	</changeSet>
 
+	<changeSet id="v1.0.89_fixes" author="smalleyd" dbms="mysql">
+		<sql><![CDATA[
+			ALTER TABLE symptoms_log RENAME INDEX person_id TO unq_symptoms_log;
+		]]></sql>
+
+		<rollback>
+			<sql><![CDATA[
+				ALTER TABLE symptoms_log RENAME INDEX unq_symptoms_log TO person_id;
+			]]></sql>
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>
