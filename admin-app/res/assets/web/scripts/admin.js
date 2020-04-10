@@ -416,6 +416,9 @@ var SessionsHandler = new ListTemplate({
 	}
 });
 
+console.log('RegistrationsHandler', RegistrationsHandler, RegistrationsHandler.FIELDS, RegistrationsHandler.EDITOR);
+console.log('SessionsHandler', SessionsHandler, SessionsHandler.FIELDS, SessionsHandler.EDITOR);
+
 var TestsHandler = new ListTemplate({
 	NAME: 'tests',
 	SINGULAR: 'Test',
