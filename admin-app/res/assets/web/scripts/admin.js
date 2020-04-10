@@ -224,6 +224,10 @@ var PeopleHandler = new ListTemplate({
 	CAN_REMOVE: true,
 	EDIT_METHOD: 'put',
 
+	ROW_ACTIONS: [ new RowAction('openSymptomsLogs', 'Symptoms Logs') ],
+
+	openSymptomsLogs: (c, e) => SYMPTOMS_LOG.filter({ pageSize: 100 }),
+
 	COLUMNS: [ new IdColumn('id', 'ID', true),
 	           new EditColumn('name', 'Name'),
 	           new EditColumn('phone', 'Phone'),
@@ -286,7 +290,24 @@ var PeopleHandler = new ListTemplate({
 		          new DatesField('createdAt', 'Created At', false),
 		          new DatesField('updatedAt', 'Updated At', false),
 		          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ]
-	}
+	},
+
+	SYMPTOMS_LOG: new ListTemplate({
+		NAME: 'symptomsLog',
+		SINGULAR: 'Symptoms Log',
+		PLURAL: 'Symptoms Logs',
+		RESOURCE: 'symptomsLogs',
+
+		CAN_ADD: false,
+		CAN_EDIT: false,
+		CAN_REMOVE: false,
+
+		toName: v => v.name,
+
+		COLUMNS: [ new TextColumn('symptom', 'Symptom', 'toName'),
+		           new TextColumn('startedAt', 'Started At', 'toDateTime'),
+		           new TextColumn('endedAt', 'Ended At', 'toDateTime') ]
+	})
 });
 
 var RegistrationsHandler = new ListTemplate({
