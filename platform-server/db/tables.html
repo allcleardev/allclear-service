@@ -23,7 +23,7 @@
 <TR>
 <TD CLASS="header" COLSPAN="1">No.</TD><TD CLASS="header" COLSPAN="1">Table Name</TD><TD CLASS="header" COLSPAN="1">Comments</TD><TD CLASS="header" COLSPAN="1"># Records</TD></TR>
 <TR>
-<TD CLASS="detail">1</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOG">DATABASECHANGELOG</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">10</TD></TR>
+<TD CLASS="detail">1</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOG">DATABASECHANGELOG</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">13</TD></TR>
 <TR>
 <TD CLASS="detail">2</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOGLOCK">DATABASECHANGELOGLOCK</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">1</TD></TR>
 <TR>
@@ -409,7 +409,7 @@
 <TR>
 <TD CLASS="detail">19</TD><TD CLASS="detail">alertable</TD><TD CLASS="detail">BIT</TD><TD CLASS="detail">1</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail">Indicates that a user wishes to be notified with pertinent information.</TD></TR>
 <TR>
-<TD CLASS="detail">20</TD><TD CLASS="detail">health_worker_status_id</TD><TD CLASS="detail">CHAR</TD><TD CLASS="detail">1</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Refers to the state of employment as a healthcare worker.</TD></TR>
+<TD CLASS="detail">20</TD><TD CLASS="detail">health_worker_status_id</TD><TD CLASS="detail">CHAR</TD><TD CLASS="detail">1</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail">Refers to the state of employment as a healthcare worker.</TD></TR>
 </TABLE>
 <BR><TABLE CELLSPACING="0">
 <TR>
@@ -513,9 +513,9 @@
 <TR>
 <TD CLASS="header" COLSPAN="1">No.</TD><TD CLASS="header" COLSPAN="1">Name</TD><TD CLASS="header" COLSPAN="1">Unique?</TD><TD CLASS="header" COLSPAN="1">Primary Key?</TD><TD CLASS="header" COLSPAN="1">Column</TD></TR>
 <TR>
-<TD CLASS="detail">1</TD><TD CLASS="detail">person_id</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">No</TD><TD CLASS="detail">person_id, symptom_id, started_at</TD></TR>
+<TD CLASS="detail">1</TD><TD CLASS="detail">PRIMARY</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">id</TD></TR>
 <TR>
-<TD CLASS="detail">2</TD><TD CLASS="detail">PRIMARY</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">id</TD></TR>
+<TD CLASS="detail">2</TD><TD CLASS="detail">unq_symptoms_log</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">No</TD><TD CLASS="detail">person_id, symptom_id, started_at</TD></TR>
 </TABLE>
 <BR><TABLE CELLSPACING="0">
 <TR>
