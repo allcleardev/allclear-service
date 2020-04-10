@@ -1,7 +1,7 @@
 function ListTemplate(properties)
 {
 	this.load(properties);
-	if (this.CAN_EDIT || this.CAN_ADD)
+	if (this.CAN_EDIT || this.CAN_ADD || this.FIELDS)	// Load EDITOR even if CAN_ADD & CAN_EDIT are both FALSE in case some of the Handler wants to use the editor. DLS on 4/10/2020.
 		this.EDITOR = new EditTemplate(properties);
 	this.OPEN_CHILD = (undefined != this.openChild);
 	this.HAS_ROW_ACTIONS = (this.CAN_REMOVE || this.OPEN_CHILD || this.ROW_ACTIONS || this.HISTORY);

@@ -383,7 +383,7 @@ var SessionsHandler = new ListTemplate({
 		var v = e.myRecord;
 		if (v.admin) AdminsHandler.EDITOR.doEdit(v.admin.id);
 		else if (v.person) PeopleHandler.EDITOR.doEdit(v.person.id);
-		else RegistrationsHandler.doValue(v.registration);
+		else RegistrationsHandler.EDITOR.doValue(v.registration);
 	},
 	toSessionType: (p, v) => (v.admin ? 'Admin' : ((v.person) ? 'Person' : 'Registration')),
 	toSessionName: (p, v) => (v.admin ? v.admin.id : ((v.person) ? v.person.name : v.registration.phone)),
