@@ -101,7 +101,7 @@ var FacilitiesHandler = new ListTemplate({
 	onEditorPostLoad: function(c) {
 		var me = this;
 		var f = c.form;
-		f.address.onChange(function(ev) {
+		f.address.onchange = function(ev) {
 			me.get('maps/geocode', { location: this.value }, function(data) {
 				if (data.message)
 				{
@@ -114,7 +114,7 @@ var FacilitiesHandler = new ListTemplate({
 				if (!f.latitude.value && data.latitude) f.latitude.value = data.latitude;
 				if (!f.longitude.value && data.longitude) f.longitude.value = data.longitude;
 			});
-		});
+		};
 	},
 
 	COLUMNS: [ new IdColumn('id', 'ID', true),
