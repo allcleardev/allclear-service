@@ -226,7 +226,7 @@ var PeopleHandler = new ListTemplate({
 
 	ROW_ACTIONS: [ new RowAction('openSymptomsLogs', 'Symptoms Logs') ],
 
-	openSymptomsLogs: (c, e) => SYMPTOMS_LOG.filter({ pageSize: 100 }),
+	openSymptomsLogs: (c, e) => this.SYMPTOMS_LOG.filter({ pageSize: 100 }),
 
 	COLUMNS: [ new IdColumn('id', 'ID', true),
 	           new EditColumn('name', 'Name'),
@@ -306,7 +306,19 @@ var PeopleHandler = new ListTemplate({
 
 		COLUMNS: [ new TextColumn('symptom', 'Symptom', 'toName'),
 		           new TextColumn('startedAt', 'Started At', 'toDateTime'),
-		           new TextColumn('endedAt', 'Ended At', 'toDateTime') ]
+		           new TextColumn('endedAt', 'Ended At', 'toDateTime') ],
+
+		SEARCH: {
+			NAME: 'symptomsLog',
+			SINGULAR: 'Symptoms Log',
+			PLURAL: 'Symptoms Logs',
+			RESOURCE: 'symptomsLogs',
+
+			FIELDS: [ new ListField('symptomId', 'Symptom', false, 'symptoms', undefined, 'No Search'),
+			          new DatesField('startedAt', 'Started At'),
+			          new ListField('hasEndedAt', 'Has Ended At', undefined, 'yesNoOptions', undefined, 'No Search'),
+			          new DatesField('endedAt', 'Ended At') ]
+		}
 	})
 });
 
