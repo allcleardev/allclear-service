@@ -98,6 +98,25 @@ var FacilitiesHandler = new ListTemplate({
 	CAN_REMOVE: true,
 	EDIT_METHOD: 'put',
 
+	onEditorPostLoad: function(c) {
+		var me = this;
+		var f = c.form;
+		f.address.onChange(function(ev) {
+			me.get('maps/geocode', { location: this.value }, function(data) {
+				if (data.message)
+				{
+					window.alert(data.message);
+					return;
+				}
+
+				if (!f.city.value && data.city) f.city.value = data.city;
+				if (!f.state.value && data.state) f.state.value = data.state;
+				if (!f.latitude.value && data.latitude) f.latitude.value = data.latitude;
+				if (!f.longitude.value && data.longitude) f.longitude.value = data.longitude;
+			});
+		});
+	},
+
 	COLUMNS: [ new IdColumn('id', 'ID', true),
 	           new EditColumn('name', 'Name'),
 	           new EditColumn('city', 'City'),

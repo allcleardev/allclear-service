@@ -25,7 +25,7 @@ import app.allclear.common.errors.ValidationExceptionMapper;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.google.client.MapClient;
 import app.allclear.google.model.GeocodeResponse;
-import app.allclear.google.model.GeocodeResult;
+import app.allclear.platform.model.GeocodedResponse;
 
 /**********************************************************************************
 *
@@ -65,22 +65,17 @@ public class MapResourceTest
 		var response = request(target().path("geocode").queryParam("location", "First Street")).get();
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
-		var r = response.readEntity(GeocodeResult.class);
+		var r = response.readEntity(GeocodedResponse.class);
 		Assertions.assertNotNull(r, "Exists");
-		Assertions.assertEquals("924", r.streetNumber().shortName, "Check result.streetNumber");
-		Assertions.assertEquals("Willow Avenue", r.streetName().longName, "Check result.streetName.longName");
-		Assertions.assertEquals("Willow Ave", r.streetName().shortName, "Check result.streetName.shortName");
-		Assertions.assertEquals("Hoboken", r.city().shortName, "Check result.city");
-		Assertions.assertEquals("Hudson County", r.county().shortName, "Check result.county");
-		Assertions.assertEquals("New Jersey", r.state().longName, "Check result.state.longName");
-		Assertions.assertEquals("NJ", r.state().shortName, "Check result.state.shortName");
-		Assertions.assertEquals("United States", r.country().longName, "Check result.country.longName");
-		Assertions.assertEquals("US", r.country().shortName, "Check result.country.shortName");
-		Assertions.assertEquals("07030", r.postalCode().shortName, "Check result.postalCode");
-
-		var l = r.geometry.location;
-		Assertions.assertEquals(new BigDecimal("40.7487855"), l.lat, "Check result.geometry.location.lat");
-		Assertions.assertEquals(new BigDecimal("-74.0315385"), l.lng, "Check result.geometry.location.lng");
+		Assertions.assertEquals("924", r.streetNumber, "Check result.streetNumber");
+		Assertions.assertEquals("Willow Ave", r.streetName, "Check result.streetName.shortName");
+		Assertions.assertEquals("Hoboken", r.city, "Check result.city");
+		Assertions.assertEquals("Hudson County", r.county, "Check result.county");
+		Assertions.assertEquals("New Jersey", r.state, "Check result.state.longName");
+		Assertions.assertEquals("US", r.country, "Check result.country.shortName");
+		Assertions.assertEquals("07030", r.postalCode, "Check result.postalCode");
+		Assertions.assertEquals(new BigDecimal("40.7487855"), r.latitude, "Check result.geometry.location.lat");
+		Assertions.assertEquals(new BigDecimal("-74.0315385"), r.longitude, "Check result.geometry.location.lng");
 	}
 
 	public static Stream<Arguments> geocode_failure()
