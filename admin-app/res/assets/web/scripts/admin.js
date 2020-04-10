@@ -400,8 +400,8 @@ var SessionsHandler = new ListTemplate({
 	FIELDS: [ new TextField('id', 'ID'),
 	          new TextField('rememberMe', 'Remember Me?'),
 	          new TextField('duration', 'Duration', 'fromMilliseconds'),
-	          new TextField('admin', 'Type', 'toSessionType'),
-	          new TextField('name', 'Name', 'toSessionName', false, false, 'openSession'),
+	          new TextField('admin', 'Type', (v, p) => SessionsHandler.toSessionType(p, v)),
+	          new TextField('name', 'Name', (v, p) => SessionsHandler.toSessionName(p, v), false, false, 'openSession'),
 	          new TextField('expiresAt', 'Exipres At', 'toDateTime'),
 	          new TextField('lastAccessedAt', 'Last Accessed At', 'toDateTime'),
 	          new TextField('createdAt', 'Created At', 'toDateTime') ],
@@ -415,9 +415,6 @@ var SessionsHandler = new ListTemplate({
 		FIELDS: [ new EditField('id', 'ID', false, false, 128, 50) ]
 	}
 });
-
-console.log('RegistrationsHandler', RegistrationsHandler, RegistrationsHandler.FIELDS, RegistrationsHandler.EDITOR);
-console.log('SessionsHandler', SessionsHandler, SessionsHandler.FIELDS, SessionsHandler.EDITOR);
 
 var TestsHandler = new ListTemplate({
 	NAME: 'tests',
