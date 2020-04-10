@@ -226,7 +226,7 @@ var PeopleHandler = new ListTemplate({
 
 	ROW_ACTIONS: [ new RowAction('openSymptomsLogs', 'Symptoms Logs') ],
 
-	openSymptomsLogs: (c, e) => this.SYMPTOMS_LOG.filter({ pageSize: 100 }),
+	openSymptomsLogs: function(c, e) { this.SYMPTOMS_LOG.filter({ pageSize: 100 }); },
 
 	COLUMNS: [ new IdColumn('id', 'ID', true),
 	           new EditColumn('name', 'Name'),
