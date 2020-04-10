@@ -1,18 +1,14 @@
 package app.allclear.platform.rest;
 
-import static java.util.stream.Collectors.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static app.allclear.testing.TestingUtils.*;
-import static app.allclear.platform.type.Symptom.*;
 
 import java.math.BigDecimal;
-import java.util.*;
 import java.util.stream.Stream;
 import javax.ws.rs.client.*;
-import javax.ws.rs.core.GenericType;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,21 +19,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 
-import app.allclear.junit.hibernate.*;
-import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.ErrorInfo;
 import app.allclear.common.errors.NotFoundExceptionMapper;
 import app.allclear.common.errors.ValidationExceptionMapper;
 import app.allclear.common.mediatype.UTF8MediaType;
-import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.google.client.MapClient;
 import app.allclear.google.model.GeocodeResponse;
 import app.allclear.google.model.GeocodeResult;
-import app.allclear.platform.App;
-import app.allclear.platform.ConfigTest;
-import app.allclear.platform.dao.*;
-import app.allclear.platform.filter.SymptomsLogFilter;
-import app.allclear.platform.value.*;
 
 /**********************************************************************************
 *
