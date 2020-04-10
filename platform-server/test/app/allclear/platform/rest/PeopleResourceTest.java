@@ -497,7 +497,6 @@ public class PeopleResourceTest
 	@Test
 	public void z_07_modify()
 	{
-System.out.println("z_07_modify");
 		LAST_UPDATED_AT = new Date();
 		Assertions.assertEquals(HTTP_STATUS_OK,
 			request().put(Entity.json(new PeopleValue("third", "+18885552002", false).withId(VALUE.id).withAuthAt(utc(2020, 4, 8)))).getStatus());
@@ -529,7 +528,6 @@ System.out.println("z_07_modify");
 	@Test
 	public void z_08_modify()
 	{
-System.out.println("z_08_modify");
 		sessionDao.current(ADMIN);
 
 		LAST_UPDATED_AT = new Date();

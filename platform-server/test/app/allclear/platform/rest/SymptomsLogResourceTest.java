@@ -157,14 +157,6 @@ public class SymptomsLogResourceTest
 		ENDED_PERSON_1 = exclusions.size();
 	}
 
-	@Test
-	public void modify_check()
-	{
-		sessionDao.current(ADMIN);
-		System.out.println("PERSON: " + dao.search(new SymptomsLogFilter().withPersonId(PERSON.id)).records);
-		System.out.println("PERSON_1: " + dao.search(new SymptomsLogFilter().withPersonId(PERSON_1.id)).records);
-	}
-
 	@ParameterizedTest
 	@MethodSource
 	public void search(final SessionValue user, final SymptomsLogFilter filter, final int total)

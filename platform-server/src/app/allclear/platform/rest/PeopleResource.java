@@ -138,14 +138,11 @@ public class PeopleResource
 		final PeopleValue value) throws ValidationException
 	{
 		var o = sessionDao.current();
-System.out.println("SET: " + o);
 		if (!o.admin())	// Non-admins can only update themselves.
 		{
-System.out.println("SET: non-admin");
 			return sessionDao.update(o, dao.update(value.withId(o.person.id), false)).person;
 		}
 
-System.out.println("SET: admin");
 		return dao.update(value, true);
 	}
 
