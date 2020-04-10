@@ -100,6 +100,18 @@ public class PeopleResource
 	}
 
 	@POST
+	@Path("/{id}/auth") @Timed @UnitOfWork(readOnly=true, transactional=false)
+	@ApiOperation(value="authenticate", notes="Authenticates the specified user on behalf of an Administrator.")
+	public SessionValue authenticate(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@PathParam("id") @ApiParam(name="id", value="Represents the person identifier.", required=true) final String id,
+		@QueryParam("rememberMe") @ApiParam(name="rememberMe", value="Optionally, indicates to use a long term session.", required=false) @DefaultValue("false") final Boolean rememberMe) throws ObjectNotFoundException
+	{
+		sessionDao.checkAdmin();
+
+		return sessionDao.add(dao.getByIdWithException(id), Boolean.TRUE.equals(rememberMe));
+	}
+
+	@POST
 	@Path("/confirm") @Timed @UnitOfWork(readOnly=true, transactional=false)
 	@ApiOperation(value="confirm", notes="Confirms the user phone number or email address during the registration process.", response=SessionValue.class)
 	public SessionValue confirm(final StartResponse request) throws ValidationException

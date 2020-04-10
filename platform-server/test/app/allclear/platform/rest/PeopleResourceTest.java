@@ -7,6 +7,8 @@ import static app.allclear.testing.TestingUtils.*;
 
 import java.util.*;
 import java.util.stream.Stream;
+
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
@@ -128,11 +130,44 @@ public class PeopleResourceTest
 	}
 
 	@Test
-	public void add_as_person()
+	public void authenticate_as_systemAdmin()
+	{
+		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, request("123/auth").method(HttpMethod.POST).getStatus(), "Status: invalid Person ID");	// Invalid Person ID.
+
+		var response = request(VALUE.id + "/auth").method(HttpMethod.POST);
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var value = response.readEntity(SessionValue.class);
+		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertTrue(value.person(), "Check person()");
+		Assertions.assertFalse(value.admin(), "Check admin()");
+		Assertions.assertEquals(SessionValue.DURATION_SHORT, value.duration);
+		Assertions.assertEquals(VALUE.id, value.person.id, "Check person.id");
+
+		SESSION = value;
+	}
+
+	@Test
+	public void authenticate_as_systemAdmin_rememberMe()
+	{
+		var response = request(target().path(VALUE.id + "/auth").queryParam("rememberMe", true)).method(HttpMethod.POST);
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var value = response.readEntity(SessionValue.class);
+		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertTrue(value.person(), "Check person()");
+		Assertions.assertFalse(value.admin(), "Check admin()");
+		Assertions.assertEquals(SessionValue.DURATION_LONG, value.duration);
+		Assertions.assertEquals(VALUE.id, value.person.id, "Check person.id");
+	}
+
+	@Test
+	public void check_as_person()
 	{
 		sessionDao.current(SESSION);
 
-		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request().post(Entity.json(new PeopleValue("next", "888-next-one", true))).getStatus());
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request().post(Entity.json(new PeopleValue("next", "888-next-one", true))).getStatus(), "Status: add");
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request(VALUE.id + "/auth").method(HttpMethod.POST).getStatus(), "Status: auth");
 
 		sessionDao.current(ADMIN);
 	}

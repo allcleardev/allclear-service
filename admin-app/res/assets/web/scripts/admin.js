@@ -224,8 +224,15 @@ var PeopleHandler = new ListTemplate({
 	CAN_REMOVE: true,
 	EDIT_METHOD: 'put',
 
-	ROW_ACTIONS: [ new RowAction('openSymptomsLogs', 'Symptoms Logs') ],
+	ROW_ACTIONS: [ new RowAction('authenticate', 'Authenticate'),
+	               new RowAction('openSymptomsLogs', 'Symptoms Logs') ],
 
+	authenticate: function(c, e) {
+		this.post(this.RESOURCE + '/' + e.myRecord.id + '/auth', null, function(data) {
+			if (data.message) window.alert(data.message);
+			else SessionsHandler.EDITOR.doValue(data);
+		});
+	},
 	openSymptomsLogs: function(c, e) { this.SYMPTOMS_LOG.filter({ personId: e.myRecord.id, pageSize: 100 }); },
 
 	COLUMNS: [ new IdColumn('id', 'ID', true),
@@ -289,6 +296,12 @@ var PeopleHandler = new ListTemplate({
 		          new DatesField('emailVerifiedAt', 'Email Verified At', false),
 		          new DatesField('createdAt', 'Created At', false),
 		          new DatesField('updatedAt', 'Updated At', false),
+		          new TagField('includeConditions', 'Include Conditions', false, 'types/conditions'),
+		          new TagField('excludeConditions', 'Exclude Conditions', false, 'types/conditions'),
+		          new TagField('includeExposures', 'Include Exposures', false, 'types/exposures'),
+		          new TagField('excludeExposures', 'Exclude Exposures', false, 'types/exposures'),
+		          new TagField('includeSymptoms', 'Include Symptoms', false, 'types/symptoms'),
+		          new TagField('excludeSymptoms', 'Exclude Symptoms', false, 'types/symptoms'),
 		          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ]
 	},
 
@@ -338,6 +351,13 @@ var RegistrationsHandler = new ListTemplate({
 	          new TextColumn('beenTested', 'Been Tested'),
 	          new TextColumn('haveSymptoms', 'Have Symptoms'),
 	          new TextColumn('ttl', 'TTL', 'fromSeconds') ],
+
+	FIELDS: [ new TextField('key', 'Key'),
+	          new TextField('phone', 'Phone'),
+	          new TextField('beenTested', 'Been Tested'),
+	          new TextField('haveSymptoms', 'Have Symptoms'),
+	          new TextField('ttl', 'TTL', 'fromSeconds') ],
+
 	SEARCH: {
 		NAME: 'registration',
 		SINGULAR: 'Registration Request',
@@ -363,7 +383,7 @@ var SessionsHandler = new ListTemplate({
 		var v = e.myRecord;
 		if (v.admin) AdminsHandler.EDITOR.doEdit(v.admin.id);
 		else if (v.person) PeopleHandler.EDITOR.doEdit(v.person.id);
-		else window.alert(v.registration);
+		else RegistrationsHandler.doValue(v.registration);
 	},
 	toSessionType: (p, v) => (v.admin ? 'Admin' : ((v.person) ? 'Person' : 'Registration')),
 	toSessionName: (p, v) => (v.admin ? v.admin.id : ((v.person) ? v.person.name : v.registration.phone)),
@@ -376,6 +396,16 @@ var SessionsHandler = new ListTemplate({
 	           new TextColumn('expiresAt', 'Exipres At', 'toDateTime'),
 	           new TextColumn('lastAccessedAt', 'Last Accessed At', 'toDateTime'),
 	           new TextColumn('createdAt', 'Created At', 'toDateTime') ],
+
+	FIELDS: [ new TextField('id', 'ID'),
+	          new TextField('rememberMe', 'Remember Me?'),
+	          new TextField('duration', 'Duration', 'fromMilliseconds'),
+	          new TextField('admin', 'Type', 'toSessionType'),
+	          new TextField('name', 'Name', 'toSessionName', false, false, 'openSession'),
+	          new TextField('expiresAt', 'Exipres At', 'toDateTime'),
+	          new TextField('lastAccessedAt', 'Last Accessed At', 'toDateTime'),
+	          new TextField('createdAt', 'Created At', 'toDateTime') ],
+
 	SEARCH: {
 		NAME: 'session',
 		SINGULAR: 'Session',
