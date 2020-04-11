@@ -125,6 +125,14 @@ project(':platform-server') {
   }
 }
 
+project(':platform-task') {
+  dependencies {
+    compile project(':common-service')
+    compile project(':platform-model')
+    testCompile project(':common-testing')
+  }
+}
+
 project(':twilio-client') {
   dependencies {
     compile project(':twilio-model')

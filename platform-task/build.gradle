@@ -1,0 +1,84 @@
+apply plugin: 'application'
+apply plugin: 'com.github.johnrengelman.shadow'
+
+// Set project level properties
+mainClassName = 'app.allclear.platform.Task'	// Need outside of "ext" to work with the "run" task.
+
+// Add Gradle OneJar Plugin, see https://github.com/rholder/gradle-one-jar
+buildscript {
+  repositories {
+    jcenter()
+  }
+
+  dependencies {
+    classpath 'com.github.jengelman.gradle.plugins:shadow:4.0.3'
+  }
+}
+
+test {
+  forkEvery = 50
+  maxParallelForks = 1	// Some tests share resources in AWS. DLS on 7/22/2016.
+}
+
+dependencies {
+  compile "com.microsoft.azure:azure-storage:${azureStorageVersion}"
+  compile "commons-io:commons-io:${commonsIOVersion}"
+  compile "io.dropwizard:dropwizard-assets:${dropwizardVersion}"
+  compile "io.dropwizard:dropwizard-jdbi3:${dropwizardVersion}"
+  compile "io.dropwizard:dropwizard-metrics:${dropwizardVersion}"
+  testCompile "io.dropwizard:dropwizard-migrations:${dropwizardVersion}"
+  compile "org.glassfish.jersey.media:jersey-media-multipart:${jerseyVersion}"
+  compile "org.glassfish.jersey.core:jersey-client:${jerseyVersion}"
+  compile "org.liquibase:liquibase-core:${liquibaseVersion}"
+  runtime "mysql:mysql-connector-java:${mysqlVersion}"
+}
+
+// Starts the server.
+run {
+  jvmArgs '-Dfile.encoding=UTF-8', '-Duser.timezone=UTC', '-Dhibernate.dialect.storage_engine=innodb'
+  args 'server', './conf/local.json'
+}
+
+// Start the application with the DEV configuration.
+task runDev(type: JavaExec, dependsOn: assemble) {
+  main = mainClassName
+  classpath run.classpath
+  jvmArgs '-Dfile.encoding=UTF-8', '-Duser.timezone=UTC', '-Dhibernate.dialect.storage_engine=innodb'
+  args 'server', './conf/dev.json'
+}
+
+// Start the application with the STAGING configuration.
+task runStage(type: JavaExec, dependsOn: assemble) {
+  main = mainClassName
+  classpath run.classpath
+  jvmArgs '-Dfile.encoding=UTF-8', '-Duser.timezone=UTC', '-Dhibernate.dialect.storage_engine=innodb'
+  args 'server', './conf/staging.json'
+}
+
+// Start the application with the PROD configuration.
+task runProd(type: JavaExec, dependsOn: assemble) {
+  main = mainClassName
+  classpath run.classpath
+  jvmArgs '-Dfile.encoding=UTF-8', '-Duser.timezone=UTC', '-Dhibernate.dialect.storage_engine=innodb'
+  args 'server', './conf/prod.json'
+}
+
+task wrapper(type: Wrapper) {
+  gradleVersion = '6.0.1'
+}
+
+// Builds a single fat jar.
+shadowJar {
+  mergeServiceFiles()
+  exclude 'META-INF/*.DSA'
+  exclude 'META-INF/*.RSA'
+}
+
+jar {
+  manifest {
+    attributes('Main-Class': mainClassName,
+      'Implementation-Vendor': 'AllClear',
+      'Implementation-Title': 'platform-task',
+      'Implementation-Version': version)
+  }
+}
