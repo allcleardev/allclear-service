@@ -49,6 +49,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		"healthWorkerStatusId", ASC,
 		"latitude", DESC,
 		"longitude", DESC,
+		"locationName", ASC,
 		"alertable", DESC,
 		"active", DESC,
 		"authAt", DESC,
@@ -242,6 +243,7 @@ public class PeopleDAO extends AbstractDAO<People>
 			.ensureExistsAndLength("healthWorkerStatusId", "HealthWorkerStatusId", value.healthWorkerStatusId, PeopleValue.MAX_LEN_HEALTH_WORKER_STATUS_ID)
 			.ensureLatitude("latitude", "Latitude", value.latitude)
 			.ensureLongitude("longitude", "Longitude", value.longitude)
+			.ensureLength("locationName", "Location Name", value.locationName, PeopleValue.MAX_LEN_LOCATION_NAME)
 			.check();
 
 		// Check enum values.
@@ -444,6 +446,8 @@ public class PeopleDAO extends AbstractDAO<People>
 			.addNotNull("o.longitude", filter.hasLongitude)
 			.add("longitudeFrom", "o.longitude >= :longitudeFrom", filter.longitudeFrom)
 			.add("longitudeTo", "o.longitude <= :longitudeTo", filter.longitudeTo)
+			.addContains("locationName", "o.locationName LIKE :locationName", filter.locationName)
+			.addNotNull("o.locationName", filter.hasLocationName)
 			.add("alertable", "o.alertable = :alertable", filter.alertable)
 			.add("active", "o.active = :active", filter.active)
 			.addNotNull("o.authAt", filter.hasAuthAt)

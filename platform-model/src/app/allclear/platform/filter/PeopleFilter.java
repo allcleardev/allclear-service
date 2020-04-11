@@ -50,6 +50,8 @@ public class PeopleFilter extends QueryFilter
 	public Boolean hasLongitude = null;
 	public BigDecimal longitudeFrom = null;
 	public BigDecimal longitudeTo = null;
+	public String locationName = null;
+	public Boolean hasLocationName = null;
 	public Boolean alertable = null;
 	public Boolean active = null;
 	public Boolean hasAuthAt = null;
@@ -101,6 +103,8 @@ public class PeopleFilter extends QueryFilter
 	public PeopleFilter withHasLongitude(final Boolean newValue) { hasLongitude = newValue; return this; }
 	public PeopleFilter withLongitudeFrom(final BigDecimal newValue) { longitudeFrom = newValue; return this; }
 	public PeopleFilter withLongitudeTo(final BigDecimal newValue) { longitudeTo = newValue; return this; }
+	public PeopleFilter withLocationName(final String newValue) { locationName = newValue; return this; }
+	public PeopleFilter withHasLocationName(final Boolean newValue) { hasLocationName = newValue; return this; }
 	public PeopleFilter withAlertable(final Boolean newValue) { alertable = newValue; return this; }
 	public PeopleFilter withActive(final Boolean newValue) { active = newValue; return this; }
 	public PeopleFilter withHasAuthAt(final Boolean newValue) { hasAuthAt = newValue; return this; }
@@ -178,6 +182,7 @@ public class PeopleFilter extends QueryFilter
 		@param longitude represents the "longitude" field.
 		@param longitudeFrom represents the "longitude" field - lower boundary.
 		@param longitudeTo represents the "longitude" field - upper boundary.
+		@param locationName represents the "location_name" field.
 		@param alertable represents the "alertable" field.
 		@param active represents the "active" field.
 		@param authAtFrom represents the "auth_at" field - lower boundary.
@@ -210,6 +215,7 @@ public class PeopleFilter extends QueryFilter
 		final BigDecimal longitude,
 		final BigDecimal longitudeFrom,
 		final BigDecimal longitudeTo,
+		final String locationName,
 		final Boolean alertable,
 		final Boolean active,
 		final Date authAtFrom,
@@ -242,6 +248,7 @@ public class PeopleFilter extends QueryFilter
 		this.longitude = longitude;
 		this.longitudeFrom = longitudeFrom;
 		this.longitudeTo = longitudeTo;
+		this.locationName = locationName;
 		this.alertable = alertable;
 		this.active = active;
 		this.authAtFrom = authAtFrom;
@@ -275,6 +282,7 @@ public class PeopleFilter extends QueryFilter
 		statureId = StringUtils.trimToNull(statureId);
 		sexId = StringUtils.trimToNull(sexId);
 		healthWorkerStatusId = StringUtils.trimToNull(healthWorkerStatusId);
+		locationName = StringUtils.trimToNull(locationName);
 
 		return this;
 	}
@@ -316,6 +324,8 @@ public class PeopleFilter extends QueryFilter
 			.append(", hasLongitude: ").append(hasLongitude)
 			.append(", longitudeFrom: ").append(longitudeFrom)
 			.append(", longitudeTo: ").append(longitudeTo)
+			.append(", locationName: ").append(locationName)
+			.append(", hasLocationName: ").append(hasLocationName)
 			.append(", alertable: ").append(alertable)
 			.append(", active: ").append(active)
 			.append(", hasAuthAt: ").append(hasAuthAt)

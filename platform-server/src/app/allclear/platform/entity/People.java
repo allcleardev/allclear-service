@@ -111,6 +111,11 @@ public class People implements Serializable
 	public BigDecimal longitude;
 	public void setLongitude(final BigDecimal newValue) { longitude = newValue; }
 
+	@Column(name="location_name", columnDefinition="VARCHAR(255)", nullable=true)
+	public String getLocationName() { return locationName; }
+	public String locationName;
+	public void setLocationName(final String newValue) { locationName = newValue; }
+
 	@Column(name="alertable", columnDefinition="BIT", nullable=false)
 	public boolean isAlertable() { return alertable; }
 	public boolean alertable;
@@ -181,6 +186,7 @@ public class People implements Serializable
 		final String healthWorkerStatusId,
 		final BigDecimal latitude,
 		final BigDecimal longitude,
+		final String locationName,
 		final boolean alertable,
 		final boolean active,
 		final Date authAt,
@@ -201,6 +207,7 @@ public class People implements Serializable
 		this.healthWorkerStatusId = healthWorkerStatusId;
 		this.latitude = latitude;
 		this.longitude = longitude;
+		this.locationName = locationName;
 		this.alertable = alertable;
 		this.active = active;
 		this.authAt = authAt;
@@ -215,8 +222,8 @@ public class People implements Serializable
 			value.firstName, value.lastName, value.dob,
 			value.statusId, value.statureId, value.sexId,
 			value.healthWorkerStatusId,
-			value.latitude, value.longitude, value.alertable,
-			value.active, value.authAt, value.phoneVerifiedAt,
+			value.latitude, value.longitude, value.locationName,
+			value.alertable, value.active, value.authAt, value.phoneVerifiedAt,
 			value.emailVerifiedAt, value.initDates());
 	}
 
@@ -233,6 +240,7 @@ public class People implements Serializable
 		setHealthWorkerStatusId(value.healthWorkerStatusId);
 		setLatitude(value.latitude);
 		setLongitude(value.longitude);
+		setLocationName(value.locationName);
 		setAlertable(value.alertable);
 		if (admin)
 		{
@@ -276,6 +284,7 @@ public class People implements Serializable
 			Objects.equals(healthWorkerStatusId, v.healthWorkerStatusId) &&
 			Objects.equals(latitude, v.latitude) &&
 			Objects.equals(longitude, v.longitude) &&
+			Objects.equals(locationName, v.locationName) &&
 			(alertable == v.alertable) &&
 			(active == v.active) &&
 			DateUtils.truncatedEquals(authAt, v.authAt, Calendar.SECOND) &&
@@ -316,6 +325,7 @@ public class People implements Serializable
 			HealthWorkerStatus.get(getHealthWorkerStatusId()),
 			getLatitude(),
 			getLongitude(),
+			getLocationName(),
 			isAlertable(),
 			isActive(),
 			getAuthAt(),

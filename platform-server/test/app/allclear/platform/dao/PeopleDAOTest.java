@@ -68,7 +68,7 @@ public class PeopleDAOTest
 	{
 		var value = dao.add(VALUE = new PeopleValue("ronny", "888-555-1000", "ronny@gmail.com", "Ronald", "Howard",
 			DOB, PeopleStatus.INFECTED.id, PeopleStature.INFLUENCER.id, Sex.MALE.id, HealthWorkerStatus.LIVE_WITH.id,
-			bg("86.5"), bg("-37.1"), false, true));
+			bg("86.5"), bg("-37.1"), "Phoenix, Arizona", false, true));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
@@ -80,7 +80,7 @@ public class PeopleDAOTest
 	{
 		return new PeopleValue("bryce", "888-555-1001", "dallas@gmail.com", "Dallas", "Drawoh",
 			DOB_1, PeopleStatus.RECOVERED.id, PeopleStature.CELEBRITY.id, Sex.FEMALE.id, HealthWorkerStatus.HEALTH_WORKER.id,
-			bg("-86.5"), bg("37.1"), true, false);
+			bg("-86.5"), bg("37.1"), "Atlanta, GA", true, false);
 	}
 
 	@Test
@@ -213,6 +213,12 @@ public class PeopleDAOTest
 	public void add_tooLowLongitude()
 	{
 		assertThrows(ValidationException.class, () -> dao.add(createValid().withLatitude(bg("-181"))));
+	}
+
+	@Test
+	public void add_longLocationName()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withLocationName(StringUtils.repeat("A", PeopleValue.MAX_LEN_LOCATION_NAME + 1))));
 	}
 
 	public static Stream<Arguments> add_invalidConditions()
@@ -445,6 +451,7 @@ public class PeopleDAOTest
 		count(new PeopleFilter().withHealthWorkerStatusId(VALUE.healthWorkerStatusId), 1L);
 		count(new PeopleFilter().withLatitude(VALUE.latitude), 1L);
 		count(new PeopleFilter().withLongitude(VALUE.longitude), 1L);
+		count(new PeopleFilter().withLocationName(VALUE.locationName), 1L);
 		count(new PeopleFilter().withAlertable(VALUE.alertable), 1L);
 		count(new PeopleFilter().withActive(VALUE.active), 1L);
 
@@ -461,6 +468,7 @@ public class PeopleDAOTest
 		count(new PeopleFilter().withHealthWorkerStatusId(v.healthWorkerStatusId), 0L);
 		count(new PeopleFilter().withLatitude(v.latitude), 0L);
 		count(new PeopleFilter().withLongitude(v.longitude), 0L);
+		count(new PeopleFilter().withLocationName(v.locationName), 0L);
 		count(new PeopleFilter().withAlertable(v.alertable), 0L);
 		count(new PeopleFilter().withActive(v.active), 0L);
 
@@ -485,6 +493,7 @@ public class PeopleDAOTest
 		count(new PeopleFilter().withHealthWorkerStatusId(VALUE.healthWorkerStatusId), 0L);
 		count(new PeopleFilter().withLatitude(VALUE.latitude), 0L);
 		count(new PeopleFilter().withLongitude(VALUE.longitude), 0L);
+		count(new PeopleFilter().withLocationName(VALUE.locationName), 0L);
 		count(new PeopleFilter().withAlertable(VALUE.alertable), 0L);
 		count(new PeopleFilter().withActive(VALUE.active), 0L);
 
@@ -501,6 +510,7 @@ public class PeopleDAOTest
 		count(new PeopleFilter().withHealthWorkerStatusId(v.healthWorkerStatusId), 1L);
 		count(new PeopleFilter().withLatitude(v.latitude), 1L);
 		count(new PeopleFilter().withLongitude(v.longitude), 1L);
+		count(new PeopleFilter().withLocationName(v.locationName), 1L);
 		count(new PeopleFilter().withAlertable(v.alertable), 1L);
 		count(new PeopleFilter().withActive(v.active), 1L);
 
@@ -526,6 +536,7 @@ public class PeopleDAOTest
 		Assertions.assertEquals(v.healthWorkerStatusId, record.getHealthWorkerStatusId(), "Check healthWorkerStatusId");
 		assertThat(record.getLatitude()).as("Check latitude").isEqualByComparingTo(v.latitude);
 		assertThat(record.getLongitude()).as("Check longitude").isEqualByComparingTo(v.longitude);
+		Assertions.assertEquals("Atlanta, GA", record.getLocationName(), "Check locationName");
 		Assertions.assertEquals(v.alertable, record.isAlertable(), "Check alertable");
 		Assertions.assertEquals(v.active, record.isActive(), "Check active");
 		assertThat(record.getUpdatedAt()).as("Check updatedAt").isAfter(record.getCreatedAt());
@@ -573,6 +584,8 @@ public class PeopleDAOTest
 			arguments(new PeopleFilter(1, 20).withHasLongitude(true), 1L),
 			arguments(new PeopleFilter(1, 20).withLongitudeFrom(downLng), 1L),
 			arguments(new PeopleFilter(1, 20).withLongitudeTo(upLng), 1L),
+			arguments(new PeopleFilter(1, 20).withLocationName(VALUE.locationName), 1L),
+			arguments(new PeopleFilter(1, 20).withHasLocationName(true), 1L),
 			arguments(new PeopleFilter(1, 20).withAlertable(VALUE.alertable), 1L),
 			arguments(new PeopleFilter(1, 20).withHasAuthAt(false), 1L),
 			/* arguments(new PeopleFilter(1, 20).withAuthAtFrom(hourAgo), 1L),
@@ -624,6 +637,8 @@ public class PeopleDAOTest
 			arguments(new PeopleFilter(1, 20).withHasLongitude(false), 0L),
 			arguments(new PeopleFilter(1, 20).withLongitudeFrom(upLng), 0L),
 			arguments(new PeopleFilter(1, 20).withLongitudeTo(downLng), 0L),
+			arguments(new PeopleFilter(1, 20).withLocationName("Phoenix, Arizona"), 0L),
+			arguments(new PeopleFilter(1, 20).withHasLocationName(false), 0L),
 			arguments(new PeopleFilter(1, 20).withAlertable(!VALUE.alertable), 0L),
 			arguments(new PeopleFilter(1, 20).withHasAuthAt(true), 0L),
 			/* arguments(new PeopleFilter(1, 20).withAuthAtFrom(hourAhead), 0L),
@@ -769,6 +784,13 @@ public class PeopleDAOTest
 			arguments(new PeopleFilter("longitude", "invalid"), "longitude", "DESC"),	// Invalid sort direction is converted to the default.
 			arguments(new PeopleFilter("longitude", "DESC"), "longitude", "DESC"),
 			arguments(new PeopleFilter("longitude", "desc"), "longitude", "DESC"),
+
+			arguments(new PeopleFilter("locationName", null), "locationName", "ASC"), // Missing sort direction is converted to the default.
+			arguments(new PeopleFilter("locationName", "ASC"), "locationName", "ASC"),
+			arguments(new PeopleFilter("locationName", "asc"), "locationName", "ASC"),
+			arguments(new PeopleFilter("locationName", "invalid"), "locationName", "ASC"),	// Invalid sort direction is converted to the default.
+			arguments(new PeopleFilter("locationName", "DESC"), "locationName", "DESC"),
+			arguments(new PeopleFilter("locationName", "desc"), "locationName", "DESC"),
 
 			arguments(new PeopleFilter("alertable", null), "alertable", "DESC"), // Missing sort direction is converted to the default.
 			arguments(new PeopleFilter("alertable", "ASC"), "alertable", "ASC"),
@@ -1227,6 +1249,7 @@ public class PeopleDAOTest
 		Assertions.assertEquals(expected.healthWorkerStatusId, record.getHealthWorkerStatusId(), assertId + "Check healthWorkerStatusId");
 		assertThat(record.getLatitude()).as(assertId + "Check latitude").isEqualByComparingTo(expected.latitude);
 		assertThat(record.getLongitude()).as(assertId + "Check longitude").isEqualByComparingTo(expected.longitude);
+		Assertions.assertEquals(expected.locationName, record.getLocationName(), assertId + "Check locationName");
 		Assertions.assertEquals(expected.alertable, record.isAlertable(), assertId + "Check alertable");
 		Assertions.assertEquals(expected.active, record.isActive(), assertId + "Check active");
 		Assertions.assertEquals(expected.authAt, record.getAuthAt(), assertId + "Check authAt");
@@ -1258,6 +1281,7 @@ public class PeopleDAOTest
 		Assertions.assertEquals(expected.latitude, value.latitude, assertId + "Check latitude");
 		assertThat(value.latitude).as(assertId + "Check latitude").isEqualByComparingTo(expected.latitude);
 		assertThat(value.longitude).as(assertId + "Check longitude").isEqualByComparingTo(expected.longitude);
+		Assertions.assertEquals(expected.locationName, value.locationName, assertId + "Check locationName");
 		Assertions.assertEquals(expected.alertable, value.alertable, assertId + "Check alertable");
 		Assertions.assertEquals(expected.active, value.active, assertId + "Check active");
 		Assertions.assertEquals(expected.authAt, value.authAt, assertId + "Check authAt");

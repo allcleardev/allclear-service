@@ -38,6 +38,7 @@ public class PeopleValue implements Serializable
 	public static final int MAX_LEN_STATURE_ID = 1;
 	public static final int MAX_LEN_SEX_ID = 1;
 	public static final int MAX_LEN_HEALTH_WORKER_STATUS_ID = 1;
+	public static final int MAX_LEN_LOCATION_NAME = 255;
 	public static final int MAX_LEN_CONDITION_ID = 2;
 
 	// Members
@@ -58,6 +59,7 @@ public class PeopleValue implements Serializable
 	public HealthWorkerStatus healthWorkerStatus = null;
 	public BigDecimal latitude = null;
 	public BigDecimal longitude = null;
+	public String locationName = null;
 	public boolean alertable;
 	public boolean active;
 	public Date authAt = null;
@@ -96,6 +98,7 @@ public class PeopleValue implements Serializable
 	public PeopleValue withHealthWorkerStatus(final HealthWorkerStatus newValue) { healthWorkerStatus = newValue; return this; }
 	public PeopleValue withLatitude(final BigDecimal newValue) { latitude = newValue; return this; }
 	public PeopleValue withLongitude(final BigDecimal newValue) { longitude = newValue; return this; }
+	public PeopleValue withLocationName(final String newValue) { locationName = newValue; return this; }
 	public PeopleValue withAlertable(final boolean newValue) { alertable = newValue; return this; }
 	public PeopleValue withActive(final boolean newValue) { active = newValue; return this; }
 	public PeopleValue withAuthAt(final Date newValue) { authAt = newValue; return this; }
@@ -139,7 +142,7 @@ public class PeopleValue implements Serializable
 		final String phone,
 		final boolean active)
 	{
-		this(name, phone, null, null, null, null, null, null, null, HealthWorkerStatus.NEITHER.id, null, null, false, active);
+		this(name, phone, null, null, null, null, null, null, null, HealthWorkerStatus.NEITHER.id, null, null, null, false, active);
 	}
 
 	public PeopleValue(
@@ -155,10 +158,11 @@ public class PeopleValue implements Serializable
 		final String healthWorkerStatusId,
 		final BigDecimal latitude,
 		final BigDecimal longitude,
+		final String locationName,
 		final boolean alertable,
 		final boolean active)
 	{
-		this(null, name, phone, email, firstName, lastName, dob, statusId, null, statureId, null, sexId, null, healthWorkerStatusId, null, latitude, longitude, alertable, active, null, null, null, null, null);
+		this(null, name, phone, email, firstName, lastName, dob, statusId, null, statureId, null, sexId, null, healthWorkerStatusId, null, latitude, longitude, locationName, alertable, active, null, null, null, null, null);
 	}
 
 	public PeopleValue(final String id,
@@ -178,6 +182,7 @@ public class PeopleValue implements Serializable
 		final HealthWorkerStatus healthWorkerStatus,
 		final BigDecimal latitude,
 		final BigDecimal longitude,
+		final String locationName,
 		final boolean alertable,
 		final boolean active,
 		final Date authAt,
@@ -203,6 +208,7 @@ public class PeopleValue implements Serializable
 		this.healthWorkerStatus = healthWorkerStatus;
 		this.latitude = latitude;
 		this.longitude = longitude;
+		this.locationName = locationName;
 		this.alertable = alertable;
 		this.active = active;
 		this.authAt = authAt;
@@ -225,6 +231,7 @@ public class PeopleValue implements Serializable
 		statureId = StringUtils.trimToNull(statureId);
 		sexId = StringUtils.trimToNull(sexId);
 		healthWorkerStatusId = StringUtils.trimToNull(healthWorkerStatusId);
+		locationName = StringUtils.trimToNull(locationName);
 	}
 
 	@Override
@@ -246,6 +253,7 @@ public class PeopleValue implements Serializable
 			Objects.equals(healthWorkerStatusId, v.healthWorkerStatusId) &&
 			((latitude == v.latitude) || (0 == Objects.compare(latitude, v.latitude, (a, b) -> a.compareTo(b)))) &&
 			((longitude == v.longitude) || (0 == Objects.compare(longitude, v.longitude, (a, b) -> a.compareTo(b)))) &&
+			Objects.equals(locationName, v.locationName) &&
 			(alertable == v.alertable) &&
 			(active == v.active) &&
 			((authAt == v.authAt) || DateUtils.truncatedEquals(authAt, v.authAt, Calendar.SECOND)) &&
@@ -275,6 +283,7 @@ public class PeopleValue implements Serializable
 			.append(", healthWorkerStatus: ").append(healthWorkerStatus)
 			.append(", latitude: ").append(latitude)
 			.append(", longitude: ").append(longitude)
+			.append(", locationName: ").append(locationName)
 			.append(", alertable: ").append(alertable)
 			.append(", active: ").append(active)
 			.append(", authAt: ").append(authAt)

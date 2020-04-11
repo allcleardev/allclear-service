@@ -272,6 +272,7 @@ public class PeopleResourceTest
 			arguments(new PeopleFilter(1, 20).withHasSexId(false), 1L),
 			arguments(new PeopleFilter(1, 20).withHasLatitude(false), 1L),
 			arguments(new PeopleFilter(1, 20).withHasLongitude(false), 1L),
+			arguments(new PeopleFilter(1, 20).withHasLocationName(false), 1L),
 			arguments(new PeopleFilter(1, 20).withAlertable(VALUE.alertable), 1L),
 			arguments(new PeopleFilter(1, 20).withActive(VALUE.active), 1L),
 			arguments(new PeopleFilter(1, 20).withAuthAtFrom(hours(AUTH_AT, -1)), 1L),
@@ -303,6 +304,7 @@ public class PeopleResourceTest
 			arguments(new PeopleFilter(1, 20).withHasSexId(true), 0L),
 			arguments(new PeopleFilter(1, 20).withHasLatitude(true), 0L),
 			arguments(new PeopleFilter(1, 20).withHasLongitude(true), 0L),
+			arguments(new PeopleFilter(1, 20).withHasLocationName(true), 0L),
 			arguments(new PeopleFilter(1, 20).withAlertable(!VALUE.alertable), 0L),
 			arguments(new PeopleFilter(1, 20).withActive(!VALUE.active), 0L),
 			arguments(new PeopleFilter(1, 20).withAuthAtFrom(hours(AUTH_AT, 1)), 0L),
@@ -660,6 +662,7 @@ public class PeopleResourceTest
 			Assertions.assertNull(value.longitude, assertId + "Check longitude");
 		else
 			assertThat(value.longitude).as(assertId + "Check longitude").isEqualByComparingTo(expected.longitude);
+		Assertions.assertEquals(expected.locationName, value.locationName, assertId + "Check locationName");
 		Assertions.assertEquals(expected.alertable, value.alertable, assertId + "Check alertable");
 		Assertions.assertEquals(expected.active, value.active, assertId + "Check active");
 		if (null == expected.authAt)

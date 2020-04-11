@@ -359,4 +359,14 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.0.102_ALLCLEAR-226" author="smalleyd">
+		<addColumn tableName="people">
+			<column name="location_name" type="VARCHAR(255)" remarks="Represents the full address of the person used during geocoding." />
+		</addColumn>
+
+		<rollback>
+			<dropColumn tableName="people" columnName="location_name" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

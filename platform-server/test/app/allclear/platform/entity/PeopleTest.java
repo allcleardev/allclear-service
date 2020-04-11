@@ -39,7 +39,7 @@ public class PeopleTest
 	private static People create()
 	{
 		return new People("123", "max", "888-555-1000", "max@gmail.com", "Max", "Power", DOB,
-			"1", INFLUENCER.id, "0", "3", LAT, LNG, true, true, AUTH_AT, PHONE_VERIFIED_AT, EMAIL_VERIFIED_AT,
+			"1", INFLUENCER.id, "0", "3", LAT, LNG, "Omaha, NE", true, true, AUTH_AT, PHONE_VERIFIED_AT, EMAIL_VERIFIED_AT,
 			CREATED_AT);
 	}
 
@@ -48,8 +48,8 @@ public class PeopleTest
 	{
 		var o = create();
 		var v = new PeopleValue("456", "min", "888-555-1001", "minnie@gmail.com", "Minnie", "Mouse", DOB_1,
-			"11", null, "12", null, "10", null, "13", null, LAT_1, LNG_1, false, false, AUTH_AT_1, PHONE_VERIFIED_AT_1, EMAIL_VERIFIED_AT_1,
-			CREATED_AT_1, null);
+			"11", null, "12", null, "10", null, "13", null, LAT_1, LNG_1, "Detroit, MI", false, false,
+			AUTH_AT_1, PHONE_VERIFIED_AT_1, EMAIL_VERIFIED_AT_1, CREATED_AT_1, null);
 		Assertions.assertEquals(CREATED_AT, o.updatedAt, "Check updatedAt: before");
 
 		o.update(v, false);
@@ -66,6 +66,7 @@ public class PeopleTest
 		Assertions.assertEquals("13", o.healthWorkerStatusId, "Check healthWorkerStatusId");
 		Assertions.assertEquals(LAT_1, o.latitude, "Check latitude");
 		Assertions.assertEquals(LNG_1, o.longitude, "Check longitude");
+		Assertions.assertEquals("Detroit, MI", o.locationName, "Check locationName");
 		Assertions.assertFalse(o.alertable, "Check alertable");
 		Assertions.assertTrue(o.active, "Check active");	// Ignored for non-admins.
 		Assertions.assertEquals(AUTH_AT, o.authAt, "Check authAt");	// Ignored for non-admins.
@@ -86,8 +87,8 @@ public class PeopleTest
 	{
 		var o = create();
 		var v = new PeopleValue("456", "min", "888-555-1001", "minnie@gmail.com", "Minnie", "Mouse", DOB_1,
-			"11", null, "12", null, "10", null, "13", null, LAT_1, LNG_1, false, false, AUTH_AT_1, PHONE_VERIFIED_AT_1, EMAIL_VERIFIED_AT_1,
-			CREATED_AT_1, null);
+			"11", null, "12", null, "10", null, "13", null, LAT_1, LNG_1, "Detroit, MI", false, false,
+			AUTH_AT_1, PHONE_VERIFIED_AT_1, EMAIL_VERIFIED_AT_1, CREATED_AT_1, null);
 		Assertions.assertEquals(CREATED_AT, o.updatedAt, "Check updatedAt: before");
 
 		o.update(v, true);
@@ -104,6 +105,7 @@ public class PeopleTest
 		Assertions.assertEquals("13", o.healthWorkerStatusId, "Check healthWorkerStatusId");
 		Assertions.assertEquals(LAT_1, o.latitude, "Check latitude");
 		Assertions.assertEquals(LNG_1, o.longitude, "Check longitude");
+		Assertions.assertEquals("Detroit, MI", o.locationName, "Check locationName");
 		Assertions.assertFalse(o.alertable, "Check alertable");
 		Assertions.assertFalse(o.active, "Check active");
 		Assertions.assertEquals(AUTH_AT_1, o.authAt, "Check authAt");
@@ -126,8 +128,8 @@ public class PeopleTest
 		o.setStatureId(null);
 
 		var v = new PeopleValue("456", "min", "888-555-1001", "minnie@gmail.com", "Minnie", "Mouse", DOB_1,
-			"11", null, "12", null, "10", null, "13", null, LAT_1, LNG_1, false, false, AUTH_AT_1, PHONE_VERIFIED_AT_1, EMAIL_VERIFIED_AT_1,
-			CREATED_AT_1, null);
+			"11", null, "12", null, "10", null, "13", null, LAT_1, LNG_1, "Detroit, MI", false, false,
+			AUTH_AT_1, PHONE_VERIFIED_AT_1, EMAIL_VERIFIED_AT_1, CREATED_AT_1, null);
 		Assertions.assertEquals(CREATED_AT, o.updatedAt, "Check updatedAt: before");
 
 		o.update(v, false);
@@ -144,6 +146,7 @@ public class PeopleTest
 		Assertions.assertEquals("13", o.healthWorkerStatusId, "Check healthWorkerStatusId");
 		Assertions.assertEquals(LAT_1, o.latitude, "Check latitude");
 		Assertions.assertEquals(LNG_1, o.longitude, "Check longitude");
+		Assertions.assertEquals("Detroit, MI", o.locationName, "Check locationName");
 		Assertions.assertFalse(o.alertable, "Check alertable");
 		Assertions.assertTrue(o.active, "Check active");	// Ignored for non-admins.
 		Assertions.assertEquals(AUTH_AT, o.authAt, "Check authAt");	// Ignored for non-admins.
