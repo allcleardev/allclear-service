@@ -1,0 +1,54 @@
+{
+  "env": "local",
+
+  "baseUrl": "${baseUrl:-http://localhost:8080}",
+  "registrationPhone": "+16466321488",
+  "authenticationPhone": "+16466321488",
+
+  "twilio": { "baseUrl": "${twilio.baseUrl:-https://api.twilio.com/2010-04-01}", "accountId": "${twilio.accountId:-123}", "authToken": "${twilio.authToken:-token}" },
+ 
+  "trans": {
+    "driverClass": "com.mysql.jdbc.Driver",
+    "user": "allclear",
+    "password": "allclear",
+    "url": "jdbc:mysql://localhost:3306/allclear?useEncoding=true&characterEncoding=UTF-8&prepStmtCacheSize=100&prepStmtCacheSqlLimit=1024&serverTimezone=UTC",
+    "maxWaitForConnection": "1s",
+    "validationQuery": "SELECT 1",
+    "validationQueryTimeout": "10s",
+    "minSize": "1",
+    "maxSize": "10",
+    "checkConnectionWhileIdle": "true",
+    "checkConnectionOnBorrow": "true",
+    "defaultTransactionIsolation": "READ_COMMITTED",
+    "properties": { "hibernate.dialect": "org.hibernate.dialect.MySQL57Dialect",
+      "hibernate.dialect.storage_engine": "innodb",
+      "hibernate.show_sql": false }
+  },
+
+  "server": {
+    "type": "simple",
+    "minThreads": 1,
+    "maxThreads": 10,
+    "registerDefaultExceptionMappers": false,
+    "connector": {
+        "type": "http",
+        "port": 8080,
+        "bindHost": null
+    },
+    "applicationContextPath": "/",
+    "adminContextPath": "/internals",
+    "requestLog": {
+        "appenders": [
+            {
+                "type": "console",
+                "threshold": "ALL",
+                "timeZone": "UTC"
+            }
+        ]
+    }
+  },
+
+  "logging": { "level": "INFO",
+    "loggers": { "com.sun.jersey.api.container.filter.LoggingFilter": "INFO",
+                 "org.hibernate.engine.internal.StatisticalLoggingSessionEventListener": "WARN" } }
+}

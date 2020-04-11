@@ -1,0 +1,74 @@
+{
+  "env": "prod",
+
+  "baseUrl": "${baseUrl:-https://app.allclear.app}",
+  "registrationPhone": "+16466321488",
+  "authenticationPhone": "+16466321488",
+
+  "twilio": { "baseUrl": "${twilio.baseUrl:-https://api.twilio.com/2010-04-01}", "accountId": "${TWILIO_ACCOUNT_ID:-123}", "authToken": "${TWILIO_AUTH_TOKEN:-token}" },
+
+  "trans": {
+    "driverClass": "com.mysql.jdbc.Driver",
+    "user": "${MYSQL_USERNAME:-allclear}",
+    "password": "${MYSQL_PASSWORD:-allclearpwd}",
+    "url": "jdbc:mysql://allclear-prod.mysql.database.azure.com:3306/allclear?useEncoding=true&characterEncoding=UTF-8&prepStmtCacheSize=100&prepStmtCacheSqlLimit=1024&serverTimezone=UTC&useSSL=true&requireSSL=true",
+    "maxWaitForConnection": "1s",
+    "validationQuery": "SELECT 1",
+    "validationQueryTimeout": "10s",
+    "minSize": "2",
+    "maxSize": "10",
+    "checkConnectionWhileIdle": "true",
+    "checkConnectionOnBorrow": "true",
+    "defaultTransactionIsolation": "READ_COMMITTED",
+    "properties": { "hibernate.dialect": "org.hibernate.dialect.MySQL57Dialect",
+      "hibernate.dialect.storage_engine": "innodb",
+      "hibernate.show_sql": false }
+  },
+
+  "read": {
+    "driverClass": "com.mysql.jdbc.Driver",
+    "user": "${MYSQL_USERNAME:-allclear}",
+    "password": "${MYSQL_PASSWORD:-allclearpwd}",
+    "url": "jdbc:mysql://ro-allclear-prod.mysql.database.azure.com:3306/allclear?useEncoding=true&characterEncoding=UTF-8&prepStmtCacheSize=100&prepStmtCacheSqlLimit=1024&serverTimezone=UTC&useSSL=true&requireSSL=true",
+    "maxWaitForConnection": "1s",
+    "validationQuery": "SELECT 1",
+    "validationQueryTimeout": "10s",
+    "minSize": "10",
+    "maxSize": "40",
+    "readOnlyByDefault": true,
+    "checkConnectionWhileIdle": "true",
+    "checkConnectionOnBorrow": "true",
+    "defaultTransactionIsolation": "READ_UNCOMMITTED",
+    "properties": { "hibernate.dialect": "org.hibernate.dialect.MySQL57Dialect",
+      "hibernate.dialect.storage_engine": "innodb",
+      "hibernate.show_sql": false }
+  },
+
+  "server": {
+    "type": "simple",
+    "minThreads": 1,
+    "maxThreads": 10,
+    "registerDefaultExceptionMappers": false,
+    "connector": {
+        "type": "http",
+        "port": 8080,
+        "bindHost": null
+    },
+    "applicationContextPath": "/",
+    "adminContextPath": "/internals",
+    "requestLog": {
+        "appenders": [
+            {
+                "type": "console",
+                "threshold": "ALL",
+                "timeZone": "UTC"
+            }
+        ]
+    }
+  },
+
+  "logging": { "level": "INFO",
+    "loggers": { "com.sun.jersey.api.container.filter.LoggingFilter": "INFO",
+                 "org.hibernate.engine.internal.StatisticalLoggingSessionEventListener": "WARN",
+                 "org.reflections.Reflections": "ERROR" } }
+}
