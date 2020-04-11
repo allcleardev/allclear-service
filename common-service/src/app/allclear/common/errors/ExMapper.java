@@ -25,7 +25,7 @@ public abstract class ExMapper<E extends Throwable> implements ExceptionMapper<E
 	public ExMapper() { super(); }
 
 	protected abstract int status();
-	protected ErrorInfo log(final String message) { log.warn(message); return new ErrorInfo(message); }
+	protected ErrorInfo log(final String message, final Throwable ex) { log.warn(message); return new ErrorInfo(message); }
 	protected ErrorInfo log(final Throwable ex) { log.warn(ex.getMessage(), ex); return new ErrorInfo(ex); }
 
 	@Override
@@ -33,7 +33,7 @@ public abstract class ExMapper<E extends Throwable> implements ExceptionMapper<E
 	{
 		return Response.status(status())
 			.type(UTF8MediaType.APPLICATION_JSON_TYPE)
-			.entity((log.isDebugEnabled()) ? log(ex) : log(ex.getMessage()))
+			.entity((log.isDebugEnabled()) ? log(ex) : log(ex.getMessage(), ex))
 			.build();
 	}
 }

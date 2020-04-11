@@ -16,6 +16,6 @@ import javax.ws.rs.ext.Provider;
 public class AuthorizationExceptionMapper extends ExMapper<NotAuthorizedException>
 {
 	@Override protected int status() { return Response.Status.UNAUTHORIZED.getStatusCode(); }
-	@Override protected ErrorInfo log(final String message) { log.error(message); return new ErrorInfo(message); }
+	@Override protected ErrorInfo log(final String message, final Throwable ex) { log.error(message, ex); return new ErrorInfo(message); }
 	@Override protected ErrorInfo log(final Throwable ex) { log.error(ex.getMessage(), ex); return new ErrorInfo(ex); }
 }

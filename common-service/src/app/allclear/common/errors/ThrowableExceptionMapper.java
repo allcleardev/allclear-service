@@ -17,6 +17,6 @@ public class ThrowableExceptionMapper extends ExMapper<Throwable>
 	public ThrowableExceptionMapper() {}
 
 	@Override protected int status() { return Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(); }
-	@Override protected ErrorInfo log(final String message) { log.error(message); return new ErrorInfo(message); }
-	@Override protected ErrorInfo log(final Throwable ex) { log.error(ex.getMessage()); return new ErrorInfo(ex); }
+	@Override protected ErrorInfo log(final String message, final Throwable ex) { log.error(message, ex); return new ErrorInfo(message); }
+	@Override protected ErrorInfo log(final Throwable ex) { log.error(ex.getMessage(), ex); return new ErrorInfo(ex); }
 }
