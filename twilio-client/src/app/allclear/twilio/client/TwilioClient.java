@@ -36,6 +36,7 @@ public class TwilioClient implements AutoCloseable
 	public final String FIELD_TO = "To";
 	public final String FIELD_BODY = "Body";
 	public final String FIELD_FROM = "From";
+	public final String FIELD_MESSAGE_SERVICE_SID = "MessagingServiceSid";
 
 	private final Client client;
 	private final Invocation.Builder message;
@@ -62,7 +63,10 @@ public class TwilioClient implements AutoCloseable
 	public SMSResponse send(final SMSRequest request) throws TwilioException
 	{
 		var params = new MultivaluedStringMap(3);
-		params.add(FIELD_FROM, request.from);
+		if (request.hasMessagingServiceSid())
+			params.add(FIELD_MESSAGE_SERVICE_SID, request.messagingServiceSid);
+		else
+			params.add(FIELD_FROM, request.from);
 		params.add(FIELD_BODY, request.body);
 		params.add(FIELD_TO, request.to);
 
