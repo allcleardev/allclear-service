@@ -45,6 +45,7 @@ public class SessionDAO
 	public static String key(final String id) { return String.format(ID, id); }
 	public static String authKey(final String phone, final String token) { return String.format(AUTH_KEY, phone, token); }
 
+	private final String authSid;
 	private final String authFrom;
 	private final RedisClient redis;
 	private final String authMessage;
@@ -56,6 +57,7 @@ public class SessionDAO
 	{
 		this.redis = redis;
 		this.twilio = twilio;
+		this.authSid = conf.authenticationSid;
 		this.authFrom = conf.authenticationPhone;
 		this.authMessage = conf.authenticationSMSMessage;
 	}
@@ -112,7 +114,7 @@ public class SessionDAO
 	{
 		var token = RandomStringUtils.randomNumeric(TOKEN_LENGTH).toUpperCase();
 
-		twilio.send(new SMSRequest(authFrom, String.format(authMessage, token, encode(phone, UTF_8), encode(token, UTF_8)), phone));
+		twilio.send(new SMSRequest(authSid, authFrom, String.format(authMessage, token, encode(phone, UTF_8), encode(token, UTF_8)), phone));
 		redis.put(authKey(phone, token), phone, AUTH_DURATION);
 
 		return token;

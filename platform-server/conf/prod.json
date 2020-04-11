@@ -2,8 +2,8 @@
   "env": "prod",
 
   "baseUrl": "${baseUrl:-https://app.allclear.app}",
-  "registrationPhone": "+16466321488",
-  "authenticationPhone": "+16466321488",
+  "registrationPhone": "MG84db3eef8585f4f32478113f58b6138e",
+  "authenticationPhone": "MG84db3eef8585f4f32478113f58b6138e",
 
   "admins": "DefaultEndpointsProtocol=https;AccountName=allclear-admins;AccountKey=${COSMOS_ACCOUNT_KEY:-accountKey};TableEndpoint=https://allclear-admins.table.cosmos.azure.com:443/;",
   "session": { "host": "allclear-prod.redis.cache.windows.net", "port": 6380, "timeout": 200, "poolSize": 10, "password": "${REDIS_PASSWORD:-password}", "ssl": true, "testWhileIdle": true },

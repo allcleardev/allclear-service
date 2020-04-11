@@ -39,7 +39,9 @@ public class Config extends Configuration implements Serializable
 	public final ManifestValue manifest;
 
 	public final String baseUrl;
+	public final String registrationSid;
 	public final String registrationPhone;
+	public final String authenticationSid;
 	public final String authenticationPhone;
 	public final String registrationSMSMessage;
 	public final String authenticationSMSMessage;
@@ -68,8 +70,10 @@ public class Config extends Configuration implements Serializable
 		this.disableSwagger = Boolean.TRUE.equals(disableSwagger);
 
 		this.baseUrl = baseUrl;
-		this.registrationPhone = registrationPhone;
-		this.authenticationPhone = authenticationPhone;
+		this.registrationSid = registrationPhone.startsWith("+") ? null : registrationPhone;
+		this.registrationPhone = registrationPhone.startsWith("+") ? registrationPhone : null;
+		this.authenticationSid = authenticationPhone.startsWith("+") ? null : authenticationPhone;
+		this.authenticationPhone = authenticationPhone.startsWith("+") ? authenticationPhone : null;
 		this.registrationSMSMessage = baseUrl("/messages/sms/registration.txt", baseUrl);
 		this.authenticationSMSMessage = baseUrl("/messages/sms/authentication.txt", baseUrl);
 

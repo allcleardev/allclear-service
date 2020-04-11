@@ -45,6 +45,7 @@ public class RegistrationDAO
 	private static final ObjectMapper mapper = JacksonUtils.createMapper();
 	private static final TypeReference<Map<String, String>> TYPE_MAP = new TypeReference<Map<String, String>>() {};
 
+	private final String sid;
 	private final String from;
 	private final String message;
 	private final RedisClient redis;
@@ -54,6 +55,7 @@ public class RegistrationDAO
 	{
 		this.redis = redis;
 		this.twilio = twilio;
+		this.sid = conf.registrationSid;
 		this.from = conf.registrationPhone;
 		this.message = conf.registrationSMSMessage;
 	}
@@ -82,7 +84,7 @@ public class RegistrationDAO
 				key = key(request.phone, code = RandomStringUtils.randomNumeric(CODE_LENGTH).toUpperCase());
 			}
 
-			twilio.send(new SMSRequest(from, String.format(message, code, encode(request.phone, UTF_8), encode(code, UTF_8)), request.phone));
+			twilio.send(new SMSRequest(sid, from, String.format(message, code, encode(request.phone, UTF_8), encode(code, UTF_8)), request.phone));
 			c.hset(key, mapper.convertValue(request, TYPE_MAP));
 			c.expire(key, EXPIRATION);
 
