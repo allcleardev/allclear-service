@@ -59,9 +59,9 @@ public class PeopleResource
 		@PathParam("id") final String id) throws ObjectNotFoundException
 	{
 		var o = sessionDao.current();	// Only admins can see other application users.
-		if (o.person()) return o.person;
+		var id_ = o.person() ? o.person.id : id;
 
-		return dao.getByIdWithException(id);
+		return dao.getByIdWithException(id_);
 	}
 
 	@GET
@@ -71,7 +71,7 @@ public class PeopleResource
 		@QueryParam("name") @ApiParam(name="name", value="Value for the wildcard search") final String name)
 	{
 		var o = sessionDao.current();	// Only admins can see other application users.
-		if (o.person()) return List.of(o.person);
+		if (o.person()) return List.of(dao.getByIdWithException(o.person.id));
 
 		return dao.getActiveByIdOrName(name);
 	}
