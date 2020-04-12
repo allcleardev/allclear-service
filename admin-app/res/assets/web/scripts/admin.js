@@ -515,7 +515,7 @@ var ConfigurationHandler = new EditTemplate({
 	          new TextField('version', 'Version'),
 	          new TextField('baseUrl', 'Base URL'),
 	          new TextField('registrationPhone', 'Registration Sid/Phone', (v, p) => p ? p : v.registrationSid),
-	          new TextField('authenticationPhone', 'Authentication Sid/Phone', (v, p) => p ? p : v.authenticatioSid),
+	          new TextField('authenticationPhone', 'Authentication Sid/Phone', (v, p) => p ? p : v.authenticationSid),
 	          new TextField('registrationSMSMessage', 'Registration SMS Message'),
 	          new TextField('authenticationSMSMessage', 'Authentication SMS Message'),
 	          new TextField('admins', 'Cosmos Table Account', (v, p) => p.AccountName),
