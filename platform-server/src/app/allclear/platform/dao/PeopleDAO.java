@@ -206,7 +206,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		var record = findByPhone(phone);
 		if (null == record) throw new ObjectNotFoundException("Could not find the account with phone number '" + phone + "'.");
 
-		return record.auth().toValue();
+		return record.auth().toValueX();	// MUST get the full profile. Needed for Facility restrictions. DLS on 4/12/2020.
 	}
 
 	/** Validates a single People value.
