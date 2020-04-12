@@ -6,6 +6,8 @@
 			<column name="id" type="VARCHAR(10)" remarks="Represents a randomly generated alphanumeric identifier.">
 				<constraints nullable="false" primaryKey="true" primaryKeyName="pk_people" />
 			</column>
+			<column name="latitude" type="DECIMAL(12,8)" remarks="Represents the GEO coordinates of the user's primary location - latitude property." />
+			<column name="longitude" type="DECIMAL(12,8)" remarks="Represents the GEO coordinates of the user's primary location - longitude property." />
 			<column name="alertable" type="BOOLEAN" defaultValueBoolean="false" remarks="Indicates that a user wishes to be notified with pertinent information.">
 				<constraints nullable="false" />
 			</column>
@@ -17,8 +19,10 @@
 
 	<changeSet id="load-tests" author="smalleyd">
 
-		<loadData tableName="people" file="/feeds/people.csv">
+		<loadData tableName="people" file="feeds/people.csv">
 			<column name="id" type="STRING" />
+			<column name="latitude" type="NUMERIC" />
+			<column name="longitude" type="NUMERIC" />
 			<column name="alertable" type="BOOLEAN" />
 			<column name="active" type="BOOLEAN" />
 		</loadData>

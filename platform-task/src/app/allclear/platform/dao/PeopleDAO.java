@@ -15,6 +15,6 @@ import org.jdbi.v3.sqlobject.statement.SqlQuery;
 
 public interface PeopleDAO
 {
-	@SqlQuery("SELECT o.id FROM people o WHERE o.id > :lastId AND o.alertable = TRUE AND o.active = TRUE ORDER BY o.id LIMIT :pageSize")
-	public List<Long> getActiveAlertableIds(@Bind("lastId") final String lastId, @Bind("pageSize") final int pageSize);
+	@SqlQuery("SELECT o.id FROM people o WHERE o.id > :lastId AND o.latitude IS NOT NULL AND o.longitude IS NOT NULL AND o.alertable = TRUE AND o.active = TRUE ORDER BY o.id LIMIT :pageSize")
+	public List<String> getActiveAlertableIds(@Bind("lastId") final String lastId, @Bind("pageSize") final int pageSize);
 }
