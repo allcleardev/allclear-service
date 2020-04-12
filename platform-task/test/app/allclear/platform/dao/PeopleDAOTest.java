@@ -1,13 +1,20 @@
 package app.allclear.platform.dao;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
 import app.allclear.junit.jdbi.JDBiRule;
+import app.allclear.platform.type.Timezone;
 
 /** Functional test that verifies the PeopleDAO class.
  * 
@@ -31,11 +38,28 @@ public class PeopleDAOTest
 		dao = RULE.dbi().onDemand(PeopleDAO.class);
 	}
 
-	@Test
-	public void getActiveAlertableIds()
+	public static Stream<Arguments> getActiveAlertableIds()
 	{
-		var ids = dao.getActiveAlertableIds("", 20);
+		return Stream.of(
+			arguments(Timezone.CST, "VVVV"),
+			arguments(Timezone.MST, "WWWW"),
+			arguments(Timezone.PST, "XXXX"));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void getActiveAlertableIds(final Timezone zone, final String expectedId)
+	{
+		var ids = dao.getActiveAlertableIds("", zone.longitudeFrom, zone.longitudeTo, 20);
+		assertThat(ids).as("Check page 1").hasSize(1).containsExactly(expectedId);
+	}
+
+	@Test
+	public void getActiveAlertableIds_EST()
+	{
+		var zone = Timezone.EST;
+		var ids = dao.getActiveAlertableIds("", zone.longitudeFrom, zone.longitudeTo, 20);
 		assertThat(ids).as("Check page 1").hasSize(20).containsExactly("1111", "AAAA", "CCCC", "DDDD", "EEEE", "FFFF", "GGGG", "HHHH", "IIII", "JJJJ", "KKKK", "LLLL", "MMMM", "NNNN", "OOOO", "PPPP", "QQQQ", "RRRR", "SSSS", "TTTT");
-		assertThat(dao.getActiveAlertableIds(ids.get(19), 20)).as("Check page 2").hasSize(1).containsExactly("UUUU");
+		assertThat(dao.getActiveAlertableIds(ids.get(19), zone.longitudeFrom, zone.longitudeTo, 20)).as("Check page 2").hasSize(1).containsExactly("UUUU");
 	}
 }
