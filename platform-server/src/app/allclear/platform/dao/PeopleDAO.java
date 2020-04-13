@@ -2,7 +2,7 @@ package app.allclear.platform.dao;
 
 import static app.allclear.common.dao.OrderByBuilder.*;
 
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -33,6 +33,8 @@ import app.allclear.platform.value.PeopleValue;
 
 public class PeopleDAO extends AbstractDAO<People>
 {
+	public static final int MAX_FACILITIES = 20;
+
 	private static final String SELECT = "SELECT OBJECT(o) FROM People o";
 	private static final String COUNT = "SELECT COUNT(o.id) FROM People o";
 	private static final OrderByBuilder ORDER = new OrderByBuilder('o', 
@@ -102,6 +104,47 @@ public class PeopleDAO extends AbstractDAO<People>
 	{
 		if (CollectionUtils.isEmpty(values)) return;
 		values.stream().filter(v -> null != v).forEach(v -> s.persist(toEntity.apply(v)));
+	}
+
+	/** Associates one or more facilities with a person.
+	 * 
+	 * @param id person identifier
+	 * @param facilityIds
+	 * @return number of associations added.
+	 * @throws ObjectNotFoundException
+	 * @throws ValidationException
+	 */
+	public int addFacilities(final String id, final List<Long> facilityIds) throws ObjectNotFoundException, ValidationException
+	{
+		if (CollectionUtils.isEmpty(facilityIds)) throw new ValidationException("facilityIds", "Please provide one or more facilities to bookmark.");
+
+		var now = new Date();
+		var s = currentSession();
+		var validator = new Validator();
+		var record = findWithException(id);
+		var existingIds = new HashSet<>(namedQuery("getFacilityIdsByPerson", Long.class).setParameter("personId", id).list());	// Needs to be modifiable.
+		var updatable = facilityIds.stream()
+			.filter(i -> null != i)
+			.filter(i -> !existingIds.contains(i))
+			.map(i -> {
+				var o = s.get(Facility.class, i);
+				if (null == o) validator.add("facilityId", "The Facility ID '%d' is invalid.", i);
+
+				return o;
+			})
+			.filter(o -> (null != o))
+			.peek(o -> existingIds.add(o.getId()))
+			.collect(Collectors.toList());
+
+		validator.check();	// Were there any invalid facility IDs.
+
+		int size = updatable.size();
+		if (MAX_FACILITIES < (size + existingIds.size()))
+			validator.add("facilityIds", "You may only have a total of %d bookmarked facilities.", MAX_FACILITIES).check();
+
+		updatable.forEach(o -> s.persist(new PeopleFacility(record, o, now)));
+
+		return updatable.size();
 	}
 
 	/** Updates a single People value.
@@ -304,6 +347,28 @@ public class PeopleDAO extends AbstractDAO<People>
 		return true;
 	}
 
+	/** Removes one or more facility associations from a person.
+	 * 
+	 * @param id person identifier
+	 * @param facilityIds
+	 * @return number of associations removed.
+	 * @throws ObjectNotFoundException
+	 * @throws ValidationException
+	 */
+	public int removeFacilities(final String id, final List<Long> facilityIds) throws ObjectNotFoundException, ValidationException
+	{
+		if (CollectionUtils.isEmpty(facilityIds)) return 0;
+
+		var s = currentSession();
+		var query = namedQuery("findPeopleFacility", PeopleFacility.class).setParameter("personId", id);
+		return (int) facilityIds.stream()
+			.filter(i -> null != i)
+			.map(i -> query.setParameter("facilityId", i).uniqueResult())
+			.filter(o -> null != o)
+			.peek(o -> s.delete(o))
+			.count();
+	}
+
 	/** Finds a single People entity by identifier.
 	 *
 	 * @param id
@@ -468,6 +533,9 @@ public class PeopleDAO extends AbstractDAO<People>
 			.addIn("includeExposures", "EXISTS (SELECT 1 FROM Exposures c WHERE c.personId = o.id AND c.exposureId IN {})", filter.includeExposures)
 			.addIn("excludeExposures", "NOT EXISTS (SELECT 1 FROM Exposures c WHERE c.personId = o.id AND c.exposureId IN {})", filter.excludeExposures)
 			.addIn("includeSymptoms", "EXISTS (SELECT 1 FROM Symptoms c WHERE c.personId = o.id AND c.symptomId IN {})", filter.includeSymptoms)
-			.addIn("excludeSymptoms", "NOT EXISTS (SELECT 1 FROM Symptoms c WHERE c.personId = o.id AND c.symptomId IN {})", filter.excludeSymptoms);
+			.addIn("excludeSymptoms", "NOT EXISTS (SELECT 1 FROM Symptoms c WHERE c.personId = o.id AND c.symptomId IN {})", filter.excludeSymptoms)
+			.addExists("SELECT 1 FROM PeopleFacility c WHERE c.personId = o.id", filter.hasFacilities)
+			.addIn("includeFacilities", "EXISTS (SELECT 1 FROM PeopleFacility c WHERE c.personId = o.id AND c.facilityId IN {})", filter.includeFacilities)
+			.addIn("excludeFacilities", "NOT EXISTS (SELECT 1 FROM PeopleFacility c WHERE c.personId = o.id AND c.facilityId IN {})", filter.excludeFacilities);
 	}
 }

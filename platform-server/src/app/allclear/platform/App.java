@@ -46,7 +46,7 @@ public class App extends Application<Config>
 
 	public static final String APP_NAME = "AllClear Platform";
 
-	public static final Class<?>[] ENTITIES = new Class<?>[] { Conditions.class, Exposures.class, Facility.class, FacilityX.class, People.class, Symptoms.class, SymptomsLog.class, Tests.class };
+	public static final Class<?>[] ENTITIES = new Class<?>[] { Conditions.class, Exposures.class, Facility.class, FacilityX.class, People.class, PeopleFacility.class, Symptoms.class, SymptomsLog.class, Tests.class };
 
 	private final HibernateBundle<Config> transHibernateBundle = new HibernateBundle<>(People.class, ENTITIES) {
 		@Override public DataSourceFactory getDataSourceFactory(final Config conf) { return conf.trans; }

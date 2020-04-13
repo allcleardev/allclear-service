@@ -369,4 +369,25 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.0.108_ALLCLEAR-259" author="smalleyd">
+		<createTable tableName="people_facility" remarks="Represents bookmarked facilities by a person.">
+			<column name="person_id" type="VARCHAR(10)" remarks="Refers to a person.">
+				<constraints nullable="false" />
+			</column>
+			<column name="facility_id" type="BIGINT" remarks="Refers to a facility.">
+				<constraints nullable="false" />
+			</column>
+			<column name="created_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was created.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey tableName="people_facility" columnNames="person_id, facility_id" constraintName="pk_people_facility" />
+		<addForeignKeyConstraint baseTableName="people_facility" baseColumnNames="person_id" referencedTableName="people" referencedColumnNames="id" constraintName="fk_people_facility_1" onDelete="CASCADE" />
+		<addForeignKeyConstraint baseTableName="people_facility" baseColumnNames="facility_id" referencedTableName="facility" referencedColumnNames="id" constraintName="fk_people_facility_2" onDelete="CASCADE" />
+
+		<rollback>
+			<dropTable tableName="people_facility" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

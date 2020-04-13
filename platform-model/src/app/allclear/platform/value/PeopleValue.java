@@ -70,6 +70,7 @@ public class PeopleValue implements Serializable
 	public List<CreatedValue> conditions = null;
 	public List<CreatedValue> exposures = null;
 	public List<CreatedValue> symptoms = null;
+	public List<FacilityValue> facilities = null;
 
 	// Accessors
 	public boolean symptomatic()
@@ -127,6 +128,7 @@ public class PeopleValue implements Serializable
 	{
 		return withSymptoms(Arrays.asList(newValues).stream().map(v -> v.created()).collect(toList()));
 	}
+	public PeopleValue withFacilities(final List<FacilityValue> newValues) { facilities = newValues; return this; }
 
 	public PeopleValue registered() { return withActive(true).withAuthAt(new Date()); }
 	public PeopleValue registeredByPhone() { return registered().withPhoneVerifiedAt(authAt).withEmailVerifiedAt(null); }
@@ -294,6 +296,7 @@ public class PeopleValue implements Serializable
 			.append(", conditions: ").append(conditions)
 			.append(", exposures: ").append(exposures)
 			.append(", symptoms: ").append(symptoms)
+			.append(", facilities: ").append(facilities)
 			.append(" }").toString();
 	}
 }

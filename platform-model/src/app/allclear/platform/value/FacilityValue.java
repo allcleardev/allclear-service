@@ -125,6 +125,11 @@ public class FacilityValue implements Serializable
 
 	public FacilityValue() {}
 
+	public FacilityValue(final int i)	// For tests
+	{
+		this("Test Center " + i, "Address " + i, "City" + i, "State " + i, new BigDecimal(i), new BigDecimal(i), false, false, false, false, false, false, false, true);
+	}
+
 	public FacilityValue(
 		final String name,
 		final String address,

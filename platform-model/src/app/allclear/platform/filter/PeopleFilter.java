@@ -73,6 +73,9 @@ public class PeopleFilter extends QueryFilter
 	public List<String> excludeExposures = null;
 	public List<String> includeSymptoms = null;
 	public List<String> excludeSymptoms = null;
+	public Boolean hasFacilities = null;
+	public List<Long> includeFacilities = null;
+	public List<Long> excludeFacilities = null;
 
 	// Mutators
 	public PeopleFilter withId(final String newValue) { id = newValue; return this; }
@@ -132,6 +135,11 @@ public class PeopleFilter extends QueryFilter
 	public PeopleFilter withIncludeSymptoms(final String... newValues) { return withIncludeSymptoms(Arrays.asList(newValues)); }
 	public PeopleFilter withExcludeSymptoms(final List<String> newValues) { excludeSymptoms = newValues; return this; }
 	public PeopleFilter withExcludeSymptoms(final String... newValues) { return withExcludeSymptoms(Arrays.asList(newValues)); }
+	public PeopleFilter withHasFacilities(final Boolean newValue) { hasFacilities = newValue; return this; }
+	public PeopleFilter withIncludeFacilities(final List<Long> newValues) { includeFacilities = newValues; return this; }
+	public PeopleFilter withIncludeFacilities(final Long... newValues) { return withIncludeFacilities(Arrays.asList(newValues)); }
+	public PeopleFilter withExcludeFacilities(final List<Long> newValues) { excludeFacilities = newValues; return this; }
+	public PeopleFilter withExcludeFacilities(final Long... newValues) { return withExcludeFacilities(Arrays.asList(newValues)); }
 
 	/**************************************************************************
 	*
@@ -347,6 +355,9 @@ public class PeopleFilter extends QueryFilter
 			.append(", excludeExposures: ").append(excludeExposures)
 			.append(", includeSymptoms: ").append(includeSymptoms)
 			.append(", excludeSymptoms: ").append(excludeSymptoms)
+			.append(", hasFacilities: ").append(hasFacilities)
+			.append(", includeFacilities: ").append(includeFacilities)
+			.append(", excludeFacilities: ").append(excludeFacilities)
 			.append(" }").toString();
 	}
 }

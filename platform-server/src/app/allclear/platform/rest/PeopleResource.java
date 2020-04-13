@@ -14,6 +14,7 @@ import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.resources.Headers;
+import app.allclear.common.value.CountResults;
 import app.allclear.common.value.OperationResponse;
 import app.allclear.platform.dao.*;
 import app.allclear.platform.filter.PeopleFilter;
@@ -120,6 +121,27 @@ public class PeopleResource
 	}
 
 	@POST
+	@Path("/facilities") @Timed @UnitOfWork
+	@ApiOperation(value="addFacilities", notes="Associates one or more facilities with a person.", response=PeopleValue.class)
+	public CountResults addFacilities(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final List<Long> facilityIds) throws ObjectNotFoundException, ValidationException
+	{
+		return new CountResults(dao.addFacilities(sessionDao.checkPerson().id, facilityIds));
+	}
+
+	@POST
+	@Path("/{id}/facilities") @Timed @UnitOfWork
+	@ApiOperation(value="addFacilities", notes="Associates one or more facilities with a person.", response=PeopleValue.class)
+	public CountResults addFacilities(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@PathParam("id") final String id,
+		final List<Long> facilityIds) throws ObjectNotFoundException, ValidationException
+	{
+		sessionDao.checkAdmin();	// Only admin can perform this operation on select users.
+
+		return new CountResults(dao.addFacilities(id, facilityIds));
+	}
+
+	@POST
 	@Path("/register") @Timed @UnitOfWork
 	@ApiOperation(value="register", notes="Completes the user registration process.", response=SessionValue.class)
 	public SessionValue register(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
@@ -191,6 +213,27 @@ public class PeopleResource
 		sessionDao.checkAdmin();	// Only admins can delete application users.
 
 		return new OperationResponse(dao.remove(id));
+	}
+
+	@DELETE
+	@Path("/facilities") @Timed @UnitOfWork
+	@ApiOperation(value="removeFacilities", notes="Removes one or more facility associations from a person.", response=PeopleValue.class)
+	public CountResults removeFacilities(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final List<Long> facilityIds) throws ObjectNotFoundException, ValidationException
+	{
+		return new CountResults(dao.removeFacilities(sessionDao.checkPerson().id, facilityIds));
+	}
+
+	@DELETE
+	@Path("/{id}/facilities") @Timed @UnitOfWork
+	@ApiOperation(value="removeFacilities", notes="Removes one or more facility associations from a person.", response=PeopleValue.class)
+	public CountResults removeFacilities(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@PathParam("id") final String id,
+		final List<Long> facilityIds) throws ObjectNotFoundException, ValidationException
+	{
+		sessionDao.checkAdmin();	// Only admin can perform this operation on select users.
+
+		return new CountResults(dao.removeFacilities(id, facilityIds));
 	}
 
 	@POST

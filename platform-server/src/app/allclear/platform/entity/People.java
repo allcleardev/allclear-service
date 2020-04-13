@@ -171,6 +171,12 @@ public class People implements Serializable
 	public List<Tests> tests;
 	public void setTests(final List<Tests> newValues) { tests = newValues; }
 
+	@ManyToMany(cascade={CascadeType.REMOVE}, fetch=FetchType.LAZY)
+	@JoinTable(name="people_facility", joinColumns=@JoinColumn(name="person_id"), inverseJoinColumns=@JoinColumn(name="facility_id"))
+	public List<Facility> getFacilities() { return facilities; }
+	public List<Facility> facilities;
+	public void setFacilities(final List<Facility> newValues) { facilities = newValues; }
+
 	public People() {}
 
 	public People(final String id,
@@ -338,9 +344,12 @@ public class People implements Serializable
 	@Transient
 	public PeopleValue toValueX()
 	{
+		var facilities_ = CollectionUtils.isEmpty(getFacilities()) ? null : getFacilities().stream().map(o -> o.toValue()).collect(toList());
+
 		return toValue().withConditions(toCreatedValues(getConditions()))
 			.withExposures(toCreatedValues(getExposures()))
-			.withSymptoms(toCreatedValues(getSymptoms()));
+			.withSymptoms(toCreatedValues(getSymptoms()))
+			.withFacilities(facilities_);
 	}
 
 	@Transient

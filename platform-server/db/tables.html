@@ -23,7 +23,7 @@
 <TR>
 <TD CLASS="header" COLSPAN="1">No.</TD><TD CLASS="header" COLSPAN="1">Table Name</TD><TD CLASS="header" COLSPAN="1">Comments</TD><TD CLASS="header" COLSPAN="1"># Records</TD></TR>
 <TR>
-<TD CLASS="detail">1</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOG">DATABASECHANGELOG</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">14</TD></TR>
+<TD CLASS="detail">1</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOG">DATABASECHANGELOG</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">15</TD></TR>
 <TR>
 <TD CLASS="detail">2</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOGLOCK">DATABASECHANGELOGLOCK</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">1</TD></TR>
 <TR>
@@ -37,11 +37,13 @@
 <TR>
 <TD CLASS="detail">7</TD><TD CLASS="detail"><A HREF="#people">people</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">1</TD></TR>
 <TR>
-<TD CLASS="detail">8</TD><TD CLASS="detail"><A HREF="#symptoms">symptoms</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">0</TD></TR>
+<TD CLASS="detail">8</TD><TD CLASS="detail"><A HREF="#people_facility">people_facility</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">0</TD></TR>
 <TR>
-<TD CLASS="detail">9</TD><TD CLASS="detail"><A HREF="#symptoms_log">symptoms_log</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">0</TD></TR>
+<TD CLASS="detail">9</TD><TD CLASS="detail"><A HREF="#symptoms">symptoms</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">0</TD></TR>
 <TR>
-<TD CLASS="detail">10</TD><TD CLASS="detail"><A HREF="#tests">tests</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">0</TD></TR>
+<TD CLASS="detail">10</TD><TD CLASS="detail"><A HREF="#symptoms_log">symptoms_log</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">0</TD></TR>
+<TR>
+<TD CLASS="detail">11</TD><TD CLASS="detail"><A HREF="#tests">tests</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">0</TD></TR>
 </TABLE>
 <DIV STYLE="page-break-before:always">
 <A NAME="DATABASECHANGELOG"><H2>DATABASECHANGELOG</H2></A>
@@ -359,7 +361,9 @@
 <TR>
 <TD CLASS="header" COLSPAN="1">No.</TD><TD CLASS="header" COLSPAN="1">Name</TD><TD CLASS="header" COLSPAN="1">References</TD><TD CLASS="header" COLSPAN="1">Reference Column</TD></TR>
 <TR>
-<TD CLASS="detail">1</TD><TD CLASS="detail">fk_tests_facility</TD><TD CLASS="detail"><A HREF="#tests">tests</A></TD><TD CLASS="detail">facility_id</TD></TR>
+<TD CLASS="detail">1</TD><TD CLASS="detail">fk_people_facility_2</TD><TD CLASS="detail"><A HREF="#people_facility">people_facility</A></TD><TD CLASS="detail">facility_id</TD></TR>
+<TR>
+<TD CLASS="detail">2</TD><TD CLASS="detail">fk_tests_facility</TD><TD CLASS="detail"><A HREF="#tests">tests</A></TD><TD CLASS="detail">facility_id</TD></TR>
 </TABLE>
 <BR><A HREF="#Contents">Goto Contents</A>
 </DIV>
@@ -443,11 +447,55 @@
 <TR>
 <TD CLASS="detail">2</TD><TD CLASS="detail">fk_exposures_1</TD><TD CLASS="detail"><A HREF="#exposures">exposures</A></TD><TD CLASS="detail">person_id</TD></TR>
 <TR>
-<TD CLASS="detail">3</TD><TD CLASS="detail">fk_symptoms_1</TD><TD CLASS="detail"><A HREF="#symptoms">symptoms</A></TD><TD CLASS="detail">person_id</TD></TR>
+<TD CLASS="detail">3</TD><TD CLASS="detail">fk_people_facility_1</TD><TD CLASS="detail"><A HREF="#people_facility">people_facility</A></TD><TD CLASS="detail">person_id</TD></TR>
 <TR>
-<TD CLASS="detail">4</TD><TD CLASS="detail">fk_symptoms_log_1</TD><TD CLASS="detail"><A HREF="#symptoms_log">symptoms_log</A></TD><TD CLASS="detail">person_id</TD></TR>
+<TD CLASS="detail">4</TD><TD CLASS="detail">fk_symptoms_1</TD><TD CLASS="detail"><A HREF="#symptoms">symptoms</A></TD><TD CLASS="detail">person_id</TD></TR>
 <TR>
-<TD CLASS="detail">5</TD><TD CLASS="detail">fk_tests_person</TD><TD CLASS="detail"><A HREF="#tests">tests</A></TD><TD CLASS="detail">person_id</TD></TR>
+<TD CLASS="detail">5</TD><TD CLASS="detail">fk_symptoms_log_1</TD><TD CLASS="detail"><A HREF="#symptoms_log">symptoms_log</A></TD><TD CLASS="detail">person_id</TD></TR>
+<TR>
+<TD CLASS="detail">6</TD><TD CLASS="detail">fk_tests_person</TD><TD CLASS="detail"><A HREF="#tests">tests</A></TD><TD CLASS="detail">person_id</TD></TR>
+</TABLE>
+<BR><A HREF="#Contents">Goto Contents</A>
+</DIV>
+<DIV STYLE="page-break-before:always">
+<A NAME="people_facility"><H2>people_facility</H2></A>
+<TABLE CELLSPACING="0">
+<TR>
+<TD CLASS="header" COLSPAN="7">Columns</TD></TR>
+<TR>
+<TD CLASS="header" COLSPAN="1">No.</TD><TD CLASS="header" COLSPAN="1">Name</TD><TD CLASS="header" COLSPAN="1">Data Type</TD><TD CLASS="header" COLSPAN="1">Size</TD><TD CLASS="header" COLSPAN="1">Decimal</TD><TD CLASS="header" COLSPAN="1">Nullable</TD><TD CLASS="header" COLSPAN="1">Comments</TD></TR>
+<TR>
+<TD CLASS="detail">1</TD><TD CLASS="detail">person_id</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">10</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail">Refers to a person.</TD></TR>
+<TR>
+<TD CLASS="detail">2</TD><TD CLASS="detail">facility_id</TD><TD CLASS="detail">BIGINT</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail">Refers to a facility.</TD></TR>
+<TR>
+<TD CLASS="detail">3</TD><TD CLASS="detail">created_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail">Represents the date-time when the record was created.</TD></TR>
+</TABLE>
+<BR><TABLE CELLSPACING="0">
+<TR>
+<TD CLASS="header" COLSPAN="5">Indexes</TD></TR>
+<TR>
+<TD CLASS="header" COLSPAN="1">No.</TD><TD CLASS="header" COLSPAN="1">Name</TD><TD CLASS="header" COLSPAN="1">Unique?</TD><TD CLASS="header" COLSPAN="1">Primary Key?</TD><TD CLASS="header" COLSPAN="1">Column</TD></TR>
+<TR>
+<TD CLASS="detail">1</TD><TD CLASS="detail">PRIMARY</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">person_id, facility_id</TD></TR>
+<TR>
+<TD CLASS="detail">2</TD><TD CLASS="detail">fk_people_facility_2</TD><TD CLASS="detail">No</TD><TD CLASS="detail">No</TD><TD CLASS="detail">facility_id</TD></TR>
+</TABLE>
+<BR><TABLE CELLSPACING="0">
+<TR>
+<TD CLASS="header" COLSPAN="5">Imported Keys</TD></TR>
+<TR>
+<TD CLASS="header" COLSPAN="1">No.</TD><TD CLASS="header" COLSPAN="1">Name</TD><TD CLASS="header" COLSPAN="1">Column</TD><TD CLASS="header" COLSPAN="1">References</TD><TD CLASS="header" COLSPAN="1">Reference Column</TD></TR>
+<TR>
+<TD CLASS="detail">1</TD><TD CLASS="detail">fk_people_facility_1</TD><TD CLASS="detail">person_id</TD><TD CLASS="detail"><A HREF="#people">people</A></TD><TD CLASS="detail">id</TD></TR>
+<TR>
+<TD CLASS="detail">2</TD><TD CLASS="detail">fk_people_facility_2</TD><TD CLASS="detail">facility_id</TD><TD CLASS="detail"><A HREF="#facility">facility</A></TD><TD CLASS="detail">id</TD></TR>
+</TABLE>
+<BR><TABLE CELLSPACING="0">
+<TR>
+<TD CLASS="header" COLSPAN="4">Exported Keys</TD></TR>
+<TR>
+<TD CLASS="detail-center" COLSPAN="4">None</TD></TR>
 </TABLE>
 <BR><A HREF="#Contents">Goto Contents</A>
 </DIV>
