@@ -1,4 +1,5 @@
 dependencies {
+  compile "com.azure:azure-storage-queue:${azureQueueVersion}"
   compile "commons-codec:commons-codec:${commonsCodecVersion}"
   compile "commons-io:commons-io:${commonsIOVersion}"
   compile "io.dropwizard:dropwizard-db:${dropwizardVersion}"

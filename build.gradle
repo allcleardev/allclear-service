@@ -22,7 +22,7 @@ subprojects {
   }
 
   ext {
-    awsVersion = '1.11.703'
+    azureQueueVersion = '12.5.0'
     azureStorageVersion = '8.6.3'
     commonsCodecVersion = '1.11'
     commonsCollectionVersion = '4.4'
