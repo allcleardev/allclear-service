@@ -21,4 +21,6 @@ public class ValidationExceptionMapper extends ExMapper<ValidationException>
 	public ValidationExceptionMapper() { super(); }
 
 	@Override protected int status() { return 422; }
+	@Override protected ErrorInfo warn(final ValidationException ex) { return new ErrorInfo(ex.getMessage(), ex.errors); }
+	@Override protected ErrorInfo error(final ValidationException ex) { return new ErrorInfo(ex); }
 }

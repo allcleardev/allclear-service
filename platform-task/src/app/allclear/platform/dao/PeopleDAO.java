@@ -6,6 +6,8 @@ import java.util.List;
 import org.jdbi.v3.sqlobject.customizer.Bind;
 import org.jdbi.v3.sqlobject.statement.SqlQuery;
 
+import app.allclear.platform.type.Timezone;
+
 /** JDBi data access object that maps to the PEOPLE table.
  * 
  * @author smalleyd
@@ -21,4 +23,9 @@ public interface PeopleDAO
 		@Bind("longitudeFrom") final BigDecimal longitudeFrom,
 		@Bind("longitudeTo") final BigDecimal longitudeTo,
 		@Bind("pageSize") final int pageSize);
+
+	public default List<String> getActiveAlertableIds(final String lastId, final Timezone zone, final int pageSize)
+	{
+		return getActiveAlertableIds(lastId, zone.longitudeFrom, zone.longitudeTo, pageSize);
+	}
 }

@@ -15,6 +15,6 @@ import javax.ws.rs.ext.Provider;
 public class AuthenticationExceptionMapper extends ExMapper<NotAuthenticatedException>
 {
 	@Override protected int status() { return Response.Status.FORBIDDEN.getStatusCode(); }
-	@Override protected ErrorInfo log(final String message, final Throwable ex) { log.debug(message); return new ErrorInfo(message); }
-	@Override protected ErrorInfo log(final Throwable ex) { log.debug(ex.getMessage(), ex); return new ErrorInfo(ex); }
+	@Override protected ErrorInfo log(final String message, final NotAuthenticatedException ex) { log.debug(message); return new ErrorInfo(message); }
+	@Override protected ErrorInfo log(final NotAuthenticatedException ex) { log.debug(ex.getMessage(), ex); return new ErrorInfo(ex); }
 }

@@ -26,6 +26,7 @@ public class Timezone implements Serializable
 	public static final List<Timezone> LIST = List.of(EST, CST, MST, PST);
 	public static final Map<String, Timezone> VALUES = LIST.stream().collect(Collectors.toMap(v -> v.id, v -> v));
 	public static Timezone get(final int i) { return LIST.get(i); }
+	public static Timezone get(final String id) { return VALUES.get(id); }
 	public static boolean exists(final String id) { return VALUES.containsKey(id); }
 
 	public final String id;

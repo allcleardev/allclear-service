@@ -50,7 +50,7 @@ public class PeopleDAOTest
 	@MethodSource
 	public void getActiveAlertableIds(final Timezone zone, final String expectedId)
 	{
-		var ids = dao.getActiveAlertableIds("", zone.longitudeFrom, zone.longitudeTo, 20);
+		var ids = dao.getActiveAlertableIds("", zone, 20);
 		assertThat(ids).as("Check page 1").hasSize(1).containsExactly(expectedId);
 	}
 
@@ -58,8 +58,8 @@ public class PeopleDAOTest
 	public void getActiveAlertableIds_EST()
 	{
 		var zone = Timezone.EST;
-		var ids = dao.getActiveAlertableIds("", zone.longitudeFrom, zone.longitudeTo, 20);
+		var ids = dao.getActiveAlertableIds("", zone, 20);
 		assertThat(ids).as("Check page 1").hasSize(20).containsExactly("1111", "AAAA", "CCCC", "DDDD", "EEEE", "FFFF", "GGGG", "HHHH", "IIII", "JJJJ", "KKKK", "LLLL", "MMMM", "NNNN", "OOOO", "PPPP", "QQQQ", "RRRR", "SSSS", "TTTT");
-		assertThat(dao.getActiveAlertableIds(ids.get(19), zone.longitudeFrom, zone.longitudeTo, 20)).as("Check page 2").hasSize(1).containsExactly("UUUU");
+		assertThat(dao.getActiveAlertableIds(ids.get(19), zone, 20)).as("Check page 2").hasSize(1).containsExactly("UUUU");
 	}
 }

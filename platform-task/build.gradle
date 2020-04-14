@@ -30,6 +30,7 @@ dependencies {
   compile "org.glassfish.jersey.media:jersey-media-multipart:${jerseyVersion}"
   compile "org.glassfish.jersey.core:jersey-client:${jerseyVersion}"
   compile "org.liquibase:liquibase-core:${liquibaseVersion}"
+  testCompile "org.mockito:mockito-inline:${mockitoVersion}"
   runtime "mysql:mysql-connector-java:${mysqlVersion}"
 }
 

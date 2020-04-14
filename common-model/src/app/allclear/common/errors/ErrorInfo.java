@@ -1,6 +1,7 @@
 package app.allclear.common.errors;
 
 import java.io.*;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -17,13 +18,22 @@ public class ErrorInfo implements Serializable
 
 	public final String message;
 	public final String stacktrace;
+	public List<FieldError> fields = null;
 
 	public ErrorInfo(final String message) { this(message, null); }
+	public ErrorInfo(final String message, final List<FieldError> fields) { this(message, null, fields); }
 	public ErrorInfo(@JsonProperty("message") final String message,
-		@JsonProperty("stacktrace") final String stacktrace)
+		@JsonProperty("stacktrace") final String stacktrace,
+		@JsonProperty("fields") final List<FieldError> fields)
 	{
 		this.message = message;
 		this.stacktrace = stacktrace;
+	}
+
+	public ErrorInfo(final ValidationException ex)
+	{
+		this((Throwable) ex);
+		this.fields = ex.errors;
 	}
 
 	public ErrorInfo(final Throwable t)
