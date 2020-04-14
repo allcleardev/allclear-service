@@ -1,6 +1,9 @@
 package app.allclear.common.task;
 
-import org.junit.*;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
 import app.allclear.junit.redis.RedisServerRule;
 import app.allclear.common.errors.ErrorInfo;
@@ -14,12 +17,12 @@ import app.allclear.common.redis.*;
  *
  */
 
+@ExtendWith(DropwizardExtensionsSupport.class)
 public class RedisTaskManagerTest extends TaskManagerTest
 {
-	@ClassRule
 	public static final RedisServerRule SERVER = new RedisServerRule();
 
-	@Before
+	@BeforeEach
 	public void up() throws Exception
 	{
 		var client = new RedisClient(new RedisConfig("localhost", 6378, 200L, 5));
@@ -36,5 +39,12 @@ public class RedisTaskManagerTest extends TaskManagerTest
 					@Override public void onSuccess(final TaskRequest<ErrorInfo> req) { System.out.println("On Success"); onSuccess++; }
 				},
 				ErrorInfo.class));
+
+		operatorInvalid = new TaskOperator<ErrorInfo>(QUEUE_NAME, x -> {
+			if ("Error 4".equals(x.message))
+				throw new RuntimeException();
+
+			System.out.println(x.stacktrace); return true;
+		}, ErrorInfo.class, 1);
 	}
 }

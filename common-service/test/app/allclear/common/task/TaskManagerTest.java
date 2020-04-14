@@ -1,11 +1,15 @@
 package app.allclear.common.task;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.util.*;
 import java.util.stream.*;
 
-import org.junit.*;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import app.allclear.common.ThreadUtils;
 import app.allclear.common.errors.ErrorInfo;
@@ -26,6 +30,7 @@ public class TaskManagerTest
 	protected TaskManager managerX = null;	// Test extra handlers like onSuccess.
 	protected TaskOperator<ErrorInfo> operator = null;
 	protected TaskOperator<ErrorInfo> operatorX = null;	// Test extra handlers like onSuccess.
+	protected TaskOperator<ErrorInfo> operatorInvalid = null;
 
 	/** Data. */
 	protected static final String QUEUE_NAME = "errorLog";
@@ -48,7 +53,7 @@ public class TaskManagerTest
 		onSuccess = 0;
 	}
 
-	@Before
+	@BeforeEach
 	public void up() throws Exception
 	{
 		reset();
@@ -64,6 +69,13 @@ public class TaskManagerTest
 				ErrorInfo.class));
 
 		checkStats();
+
+		operatorInvalid = new TaskOperator<ErrorInfo>(QUEUE_NAME, x -> {
+			if ("Error 4".equals(x.message))
+				throw new RuntimeException();
+
+			System.out.println(x.stacktrace); return true;
+		}, ErrorInfo.class, 1);
 	}
 
 	@Test
@@ -88,59 +100,67 @@ public class TaskManagerTest
 	}
 
 	@Test
-	public void testPower()
+	public static Stream<Arguments> testPower()
 	{
-		Assert.assertEquals("Power of 2 ^ 0", 1L, TaskManager.power(2L, 0));
-		Assert.assertEquals("Power of 2 ^ 1", 2L, TaskManager.power(2L, 1));
-		Assert.assertEquals("Power of 2 ^ 2", 4L, TaskManager.power(2L, 2));
-		Assert.assertEquals("Power of 2 ^ 3", 8L, TaskManager.power(2L, 3));
-		Assert.assertEquals("Power of 2 ^ 4", 16L, TaskManager.power(2L, 4));
-		Assert.assertEquals("Power of 2 ^ 5", 32L, TaskManager.power(2L, 5));
-		Assert.assertEquals("Power of 2 ^ 6", 64L, TaskManager.power(2L, 6));
-		Assert.assertEquals("Power of 2 ^ 7", 128L, TaskManager.power(2L, 7));
-		Assert.assertEquals("Power of 2 ^ 8", 256L, TaskManager.power(2L, 8));
-		Assert.assertEquals("Power of 2 ^ 9", 512L, TaskManager.power(2L, 9));
-		Assert.assertEquals("Power of 2 ^ 10", 1024L, TaskManager.power(2L, 10));
+		return Stream.of(
+			arguments(1L, 2L, 0),
+			arguments(2L, 2L, 1),
+			arguments(4L, 2L, 2),
+			arguments(8L, 2L, 3),
+			arguments(16L, 2L, 4),
+			arguments(32L, 2L, 5),
+			arguments(64L, 2L, 6),
+			arguments(128L, 2L, 7),
+			arguments(256L, 2L, 8),
+			arguments(512L, 2L, 9),
+			arguments(1024L, 2L, 10),
 
-		Assert.assertEquals("Power of 5 ^ 0", 1L, TaskManager.power(5L, 0));
-		Assert.assertEquals("Power of 5 ^ 1", 5L, TaskManager.power(5L, 1));
-		Assert.assertEquals("Power of 5 ^ 2", 25L, TaskManager.power(5L, 2));
-		Assert.assertEquals("Power of 5 ^ 3", 125L, TaskManager.power(5L, 3));
-		Assert.assertEquals("Power of 5 ^ 4", 25L * 25L, TaskManager.power(5L, 4));
-		Assert.assertEquals("Power of 5 ^ 5", 25L * 25L * 5L, TaskManager.power(5L, 5));
-		Assert.assertEquals("Power of 5 ^ 6", 125L * 125L, TaskManager.power(5L, 6));
-		Assert.assertEquals("Power of 5 ^ 7", 125L * 125L * 5L, TaskManager.power(5L, 7));
-		Assert.assertEquals("Power of 5 ^ 8", 25L * 25L * 25L * 25L, TaskManager.power(5L, 8));
-		Assert.assertEquals("Power of 5 ^ 9", 125L * 125L * 125L, TaskManager.power(5L, 9));
-		Assert.assertEquals("Power of 5 ^ 10", 125L * 125L * 25L * 25L, TaskManager.power(5L, 10));
+			arguments(1L, 5L, 0),
+			arguments(5L, 5L, 1),
+			arguments(25L, 5L, 2),
+			arguments(125L, 5L, 3),
+			arguments(25L * 25L, 5L, 4),
+			arguments(25L * 25L * 5L, 5L, 5),
+			arguments(125L * 125L, 5L, 6),
+			arguments(125L * 125L * 5L, 5L, 7),
+			arguments(25L * 25L * 25L * 25L, 5L, 8),
+			arguments(125L * 125L * 125L, 5L, 9),
+			arguments(125L * 125L * 25L * 25L, 5L, 10));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void testPower(final long expected, final long input, final int exponent)
+	{
+		Assertions.assertEquals(expected, TaskManager.power(input, exponent));
 	}
 
 	@Test
 	public void testRun()
 	{
 		manager.turnOff();	// Ensure that the manager is unavailable otherwise the 'run' method will never exit.
-		Assert.assertEquals("Check beforeRun", 0, beforeRun_);
-		Assert.assertEquals("Check afterRun", 0, afterRun_);
+		Assertions.assertEquals(0, beforeRun_, "Check beforeRun");
+		Assertions.assertEquals(0, afterRun_, "Check afterRun");
 
 		manager.run();
-		Assert.assertEquals("Check beforeRun", 0, beforeRun_);
-		Assert.assertEquals("Check afterRun", 0, afterRun_);
+		Assertions.assertEquals(0, beforeRun_, "Check beforeRun");
+		Assertions.assertEquals(0, afterRun_, "Check afterRun");
 
 		manager.withBeforeRun(beforeRun).run();
-		Assert.assertEquals("Check beforeRun", 1, beforeRun_);
-		Assert.assertEquals("Check afterRun", 0, afterRun_);
+		Assertions.assertEquals(1, beforeRun_, "Check beforeRun");
+		Assertions.assertEquals(0, afterRun_, "Check afterRun");
 
 		manager.withAfterRun(afterRun).run();
-		Assert.assertEquals("Check beforeRun", 2, beforeRun_);
-		Assert.assertEquals("Check afterRun", 1, afterRun_);
+		Assertions.assertEquals(2, beforeRun_, "Check beforeRun");
+		Assertions.assertEquals(1, afterRun_, "Check afterRun");
 
 		manager.withBeforeRun(null).run();
-		Assert.assertEquals("Check beforeRun", 2, beforeRun_);
-		Assert.assertEquals("Check afterRun", 2, afterRun_);
+		Assertions.assertEquals(2, beforeRun_, "Check beforeRun");
+		Assertions.assertEquals(2, afterRun_, "Check afterRun");
 
 		manager.withAfterRun(null).run();
-		Assert.assertEquals("Check beforeRun", 2, beforeRun_);
-		Assert.assertEquals("Check afterRun", 2, afterRun_);
+		Assertions.assertEquals(2, beforeRun_, "Check beforeRun");
+		Assertions.assertEquals(2, afterRun_, "Check afterRun");
 	}
 
 	@Test
@@ -160,27 +180,23 @@ public class TaskManagerTest
 
 		checkRequests();
 
-		operator.maxTries = 1;	// Testing moving of failed requests to the DLQ. DLS on 7/14/2016.
-		operator.callback = x -> {
-			if ("Error 4".equals(x.message))
-				throw new RuntimeException();
+		manager.removeOperator(QUEUE_NAME);
+		manager.addOperator(operatorInvalid);
 
-			System.out.println(x.stacktrace); return true;
-		};
-		Assert.assertEquals("Process Update Job Request: check queue size", count, queue.getQueueSize(QUEUE_NAME));
+		Assertions.assertEquals(count, queue.getQueueSize(QUEUE_NAME), "Process Update Job Request: check queue size");
 		checkStats(new OperatorStats(QUEUE_NAME, count, 0, 0, 0, 0));
 
 		long ranAt = processRequests(0, 1);
 
-		List<TaskRequest<?>> values = manager.listRequests(TaskOperator.dlq(QUEUE_NAME));
-		Assert.assertEquals("List requests size", 1, values.size());
-		TaskRequest<?> value = values.get(0);
-		Assert.assertNotNull("nextRunAt exists", value.nextRunAt);
+		var values = manager.listRequests(TaskOperator.dlq(QUEUE_NAME));
+		Assertions.assertEquals(1, values.size(), "List requests size");
+		var value = values.get(0);
+		Assertions.assertNotNull(value.nextRunAt, "nextRunAt exists");
 		assertNear("nextRunAt should be about a minute out", ranAt + 60000L, value.nextRunAt, 6000L);
-		Assert.assertEquals("Number of tries", 1, value.tries);
-		Object request = value.value;
-		Assert.assertTrue("Remaining error instanceOf Exception", request instanceof ErrorInfo);
-		Assert.assertEquals("Remaining error", "Error 4", ((ErrorInfo) request).message);
+		Assertions.assertEquals(1, value.tries, "Number of tries");
+		var request = value.value;
+		assertThat(request).as("Remaining error instanceOf Exception").isInstanceOf(ErrorInfo.class);
+		Assertions.assertEquals("Error 4", ((ErrorInfo) request).message, "Remaining error");
 		checkStats(new OperatorStats(QUEUE_NAME, 0, 1, count - 1, 0, 1));
 
 		processRequests(0, 1);
@@ -188,9 +204,9 @@ public class TaskManagerTest
 
 		// Move the DLQ items back to the operational queue.
 		final int total = manager.countRequests(QUEUE_NAME);
-		Assert.assertEquals("Check moved requests", 1, manager.moveRequests(QUEUE_NAME));
-		Assert.assertEquals("Check moved count", total + 1, manager.countRequests(QUEUE_NAME));
-		Assert.assertEquals("Check moved count", 0, manager.countRequests(TaskOperator.dlq(QUEUE_NAME)));
+		Assertions.assertEquals(1, manager.moveRequests(QUEUE_NAME), "Check moved requests");
+		Assertions.assertEquals(total + 1, manager.countRequests(QUEUE_NAME), "Check moved count");
+		Assertions.assertEquals(0, manager.countRequests(TaskOperator.dlq(QUEUE_NAME)), "Check moved count");
 		checkStats(new OperatorStats(QUEUE_NAME, 1, 0, count - 1, 0, 1));
 	}
 
@@ -199,9 +215,9 @@ public class TaskManagerTest
 	{
 		addRequests();
 		checkRequests();
-		Assert.assertEquals("Check the size of the Request queue", SIZE, queue.getQueueSize(QUEUE_NAME));
-		Assert.assertEquals("Clear the Request queue", SIZE, manager.clearRequests(QUEUE_NAME));
-		Assert.assertEquals("Check the size of the Request queue after clearing", 0, queue.getQueueSize(QUEUE_NAME));
+		Assertions.assertEquals(SIZE, queue.getQueueSize(QUEUE_NAME), "Check the size of the Request queue");
+		Assertions.assertEquals(SIZE, manager.clearRequests(QUEUE_NAME), "Clear the Request queue");
+		Assertions.assertEquals(0, queue.getQueueSize(QUEUE_NAME), "Check the size of the Request queue after clearing");
 
 		checkStats();	// Empty now.
 	}
@@ -212,8 +228,8 @@ public class TaskManagerTest
 		manager.turnOn();	// Make sure that it's available to process manually though.
 		addRequests();
 		checkRequests();
-		Assert.assertEquals("Check count", SIZE, manager.process(QUEUE_NAME));
-		Assert.assertEquals("Check count", 0, queue.getQueueSize(QUEUE_NAME));
+		Assertions.assertEquals(SIZE, manager.process(QUEUE_NAME), "Check count");
+		Assertions.assertEquals(0, queue.getQueueSize(QUEUE_NAME), "Check count");
 
 		checkStats(new OperatorStats(QUEUE_NAME, 0, 0, SIZE, 0, 0));
 	}
@@ -226,15 +242,14 @@ public class TaskManagerTest
 		checkRequests();
 
 		int i = 0;
-		List<TaskRequest<?>> requests = manager.listRequests(QUEUE_NAME);
-		for (TaskRequest<?> request : requests)
+		for (var request : manager.listRequests(QUEUE_NAME))
 		{
-			Assert.assertTrue("Check " + (++i), manager.process(QUEUE_NAME, request.id));
-			Assert.assertEquals("Check count: " + i, SIZE - i, queue.getQueueSize(QUEUE_NAME));
+			Assertions.assertTrue(manager.process(QUEUE_NAME, request.id), "Check " + (++i));
+			Assertions.assertEquals(SIZE - i, queue.getQueueSize(QUEUE_NAME), "Check count: " + i);
 			checkStats(new OperatorStats(QUEUE_NAME, SIZE - i, 0, i, 0, 0));
 		}
 
-		Assert.assertEquals("Check count", 0, queue.getQueueSize(QUEUE_NAME));
+		Assertions.assertEquals(0, queue.getQueueSize(QUEUE_NAME), "Check count");
 		checkStats(new OperatorStats(QUEUE_NAME, 0, 0, SIZE, 0, 0));
 	}
 
@@ -246,47 +261,46 @@ public class TaskManagerTest
 		checkRequests();
 
 		int i = 0;
-		Set<String> oldIds = new HashSet<>(SIZE);
-		List<TaskRequest<?>> requests = manager.listRequests(QUEUE_NAME);
-		for (TaskRequest<?> request : requests)
+		var oldIds = new HashSet<String>(SIZE);
+		var requests = manager.listRequests(QUEUE_NAME);
+		for (var request : requests)
 		{
 			i++;
-			TaskRequest<?> newRequest = manager.modifyRequest(QUEUE_NAME, new TaskRequest<String>(request.id,
+			var newRequest = manager.modifyRequest(QUEUE_NAME, new TaskRequest<String>(request.id,
 				String.format(REQUEST_JSON, i), 0, null));
 
 			// Make sure that the old and new IDs do NOT match.
-			Assert.assertNotEquals("Check IDs", request.id, newRequest.id);
+			Assertions.assertNotEquals(request.id, newRequest.id, "Check IDs");
 			oldIds.add(request.id);
 
 			// Should NOT change size.
-			Assert.assertEquals("Check count", SIZE, queue.getQueueSize(QUEUE_NAME));
+			Assertions.assertEquals(SIZE, queue.getQueueSize(QUEUE_NAME), "Check count");
 		}
 
 		// Make sure that there are still the initial number of requests.
-		Assert.assertEquals("Check count", SIZE, queue.getQueueSize(QUEUE_NAME));
+		Assertions.assertEquals(SIZE, queue.getQueueSize(QUEUE_NAME), "Check count");
 
 		// Make sure that the none of the new task request IDs match the prior old IDs.
 		i = 0;
 		requests = manager.listRequests(QUEUE_NAME);
-		for (TaskRequest<?> request : requests)
-			Assert.assertFalse("Check " + (++i), oldIds.contains(request.id));
+		for (var request : requests)
+			Assertions.assertFalse(oldIds.contains(request.id), "Check " + (++i));
 
 		checkStats(new OperatorStats(QUEUE_NAME, SIZE, 0, 0, 0, 0));
 
 		// Make sure that the modified requests are process-able.
 		manager.process(QUEUE_NAME);
-		Assert.assertEquals("Check count", 0, queue.getQueueSize(QUEUE_NAME));
+		Assertions.assertEquals(0, queue.getQueueSize(QUEUE_NAME), "Check count");
 		checkStats(new OperatorStats(QUEUE_NAME, 0, 0, SIZE, 0, 0));
 	}
 
 	private int addRequests() throws Exception
 	{
 		int i = 0;
-		String assertId = "Add Update Job Request: check queue size";
-		for (ErrorInfo request : REQUESTS)
+		for (var request : REQUESTS)
 		{
 			queue.pushTask(QUEUE_NAME, new TaskRequest<ErrorInfo>(request));
-			Assert.assertEquals(assertId, ++i, queue.getQueueSize(QUEUE_NAME));
+			Assertions.assertEquals(++i, queue.getQueueSize(QUEUE_NAME), "Add Update Job Request: check queue size");
 		}
 
 		return i;
@@ -298,13 +312,13 @@ public class TaskManagerTest
 
 		int i = 1;
 		List<TaskRequest<?>> values = manager.listRequests(QUEUE_NAME);
-		Assert.assertEquals(SIZE, values.size());
+		Assertions.assertEquals(SIZE, values.size());
 
 		for (TaskRequest<?> value : values)
 		{
 			String assertId = "List Request(" + i++ + "): ";
-			Assert.assertTrue(assertId + "instanceOf check", value.value instanceof ErrorInfo);
-			Assert.assertTrue(assertId + "contains check", REQUESTS.contains(value.value));
+			assertThat(value.value).as(assertId + "instanceOf check").isInstanceOf(ErrorInfo.class);
+			Assertions.assertTrue(REQUESTS.contains(value.value), assertId + "contains check");
 		}
 	}
 
@@ -315,17 +329,17 @@ public class TaskManagerTest
 
 	private void checkStats(final OperatorStats expected)
 	{
-		final List<OperatorStats> values = manager.stats();
-		Assert.assertNotNull("Exists", values);
-		Assert.assertEquals("Check size", 1, values.size());
+		var values = manager.stats();
+		Assertions.assertNotNull(values, "Exists");
+		Assertions.assertEquals(1, values.size(), "Check size");
 
-		final OperatorStats actual = values.get(0);
-		Assert.assertEquals("Check name", expected.name, actual.name);
-		Assert.assertEquals("Check queueSize", expected.queueSize, actual.queueSize);
-		Assert.assertEquals("Check dlqSize", expected.dlqSize, actual.dlqSize);
-		Assert.assertEquals("Check successes", expected.successes, actual.successes);
-		Assert.assertEquals("Check skips", expected.skips, actual.skips);
-		Assert.assertEquals("Check errors", expected.errors, actual.errors);
+		var actual = values.get(0);
+		Assertions.assertEquals(expected.name, actual.name, "Check name");
+		Assertions.assertEquals(expected.queueSize, actual.queueSize, "Check queueSize");
+		Assertions.assertEquals(expected.dlqSize, actual.dlqSize, "Check dlqSize");
+		Assertions.assertEquals(expected.successes, actual.successes, "Check successes");
+		Assertions.assertEquals(expected.skips, actual.skips, "Check skips");
+		Assertions.assertEquals(expected.errors, actual.errors, "Check errors");
 	}
 
 	private long processRequests(int remainingRequests) throws Exception
@@ -341,17 +355,17 @@ public class TaskManagerTest
 
 		Thread.sleep(2000L);	// After two seconds all the items should be processed since JSClient is mocked.
 
-		String assertId = "Process Requests: ";
-		Assert.assertEquals(assertId + "thread count while running", threadsCount + 1, Thread.activeCount());
+		var assertId = "Process Requests: ";
+		Assertions.assertEquals(threadsCount + 1, Thread.activeCount(), assertId + "thread count while running");
 
 		manager.stop();	// Should stop successfully.
 
 		System.gc();	// Cleans up thread before checking the count below.
-		Assert.assertEquals(assertId + "check queue size", remainingRequests, queue.getQueueSize(QUEUE_NAME));
-		Assert.assertEquals(assertId + "check DLQ size", dlqRequests, queue.getQueueSize(TaskOperator.dlq(QUEUE_NAME)));
+		Assertions.assertEquals(remainingRequests, queue.getQueueSize(QUEUE_NAME), assertId + "check queue size");
+		Assertions.assertEquals(dlqRequests, queue.getQueueSize(TaskOperator.dlq(QUEUE_NAME)), assertId + "check DLQ size");
 
 		// Thread.sleep(3000L);	// NOT needed anymore. "stop" method does not exit until all threads are dead.	// Wait a second for the thread to be cleared out.
-		Assert.assertEquals(assertId + "thread count after shutdown", threadsCount, Thread.activeCount());
+		Assertions.assertEquals(threadsCount, Thread.activeCount(), assertId + "thread count after shutdown");
 
 		return runAt;
 	}
@@ -359,7 +373,7 @@ public class TaskManagerTest
 	@Test
 	public void processX() throws Exception
 	{
-		Assert.assertEquals("Check onSuccess", 0, onSuccess);
+		Assertions.assertEquals(0, onSuccess, "Check onSuccess");
 
 		addRequests();
 
@@ -367,7 +381,7 @@ public class TaskManagerTest
 		ThreadUtils.sleep(2000L);
 		managerX.stop();
 
-		Assert.assertEquals("Check onSuccess", 8, onSuccess);
+		Assertions.assertEquals(8, onSuccess, "Check onSuccess");
 	}
 
 	@Test
@@ -381,8 +395,8 @@ public class TaskManagerTest
 		for (int j = 0; j < 10; j++) queue.pushTask(queueName, new TaskRequest<String>("Request: " + j));
 
 		manager.turnOn();
-		Assert.assertEquals("Check queueSize: before", 10, queue.getQueueSize(queueName));
-		Assert.assertEquals("Check process", 4, manager.process());
-		Assert.assertEquals("Check queueSize: before", 6, queue.getQueueSize(queueName));
+		Assertions.assertEquals(10, queue.getQueueSize(queueName), "Check queueSize: before");
+		Assertions.assertEquals(4, manager.process(), "Check process");
+		Assertions.assertEquals(6, queue.getQueueSize(queueName), "Check queueSize: before");
 	}
 }
