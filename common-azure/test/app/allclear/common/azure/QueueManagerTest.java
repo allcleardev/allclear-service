@@ -21,7 +21,7 @@ import app.allclear.common.task.TaskOperator;
  *
  */
 
-@Disabled
+// @Disabled
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class QueueManagerTest
 {

@@ -1,11 +1,14 @@
 package app.allclear.common.azure;
 
+import static com.azure.storage.common.policy.RetryPolicyType.EXPONENTIAL;
+
 import java.util.*;
 
 import org.slf4j.*;
 
 import io.dropwizard.lifecycle.Managed;
 
+import com.azure.storage.common.policy.RequestRetryOptions;
 import com.azure.storage.queue.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import app.allclear.common.errors.ThrottledException;
@@ -79,7 +82,8 @@ public class QueueManager implements Managed, Runnable
 		for (var o : operators)
 		{
 			this.operators.put(o.name, o);
-			this.queues.put(o.name, new QueueClientBuilder().connectionString(connectionString).queueName(o.name).buildClient());
+			this.queues.put(o.name, new QueueClientBuilder().connectionString(connectionString)
+				.retryOptions(new RequestRetryOptions(EXPONENTIAL, o.maxTries, o.timeout, o.delayMS(), o.maxDelayMS(), null)).queueName(o.name).buildClient());
 		}
 
 		this.threads = threads;
