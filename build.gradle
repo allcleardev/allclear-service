@@ -63,6 +63,13 @@ subprojects {
   }
 }
 
+project(':common-azure') {
+  dependencies {
+    compile project(':common-service')
+    testCompile project(':common-testing')
+  }
+}
+
 project(':common-jersey') {
   dependencies {
     testCompile project(':common-model')
@@ -127,7 +134,7 @@ project(':platform-server') {
 
 project(':platform-task') {
   dependencies {
-    compile project(':common-service')
+    compile project(':common-azure')
     compile project(':platform-model')
     testCompile project(':common-testing')
   }

@@ -4,11 +4,11 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static app.allclear.testing.TestingUtils.timestamp;
 
 import java.util.Date;
+import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.*;
 
 import com.azure.storage.queue.QueueClient;
-import com.azure.storage.queue.models.QueueMessageItem;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import app.allclear.common.errors.ThrottledException;
 import app.allclear.common.task.TaskOperator;
@@ -25,7 +25,7 @@ import app.allclear.common.task.TaskOperator;
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class QueueManagerTest
 {
-	public static final String QUEUE_NAME = "testQueueManager";
+	public static final String QUEUE_NAME = "test-queue-manager";
 
 	private static QueueClient queue;
 	private static QueueManager queuer = null;
@@ -70,7 +70,7 @@ public class QueueManagerTest
 	@Test
 	public void runQueue_checkEmpty() throws Exception
 	{
-		Assertions.assertNull(queue.receiveMessage());
+		assertThat(Assertions.assertThrows(NoSuchElementException.class, () -> queue.receiveMessage())).hasMessage("Source was empty");
 	}
 
 	@Test
@@ -106,24 +106,23 @@ public class QueueManagerTest
 	{
 		var i = new int[] { 0 };
 		var operator = new TaskOperator<Request>(QUEUE_NAME, x -> { System.out.println("Throttle: " + (++i[0])); if (5 == i[0]) throw new ThrottledException(x.toString()); return true; }, Request.class);
-		var queuer_ = new QueueManager(connectionString, 1, operator);
+		var queuer_ = new QueueManager(connectionString, 1, operator).withBatchSize(1);
 
 		var queue_ = queuer_.queues.get(QUEUE_NAME);
 		for (int j = 0; j < 10; j++) queue_.sendMessage("{ \"numOfFruits\": " + j + " }");
 
 		queuer_.turnOn();
-		Assertions.assertEquals(4, queuer_.process(), "Check process");
+		Assertions.assertEquals(4, queuer_.process(), "Check process");	// breaks after 4.
 
 		int count = 0;
-		QueueMessageItem message = null;
-		while (null != (message = queue_.receiveMessage()))
+		for (var message : queue_.receiveMessages(10))
 		{
 			count++;
 			queue_.deleteMessage(message.getMessageId(), message.getPopReceipt());
 		}
 		Assertions.assertEquals(6 - 1, count, "Check queueSize: before");	// One message will be in limbo when not processed after the ThrottledException is thrown. DLS on 2/14/2020.
 
-		// Do NOT purge. It interrupts other purge operations. manager.purgeQueue(QUEUE_URL);	// Get rid of the message in the "received" state. DLS on 2/14/2020.
+		queue_.clearMessages();
 	}
 
 	/** Value object that represents a test request. */

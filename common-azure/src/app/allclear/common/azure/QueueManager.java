@@ -7,7 +7,6 @@ import org.slf4j.*;
 import io.dropwizard.lifecycle.Managed;
 
 import com.azure.storage.queue.*;
-import com.azure.storage.queue.models.QueueMessageItem;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import app.allclear.common.errors.ThrottledException;
 import app.allclear.common.jackson.JacksonUtils;
@@ -53,6 +52,10 @@ public class QueueManager implements Managed, Runnable
 	public int getThreads() { return threads; }
 	private int threads = 1;
 	public void setThreads(final int newValue) { threads = newValue; }
+
+	public int getBatchSize() { return batchSize; }
+	private int batchSize = 10;
+	public QueueManager withBatchSize(final int newValue) { batchSize = newValue; return this; }
 
 	private Runnable beforeRun = null;	// Action to run at the start of each thread. DLS on 5/5/2018.
 	public QueueManager withBeforeRun(final Runnable newValue) { beforeRun = newValue; return this; }
@@ -198,47 +201,58 @@ public class QueueManager implements Managed, Runnable
 	public <T> int process(final TaskOperator<?> operator, final Class<T> clazz) throws Exception
 	{
 		int count = 0;
-		QueueMessageItem request = null;
 		var op = (TaskOperator<T>) operator;
 		var queue = queues.get(op.name);
 
 		// Include "available" property to ensure earliest possible exit when requested.
-		while (available && (null != (request = queue.receiveMessage())))
+		while (available)
 		{
-			if (logger.isDebugEnabled())
-				logger.debug("Process {}", request.getMessageText());
-
-			try
+			boolean throttled = false;
+			final int count_ = count;
+			for (var request : queue.receiveMessages(batchSize))
 			{
-				final long time = System.currentTimeMillis();
-
-				// Remove from queue if successful.
-				if (op.callback.process(MAPPER.readValue(request.getMessageText(), clazz)))
-					queue.deleteMessage(request.getMessageId(), request.getPopReceipt());
-
 				if (logger.isDebugEnabled())
-					logger.debug("Processed {} on thread '{}' in {} ms - {}.", op.name, Thread.currentThread().getName(), System.currentTimeMillis() - time, request.getMessageText());
+					logger.debug("Process {}", request.getMessageText());
+	
+				try
+				{
+					final long time = System.currentTimeMillis();
+	
+					// Remove from queue if successful.
+					if (op.callback.process(MAPPER.readValue(request.getMessageText(), clazz)))
+						queue.deleteMessage(request.getMessageId(), request.getPopReceipt());
+	
+					if (logger.isDebugEnabled())
+						logger.debug("Processed {} on thread '{}' in {} ms - {}.", op.name, Thread.currentThread().getName(), System.currentTimeMillis() - time, request.getMessageText());
+	
+					count++;
+				}
+	
+				catch (final ThrottledException ex)
+				{
+					logger.warn("Throttled: {} - {}. Temporarily deferring execution.", op.name, ex.getMessage());
+					// queue.delayMessage(operator.name, request.getReceiptHandle(), DELAY_AFTER_ERROR);
 
-				count++;
+					throttled = true;
+					break;
+				}
+	
+				catch (final Exception ex)
+				{
+					// Only log an error if this is at least the second try. Sometimes there is a timing issue with the first try
+					// before its originating transaction is complete.
+					if (1L < request.getDequeueCount())
+						logger.error("{} ({}): {} - {}", operator.name, clazz, ex.getMessage(), ex);
+					else
+						logger.warn("{} ({}): {}", operator.name, clazz, ex.getMessage());
+	
+					// Increment the try count[0] & set a backoff delay.
+					// Also, put back on the queue.
+					// queue.delayMessage(operator.name, request.getReceiptHandle(), DELAY_AFTER_ERROR);
+				}
 			}
 
-			catch (final ThrottledException ex)
-			{
-				logger.warn("Throttled: {} - {}. Temporarily deferring execution.", op.name, ex.getMessage());
-				// queue.delayMessage(operator.name, request.getReceiptHandle(), DELAY_AFTER_ERROR);
-				break;
-			}
-
-			catch (final Exception ex)
-			{
-				// Only log an error if this is at least the second try. Sometimes there is a timing issue with the first try
-				// before its originating transaction is complete.
-				logger.warn("{} ({}): {}", operator.name, clazz, ex.getMessage());
-
-				// Increment the try count & set a backoff delay.
-				// Also, put back on the queue.
-				// queue.delayMessage(operator.name, request.getReceiptHandle(), DELAY_AFTER_ERROR);
-			}
+			if (throttled || (count_ == count)) break;	// No new messages
 		}
 
 		return count;

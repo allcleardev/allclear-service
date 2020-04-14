@@ -1,0 +1,3 @@
+dependencies {
+  compile "com.azure:azure-storage-queue:${azureQueueVersion}"
+}
