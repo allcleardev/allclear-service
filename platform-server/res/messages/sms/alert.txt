@@ -1,0 +1,1 @@
+New COVID-19 test locations are available in your area. Click here to view them on AllClear: ${baseUrl}/alert?lastAlertedAt=%s&phone=%s&token=%s

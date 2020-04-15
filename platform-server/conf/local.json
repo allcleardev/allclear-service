@@ -3,7 +3,7 @@
 
   "baseUrl": "${baseUrl:-http://localhost:8080}",
   "registrationPhone": "+16466321488",
-  "authenticationPhone": "+16466321488",
+  "authPhone": "+16466321488",
 
   "admins": "DefaultEndpointsProtocol=https;AccountName=allclear-admins;AccountKey=${COSMOS_ACCOUNT_KEY:-accountKey};TableEndpoint=https://allclear-admins.table.cosmos.azure.com:443/;",
   "session": { "host": "localhost", "timeout": 200, "poolSize": 10, "testWhileIdle": true },

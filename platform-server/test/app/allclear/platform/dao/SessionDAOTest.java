@@ -3,7 +3,10 @@ package app.allclear.platform.dao;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.*;
+import static app.allclear.testing.TestingUtils.utc;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -34,8 +37,9 @@ import app.allclear.twilio.model.SMSResponse;
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class SessionDAOTest
 {
-	public static final Pattern PATTERN_TOKEN = Pattern.compile("[A-Z0-9]{6}");
+	public static final Pattern PATTERN_TOKEN = Pattern.compile("[0-9]{6}");
 	public static final String MESSAGE = "Your AllClear passcode to login is %s or click this magic link https://app-test.allclear.app/auth?phone=%s&token=%s";
+	public static final String ALERT = "New COVID-19 test locations are available in your area. Click here to view them on AllClear: https://app-test.allclear.app/alert?lastAlertedAt=%s&phone=%s&token=%s";
 
 	private static final FakeRedisClient redis = new FakeRedisClient();
 	private static final TwilioClient twilio = mock(TwilioClient.class);
@@ -143,6 +147,24 @@ public class SessionDAOTest
 		Assertions.assertNull(SUPER.person, "Check person");
 		Assertions.assertEquals(30 * 24 * 60 * 60, SUPER.seconds(), "Check seconds");
 		Assertions.assertEquals(30L * 24L * 60L * 60L, redis.ttl(SessionDAO.key(SUPER.id)), "Check expiration");
+	}
+
+	@Test
+	public void alert()
+	{
+		Assertions.assertNull(LAST_RESPONSE, "Check lastResponse: before");
+
+		var lastAlertedAt = utc(2020, 4, 15);
+		var token = dao.alert("888-555-1000", lastAlertedAt);
+		assertThat(token).as("Check token").isNotNull().hasSize(6).matches(PATTERN_TOKEN);
+		Assertions.assertTrue(redis.containsKey(SessionDAO.authKey("888-555-1000", token)), "Check redis: before");
+		Assertions.assertNotNull(LAST_RESPONSE, "Check lastResponse: after");
+		assertThat(LAST_RESPONSE.body).as("Check lastResponse.body").isEqualTo(String.format(ALERT, URLEncoder.encode("2020-04-15T00:00:00+0000", StandardCharsets.UTF_8), "888-555-1000", token));
+
+		dao.auth("888-555-1000", token);
+		Assertions.assertFalse(redis.containsKey(SessionDAO.authKey("888-555-1000", token)), "Check redis: after");
+
+		LAST_RESPONSE = null;
 	}
 
 	@Test

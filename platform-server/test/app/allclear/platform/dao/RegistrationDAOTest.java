@@ -42,7 +42,7 @@ import app.allclear.twilio.model.*;
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class RegistrationDAOTest
 {
-	public static final Pattern PATTERN_CODE = Pattern.compile("[A-Z0-9]{6}");
+	public static final Pattern PATTERN_CODE = Pattern.compile("[0-9]{6}");
 	public static final String MESSAGE = "Your AllClear passcode to register is %s or click this magic link https://app-test.allclear.app/register?phone=%s&code=%s";
 
 	private static RegistrationDAO dao;

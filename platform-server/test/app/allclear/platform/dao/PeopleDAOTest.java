@@ -599,6 +599,7 @@ public class PeopleDAOTest
 			/* arguments(new PeopleFilter(1, 20).withEmailVerifiedAtFrom(hourAgo), 1L),
 			arguments(new PeopleFilter(1, 20).withEmailVerifiedAtTo(hourAhead), 1L),
 			arguments(new PeopleFilter(1, 20).withEmailVerifiedAtFrom(hourAgo).withEmailVerifiedAtTo(hourAhead), 1L), */
+			arguments(new PeopleFilter(1, 20).withHasAlertedOf(false), 1L),
 			arguments(new PeopleFilter(1, 20).withHasAlertedAt(false), 1L),
 			/* arguments(new PeopleFilter(1, 20).withAlertedAtFrom(hourAgo), 1L),
 			arguments(new PeopleFilter(1, 20).withAlertedAtTo(hourAhead), 1L),
@@ -656,6 +657,7 @@ public class PeopleDAOTest
 			/* arguments(new PeopleFilter(1, 20).withEmailVerifiedAtFrom(hourAhead), 0L),
 			arguments(new PeopleFilter(1, 20).withEmailVerifiedAtTo(hourAgo), 0L),
 			arguments(new PeopleFilter(1, 20).withEmailVerifiedAtFrom(hourAhead).withEmailVerifiedAtTo(hourAgo), 0L), */
+			arguments(new PeopleFilter(1, 20).withHasAlertedOf(true), 0L),
 			arguments(new PeopleFilter(1, 20).withHasAlertedAt(true), 0L),
 			/* arguments(new PeopleFilter(1, 20).withAlertedAtFrom(hourAhead), 0L),
 			arguments(new PeopleFilter(1, 20).withAlertedAtTo(hourAgo), 0L),
@@ -834,6 +836,13 @@ public class PeopleDAOTest
 			arguments(new PeopleFilter("emailVerifiedAt", "invalid"), "emailVerifiedAt", "DESC"),	// Invalid sort direction is converted to the default.
 			arguments(new PeopleFilter("emailVerifiedAt", "DESC"), "emailVerifiedAt", "DESC"),
 			arguments(new PeopleFilter("emailVerifiedAt", "desc"), "emailVerifiedAt", "DESC"),
+
+			arguments(new PeopleFilter("alertedOf", null), "alertedOf", "DESC"), // Missing sort direction is converted to the default.
+			arguments(new PeopleFilter("alertedOf", "ASC"), "alertedOf", "ASC"),
+			arguments(new PeopleFilter("alertedOf", "asc"), "alertedOf", "ASC"),
+			arguments(new PeopleFilter("alertedOf", "invalid"), "alertedOf", "DESC"),	// Invalid sort direction is converted to the default.
+			arguments(new PeopleFilter("alertedOf", "DESC"), "alertedOf", "DESC"),
+			arguments(new PeopleFilter("alertedOf", "desc"), "alertedOf", "DESC"),
 
 			arguments(new PeopleFilter("alertedAt", null), "alertedAt", "DESC"), // Missing sort direction is converted to the default.
 			arguments(new PeopleFilter("alertedAt", "ASC"), "alertedAt", "ASC"),
@@ -1270,6 +1279,7 @@ public class PeopleDAOTest
 		Assertions.assertEquals(expected.authAt, record.getAuthAt(), assertId + "Check authAt");
 		Assertions.assertEquals(expected.phoneVerifiedAt, record.getPhoneVerifiedAt(), assertId + "Check phoneVerifiedAt");
 		Assertions.assertEquals(expected.emailVerifiedAt, record.getEmailVerifiedAt(), assertId + "Check emailVerifiedAt");
+		Assertions.assertEquals(expected.alertedOf, record.getAlertedOf(), assertId + "Check alertedOf");
 		Assertions.assertEquals(expected.alertedAt, record.getAlertedAt(), assertId + "Check alertedAt");
 		Assertions.assertEquals(expected.createdAt, record.getCreatedAt(), assertId + "Check createdAt");
 		Assertions.assertEquals(expected.updatedAt, record.getUpdatedAt(), assertId + "Check updatedAt");
@@ -1303,6 +1313,7 @@ public class PeopleDAOTest
 		Assertions.assertEquals(expected.authAt, value.authAt, assertId + "Check authAt");
 		Assertions.assertEquals(expected.phoneVerifiedAt, value.phoneVerifiedAt, assertId + "Check phoneVerifiedAt");
 		Assertions.assertEquals(expected.emailVerifiedAt, value.emailVerifiedAt, assertId + "Check emailVerifiedAt");
+		Assertions.assertEquals(expected.alertedOf, value.alertedOf, assertId + "Check alertedOf");
 		Assertions.assertEquals(expected.alertedAt, value.alertedAt, assertId + "Check alertedAt");
 		Assertions.assertEquals(expected.createdAt, value.createdAt, assertId + "Check createdAt");
 		Assertions.assertEquals(expected.updatedAt, value.updatedAt, assertId + "Check updatedAt");

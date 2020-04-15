@@ -2,8 +2,10 @@ package app.allclear.platform.dao;
 
 import static java.net.URLEncoder.encode;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static app.allclear.common.jackson.JacksonUtils.timestamp;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -38,6 +40,7 @@ public class SessionDAO
 	private static final String ID = "session:%s";
 	private static final String MATCH = "session:*";
 	private static final int AUTH_DURATION = 5 * 60;	// Five minutes
+	private static final int ALERT_DURATION = 24 * 60 * 60;	// 24 hours
 	private static final String AUTH_KEY = "authentication:%s:%s";
 	private final ObjectMapper mapper = JacksonUtils.createMapper();
 	public static final int TOKEN_LENGTH = RegistrationDAO.CODE_LENGTH;
@@ -45,21 +48,17 @@ public class SessionDAO
 	public static String key(final String id) { return String.format(ID, id); }
 	public static String authKey(final String phone, final String token) { return String.format(AUTH_KEY, phone, token); }
 
-	private final String authSid;
-	private final String authFrom;
+	private final Config conf;
 	private final RedisClient redis;
-	private final String authMessage;
 	private final TwilioClient twilio;
 	private final ThreadLocal<SessionValue> current = new ThreadLocal<>();
 
 	public SessionDAO(final RedisClient redis, final Config conf) { this(redis, null, conf); }
 	public SessionDAO(final RedisClient redis, final TwilioClient twilio, final Config conf)
 	{
+		this.conf = conf;
 		this.redis = redis;
 		this.twilio = twilio;
-		this.authSid = conf.authenticationSid;
-		this.authFrom = conf.authenticationPhone;
-		this.authMessage = conf.authenticationSMSMessage;
 	}
 
 	/** Adds a short-term registration session.
@@ -105,7 +104,7 @@ public class SessionDAO
 		return value;
 	}
 
-	/** Sends an authentication token to the specified user.
+	/** Sends an authentication token to the specified phone number/user.
 	 * 
 	 * @param phone
 	 * @return the token to be used in tests.
@@ -114,8 +113,25 @@ public class SessionDAO
 	{
 		var token = RandomStringUtils.randomNumeric(TOKEN_LENGTH).toUpperCase();
 
-		twilio.send(new SMSRequest(authSid, authFrom, String.format(authMessage, token, encode(phone, UTF_8), encode(token, UTF_8)), phone));
+		twilio.send(new SMSRequest(conf.authSid, conf.authPhone, String.format(conf.authSMSMessage, token, encode(phone, UTF_8), encode(token, UTF_8)), phone));
 		redis.put(authKey(phone, token), phone, AUTH_DURATION);
+
+		return token;
+	}
+
+	/** Sends an alert message with an authentication token to the specified phone number/user.
+	 * 
+	 * @param phone
+	 * @param lastAlertedAt
+	 * @return the token to be used in tests.
+	 */
+	public String alert(final String phone, final Date lastAlertedAt)
+	{
+		var token = RandomStringUtils.randomNumeric(TOKEN_LENGTH).toUpperCase();
+
+		twilio.send(new SMSRequest(conf.alertSid, conf.alertPhone,
+			String.format(conf.alertSMSMessage, encode(timestamp(lastAlertedAt), UTF_8), encode(phone, UTF_8), encode(token, UTF_8)), phone));
+		redis.put(authKey(phone, token), phone, ALERT_DURATION);
 
 		return token;
 	}

@@ -417,7 +417,9 @@
 <TR>
 <TD CLASS="detail">21</TD><TD CLASS="detail">location_name</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">255</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the full address of the person used during geocoding.</TD></TR>
 <TR>
-<TD CLASS="detail">22</TD><TD CLASS="detail">alerted_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents when the last facility alert was sent to the user.</TD></TR>
+<TD CLASS="detail">22</TD><TD CLASS="detail">alerted_of</TD><TD CLASS="detail">INT</TD><TD CLASS="detail">10</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the number of new facilities found when attempting the last alert for the user. Zero indicates that no actual alert was sent.</TD></TR>
+<TR>
+<TD CLASS="detail">23</TD><TD CLASS="detail">alerted_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents when the last facility alert was attempted-for/sent-to the user.</TD></TR>
 </TABLE>
 <BR><TABLE CELLSPACING="0">
 <TR>

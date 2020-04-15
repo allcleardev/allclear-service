@@ -66,6 +66,7 @@ public class PeopleValue implements Serializable
 	public Date authAt = null;
 	public Date phoneVerifiedAt = null;
 	public Date emailVerifiedAt = null;
+	public Integer alertedOf = null;
 	public Date alertedAt = null;
 	public Date createdAt = null;
 	public Date updatedAt = null;
@@ -107,6 +108,7 @@ public class PeopleValue implements Serializable
 	public PeopleValue withAuthAt(final Date newValue) { authAt = newValue; return this; }
 	public PeopleValue withPhoneVerifiedAt(final Date newValue) { phoneVerifiedAt = newValue; return this; }
 	public PeopleValue withEmailVerifiedAt(final Date newValue) { emailVerifiedAt = newValue; return this; }
+	public PeopleValue withAlertedOf(final Integer newValue) { alertedOf = newValue; return this; }
 	public PeopleValue withAlertedAt(final Date newValue) { alertedAt = newValue; return this; }
 	public PeopleValue withCreatedAt(final Date newValue) { createdAt = newValue; return this; }
 	public PeopleValue withUpdatedAt(final Date newValue) { updatedAt = newValue; return this; }
@@ -133,7 +135,7 @@ public class PeopleValue implements Serializable
 	}
 	public PeopleValue withFacilities(final List<FacilityValue> newValues) { facilities = newValues; return this; }
 
-	public PeopleValue registered() { return withActive(true).withAuthAt(new Date()); }
+	public PeopleValue registered() { return withActive(true).withAuthAt(new Date()).withAlertedOf(null).withAlertedAt(null); }
 	public PeopleValue registeredByPhone() { return registered().withPhoneVerifiedAt(authAt).withEmailVerifiedAt(null); }
 	public Date initDates()
 	{
@@ -167,7 +169,7 @@ public class PeopleValue implements Serializable
 		final boolean alertable,
 		final boolean active)
 	{
-		this(null, name, phone, email, firstName, lastName, dob, statusId, null, statureId, null, sexId, null, healthWorkerStatusId, null, latitude, longitude, locationName, alertable, active, null, null, null, null, null, null);
+		this(null, name, phone, email, firstName, lastName, dob, statusId, null, statureId, null, sexId, null, healthWorkerStatusId, null, latitude, longitude, locationName, alertable, active, null, null, null, null, null, null, null);
 	}
 
 	public PeopleValue(final String id,
@@ -193,6 +195,7 @@ public class PeopleValue implements Serializable
 		final Date authAt,
 		final Date phoneVerifiedAt,
 		final Date emailVerifiedAt,
+		final Integer alertedOf,
 		final Date alertedAt,
 		final Date createdAt,
 		final Date updatedAt)
@@ -220,6 +223,7 @@ public class PeopleValue implements Serializable
 		this.authAt = authAt;
 		this.phoneVerifiedAt = phoneVerifiedAt;
 		this.emailVerifiedAt = emailVerifiedAt;
+		this.alertedOf = alertedOf;
 		this.alertedAt = alertedAt;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
@@ -272,6 +276,7 @@ public class PeopleValue implements Serializable
 			((authAt == v.authAt) || DateUtils.truncatedEquals(authAt, v.authAt, Calendar.SECOND)) &&
 			((phoneVerifiedAt == v.phoneVerifiedAt) || DateUtils.truncatedEquals(phoneVerifiedAt, v.phoneVerifiedAt, Calendar.SECOND)) &&
 			((emailVerifiedAt == v.emailVerifiedAt) || DateUtils.truncatedEquals(emailVerifiedAt, v.emailVerifiedAt, Calendar.SECOND)) &&
+			Objects.equals(alertedOf, v.alertedOf) &&
 			((alertedAt == v.alertedAt) || DateUtils.truncatedEquals(alertedAt, v.alertedAt, Calendar.SECOND)) &&
 			((createdAt == v.createdAt) || DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND)) &&
 			((updatedAt == v.updatedAt) || DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND));
@@ -303,6 +308,7 @@ public class PeopleValue implements Serializable
 			.append(", authAt: ").append(authAt)
 			.append(", phoneVerifiedAt: ").append(phoneVerifiedAt)
 			.append(", emailVerifiedAt: ").append(emailVerifiedAt)
+			.append(", alertedOf: ").append(alertedOf)
 			.append(", alertedAt: ").append(alertedAt)
 			.append(", createdAt: ").append(createdAt)
 			.append(", updatedAt: ").append(updatedAt)

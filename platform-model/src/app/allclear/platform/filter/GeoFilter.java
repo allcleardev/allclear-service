@@ -40,6 +40,13 @@ public class GeoFilter implements Serializable
 		this.km = km;
 	}
 
+	public GeoFilter(final BigDecimal latitude,
+		final BigDecimal longitude,
+		final Integer miles)
+	{
+		this(latitude, longitude, null, miles, null);
+	}
+
 	public long meters() { return ((null != miles) ? milesToMeters(miles) : kmToMeters(km)); }
 	public boolean valid()
 	{

@@ -390,9 +390,10 @@
 		</rollback>
 	</changeSet>
 
-	<changeSet id="v1.0.109_ALLCLEAR-248" author="smalleyd">
+	<changeSet id="v1.0.111_ALLCLEAR-248" author="smalleyd">
 		<addColumn tableName="people">
-			<column name="alerted_at" type="DATETIME" remarks="Represents when the last facility alert was sent to the user." />
+			<column name="alerted_of" type="INTEGER" remarks="Represents the number of new facilities found when attempting the last alert for the user. Zero indicates that no actual alert was sent." />
+			<column name="alerted_at" type="DATETIME" remarks="Represents when the last facility alert was attempted-for/sent-to the user." />
 		</addColumn>
 
 		<sql dbms="mysql"><![CDATA[
@@ -403,6 +404,7 @@
 
 		<rollback>
 			<dropColumn tableName="people" columnName="alerted_at" />
+			<dropColumn tableName="people" columnName="alerted_of" />
 		</rollback>
 	</changeSet>
 

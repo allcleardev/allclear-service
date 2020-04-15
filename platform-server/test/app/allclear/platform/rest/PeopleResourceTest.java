@@ -67,6 +67,8 @@ public class PeopleResourceTest
 	private static Date AUTH_AT;
 	private static Date EMAIL_VERIFIED_AT;
 	private static Date PHONE_VERIFIED_AT;
+	private static int ALERTED_OF = 5;
+	private static Date ALERTED_AT;
 	private static SMSResponse LAST_SMS_RESPONSE;
 	private static RegistrationValue REGISTRATION;
 	private static SessionValue ADMIN;
@@ -102,6 +104,7 @@ public class PeopleResourceTest
 		AUTH_AT = timestamp("2020-03-24T12:46:30-0000");
 		EMAIL_VERIFIED_AT = timestamp("2020-03-24T12:47:30-0000");
 		PHONE_VERIFIED_AT = timestamp("2020-03-24T12:48:30-0000");
+		ALERTED_AT = timestamp("2020-04-15T12:02:30-0000");
 
 		when(twilio.send(any(SMSRequest.class))).thenAnswer(a -> LAST_SMS_RESPONSE = new SMSResponse((SMSRequest) a.getArgument(0)));
 	}
@@ -113,7 +116,8 @@ public class PeopleResourceTest
 
 		var response = request()
 			.post(Entity.entity(VALUE = new PeopleValue("minimal", "888-minimal", true)
-				.withAuthAt(AUTH_AT).withEmailVerifiedAt(EMAIL_VERIFIED_AT).withPhoneVerifiedAt(PHONE_VERIFIED_AT), UTF8MediaType.APPLICATION_JSON_TYPE));
+				.withAuthAt(AUTH_AT).withEmailVerifiedAt(EMAIL_VERIFIED_AT).withPhoneVerifiedAt(PHONE_VERIFIED_AT).withAlertedOf(ALERTED_OF).withAlertedAt(ALERTED_AT),
+					UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var value = response.readEntity(PeopleValue.class);
@@ -275,15 +279,26 @@ public class PeopleResourceTest
 			arguments(new PeopleFilter(1, 20).withHasLocationName(false), 1L),
 			arguments(new PeopleFilter(1, 20).withAlertable(VALUE.alertable), 1L),
 			arguments(new PeopleFilter(1, 20).withActive(VALUE.active), 1L),
+			arguments(new PeopleFilter(1, 20).withHasAuthAt(true), 1L),
 			arguments(new PeopleFilter(1, 20).withAuthAtFrom(hours(AUTH_AT, -1)), 1L),
 			arguments(new PeopleFilter(1, 20).withAuthAtTo(hours(AUTH_AT, 1)), 1L),
 			arguments(new PeopleFilter(1, 20).withAuthAtFrom(hours(AUTH_AT, -1)).withAuthAtTo(hours(AUTH_AT, 1)), 1L),
+			arguments(new PeopleFilter(1, 20).withHasPhoneVerifiedAt(true), 1L),
 			arguments(new PeopleFilter(1, 20).withPhoneVerifiedAtFrom(hours(PHONE_VERIFIED_AT, -1)), 1L),
 			arguments(new PeopleFilter(1, 20).withPhoneVerifiedAtTo(hours(PHONE_VERIFIED_AT, 1)), 1L),
 			arguments(new PeopleFilter(1, 20).withPhoneVerifiedAtFrom(hours(PHONE_VERIFIED_AT, -1)).withPhoneVerifiedAtTo(hours(PHONE_VERIFIED_AT, 1)), 1L),
+			arguments(new PeopleFilter(1, 20).withHasEmailVerifiedAt(true), 1L),
 			arguments(new PeopleFilter(1, 20).withEmailVerifiedAtFrom(hours(EMAIL_VERIFIED_AT, -1)), 1L),
 			arguments(new PeopleFilter(1, 20).withEmailVerifiedAtTo(hours(EMAIL_VERIFIED_AT, 1)), 1L),
 			arguments(new PeopleFilter(1, 20).withEmailVerifiedAtFrom(hours(EMAIL_VERIFIED_AT, -1)).withEmailVerifiedAtTo(hours(EMAIL_VERIFIED_AT, 1)), 1L),
+			arguments(new PeopleFilter(1, 20).withAlertedOf(ALERTED_OF), 1L),
+			arguments(new PeopleFilter(1, 20).withHasAlertedOf(true), 1L),
+			arguments(new PeopleFilter(1, 20).withAlertedOfFrom(ALERTED_OF - 1), 1L),
+			arguments(new PeopleFilter(1, 20).withAlertedOfTo(ALERTED_OF + 1), 1L),
+			arguments(new PeopleFilter(1, 20).withHasAlertedAt(true), 1L),
+			arguments(new PeopleFilter(1, 20).withAlertedAtFrom(hours(ALERTED_AT, -1)), 1L),
+			arguments(new PeopleFilter(1, 20).withAlertedAtTo(hours(ALERTED_AT, 1)), 1L),
+			arguments(new PeopleFilter(1, 20).withAlertedAtFrom(hours(ALERTED_AT, -1)).withAlertedAtTo(hours(ALERTED_AT, 1)), 1L),
 			arguments(new PeopleFilter(1, 20).withCreatedAtFrom(hourAgo), 1L),
 			arguments(new PeopleFilter(1, 20).withCreatedAtTo(hourAhead), 1L),
 			arguments(new PeopleFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
@@ -307,15 +322,26 @@ public class PeopleResourceTest
 			arguments(new PeopleFilter(1, 20).withHasLocationName(true), 0L),
 			arguments(new PeopleFilter(1, 20).withAlertable(!VALUE.alertable), 0L),
 			arguments(new PeopleFilter(1, 20).withActive(!VALUE.active), 0L),
+			arguments(new PeopleFilter(1, 20).withHasAuthAt(false), 0L),
 			arguments(new PeopleFilter(1, 20).withAuthAtFrom(hours(AUTH_AT, 1)), 0L),
 			arguments(new PeopleFilter(1, 20).withAuthAtTo(hours(AUTH_AT, -1)), 0L),
 			arguments(new PeopleFilter(1, 20).withAuthAtFrom(hours(AUTH_AT, 1)).withAuthAtTo(hours(AUTH_AT, -1)), 0L),
+			arguments(new PeopleFilter(1, 20).withHasPhoneVerifiedAt(false), 0L),
 			arguments(new PeopleFilter(1, 20).withPhoneVerifiedAtFrom(hours(PHONE_VERIFIED_AT, 1)), 0L),
 			arguments(new PeopleFilter(1, 20).withPhoneVerifiedAtTo(hours(PHONE_VERIFIED_AT, -1)), 0L),
 			arguments(new PeopleFilter(1, 20).withPhoneVerifiedAtFrom(hours(PHONE_VERIFIED_AT, 1)).withPhoneVerifiedAtTo(hours(PHONE_VERIFIED_AT, -1)), 0L),
+			arguments(new PeopleFilter(1, 20).withHasEmailVerifiedAt(false), 0L),
 			arguments(new PeopleFilter(1, 20).withEmailVerifiedAtFrom(hours(EMAIL_VERIFIED_AT, 1)), 0L),
 			arguments(new PeopleFilter(1, 20).withEmailVerifiedAtTo(hours(EMAIL_VERIFIED_AT, -1)), 0L),
 			arguments(new PeopleFilter(1, 20).withEmailVerifiedAtFrom(hours(EMAIL_VERIFIED_AT, 1)).withEmailVerifiedAtTo(hours(EMAIL_VERIFIED_AT, -1)), 0L),
+			arguments(new PeopleFilter(1, 20).withAlertedOf(ALERTED_OF + 1000), 0L),
+			arguments(new PeopleFilter(1, 20).withHasAlertedOf(false), 0L),
+			arguments(new PeopleFilter(1, 20).withAlertedOfFrom(ALERTED_OF + 1), 0L),
+			arguments(new PeopleFilter(1, 20).withAlertedOfTo(ALERTED_OF - 1), 0L),
+			arguments(new PeopleFilter(1, 20).withHasAlertedAt(false), 0L),
+			arguments(new PeopleFilter(1, 20).withAlertedAtFrom(hours(ALERTED_AT, 1)), 0L),
+			arguments(new PeopleFilter(1, 20).withAlertedAtTo(hours(ALERTED_AT, -1)), 0L),
+			arguments(new PeopleFilter(1, 20).withAlertedAtFrom(hours(ALERTED_AT, 1)).withAlertedAtTo(hours(ALERTED_AT, -1)), 0L),
 			arguments(new PeopleFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
 			arguments(new PeopleFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
 			arguments(new PeopleFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
@@ -834,6 +860,7 @@ public class PeopleResourceTest
 			Assertions.assertNull(value.emailVerifiedAt, assertId + "Check emailVerifiedAt");
 		else
 			assertThat(value.emailVerifiedAt).as(assertId + "Check emailVerifiedAt").isCloseTo(expected.emailVerifiedAt, 500L);
+		Assertions.assertEquals(expected.alertedOf, value.alertedOf, assertId + "Check alertedOf");
 		if (null == expected.alertedAt)
 			Assertions.assertNull(value.alertedAt, assertId + "Check alertedAt");
 		else

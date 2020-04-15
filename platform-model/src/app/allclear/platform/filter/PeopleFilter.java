@@ -63,6 +63,10 @@ public class PeopleFilter extends QueryFilter
 	public Boolean hasEmailVerifiedAt = null;
 	public Date emailVerifiedAtFrom = null;
 	public Date emailVerifiedAtTo = null;
+	public Integer alertedOf = null;
+	public Boolean hasAlertedOf = null;
+	public Integer alertedOfFrom = null;
+	public Integer alertedOfTo = null;
 	public Boolean hasAlertedAt = null;
 	public Date alertedAtFrom = null;
 	public Date alertedAtTo = null;
@@ -122,6 +126,10 @@ public class PeopleFilter extends QueryFilter
 	public PeopleFilter withHasEmailVerifiedAt(final Boolean newValue) { hasEmailVerifiedAt = newValue; return this; }
 	public PeopleFilter withEmailVerifiedAtFrom(final Date newValue) { emailVerifiedAtFrom = newValue; return this; }
 	public PeopleFilter withEmailVerifiedAtTo(final Date newValue) { emailVerifiedAtTo = newValue; return this; }
+	public PeopleFilter withAlertedOf(final Integer newValue) { alertedOf = newValue; return this; }
+	public PeopleFilter withHasAlertedOf(final Boolean newValue) { hasAlertedOf = newValue; return this; }
+	public PeopleFilter withAlertedOfFrom(final Integer newValue) { alertedOfFrom = newValue; return this; }
+	public PeopleFilter withAlertedOfTo(final Integer newValue) { alertedOfTo = newValue; return this; }
 	public PeopleFilter withHasAlertedAt(final Boolean newValue) { hasAlertedAt = newValue; return this; }
 	public PeopleFilter withAlertedAtFrom(final Date newValue) { alertedAtFrom = newValue; return this; }
 	public PeopleFilter withAlertedAtTo(final Date newValue) { alertedAtTo = newValue; return this; }
@@ -205,6 +213,9 @@ public class PeopleFilter extends QueryFilter
 		@param phoneVerifiedAtTo represents the "phone_verified_at" field - upper boundary.
 		@param emailVerifiedAtFrom represents the "email_verified_at" field - lower boundary.
 		@param emailVerifiedAtTo represents the "email_verified_at" field - upper boundary.
+		@param alertedOf represents the "alerted_of" field.
+		@param alertedOfFrom represents the "alerted_of" field - lower boundary.
+		@param alertedOfTo represents the "alerted_of" field - upper boundary.
 		@param alertedAtFrom represents the "alerted_at" field - lower boundary.
 		@param alertedAtTo represents the "alerted_at" field - upper boundary.
 		@param createdAtFrom represents the "created_at" field - lower boundary.
@@ -240,6 +251,9 @@ public class PeopleFilter extends QueryFilter
 		final Date phoneVerifiedAtTo,
 		final Date emailVerifiedAtFrom,
 		final Date emailVerifiedAtTo,
+		final Integer alertedOf,
+		final Integer alertedOfFrom,
+		final Integer alertedOfTo,
 		final Date alertedAtFrom,
 		final Date alertedAtTo,
 		final Date createdAtFrom,
@@ -275,6 +289,9 @@ public class PeopleFilter extends QueryFilter
 		this.phoneVerifiedAtTo = phoneVerifiedAtTo;
 		this.emailVerifiedAtFrom = emailVerifiedAtFrom;
 		this.emailVerifiedAtTo = emailVerifiedAtTo;
+		this.alertedOf = alertedOf;
+		this.alertedOfFrom = alertedOfFrom;
+		this.alertedOfTo = alertedOfTo;
 		this.alertedAtFrom = alertedAtFrom;
 		this.alertedAtTo = alertedAtTo;
 		this.createdAtFrom = createdAtFrom;
@@ -357,6 +374,10 @@ public class PeopleFilter extends QueryFilter
 			.append(", hasEmailVerifiedAt: ").append(hasEmailVerifiedAt)
 			.append(", emailVerifiedAtFrom: ").append(emailVerifiedAtFrom)
 			.append(", emailVerifiedAtTo: ").append(emailVerifiedAtTo)
+			.append(", alertedOf: ").append(alertedOf)
+			.append(", hasAlertedOf: ").append(hasAlertedOf)
+			.append(", alertedOfFrom: ").append(alertedOfFrom)
+			.append(", alertedOfTo: ").append(alertedOfTo)
 			.append(", hasAlertedAt: ").append(hasAlertedAt)
 			.append(", alertedAtFrom: ").append(alertedAtFrom)
 			.append(", alertedAtTo: ").append(alertedAtTo)

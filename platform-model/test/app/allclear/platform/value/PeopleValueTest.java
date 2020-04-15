@@ -37,6 +37,8 @@ public class PeopleValueTest
 			.withAuthAt(value)
 			.withPhoneVerifiedAt(value)
 			.withEmailVerifiedAt(value)
+			.withAlertedOf(4)
+			.withAlertedAt(value)
 			.withCreatedAt(value)
 			.withUpdatedAt(value);
 	}
@@ -64,6 +66,8 @@ public class PeopleValueTest
 		Assertions.assertEquals(value, o.authAt, "Check authAt");
 		Assertions.assertEquals(value, o.phoneVerifiedAt, "Check phoneVerifiedAt");
 		Assertions.assertEquals(value, o.emailVerifiedAt, "Check emailVerifiedAt");
+		Assertions.assertEquals(4, o.alertedOf, "Check alertedOf");
+		Assertions.assertEquals(value, o.alertedAt, "Check alertedAt");
 		Assertions.assertEquals(value, o.createdAt, "Check createdAt");
 		Assertions.assertEquals(value, o.updatedAt, "Check updatedAt");
 	}
@@ -82,6 +86,8 @@ public class PeopleValueTest
 		Assertions.assertEquals(value, o.authAt, "Check authAt");
 		Assertions.assertEquals(value, o.phoneVerifiedAt, "Check phoneVerifiedAt");
 		Assertions.assertEquals(value, o.emailVerifiedAt, "Check emailVerifiedAt");
+		Assertions.assertEquals(4, o.alertedOf, "Check alertedOf");
+		Assertions.assertEquals(value, o.alertedAt, "Check alertedAt");
 		assertThat(o.createdAt).as("Check createdAt").isCloseTo(now, 100L).isNotEqualTo(value);
 		assertThat(o.updatedAt).as("Check updatedAt").isCloseTo(now, 100L).isNotEqualTo(value);
 	}
@@ -99,6 +105,8 @@ public class PeopleValueTest
 		assertThat(o.authAt).as("Check authAt").isCloseTo(now, 100L).isNotEqualTo(value);
 		Assertions.assertEquals(value, o.phoneVerifiedAt, "Check phoneVerifiedAt");
 		Assertions.assertEquals(value, o.emailVerifiedAt, "Check emailVerifiedAt");
+		Assertions.assertNull(o.alertedOf, "Check alertedOf");
+		Assertions.assertNull(o.alertedAt, "Check alertedAt");
 		Assertions.assertEquals(value, o.createdAt, "Check createdAt");
 		Assertions.assertEquals(value, o.updatedAt, "Check updatedAt");
 	}
@@ -114,8 +122,10 @@ public class PeopleValueTest
 
 		Assertions.assertTrue(o.active, "Check active");
 		assertThat(o.authAt).as("Check authAt").isCloseTo(now, 100L).isNotEqualTo(value);
-		assertThat(o.phoneVerifiedAt).as("Check phoneVerifiedAt").isCloseTo(now, 100L).isNotEqualTo(value);
+		assertThat(o.phoneVerifiedAt).as("Check phoneVerifiedAt").isCloseTo(now, 100L).isNotEqualTo(value).isEqualTo(o.authAt);
 		Assertions.assertNull(o.emailVerifiedAt, "Check emailVerifiedAt");
+		Assertions.assertNull(o.alertedOf, "Check alertedOf");
+		Assertions.assertNull(o.alertedAt, "Check alertedAt");
 		Assertions.assertEquals(value, o.createdAt, "Check createdAt");
 		Assertions.assertEquals(value, o.updatedAt, "Check updatedAt");
 	}
@@ -132,8 +142,10 @@ public class PeopleValueTest
 
 		Assertions.assertTrue(o.active, "Check active");
 		assertThat(o.authAt).as("Check authAt").isCloseTo(now, 100L).isNotEqualTo(value);
-		assertThat(o.phoneVerifiedAt).as("Check phoneVerifiedAt").isCloseTo(now, 100L).isNotEqualTo(value);
+		assertThat(o.phoneVerifiedAt).as("Check phoneVerifiedAt").isCloseTo(now, 100L).isNotEqualTo(value).isEqualTo(o.authAt);
 		Assertions.assertNull(o.emailVerifiedAt, "Check emailVerifiedAt");
+		Assertions.assertNull(o.alertedOf, "Check alertedOf");
+		Assertions.assertNull(o.alertedAt, "Check alertedAt");
 		assertThat(o.createdAt).as("Check createdAt").isCloseTo(now, 100L).isNotEqualTo(value);
 		assertThat(o.updatedAt).as("Check updatedAt").isCloseTo(now, 100L).isNotEqualTo(value);
 	}

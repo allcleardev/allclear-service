@@ -304,7 +304,10 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	 */
 	public long count(final FacilityFilter filter) throws ValidationException
 	{
-		return createQueryBuilder(filter.clean(), null).aggregate(COUNT);
+		if ((null != filter.from) && filter.from.valid())
+			return createNativeQuery(filter.clean(), null, FacilityX.class).aggregate(COUNT_);
+		else
+			return createQueryBuilder(filter.clean(), null).aggregate(COUNT);
 	}
 
 	/** Helper method - creates the a standard Hibernate query builder. */
