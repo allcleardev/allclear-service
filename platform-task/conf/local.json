@@ -2,12 +2,8 @@
   "env": "local",
 
   "baseUrl": "${baseUrl:-http://localhost:8080}",
-  "registrationPhone": "+16466321488",
-  "authenticationPhone": "+16466321488",
-
-  "twilio": { "baseUrl": "${twilio.baseUrl:-https://api.twilio.com/2010-04-01}", "accountId": "${twilio.accountId:-123}", "authToken": "${twilio.authToken:-token}" },
  
-  "trans": {
+  "read": {
     "driverClass": "com.mysql.jdbc.Driver",
     "user": "allclear",
     "password": "allclear",
@@ -17,9 +13,10 @@
     "validationQueryTimeout": "10s",
     "minSize": "1",
     "maxSize": "10",
+    "readOnlyByDefault": true,
     "checkConnectionWhileIdle": "true",
     "checkConnectionOnBorrow": "true",
-    "defaultTransactionIsolation": "READ_COMMITTED",
+    "defaultTransactionIsolation": "READ_UNCOMMITTED",
     "properties": { "hibernate.dialect": "org.hibernate.dialect.MySQL57Dialect",
       "hibernate.dialect.storage_engine": "innodb",
       "hibernate.show_sql": false }

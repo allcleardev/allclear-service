@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import app.allclear.common.errors.AbortException;
 import app.allclear.common.task.TaskCallback;
 import app.allclear.common.time.StopWatch;
-import app.allclear.platform.dao.PeopleDAO;
+import app.allclear.platform.dao.PeopleJDBi;
 import app.allclear.platform.model.AlertInitRequest;
 import app.allclear.platform.model.AlertRequest;
 import app.allclear.platform.type.Timezone;
@@ -29,11 +29,11 @@ public class AlertInitTask implements TaskCallback<AlertInitRequest>
 
 	private static final int PAGE_SIZE = 100;
 
-	private final PeopleDAO dao;
+	private final PeopleJDBi dao;
 	private final QueueClient queue;
 	private final ObjectMapper mapper;
 
-	public AlertInitTask(final ObjectMapper mapper, final PeopleDAO dao, final QueueClient queue)
+	public AlertInitTask(final ObjectMapper mapper, final PeopleJDBi dao, final QueueClient queue)
 	{
 		this.dao = dao;
 		this.queue = queue;

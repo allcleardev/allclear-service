@@ -2,12 +2,8 @@
   "env": "dev",
 
   "baseUrl": "${baseUrl:-https://app-dev.allclear.app}",
-  "registrationPhone": "+16466321488",
-  "authenticationPhone": "+16466321488",
 
-  "twilio": { "baseUrl": "${twilio.baseUrl:-https://api.twilio.com/2010-04-01}", "accountId": "${TWILIO_ACCOUNT_ID:-123}", "authToken": "${TWILIO_AUTH_TOKEN:-token}" },
-
-  "trans": {
+  "read": {
     "driverClass": "com.mysql.jdbc.Driver",
     "user": "${MYSQL_USERNAME:-allclear}",
     "password": "${MYSQL_PASSWORD:-allclearpwd}",
@@ -17,9 +13,10 @@
     "validationQueryTimeout": "10s",
     "minSize": "2",
     "maxSize": "8",
+    "readOnlyByDefault": true,
     "checkConnectionWhileIdle": "true",
     "checkConnectionOnBorrow": "true",
-    "defaultTransactionIsolation": "READ_COMMITTED",
+    "defaultTransactionIsolation": "READ_UNCOMMITTED",
     "properties": { "hibernate.dialect": "org.hibernate.dialect.MySQL57Dialect",
       "hibernate.dialect.storage_engine": "innodb",
       "hibernate.show_sql": false }

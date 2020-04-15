@@ -26,16 +26,16 @@ import app.allclear.platform.type.Timezone;
 
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
 @ExtendWith(DropwizardExtensionsSupport.class)
-public class PeopleDAOTest
+public class PeopleJDBiTest
 {
 	public static final JDBiRule RULE = new JDBiRule();
 
-	private static PeopleDAO dao;
+	private static PeopleJDBi dao;
 
 	@BeforeAll
 	public static void up()
 	{
-		dao = RULE.dbi().onDemand(PeopleDAO.class);
+		dao = RULE.dbi().onDemand(PeopleJDBi.class);
 	}
 
 	public static Stream<Arguments> getActiveAlertableIds()

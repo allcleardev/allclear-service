@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import app.allclear.common.errors.*;
 import app.allclear.common.jackson.JacksonUtils;
 import app.allclear.junit.jdbi.JDBiRule;
-import app.allclear.platform.dao.PeopleDAO;
+import app.allclear.platform.dao.PeopleJDBi;
 import app.allclear.platform.model.AlertInitRequest;
 import app.allclear.platform.type.Timezone;
 
@@ -39,7 +39,7 @@ public class AlertInitTaskTest
 {
 	public static final JDBiRule RULE = new JDBiRule();
 
-	private static PeopleDAO dao;
+	private static PeopleJDBi dao;
 	private static AlertInitTask task;
 	private static final QueueClient queue = mock(QueueClient.class);
 	private static final ObjectMapper mapper = JacksonUtils.createMapper();
@@ -56,7 +56,7 @@ public class AlertInitTaskTest
 	@BeforeAll
 	public static void up()
 	{
-		dao = RULE.dbi().onDemand(PeopleDAO.class);
+		dao = RULE.dbi().onDemand(PeopleJDBi.class);
 		task = new AlertInitTask(mapper, dao, queue);
 
 		when(queue.sendMessage(any(String.class))).thenAnswer(a -> { sent.add(a.getArgument(0, String.class)); return null; });

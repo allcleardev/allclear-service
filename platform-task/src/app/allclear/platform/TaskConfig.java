@@ -18,38 +18,28 @@ import app.allclear.common.value.ManifestValue;
  *
  */
 
-public class Config extends Configuration implements Serializable
+public class TaskConfig extends Configuration implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
 	public final String env;
 	public final boolean disableSwagger;
 	public final DataSourceFactory read;
-	public final DataSourceFactory trans;
 	public final ManifestValue manifest;
 
 	public final String baseUrl;
-	public final String registrationPhone;
-	public final String authenticationPhone;
 
 	public String getVersion() { return manifest.version; }
 
-	public Config(@JsonProperty("env") final String env,
-		@JsonProperty("disableSwagger") final Boolean disableSwagger,
-		@JsonProperty("read") final DataSourceFactory read,
-		@JsonProperty("trans") final DataSourceFactory trans,
+	public TaskConfig(@JsonProperty("env") final String env,
 		@JsonProperty("baseUrl") final String baseUrl,
-		@JsonProperty("registrationPhone") final String registrationPhone,
-		@JsonProperty("authenticationPhone") final String authenticationPhone)
+		@JsonProperty("disableSwagger") final Boolean disableSwagger,
+		@JsonProperty("read") final DataSourceFactory read)
 	{
 		this.env = env;
-		this.trans = trans;
-		this.read = (null != read) ? read : trans;
+		this.read = read;
+		this.baseUrl = baseUrl;
 		this.manifest = ManifestUtils.getInfo(getClass());
 		this.disableSwagger = Boolean.TRUE.equals(disableSwagger);
-
-		this.baseUrl = baseUrl;
-		this.registrationPhone = registrationPhone;
-		this.authenticationPhone = authenticationPhone;
 	}
 }

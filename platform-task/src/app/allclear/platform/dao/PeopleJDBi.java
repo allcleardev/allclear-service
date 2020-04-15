@@ -16,7 +16,7 @@ import app.allclear.platform.type.Timezone;
  *
  */
 
-public interface PeopleDAO
+public interface PeopleJDBi
 {
 	@SqlQuery("SELECT o.id FROM people o WHERE o.id > :lastId AND o.latitude IS NOT NULL AND ((o.longitude >= :longitudeFrom) AND (o.longitude < :longitudeTo)) AND o.alertable = TRUE AND o.active = TRUE ORDER BY o.id LIMIT :pageSize")
 	public List<String> getActiveAlertableIds(@Bind("lastId") final String lastId,
