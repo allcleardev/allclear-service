@@ -24,6 +24,8 @@ import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.filter.RegistrationFilter;
 import app.allclear.platform.model.StartRequest;
+import app.allclear.platform.model.StartResponse;
+import app.allclear.platform.value.PeopleValue;
 import app.allclear.platform.value.RegistrationValue;
 import app.allclear.twilio.client.TwilioClient;
 import app.allclear.twilio.model.*;
@@ -82,7 +84,7 @@ public class RegistrationDAOTest
 		assertThat(code).as("Check code").isNotNull().hasSize(6).matches(PATTERN_CODE);
 		Assertions.assertNotNull(LAST_RESPONSE, "Check lastResponse");
 		Assertions.assertEquals(String.format(MESSAGE, code, encode(expectedPhone, UTF_8), code), LAST_RESPONSE.body, "Check lastResponse.body");
-		Assertions.assertEquals(1L, dao.search(new RegistrationFilter().withPhone(expectedPhone)).total, "Check search: before");
+		Assertions.assertEquals(1L, dao.search(new RegistrationFilter().withPhone(expectedPhone)).total, "Check search: before");	// CanNOT search with v1 format.
 
 		var o = dao.confirm(expectedPhone, code);
 		Assertions.assertNotNull(o, "Exists");
@@ -97,16 +99,28 @@ public class RegistrationDAOTest
 		Assertions.assertEquals(0L, dao.search(new RegistrationFilter().withPhone(expectedPhone)).total, "Check search: before");
 	}
 
-	@ParameterizedTest
-	@MethodSource("add")
-	public void add_again(final String phone, final Boolean beenTested, final Boolean haveSymptoms,
-		final String expectedPhone, final boolean expectedBeenTested, final boolean expectedHaveSymptoms)
+	public static Stream<Arguments> add_again()
 	{
-		var request = new StartRequest(phone, beenTested, haveSymptoms);
-		var code = dao.start(request);
+		return Stream.of(
+			arguments(new PeopleValue("first", "888-555-1000", true), "+18885551000"),
+			arguments(new PeopleValue("second", "888-555-1001", true), "+18885551001"),
+			arguments(new PeopleValue("third", "888-555-1002", true), "+18885551002"),
+			arguments(new PeopleValue("fourth", "888-555-1003", false), "+18885551003"),
+			arguments(new PeopleValue("fifth", "888-555-1004", false), "+18885551004"),
+			arguments(new PeopleValue("sixth", "888-555-1005", true), "+18885551005"),
+			arguments(new PeopleValue("seventh", "888-555-1006", true), "+18885551006"),
+			arguments(new PeopleValue("eighth", "888-555-1007", false), "+18885551007"),
+			arguments(new PeopleValue("ninth", "888-555-1008", false), "+18885551008"));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void add_again(final PeopleValue person, final String expectedPhone)
+	{
+		var code = dao.start(person.normalize());
 
 		codes.put(expectedPhone, code);
-		VALUES.put(expectedPhone, new RegistrationValue(dao.key(expectedPhone, code), request, (long) RegistrationDAO.EXPIRATION));
+		VALUES.put(expectedPhone, new RegistrationValue(dao.key(expectedPhone, code), person, (long) RegistrationDAO.EXPIRATION));
 	}
 
 	@Test
@@ -119,11 +133,17 @@ public class RegistrationDAOTest
 		var code = codes.get("+18885551008");
 		assertThat(code).as("Check code").isNotNull().hasSize(6).matches(PATTERN_CODE);
 
-		Assertions.assertNotNull(dao.request("+18885551008", code), "Check correct phone number");
-		Assertions.assertNull(dao.request("+18885551000", code), "Check mismatched phone number");
+		Assertions.assertNotNull(dao.requestX("+18885551008", code), "Check correct phone number");
+		Assertions.assertNull(dao.requestX("+18885551000", code), "Check mismatched phone number");
 
-		Assertions.assertNotNull(dao.confirm("+18885551008", code), "Check correct phone number");
+		var value = dao.confirm(new StartResponse("+18885551008", null, code));
+		Assertions.assertNotNull(value, "Check correct phone number");
+		Assertions.assertEquals("ninth", value.name, "Check value.name");
+		Assertions.assertEquals("+18885551008", value.phone, "Check value.phone");
+
 		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.confirm("+18885551000", code)))
+			.hasMessage("The supplied code is invalid.");
+		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.confirm("+18885551008", code)))	// Removed after confirm.
 			.hasMessage("The supplied code is invalid.");
 
 		Assertions.assertEquals(1L, dao.search(new RegistrationFilter(1, 100).withPhone("+18885551000")).total, "Check total: +18885551000");
@@ -155,12 +175,29 @@ public class RegistrationDAOTest
 			.hasMessage(message);
 	}
 
+	public static Stream<Arguments> startX_invalid()
+	{
+		return Stream.of(
+			arguments(new PeopleValue(), "Phone is not set."),
+			arguments(new PeopleValue().withPhone(StringUtils.repeat('5', 6)), "Phone cannot be shorter than 10 characters."),
+			arguments(new PeopleValue().withPhone(StringUtils.repeat('a', 12)), "Phone is not set."),
+			arguments(new PeopleValue().withPhone(StringUtils.repeat('5', 33)), "Phone cannot be longer than 32 characters."));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void startX_invalid(final PeopleValue person, final String message)
+	{
+		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.start(person.normalize())))
+			.hasMessage(message);
+	}
+
 	@Test
 	public void testRemove()
 	{
 		var phone = "+18885551002";
-		Assertions.assertNotNull(dao.request(phone, codes.get(phone)));
-		Assertions.assertNotNull(dao.request("+18885551003", codes.get("+18885551003")));
+		Assertions.assertNotNull(dao.requestX(phone, codes.get(phone)));
+		Assertions.assertNotNull(dao.requestX("+18885551003", codes.get("+18885551003")));
 
 		dao.remove(dao.key(phone, codes.get(phone)));
 	}
@@ -168,8 +205,8 @@ public class RegistrationDAOTest
 	@Test
 	public void testRemove_check()
 	{
-		Assertions.assertNull(dao.request("+18885551002", codes.get("+18885551002")));
-		Assertions.assertNotNull(dao.request("+18885551003", codes.get("+18885551003")));
+		Assertions.assertNull(dao.requestX("+18885551002", codes.get("+18885551002")));
+		Assertions.assertNotNull(dao.requestX("+18885551003", codes.get("+18885551003")));
 		Assertions.assertEquals(7L, dao.search(new RegistrationFilter(1, 100)).total, "Check total: All");
 	}
 }

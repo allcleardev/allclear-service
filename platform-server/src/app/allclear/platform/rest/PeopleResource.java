@@ -193,6 +193,31 @@ public class PeopleResource
 		return sessionDao.add(dao.authenticatedByPhone(request.phone), request.rememberMe);
 	}
 
+	@PUT
+	@Path("/confirm") @Timed @UnitOfWork	// USE /confirm so that AuthFilter permissions still work.
+	@ApiOperation(value="confirm", notes="Finishes the new v2 user registration process. Confirms the user phone number or email address during the registration process.", response=SessionValue.class)
+	public SessionValue confirm(@QueryParam("rememberMe") @ApiParam(name="rememberMe", value="Indicates to use a long term session if TRUE.", defaultValue="false", required=false) @DefaultValue("false") final Boolean rememberMe,
+		final StartResponse request) throws ValidationException
+	{
+		return sessionDao.add(dao.add(registrationDao.confirm(request).registeredByPhone()),
+			Boolean.TRUE.equals(rememberMe));
+	}
+
+	@PUT
+	@Path("/start") @Timed @UnitOfWork(readOnly=true, transactional=false)	// USE /start so that AuthFilter permissions still work.
+	@ApiOperation(value="start", notes="Starts the new v2 user registration process.")
+	public Response start(final PeopleValue value) throws ValidationException
+	{
+		dao.validate(value.withId("TEMP123"));	// Set temporary ID so that it passes validation.
+
+		if (dao.existsByPhone(value.normalize().phone))	// Make sure that the user phone number doesn't already exist.
+			throw new ValidationException("An account with that phone number already exists. Pleaes proceed to authenticate instead.");
+
+		registrationDao.start(value.withId(null));	// Remove the temporary ID before caching.
+
+		return Response.ok().build();
+	}
+
 	@DELETE
 	@Timed @UnitOfWork
 	@ApiOperation(value="remove", notes="Removes/deactivates the current user.")

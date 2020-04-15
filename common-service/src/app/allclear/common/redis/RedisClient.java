@@ -140,9 +140,19 @@ public class RedisClient extends HealthCheck implements Closeable, Map<String, S
 	 * @param key
 	 * @return a negative number of the key is invalid or does not have an expiration.
 	 */
-	public Long ttl(String key)
+	public Long ttl(final String key)
 	{
 		try (var cache = pool.getResource()) { return cache.ttl(key); }
+	}
+
+	/** Gets the data type of the specified key.
+	 * 
+	 * @param key
+	 * @return never NULL
+	 */
+	public String type(final String key)
+	{
+		try (var cache = pool.getResource()) { return cache.type(key); }
 	}
 
 	@Override

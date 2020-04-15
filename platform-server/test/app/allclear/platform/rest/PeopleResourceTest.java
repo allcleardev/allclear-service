@@ -423,6 +423,7 @@ public class PeopleResourceTest
 		Assertions.assertNotNull(results, "Exists");
 		Assertions.assertEquals(1L, results.total, "Check results.total");
 		assertThat(results.records).as("Check results.records").hasSize(1);
+		Assertions.assertNull(results.records.get(0).person, "Check results.records.0.person");	// V1 registration.
 
 		REGISTRATION = results.records.get(0);
 	}
@@ -598,6 +599,162 @@ public class PeopleResourceTest
 	{
 		Assertions.assertNull(dao.getById(SESSION_1.person.id), "Check getById");
 		Assertions.assertFalse(sessionDao.exists(SESSION_1.id), "Check exists");
+	}
+
+	@Test
+	public void z_09_z_done()
+	{
+		sessionDao.current(ADMIN);
+
+		var response = registrations("search").post(Entity.json(new RegistrationFilter()));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var results = response.readEntity(TYPE_QUERY_RESULTS_);
+		Assertions.assertNotNull(results, "Exists");
+		Assertions.assertNull(results.records, "Check results.records");
+		Assertions.assertEquals(0L, results.total, "Check results.total");
+	}
+
+	@Test
+	public void z_10_start()	// V2 start
+	{
+		// Non-admin tests
+		sessionDao.clear();
+
+		Assertions.assertEquals(HTTP_STATUS_OK,
+			request("start").put(Entity.json(new PeopleValue("lenny", "888-555-2200", false))).getStatus());
+	}
+
+	@Test
+	public void z_10_start_check()
+	{
+		sessionDao.current(ADMIN);
+
+		var response = registrations("search").post(Entity.json(new RegistrationFilter()));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var results = response.readEntity(TYPE_QUERY_RESULTS_);
+		Assertions.assertNotNull(results, "Exists");
+		Assertions.assertEquals(1L, results.total, "Check results.total");
+		assertThat(results.records).as("Check results.records").isNotNull().hasSize(1);
+		Assertions.assertNotNull(results.records.get(0).person, "Check results.records.0.person");
+		Assertions.assertEquals("+18885552200", results.records.get(0).person.phone, "Check results.records.0.person.phone");
+	}
+
+	@Test
+	public void z_11_confirm_fail()
+	{
+		// Non-admin tests
+		sessionDao.clear();
+
+		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION,
+			request("confirm").put(Entity.json(new StartResponse("+18885552200", null, "INVALID"))).getStatus());
+	}
+
+	@Test
+	public void z_11_confirm_fail_check()
+	{
+		z_10_start_check();	// No change
+	}
+
+	@Test
+	public void z_11_confirm_success()
+	{
+		// Non-admin tests
+		sessionDao.clear();
+
+		var response = request("confirm").put(Entity.json(new StartResponse("+18885552200", null, code())));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());
+
+		SESSION_1 = response.readEntity(SessionValue.class);
+		Assertions.assertNotNull(SESSION_1, "Exists");
+		Assertions.assertEquals(SessionValue.DURATION_SHORT, SESSION_1.duration, "Check duration");
+
+		var now = new Date();
+		var value = SESSION_1.person;
+		Assertions.assertNotNull(value, "Check person");
+		assertThat(value.id).as("Check person.id").isNotNull().hasSize(6).isNotEqualTo("doesNotMatter");
+		Assertions.assertEquals("lenny", value.name, "Check person.name");
+		Assertions.assertEquals("+18885552200", value.phone, "Check person.phone");
+		Assertions.assertTrue(value.active, "Check person.active");
+		assertThat(value.authAt).as("Check person.authAt").isNotNull().isEqualTo(value.phoneVerifiedAt).isCloseTo(now, 500L);
+		assertThat(value.createdAt).as("Check person.createdAt").isNotNull().isEqualTo(value.updatedAt).isCloseTo(now, 500L);
+	}
+
+	@Test
+	public void z_11_confirm_success_check()
+	{
+		sessionDao.current(ADMIN);
+
+		var response = registrations("search").post(Entity.json(new RegistrationFilter()));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var results = response.readEntity(TYPE_QUERY_RESULTS_);
+		Assertions.assertNotNull(results, "Exists");
+		Assertions.assertEquals(0L, results.total, "Check results.total");
+		assertThat(results.records).as("Check results.records").isNull();
+	}
+
+	@Test
+	public void z_11_confirm_success_get()
+	{
+		sessionDao.current(SESSION_1);
+
+		var response = request("doesNotMatter").get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());
+
+		var now = new Date();
+		var value = response.readEntity(PeopleValue.class);
+		Assertions.assertNotNull(value, "Exists");
+		assertThat(value.id).as("Check ID").isNotNull().hasSize(6).isNotEqualTo("doesNotMatter");
+		Assertions.assertEquals("lenny", value.name, "Check name");
+		Assertions.assertEquals("+18885552200", value.phone, "Check phone");
+		Assertions.assertTrue(value.active, "Check active");
+		assertThat(value.authAt).as("Check authAt").isNotNull().isEqualTo(value.phoneVerifiedAt).isCloseTo(now, 1000L);
+		assertThat(value.createdAt).as("Check createdAt").isNotNull().isEqualTo(value.updatedAt).isCloseTo(now, 1000L);
+	}
+
+	@Test
+	public void z_11_start()	// Perform with remember-me session.
+	{
+		// Non-admin tests
+		sessionDao.clear();
+
+		Assertions.assertEquals(HTTP_STATUS_OK,
+			request("start").put(Entity.json(new PeopleValue("jenny", "888-555-2201", false))).getStatus());
+
+		var response = request(target().path("confirm").queryParam("rememberMe", true)).put(Entity.json(new StartResponse("+18885552201", null, code())));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());
+
+		var session = response.readEntity(SessionValue.class);
+		Assertions.assertNotNull(session, "Exists");
+		Assertions.assertEquals(SessionValue.DURATION_LONG, session.duration, "Check duration");
+
+		var now = new Date();
+		var value = session.person;
+		Assertions.assertNotNull(value, "Check person");
+		assertThat(value.id).as("Check person.id").isNotNull().hasSize(6).isNotEqualTo("doesNotMatter");
+		Assertions.assertEquals("jenny", value.name, "Check person.name");
+		Assertions.assertEquals("+18885552201", value.phone, "Check person.phone");
+		Assertions.assertTrue(value.active, "Check person.active");
+		assertThat(value.authAt).as("Check person.authAt").isNotNull().isEqualTo(value.phoneVerifiedAt).isCloseTo(now, 500L);
+		assertThat(value.createdAt).as("Check person.createdAt").isNotNull().isEqualTo(value.updatedAt).isCloseTo(now, 500L);
+	}
+
+	public static Stream<Arguments> z_15_start_fail()
+	{
+		return Stream.of(
+			arguments(new PeopleValue()),
+			arguments(new PeopleValue(null, "888-555-2200", false)),
+			arguments(new PeopleValue("lenny", "aaa-aaa-aaaa", false)),
+			arguments(new PeopleValue("lenny", null, false)));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_15_start_fail(final PeopleValue value)
+	{
+		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, request("start").put(Entity.json(value)).getStatus());
 	}
 
 	private String code()

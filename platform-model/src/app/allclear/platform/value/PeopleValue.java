@@ -12,6 +12,7 @@ import org.apache.commons.lang3.time.DateUtils;
 
 import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.type.*;
+import app.allclear.twilio.model.TwilioUtils;
 
 /**********************************************************************************
 *
@@ -236,6 +237,12 @@ public class PeopleValue implements Serializable
 		locationName = StringUtils.trimToNull(locationName);
 	}
 
+	public PeopleValue normalize()
+	{
+		phone = TwilioUtils.normalize(phone);
+		return this;
+	}
+
 	@Override
 	public boolean equals(final Object o)
 	{
@@ -261,8 +268,8 @@ public class PeopleValue implements Serializable
 			((authAt == v.authAt) || DateUtils.truncatedEquals(authAt, v.authAt, Calendar.SECOND)) &&
 			((phoneVerifiedAt == v.phoneVerifiedAt) || DateUtils.truncatedEquals(phoneVerifiedAt, v.phoneVerifiedAt, Calendar.SECOND)) &&
 			((emailVerifiedAt == v.emailVerifiedAt) || DateUtils.truncatedEquals(emailVerifiedAt, v.emailVerifiedAt, Calendar.SECOND)) &&
-			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND) &&
-			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
+			((createdAt == v.createdAt) || DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND)) &&
+			((updatedAt == v.updatedAt) || DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND));
 	}
 
 	@Override

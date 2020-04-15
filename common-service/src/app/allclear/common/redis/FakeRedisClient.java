@@ -147,6 +147,12 @@ public class FakeRedisClient extends RedisClient
 	}
 
 	@Override
+	public String type(final String key)
+	{
+		return map.containsKey(key) ? "string" : (queues.containsKey(key) ? "list" : (sets.containsKey(key) ? "set" : (maps.containsKey(key) ? "hash" : "none")));
+	}
+
+	@Override
 	public void putAll(Map<? extends String, ? extends String> newValues) { map.putAll(newValues); }
 
 	@Override
@@ -443,6 +449,7 @@ public class FakeRedisClient extends RedisClient
 				var o = me.expirations.get(key);
 				return (null != o) ? o.longValue() : null;
 			}
+			@Override public String type(final String key) { return me.type(key); }
 		});
 	}
 

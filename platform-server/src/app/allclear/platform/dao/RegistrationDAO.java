@@ -3,12 +3,14 @@ package app.allclear.platform.dao;
 import static java.net.URLEncoder.encode;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.ScanParams;
@@ -24,6 +26,8 @@ import app.allclear.common.redis.RedisClient;
 import app.allclear.platform.Config;
 import app.allclear.platform.filter.RegistrationFilter;
 import app.allclear.platform.model.StartRequest;
+import app.allclear.platform.model.StartResponse;
+import app.allclear.platform.value.PeopleValue;
 import app.allclear.platform.value.RegistrationValue;
 import app.allclear.twilio.client.TwilioClient;
 import app.allclear.twilio.model.*;
@@ -63,6 +67,7 @@ public class RegistrationDAO
 	public String key(final String phone, final String code) { return String.format(ID, phone, code); }
 
 	/** Initiates registration & phone number confirmation process.
+	 *  Used for the legacy 3-step registration process.
 	 * 
 	 * @param request
 	 * @return the confirmation code
@@ -92,7 +97,39 @@ public class RegistrationDAO
 		});
 	}
 
+	/** Accepts registration details, caches the details, and sends a confirmation code message.
+	 *  Used for the newer 2-step registration process.
+	 * 
+	 * @param request
+	 * @return the confirmation code
+	 * @throws ValidationException
+	 */
+	public String start(final PeopleValue request) throws ValidationException
+	{
+		new Validator().ensureExistsAndLength("phone", "Phone", request.phone, 10, 32)
+			.ensurePattern("phone", "Phone", request.phone, Validator.PATTERN_PHONE)
+			.check();
+
+		return redis.operation(c -> {
+			int i = 0;
+			var code = RandomStringUtils.randomNumeric(CODE_LENGTH).toUpperCase();
+			var key = key(request.phone, code);
+			while (c.exists(key))
+			{
+				if (10 < i++) throw new IllegalArgumentException("CanNOT generate identifier - 10 tries.");
+				key = key(request.phone, code = RandomStringUtils.randomNumeric(CODE_LENGTH).toUpperCase());
+			}
+
+			twilio.send(new SMSRequest(sid, from, String.format(message, code, encode(request.phone, UTF_8), encode(code, UTF_8)), request.phone));
+			try { c.setex(key, EXPIRATION, mapper.writeValueAsString(request)); }
+			catch (final IOException ex) { throw new RuntimeException(ex); }
+
+			return code;
+		});
+	}
+
 	/** Confirms the phone and registration code. Retrieves the original request.
+	 *  Used for the legacy 3-step registration process.
 	 * 
 	 * @param phone
 	 * @param code
@@ -112,7 +149,28 @@ public class RegistrationDAO
 		});
 	}
 
+	/** Confirms the phone and registration code. Retrieves the original request.
+	 *  Used for the newer 2-step registration process.
+	 * 
+	 * @param value
+	 * @return never NULL.
+	 * @throws ValidationException if the phone and/or registration code are invalid.
+	 */
+	public PeopleValue confirm(final StartResponse value) throws ValidationException
+	{
+		return redis.operation(j -> {
+			var key = key(value.phone, value.code);
+			var o = requestX(j, key);
+			if (null == o) throw new ValidationException("code", "The supplied code is invalid.");
+
+			j.del(key);	// Once confirmed, delete the key.
+
+			return o;
+		});
+	}
+
 	/** Gets the original start request based on the phone number and registration confirmation code.
+	 *  Used for the legacy 3-step registration process.
 	 * 
 	 * @param phone
 	 * @param code
@@ -124,6 +182,19 @@ public class RegistrationDAO
 	}
 
 	/** Gets the original start request based on the phone number and registration confirmation code.
+	 *  Used for the newer 2-step registration process.
+	 * 
+	 * @param phone
+	 * @param code
+	 * @return NULL if not found
+	 */
+	PeopleValue requestX(final String phone, final String code)
+	{
+		return redis.operation(j -> requestX(j, key(phone, code)));
+	}
+
+	/** Gets the original start request based on the phone number and registration confirmation code.
+	 *  Used for the legacy 3-step registration process.
 	 * 
 	 * @param jedis
 	 * @param key
@@ -135,6 +206,22 @@ public class RegistrationDAO
 		if (MapUtils.isEmpty(map)) return null;
 
 		return mapper.convertValue(map, StartRequest.class);
+	}
+
+	/** Gets the original start request based on the phone number and registration confirmation code.
+	 *  Used for the newer 2-step registration process.
+	 * 
+	 * @param jedis
+	 * @param key
+	 * @return NULL if not found
+	 */
+	PeopleValue requestX(final Jedis jedis, final String key)
+	{
+		var v = jedis.get(key);
+		if (StringUtils.isEmpty(v)) return null;
+
+		try { return mapper.readValue(v, PeopleValue.class); }
+		catch (final IOException ex) { throw new RuntimeException(ex); }
 	}
 
 	/** Remove a registration request.
@@ -161,7 +248,10 @@ public class RegistrationDAO
 
 			if (CollectionUtils.isEmpty(o.getResult())) return new QueryResults<RegistrationValue, RegistrationFilter>(0L, filter);
 
-			var v = o.getResult().stream().map(i -> new RegistrationValue(i, request(j, i), j.ttl(i))).collect(Collectors.toList());
+			var v = o.getResult().stream().map(i -> {
+				var ttl = j.ttl(i);
+				return ("hash".equals(j.type(i))) ? new RegistrationValue(i, request(j, i), ttl) : new RegistrationValue(i, requestX(j, i), ttl);
+			}).collect(Collectors.toList());
 			var r = new QueryResults<RegistrationValue, RegistrationFilter>(v, filter);
 			r.page = Integer.parseInt(o.getCursor());
 			r.pages++;	// Always add one.

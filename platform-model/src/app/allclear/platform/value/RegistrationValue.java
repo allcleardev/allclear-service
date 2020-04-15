@@ -23,26 +23,28 @@ public class RegistrationValue implements Serializable
 
 	public final String key;
 	public final String phone;
-	public final boolean beenTested;
-	public final boolean haveSymptoms;
+	public final PeopleValue person;
 	public final Long ttl;
 
 	public RegistrationValue(final String key, final StartRequest request, final Long ttl)
 	{
-		this(key, request.phone, request.beenTested, request.haveSymptoms, ttl);
+		this(key, request.phone, null, ttl);
+	}
+
+	public RegistrationValue(final String key, final PeopleValue person, final Long ttl)
+	{
+		this(key, person.phone, person, ttl);
 	}
 
 	public RegistrationValue(@JsonProperty("key") final String key,
 		@JsonProperty("phone") final String phone,
-		@JsonProperty("beenTested") final Boolean beenTested,
-		@JsonProperty("haveSymptoms") final Boolean haveSymptoms,
+		@JsonProperty("person") final PeopleValue person,
 		@JsonProperty("ttl") final Long ttl)
 	{
 		this.ttl = ttl;
+		this.person = person;
 		this.key = StringUtils.trimToNull(key);
 		this.phone = StringUtils.trimToNull(phone);
-		this.beenTested = Boolean.TRUE.equals(beenTested);
-		this.haveSymptoms = Boolean.TRUE.equals(haveSymptoms);
 	}
 
 	@Override
@@ -54,8 +56,7 @@ public class RegistrationValue implements Serializable
 
 		return Objects.equals(key, v.key) &&
 			Objects.equals(phone, v.phone) &&
-			(beenTested == v.beenTested) &&
-			(haveSymptoms == v.haveSymptoms) &&
+			Objects.equals(person, v.person) &&
 			Objects.equals(ttl, v.ttl);
 	}
 
@@ -64,8 +65,7 @@ public class RegistrationValue implements Serializable
 	{
 		return new StringBuilder("{ key: ").append(key)
 			.append(", phone: ").append(phone)
-			.append(", beenTested: ").append(beenTested)
-			.append(", haveSymptoms: ").append(haveSymptoms)
+			.append(", person: ").append(person)
 			.append(", ttl: ").append(ttl)
 			.append(" }").toString();
 	}
