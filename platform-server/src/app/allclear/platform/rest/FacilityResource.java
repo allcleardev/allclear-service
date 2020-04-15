@@ -136,13 +136,14 @@ public class FacilityResource
 		}
 
 		var s = sessionDao.current();
+		var favoriteIds = dao.getIdsByPerson(s.person);
 		var restricted = (s.person() && !s.person.meetsCdcPriority3());	// Does the current user have restrictions imposed with regards to facilities that are open to them?
 		if (filter.restrictive & restricted)
 			filter.withNotTestCriteriaId(TestCriteria.CDC_CRITERIA.id);
 
 		var results = dao.search(filter);
 		if (!results.noRecords())
-			results.records.forEach(v -> v.restricted = (restricted && v.restricted()));
+			results.records.forEach(v -> v.favorite(favoriteIds).restricted = (restricted && v.restricted()));
 
 		return results;
 	}

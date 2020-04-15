@@ -17,6 +17,7 @@ import app.allclear.platform.filter.FacilityFilter;
 import app.allclear.platform.type.FacilityType;
 import app.allclear.platform.type.TestCriteria;
 import app.allclear.platform.value.FacilityValue;
+import app.allclear.platform.value.PeopleValue;
 
 /**********************************************************************************
 *
@@ -253,6 +254,19 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	public List<FacilityValue> getActiveByNameAndDistance(final String name, final BigDecimal latitude, final BigDecimal longitude, final long meters)
 	{
 		return findActiveByNameAndDistance(name, latitude, longitude, meters).stream().map(o -> o.toValue()).collect(Collectors.toList());
+	}
+
+	/** Gets a person's favorite facility IDs. Returns an empty list if the user is an admin.
+	 * 
+	 * @param person
+	 * @return never NULL.
+	 * @see ALLCLEAR-259
+	 */
+	public List<Long> getIdsByPerson(final PeopleValue person)
+	{
+		if (null == person) return List.of();
+	
+		return namedQuery("getFacilityIdsByPerson", Long.class).setParameter("personId", person.id).list();
 	}
 
 	/** Searches the Facility entity based on the supplied filter.

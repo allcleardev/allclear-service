@@ -33,8 +33,7 @@ import app.allclear.google.client.MapClient;
 import app.allclear.google.model.GeocodeResponse;
 import app.allclear.platform.App;
 import app.allclear.platform.ConfigTest;
-import app.allclear.platform.dao.FacilityDAO;
-import app.allclear.platform.dao.SessionDAO;
+import app.allclear.platform.dao.*;
 import app.allclear.platform.filter.FacilityFilter;
 import app.allclear.platform.filter.GeoFilter;
 import app.allclear.platform.type.Symptom;
@@ -58,6 +57,7 @@ public class FacilityResourceTest
 	public final HibernateTransactionRule transRule = new HibernateTransactionRule(DAO_RULE);
 
 	private static FacilityDAO dao = null;
+	private static PeopleDAO peopleDao = null;
 	private static SessionDAO sessionDao = new SessionDAO(new FakeRedisClient(), ConfigTest.loadTest());
 	private static MapClient map = mock(MapClient.class);
 	private static FacilityResource resource = null;
@@ -86,6 +86,7 @@ public class FacilityResourceTest
 	{
 		var factory = DAO_RULE.getSessionFactory();
 		dao = new FacilityDAO(factory);
+		peopleDao = new PeopleDAO(factory);
 
 		when(map.geocode(contains("Street"))).thenReturn(loadObject("/google/map/geocode.json", GeocodeResponse.class));
 		when(map.geocode(contains("Avenue"))).thenReturn(loadObject("/google/map/geocode-requestDenied.json", GeocodeResponse.class));
@@ -112,8 +113,10 @@ public class FacilityResourceTest
 		check(VALUE.withId(1L).withCreatedAt(now).withUpdatedAt(now), value);
 
 		ADMIN = sessionDao.add(new AdminValue("admin"), false);
-		PERSON = sessionDao.add(new PeopleValue("person", "888-555-1000", true), false);
-		PERSON_UNRESTRICTED = sessionDao.add(new PeopleValue("person", "888-555-1000", true).withSymptoms(Symptom.FEVER), false);
+		PERSON = sessionDao.add(peopleDao.add(new PeopleValue("firstPerson", "888-555-1000", true)), false);
+		PERSON_UNRESTRICTED = sessionDao.add(peopleDao.add(new PeopleValue("secondPerson", "888-555-1001", true).withSymptoms(Symptom.FEVER)), false);
+
+		peopleDao.addFacilities(PERSON.person.id, List.of(VALUE.id));
 	}
 
 	@Test
@@ -496,6 +499,7 @@ public class FacilityResourceTest
 		o = request("search").post(Entity.json(new FacilityFilter()), TYPE_QUERY_RESULTS);
 		Assertions.assertEquals(2L, o.total, "Check total: unrestricted");
 		o.records.forEach(v -> Assertions.assertFalse(v.restricted, "Check restricted: " + v.name + " - unrestricted"));
+		o.records.forEach(v -> Assertions.assertFalse(v.favorite, "Check favorite: " + v.name + " - favorite"));
 	}
 
 	@Test
@@ -512,6 +516,7 @@ public class FacilityResourceTest
 		o = request("search").post(Entity.json(new FacilityFilter()), TYPE_QUERY_RESULTS);
 		Assertions.assertEquals(2L, o.total, "Check total: unrestricted");
 		o.records.forEach(v -> Assertions.assertEquals("Alex".equals(v.name), v.restricted, "Check restricted: " + v.name + " - unrestricted"));
+		o.records.forEach(v -> Assertions.assertEquals(!"Alex".equals(v.name), v.favorite, "Check favorite: " + v.name + " - favorite"));
 	}
 
 	@Test
@@ -529,6 +534,7 @@ public class FacilityResourceTest
 		o = request("search").post(Entity.json(new FacilityFilter()), TYPE_QUERY_RESULTS);
 		Assertions.assertEquals(2L, o.total, "Check total: unrestricted");
 		o.records.forEach(v -> Assertions.assertFalse(v.restricted, "Check restricted: " + v.name + " - unrestricted"));
+		o.records.forEach(v -> Assertions.assertFalse(v.favorite, "Check favorite: " + v.name + " - favorite"));
 	}
 
 	/** Test removal after the search. */

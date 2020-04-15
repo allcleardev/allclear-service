@@ -9,6 +9,7 @@ import static app.allclear.platform.type.FacilityType.*;
 import static app.allclear.platform.type.TestCriteria.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.stream.Stream;
 import javax.persistence.PersistenceException;
 
@@ -29,6 +30,7 @@ import app.allclear.platform.entity.Facility;
 import app.allclear.platform.filter.FacilityFilter;
 import app.allclear.platform.filter.GeoFilter;
 import app.allclear.platform.value.FacilityValue;
+import app.allclear.platform.value.PeopleValue;
 
 /**********************************************************************************
 *
@@ -48,8 +50,11 @@ public class FacilityDAOTest
 	public final HibernateTransactionRule transRule = new HibernateTransactionRule(DAO_RULE);
 
 	private static FacilityDAO dao = null;
+	private static PeopleDAO peopleDao = null;
 	private static FacilityValue VALUE = null;
 	private static FacilityValue VALUE_1 = null;
+	private static PeopleValue PERSON = null;
+	private static PeopleValue PERSON_1 = null;
 
 	private static BigDecimal bg(final String value) { return new BigDecimal(value); }
 
@@ -58,6 +63,7 @@ public class FacilityDAOTest
 	{
 		var factory = DAO_RULE.getSessionFactory();
 		dao = new FacilityDAO(factory);
+		peopleDao = new PeopleDAO(factory);
 	}
 
 	@Test
@@ -69,6 +75,10 @@ public class FacilityDAOTest
 			false, true, false, "These providers are accepted: One", true, "Quick notations", true));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
+
+		PERSON = peopleDao.add(new PeopleValue("first", "8885551000", true));
+		PERSON_1 = peopleDao.add(new PeopleValue("second", "8885551001", true));
+		peopleDao.addFacilities(PERSON.id, List.of(value.id));
 	}
 
 	/** Creates a valid Facility value for the validation tests.
@@ -245,6 +255,18 @@ public class FacilityDAOTest
 	}
 
 	@Test
+	public void favorite()
+	{
+		Assertions.assertNull(VALUE.favorite);
+
+		VALUE.favorite(List.of(0L, 2L));
+		Assertions.assertFalse(VALUE.favorite);
+
+		VALUE.favorite(List.of(0L, 1L, 2L));
+		Assertions.assertTrue(VALUE.favorite);
+	}
+
+	@Test
 	public void find()
 	{
 		var record = dao.findWithException(VALUE.id);
@@ -302,6 +324,21 @@ public class FacilityDAOTest
 	public void getActiveByNameAndDistance()
 	{
 		assertThrows(PersistenceException.class, () -> dao.getActiveByNameAndDistance("da", bg("45.5"), bg("-35.7"), 100000L));	// Function "ST_DISTANCE_SPHERE" not found
+	}
+
+	public static Stream<Arguments> getIdsByPerson()
+	{
+		return Stream.of(
+			arguments(PERSON, new Long[] { VALUE.id }),
+			arguments(PERSON_1, new Long[0]),
+			arguments(null, new Long[0]));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void getIdsByPerson(final PeopleValue person, final Long[] ids)
+	{
+		assertThat(dao.getIdsByPerson(person)).isEqualTo(List.of(ids));
 	}
 
 	@Test
@@ -831,6 +868,9 @@ public class FacilityDAOTest
 	{
 		dao.add(createValid().withName("restrictive-0").withTestCriteriaId(null));
 		dao.add(createValid().withName("restrictive-1").withTestCriteriaId(CDC_CRITERIA.id));
+
+		peopleDao.addFacilities(PERSON.id, List.of(3L));
+		peopleDao.addFacilities(PERSON_1.id, List.of(2L, 4L));
 	}
 
 	@Test
@@ -843,6 +883,21 @@ public class FacilityDAOTest
 		count(new FacilityFilter().withTestCriteriaId(OTHER.id), 1L);
 		count(new FacilityFilter().withNotTestCriteriaId(CDC_CRITERIA.id), 2L);
 		count(new FacilityFilter().withNotTestCriteriaId(OTHER.id), 2L);
+	}
+
+	public static Stream<Arguments> z_01_add_others_getIdsByPerson()
+	{
+		return Stream.of(
+			arguments(PERSON, new Long[] { 3L }),
+			arguments(PERSON_1, new Long[] { 2L, 4L }),
+			arguments(null, new Long[0]));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_01_add_others_getIdsByPerson(final PeopleValue person, final Long[] ids)
+	{
+		assertThat(dao.getIdsByPerson(person)).isEqualTo(List.of(ids));
 	}
 
 	@Test
