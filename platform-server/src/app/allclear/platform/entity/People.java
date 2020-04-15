@@ -141,6 +141,11 @@ public class People implements Serializable
 	public Date emailVerifiedAt;
 	public void setEmailVerifiedAt(final Date newValue) { emailVerifiedAt = newValue; }
 
+	@Column(name="alerted_at", columnDefinition="DATETIME", nullable=true)
+	public Date getAlertedAt() { return alertedAt; }
+	public Date alertedAt;
+	public void setAlertedAt(final Date newValue) { alertedAt = newValue; }
+
 	@Column(name="created_at", columnDefinition="DATETIME", nullable=false)
 	public Date getCreatedAt() { return createdAt; }
 	public Date createdAt;
@@ -198,6 +203,7 @@ public class People implements Serializable
 		final Date authAt,
 		final Date phoneVerifiedAt,
 		final Date emailVerifiedAt,
+		final Date alertedAt,
 		final Date createdAt)
 	{
 		this.id = id;
@@ -219,6 +225,7 @@ public class People implements Serializable
 		this.authAt = authAt;
 		this.phoneVerifiedAt = phoneVerifiedAt;
 		this.emailVerifiedAt = emailVerifiedAt;
+		this.alertedAt = alertedAt;
 		this.createdAt = this.updatedAt = createdAt;
 	}
 
@@ -230,7 +237,7 @@ public class People implements Serializable
 			value.healthWorkerStatusId,
 			value.latitude, value.longitude, value.locationName,
 			value.alertable, value.active, value.authAt, value.phoneVerifiedAt,
-			value.emailVerifiedAt, value.initDates());
+			value.emailVerifiedAt, value.alertedAt, value.initDates());
 	}
 
 	public People update(final PeopleValue value, final boolean admin)
@@ -255,6 +262,7 @@ public class People implements Serializable
 			setStatureId(value.statureId);	// Users canNOT set their own stature. That's an admin function. DLS on 4/10/2020.
 			setPhoneVerifiedAt(value.phoneVerifiedAt);
 			setEmailVerifiedAt(value.emailVerifiedAt);
+			setAlertedAt(value.alertedAt);
 		}
 		else
 		{
@@ -262,6 +270,7 @@ public class People implements Serializable
 			value.authAt = getAuthAt();
 			value.phoneVerifiedAt = getPhoneVerifiedAt();
 			value.emailVerifiedAt = getEmailVerifiedAt();
+			value.alertedAt = getAlertedAt();
 
 			if (null != (value.statureId = getStatureId())) value.stature = PeopleStature.get(value.statureId);
 		}
@@ -296,6 +305,7 @@ public class People implements Serializable
 			DateUtils.truncatedEquals(authAt, v.authAt, Calendar.SECOND) &&
 			DateUtils.truncatedEquals(phoneVerifiedAt, v.phoneVerifiedAt, Calendar.SECOND) &&
 			DateUtils.truncatedEquals(emailVerifiedAt, v.emailVerifiedAt, Calendar.SECOND) &&
+			DateUtils.truncatedEquals(alertedAt, v.alertedAt, Calendar.SECOND) &&
 			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND) &&
 			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
 	}
@@ -337,6 +347,7 @@ public class People implements Serializable
 			getAuthAt(),
 			getPhoneVerifiedAt(),
 			getEmailVerifiedAt(),
+			getAlertedAt(),
 			getCreatedAt(),
 			getUpdatedAt());
 	}

@@ -390,4 +390,20 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.0.109_ALLCLEAR-248" author="smalleyd">
+		<addColumn tableName="people">
+			<column name="alerted_at" type="DATETIME" remarks="Represents when the last facility alert was sent to the user." />
+		</addColumn>
+
+		<sql dbms="mysql"><![CDATA[
+			ALTER TABLE people MODIFY COLUMN auth_at DATETIME DEFAULT NULL COMMENT 'Represents the date-time when the user last authenticated.';
+			ALTER TABLE people MODIFY COLUMN phone_verified_at DATETIME DEFAULT NULL COMMENT 'Represents the date-time when the user phone number was verified.';
+			ALTER TABLE people MODIFY COLUMN email_verified_at DATETIME DEFAULT NULL COMMENT 'Represents the date-time when the user email address was verified.';
+		]]></sql>
+
+		<rollback>
+			<dropColumn tableName="people" columnName="alerted_at" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

@@ -29,6 +29,8 @@ public class PeopleTest
 	private static final Date PHONE_VERIFIED_AT_1 = utc(2004, 4, 7);
 	private static final Date EMAIL_VERIFIED_AT = utc(2005, 4, 7);
 	private static final Date EMAIL_VERIFIED_AT_1 = utc(2006, 4, 7);
+	private static final Date ALERTED_AT = utc(2005, 4, 14);
+	private static final Date ALERTED_AT_1 = utc(2006, 4, 14);
 	private static final BigDecimal LAT = new BigDecimal("20");
 	private static final BigDecimal LAT_1 = new BigDecimal("21");
 	private static final BigDecimal LNG = new BigDecimal("22");
@@ -40,7 +42,7 @@ public class PeopleTest
 	{
 		return new People("123", "max", "888-555-1000", "max@gmail.com", "Max", "Power", DOB,
 			"1", INFLUENCER.id, "0", "3", LAT, LNG, "Omaha, NE", true, true, AUTH_AT, PHONE_VERIFIED_AT, EMAIL_VERIFIED_AT,
-			CREATED_AT);
+			ALERTED_AT, CREATED_AT);
 	}
 
 	@Test
@@ -49,7 +51,7 @@ public class PeopleTest
 		var o = create();
 		var v = new PeopleValue("456", "min", "888-555-1001", "minnie@gmail.com", "Minnie", "Mouse", DOB_1,
 			"11", null, "12", null, "10", null, "13", null, LAT_1, LNG_1, "Detroit, MI", false, false,
-			AUTH_AT_1, PHONE_VERIFIED_AT_1, EMAIL_VERIFIED_AT_1, CREATED_AT_1, null);
+			AUTH_AT_1, PHONE_VERIFIED_AT_1, EMAIL_VERIFIED_AT_1, ALERTED_AT_1, CREATED_AT_1, null);
 		Assertions.assertEquals(CREATED_AT, o.updatedAt, "Check updatedAt: before");
 
 		o.update(v, false);
@@ -72,14 +74,16 @@ public class PeopleTest
 		Assertions.assertEquals(AUTH_AT, o.authAt, "Check authAt");	// Ignored for non-admins.
 		Assertions.assertEquals(PHONE_VERIFIED_AT, o.phoneVerifiedAt, "Check phoneVerifiedAt");	// Ignored for non-admins.
 		Assertions.assertEquals(EMAIL_VERIFIED_AT, o.emailVerifiedAt, "Check emailVerifiedAt");	// Ignored for non-admins.
+		Assertions.assertEquals(ALERTED_AT, o.alertedAt, "Check alertedAt");	// Ignored for non-admins.
 		Assertions.assertEquals(CREATED_AT, o.createdAt, "Check createdAt");	// NOT set during update
 		assertThat(o.updatedAt).as("Check updatedAt: after").isAfterOrEqualsTo(CREATED_AT);
 
 		// Value object also reverted.
 		Assertions.assertTrue(o.active, "Check active: value");
-		Assertions.assertEquals(AUTH_AT, o.authAt, "Check authAt: value");
-		Assertions.assertEquals(PHONE_VERIFIED_AT, o.phoneVerifiedAt, "Check phoneVerifiedAt: value");
-		Assertions.assertEquals(EMAIL_VERIFIED_AT, o.emailVerifiedAt, "Check emailVerifiedAt: value");
+		Assertions.assertEquals(AUTH_AT, v.authAt, "Check authAt: value");
+		Assertions.assertEquals(PHONE_VERIFIED_AT, v.phoneVerifiedAt, "Check phoneVerifiedAt: value");
+		Assertions.assertEquals(EMAIL_VERIFIED_AT, v.emailVerifiedAt, "Check emailVerifiedAt: value");
+		Assertions.assertEquals(ALERTED_AT, v.alertedAt, "Check alertedAt: value");
 	}
 
 	@Test
@@ -88,7 +92,7 @@ public class PeopleTest
 		var o = create();
 		var v = new PeopleValue("456", "min", "888-555-1001", "minnie@gmail.com", "Minnie", "Mouse", DOB_1,
 			"11", null, "12", null, "10", null, "13", null, LAT_1, LNG_1, "Detroit, MI", false, false,
-			AUTH_AT_1, PHONE_VERIFIED_AT_1, EMAIL_VERIFIED_AT_1, CREATED_AT_1, null);
+			AUTH_AT_1, PHONE_VERIFIED_AT_1, EMAIL_VERIFIED_AT_1, ALERTED_AT_1, CREATED_AT_1, null);
 		Assertions.assertEquals(CREATED_AT, o.updatedAt, "Check updatedAt: before");
 
 		o.update(v, true);
@@ -111,14 +115,16 @@ public class PeopleTest
 		Assertions.assertEquals(AUTH_AT_1, o.authAt, "Check authAt");
 		Assertions.assertEquals(PHONE_VERIFIED_AT_1, o.phoneVerifiedAt, "Check phoneVerifiedAt");
 		Assertions.assertEquals(EMAIL_VERIFIED_AT_1, o.emailVerifiedAt, "Check emailVerifiedAt");
+		Assertions.assertEquals(ALERTED_AT_1, o.alertedAt, "Check alertedAt");
 		Assertions.assertEquals(CREATED_AT, o.createdAt, "Check createdAt");	// NOT set during update
 		assertThat(o.updatedAt).as("Check updatedAt: after").isAfterOrEqualsTo(CREATED_AT);
 
 		// Value object NOT reverted.
 		Assertions.assertFalse(o.active, "Check active: value");
-		Assertions.assertEquals(AUTH_AT_1, o.authAt, "Check authAt: value");
-		Assertions.assertEquals(PHONE_VERIFIED_AT_1, o.phoneVerifiedAt, "Check phoneVerifiedAt: value");
-		Assertions.assertEquals(EMAIL_VERIFIED_AT_1, o.emailVerifiedAt, "Check emailVerifiedAt: value");
+		Assertions.assertEquals(AUTH_AT_1, v.authAt, "Check authAt: value");
+		Assertions.assertEquals(PHONE_VERIFIED_AT_1, v.phoneVerifiedAt, "Check phoneVerifiedAt: value");
+		Assertions.assertEquals(EMAIL_VERIFIED_AT_1, v.emailVerifiedAt, "Check emailVerifiedAt: value");
+		Assertions.assertEquals(ALERTED_AT_1, v.alertedAt, "Check alertedAt: value");
 	}
 
 	@Test
@@ -129,7 +135,7 @@ public class PeopleTest
 
 		var v = new PeopleValue("456", "min", "888-555-1001", "minnie@gmail.com", "Minnie", "Mouse", DOB_1,
 			"11", null, "12", null, "10", null, "13", null, LAT_1, LNG_1, "Detroit, MI", false, false,
-			AUTH_AT_1, PHONE_VERIFIED_AT_1, EMAIL_VERIFIED_AT_1, CREATED_AT_1, null);
+			AUTH_AT_1, PHONE_VERIFIED_AT_1, EMAIL_VERIFIED_AT_1, ALERTED_AT_1, CREATED_AT_1, null);
 		Assertions.assertEquals(CREATED_AT, o.updatedAt, "Check updatedAt: before");
 
 		o.update(v, false);
@@ -152,13 +158,15 @@ public class PeopleTest
 		Assertions.assertEquals(AUTH_AT, o.authAt, "Check authAt");	// Ignored for non-admins.
 		Assertions.assertEquals(PHONE_VERIFIED_AT, o.phoneVerifiedAt, "Check phoneVerifiedAt");	// Ignored for non-admins.
 		Assertions.assertEquals(EMAIL_VERIFIED_AT, o.emailVerifiedAt, "Check emailVerifiedAt");	// Ignored for non-admins.
+		Assertions.assertEquals(ALERTED_AT, o.alertedAt, "Check alertedAt");	// Ignored for non-admins.
 		Assertions.assertEquals(CREATED_AT, o.createdAt, "Check createdAt");	// NOT set during update
 		assertThat(o.updatedAt).as("Check updatedAt: after").isAfterOrEqualsTo(CREATED_AT);
 
 		// Value object also reverted.
 		Assertions.assertTrue(o.active, "Check active: value");
-		Assertions.assertEquals(AUTH_AT, o.authAt, "Check authAt: value");
-		Assertions.assertEquals(PHONE_VERIFIED_AT, o.phoneVerifiedAt, "Check phoneVerifiedAt: value");
-		Assertions.assertEquals(EMAIL_VERIFIED_AT, o.emailVerifiedAt, "Check emailVerifiedAt: value");
+		Assertions.assertEquals(AUTH_AT, v.authAt, "Check authAt: value");
+		Assertions.assertEquals(PHONE_VERIFIED_AT, v.phoneVerifiedAt, "Check phoneVerifiedAt: value");
+		Assertions.assertEquals(EMAIL_VERIFIED_AT, v.emailVerifiedAt, "Check emailVerifiedAt: value");
+		Assertions.assertEquals(ALERTED_AT, v.alertedAt, "Check alertedAt: value");
 	}
 }

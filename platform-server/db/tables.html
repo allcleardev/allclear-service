@@ -23,7 +23,7 @@
 <TR>
 <TD CLASS="header" COLSPAN="1">No.</TD><TD CLASS="header" COLSPAN="1">Table Name</TD><TD CLASS="header" COLSPAN="1">Comments</TD><TD CLASS="header" COLSPAN="1"># Records</TD></TR>
 <TR>
-<TD CLASS="detail">1</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOG">DATABASECHANGELOG</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">15</TD></TR>
+<TD CLASS="detail">1</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOG">DATABASECHANGELOG</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">16</TD></TR>
 <TR>
 <TD CLASS="detail">2</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOGLOCK">DATABASECHANGELOGLOCK</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">1</TD></TR>
 <TR>
@@ -397,9 +397,9 @@
 <TR>
 <TD CLASS="detail">11</TD><TD CLASS="detail">auth_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the date-time when the user last authenticated.</TD></TR>
 <TR>
-<TD CLASS="detail">12</TD><TD CLASS="detail">phone_verified_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the date-time when the user phone number is verified.</TD></TR>
+<TD CLASS="detail">12</TD><TD CLASS="detail">phone_verified_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the date-time when the user phone number was verified.</TD></TR>
 <TR>
-<TD CLASS="detail">13</TD><TD CLASS="detail">email_verified_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the date-time when the user email address is verified.</TD></TR>
+<TD CLASS="detail">13</TD><TD CLASS="detail">email_verified_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the date-time when the user email address was verified.</TD></TR>
 <TR>
 <TD CLASS="detail">14</TD><TD CLASS="detail">created_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail">Represents the date-time when the record was created.</TD></TR>
 <TR>
@@ -416,6 +416,8 @@
 <TD CLASS="detail">20</TD><TD CLASS="detail">health_worker_status_id</TD><TD CLASS="detail">CHAR</TD><TD CLASS="detail">1</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail">Refers to the state of employment as a healthcare worker.</TD></TR>
 <TR>
 <TD CLASS="detail">21</TD><TD CLASS="detail">location_name</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">255</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the full address of the person used during geocoding.</TD></TR>
+<TR>
+<TD CLASS="detail">22</TD><TD CLASS="detail">alerted_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents when the last facility alert was sent to the user.</TD></TR>
 </TABLE>
 <BR><TABLE CELLSPACING="0">
 <TR>

@@ -57,6 +57,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		"authAt", DESC,
 		"phoneVerifiedAt", DESC,
 		"emailVerifiedAt", DESC,
+		"alertedAt", DESC,
 		"createdAt", DESC,
 		"updatedAt", DESC);
 
@@ -524,6 +525,9 @@ public class PeopleDAO extends AbstractDAO<People>
 			.addNotNull("o.emailVerifiedAt", filter.hasEmailVerifiedAt)
 			.add("emailVerifiedAtFrom", "o.emailVerifiedAt >= :emailVerifiedAtFrom", filter.emailVerifiedAtFrom)
 			.add("emailVerifiedAtTo", "o.emailVerifiedAt <= :emailVerifiedAtTo", filter.emailVerifiedAtTo)
+			.addNotNull("o.alertedAt", filter.hasAlertedAt)
+			.add("alertedAtFrom", "o.alertedAt >= :alertedAtFrom", filter.alertedAtFrom)
+			.add("alertedAtTo", "o.alertedAt <= :alertedAtTo", filter.alertedAtTo)
 			.add("createdAtFrom", "o.createdAt >= :createdAtFrom", filter.createdAtFrom)
 			.add("createdAtTo", "o.createdAt <= :createdAtTo", filter.createdAtTo)
 			.add("updatedAtFrom", "o.updatedAt >= :updatedAtFrom", filter.updatedAtFrom)

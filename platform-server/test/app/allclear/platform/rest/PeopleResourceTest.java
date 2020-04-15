@@ -834,6 +834,10 @@ public class PeopleResourceTest
 			Assertions.assertNull(value.emailVerifiedAt, assertId + "Check emailVerifiedAt");
 		else
 			assertThat(value.emailVerifiedAt).as(assertId + "Check emailVerifiedAt").isCloseTo(expected.emailVerifiedAt, 500L);
+		if (null == expected.alertedAt)
+			Assertions.assertNull(value.alertedAt, assertId + "Check alertedAt");
+		else
+			assertThat(value.alertedAt).as(assertId + "Check alertedAt").isCloseTo(expected.alertedAt, 500L);
 		if (null == expected.createdAt)
 			Assertions.assertNull(value.createdAt, assertId + "Check createdAt");
 		else
