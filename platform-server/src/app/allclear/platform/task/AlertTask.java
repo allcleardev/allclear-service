@@ -3,6 +3,7 @@ package app.allclear.platform.task;
 import java.util.Date;
 
 import org.hibernate.Session;
+import org.slf4j.*;
 
 import app.allclear.common.hibernate.AbstractHibernateRunner;
 import app.allclear.common.hibernate.DualSessionFactory;
@@ -23,6 +24,7 @@ import app.allclear.platform.model.AlertRequest;
 
 public class AlertTask extends AbstractHibernateTask<AlertRequest>
 {
+	private static final Logger log = LoggerFactory.getLogger(AlertTask.class);
 	public static final int MILES_DEFAULT = 20;
 
 	private final PeopleDAO dao;
@@ -43,6 +45,8 @@ public class AlertTask extends AbstractHibernateTask<AlertRequest>
 			@Override public boolean transactional() { return false; }
 			@Override public Long run(final FacilityFilter filter, final Session s) { return facilityDao.count(filter); }
 		};
+
+		log.info("INITIALIZED");
 	}
 
 	@Override
@@ -54,7 +58,12 @@ public class AlertTask extends AbstractHibernateTask<AlertRequest>
 		final long count = facilitySearch.run(new FacilityFilter().withCreatedAtFrom(lastAlertedAt).withFrom(new GeoFilter(record.getLatitude(), record.getLongitude(), MILES_DEFAULT)));
 		if (0L < count)
 		{
+			log.info("FOUND ({}): {} new facilities.", request.personId, count);
 			sessionDao.alert(record.getPhone(), lastAlertedAt);
+		}
+		else
+		{
+			log.info("NOT_FOUND ({}): no new facilities.", request.personId);
 		}
 
 		var now = new Date();	// Get date right after checking facility search.

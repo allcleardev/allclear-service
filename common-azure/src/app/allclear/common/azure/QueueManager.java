@@ -10,6 +10,7 @@ import io.dropwizard.lifecycle.Managed;
 
 import com.azure.storage.common.policy.RequestRetryOptions;
 import com.azure.storage.queue.*;
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import app.allclear.common.errors.AbortException;
 import app.allclear.common.errors.ThrottledException;
@@ -247,6 +248,12 @@ public class QueueManager implements Managed, Runnable
 				catch (final AbortException ex)
 				{
 					logger.warn("Aborted: {} - {}.", op.name, ex.getMessage());
+					queue.deleteMessage(request.getMessageId(), request.getPopReceipt());
+				}
+
+				catch (final JsonParseException ex)
+				{
+					logger.warn("Unparseable: {} - {}.", op.name, ex.getMessage());
 					queue.deleteMessage(request.getMessageId(), request.getPopReceipt());
 				}
 
