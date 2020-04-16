@@ -109,7 +109,7 @@ public class App extends Application<Config>
 		var peopleDao = new PeopleDAO(factory);
 		var sessionDao = new SessionDAO(session, twilio, conf);
 		var registrationDao = new RegistrationDAO(session, twilio, conf);
-		var task = new QueueManager(conf.queue, 5,
+		var task = new QueueManager(conf.queue, 2,
 				new TaskOperator<>(QUEUE_ALERT, new AlertTask(factory, peopleDao, facilityDao, sessionDao), AlertRequest.class));
 
 		lifecycle.manage(task.addOperator(new TaskOperator<>(QUEUE_ALERT_INIT, new AlertInitTask(factory, peopleDao, task.queue(QUEUE_ALERT)), AlertInitRequest.class)));
