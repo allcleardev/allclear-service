@@ -253,7 +253,7 @@ var PeopleHandler = new ListTemplate({
 			if (data && data.message) window.alert(data.message);
 
 			window.alert('The New Facility Alert has been sent to ' + r.phone + '.');
-		}
+		});
 	},
 	authenticate: function(c, e) {
 		this.post(this.RESOURCE + '/' + e.myRecord.id + '/auth', null, function(data) {
