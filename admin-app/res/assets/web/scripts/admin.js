@@ -508,6 +508,19 @@ var TestsHandler = new ListTemplate({
 	}
 });
 
+function parseConnectionString(value)
+{
+	var o = {};
+	value.split(';').map(v => {
+		var i = v.indexOf('=');
+		if (1 > i) return null;
+		return [ v.substring(0, i), v.substring(i + 1) ];
+	}).filter(v => (null != v) && ('AccountKey' != v[0]))
+		.forEach(v => o[v[0]] = v[1]);
+
+	return o;
+}
+
 var ConfigurationHandler = new EditTemplate({
 	NAME: 'config',
 	SINGULAR: 'Configuration',
@@ -517,26 +530,23 @@ var ConfigurationHandler = new EditTemplate({
 	init: function(body) { this.doEdit('config', undefined, body); },
 
 	onEditorPreGenerate: c => {
-		var admins = {};
-		c.value.admins.split(';').map(v => {
-			var i = v.indexOf('=');
-			if (1 > i) return null;
-			return [ v.substring(0, i), v.substring(i + 1) ];
-		}).filter(v => (null != v) && ('AccountKey' != v[0]))
-			.forEach(v => admins[v[0]] = v[1]);
-
-		c.value.admins = admins;
+		c.value.queue = parseConnectionString(c.value.queue);
+		c.value.admins = parseConnectionString(c.value.admins);
 	},
 
 	FIELDS: [ new TextField('env', 'Environment'),
 	          new TextField('version', 'Version'),
 	          new TextField('baseUrl', 'Base URL'),
 	          new TextField('registrationPhone', 'Registration Sid/Phone', (v, p) => p ? p : v.registrationSid),
-	          new TextField('authenticationPhone', 'Authentication Sid/Phone', (v, p) => p ? p : v.authenticationSid),
+	          new TextField('authPhone', 'Authentication Sid/Phone', (v, p) => p ? p : v.authenticationSid),
+	          new TextField('alertPhone', 'Alert Sid/Phone', (v, p) => p ? p : v.alertSid),
 	          new TextField('registrationSMSMessage', 'Registration SMS Message'),
-	          new TextField('authenticationSMSMessage', 'Authentication SMS Message'),
+	          new TextField('authSMSMessage', 'Authentication SMS Message'),
+	          new TextField('alertSMSMessage', 'Alert SMS Message'),
 	          new TextField('admins', 'Cosmos Table Account', (v, p) => p.AccountName),
 	          new TextField('admins', 'Cosmos Table Endpoint', (v, p) => p.TableEndpoint),
+	          new TextField('queue', 'Queue Table Account', (v, p) => p.AccountName),
+	          new TextField('queue', 'Queue Endpoint Suffix', (v, p) => p.EndpointSuffix),
 	          new TextField('session', 'Session Redis Host', (v, p) => p.host),
 	          new TextField('twilio', 'Twilio', (v, p) => p.baseUrl),
 	          new TextField('trans', 'mySQL URL', (v, p) => p.url),
