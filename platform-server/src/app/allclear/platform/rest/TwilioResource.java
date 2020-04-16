@@ -94,13 +94,14 @@ public class TwilioResource
 		// Has the user asked to be unsubscribed?
 		if (StringUtils.isNotEmpty(body))
 		{
-			if (-1 < body.toLowerCase().indexOf("unsubscribe"))
+			var body_ = body.toLowerCase();
+			if ((-1 < body_.indexOf("unsubscribe")) || (-1 < body_.indexOf("stop")))
 			{
 				peopleDao.unalertByPhone(from);
 				log.info("UNSUBSCRIBED: {}", from);
 				return String.format(RESPONSE, "You have been successfully unsubscribed from further alerts. Have a nice day.");
 			}
-			else if (-1 < body.toLowerCase().indexOf("start"))
+			else if (-1 < body_.indexOf("start"))
 			{
 				peopleDao.alertByPhone(from);
 				log.info("SUBSCRIBED: {}", from);
