@@ -124,8 +124,8 @@ project(':platform-model') {
 project(':platform-server') {
   dependencies {
     compile project(':admin-app')
+    compile project(':common-azure')
     compile project(':common-hibernate')
-    compile project(':common-service')
     compile project(':google-client')
     compile project(':platform-model')
     compile project(':twilio-client')

@@ -160,6 +160,10 @@ public class AuthFilterTest
 			arguments("info/version", false),
 			arguments("/info/version", true),
 			arguments("/peoples", true),
+			arguments("twilio", true),
+			arguments("twilio/alert", false),
+			arguments("/twilio/alert", true),
+			arguments("twilio-io/alert", true),
 			arguments("types/peopleStatuses", false),
 			arguments("/types/peopleStatuses", true),
 			arguments("types/peopleStatuses", false),
@@ -258,7 +262,8 @@ public class AuthFilterTest
 			arguments("registrations", PERSON.id, "Requires an Administrative Session."),
 			arguments("registrations", START.id, "Requires an Administrative Session."),
 			arguments("registrations/key", PERSON.id, "Requires an Administrative Session."),
-			arguments("registrations/search", START.id, "Requires an Administrative Session."));
+			arguments("registrations/search", START.id, "Requires an Administrative Session."),
+			arguments("/twilio/alert", null, "Session ID is required."));
 	}
 
 	@ParameterizedTest
@@ -290,6 +295,10 @@ public class AuthFilterTest
 			arguments("registrations", SUPER.id),
 			arguments("registrations/key", ADMIN.id),
 			arguments("registrations/search", SUPER.id),
+			arguments("twilio/alert", null),
+			arguments("twilio/alert", ADMIN.id),
+			arguments("twilio/alert", START.id),
+			arguments("twilio/alert", PERSON.id),
 			arguments("types/peopleStatuses", null),
 			arguments("types/peopleStatuses", START.id),
 			arguments("types/peopleStatuses", PERSON.id)

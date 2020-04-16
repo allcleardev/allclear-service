@@ -349,6 +349,25 @@ public class PeopleDAO extends AbstractDAO<People>
 		return true;
 	}
 
+	/** Switch off the ALERTABLE field on the user associated with the phone.
+	 * 
+	 * @param phone
+	 * @return TRUE if the user is found and is currently alertable.
+	 * @throws ObjectNotFoundException
+	 */
+	public boolean unalertByPhone(final String phone) throws ObjectNotFoundException
+	{
+		var record = findByPhone(phone);
+		if (null == record) throw new ObjectNotFoundException("The Phone Number '" + phone + "' could not be found.");
+
+		if (!record.isAlertable()) return false;
+
+		record.setAlertable(false);
+		record.setUpdatedAt(new Date());
+
+		return true;
+	}
+
 	/** Removes one or more facility associations from a person.
 	 * 
 	 * @param id person identifier

@@ -42,7 +42,7 @@ public class AlertInitTaskTest
 	private static PeopleJDBi dao;
 	private static AlertInitTask task;
 	private static final QueueClient queue = mock(QueueClient.class);
-	private static final ObjectMapper mapper = JacksonUtils.createMapper();
+	private static final ObjectMapper mapper = JacksonUtils.createMapperAzure();
 
 	private static List<String> sent = new LinkedList<>();
 	private static List<String> processed = new LinkedList<>();

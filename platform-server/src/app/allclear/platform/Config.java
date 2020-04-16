@@ -51,6 +51,7 @@ public class Config extends Configuration implements Serializable
 	public final String alertSMSMessage;
 	public final String authSMSMessage;
 
+	public final String queue;	// Connection string to the queue space.
 	public final String admins;
 	public final RedisConfig session;
 	public final TwilioConfig twilio;
@@ -65,6 +66,7 @@ public class Config extends Configuration implements Serializable
 		@JsonProperty("authPhone") final String authPhone,
 		@JsonProperty("alertPhone") final String alertPhone,
 		@JsonProperty("registrationPhone") final String registrationPhone,
+		@JsonProperty("queue") final String queue,
 		@JsonProperty("admins") final String admins,
 		@JsonProperty("session") final RedisConfig session,
 		@JsonProperty("twilio") final TwilioConfig twilio)
@@ -94,6 +96,7 @@ public class Config extends Configuration implements Serializable
 		this.alertSMSMessage = baseUrl("/messages/sms/alert.txt", baseUrl);
 		this.registrationSMSMessage = baseUrl("/messages/sms/registration.txt", baseUrl);
 
+		this.queue = queue;
 		this.admins = admins;
 		this.session = session;
 		this.twilio = twilio;

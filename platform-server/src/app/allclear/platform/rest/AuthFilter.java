@@ -25,6 +25,7 @@ public class AuthFilter implements ContainerRequestFilter
 	public static final List<String> PATHS_ADMINS = List.of("logs", "maps", "registrations");
 	public static final String PATH_INFO_CONFIG = "info/config";
 	public static final String PATH_SELF = "/self";
+	public static final String PATH_TWILIO = "twilio/";	// Uses Digest Auth
 	public static final String PATH_TYPES = "types/";
 	public static final List<String> PATHS_NO_AUTH = List.of("admins/auth", "info/health", "info/ping", "info/version", "peoples/auth", "peoples/confirm", "peoples/start", "swagger.json");
 	public static final String PATH_REGISTER = "peoples/register";
@@ -77,7 +78,7 @@ public class AuthFilter implements ContainerRequestFilter
 
 	boolean requiresAuth(final String path)
 	{
-		return ((null == path) || !(path.startsWith(PATH_TYPES) || PATHS_NO_AUTH.contains(path)));
+		return ((null == path) || !(path.startsWith(PATH_TWILIO) || path.startsWith(PATH_TYPES) || PATHS_NO_AUTH.contains(path)));
 	}
 
 	boolean self(final String path)

@@ -169,6 +169,12 @@ public class JacksonUtils
 	 */
 	public static final ObjectMapper createMapperMS() { return configureMS(Jackson.newObjectMapper()); }
 
+	/** Helper method - creates a mapper for use to marshal data to and from Azure queues.
+	 * 
+	 * @return never NULL.
+	 */
+	public static final ObjectMapper createMapperAzure() { return createMapper(); }
+
 	/** Helper method - creates a Dropwizard friendly JSON object-mapper with millisecond date formatter/parser.
 	 * 
 	 * @return never NULL.

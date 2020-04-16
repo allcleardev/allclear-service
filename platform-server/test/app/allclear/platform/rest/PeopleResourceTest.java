@@ -19,6 +19,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import com.azure.storage.queue.QueueClient;
+
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 
@@ -61,6 +63,7 @@ public class PeopleResourceTest
 	private static PeopleDAO dao = null;
 	private static final FakeRedisClient redis = new FakeRedisClient();
 	private static final TwilioClient twilio = mock(TwilioClient.class);
+	private static final QueueClient alertQueue = mock(QueueClient.class);
 	private static final SessionDAO sessionDao = new SessionDAO(redis, twilio, conf);
 	private static final RegistrationDAO registrationDao = new RegistrationDAO(redis, twilio, conf);
 	private static PeopleValue VALUE = null;
@@ -69,6 +72,7 @@ public class PeopleResourceTest
 	private static Date PHONE_VERIFIED_AT;
 	private static int ALERTED_OF = 5;
 	private static Date ALERTED_AT;
+	private static String LAST_ALERT;
 	private static SMSResponse LAST_SMS_RESPONSE;
 	private static RegistrationValue REGISTRATION;
 	private static SessionValue ADMIN;
@@ -81,7 +85,7 @@ public class PeopleResourceTest
 		.addResource(new AuthorizationExceptionMapper())
 		.addResource(new NotFoundExceptionMapper())
 		.addResource(new ValidationExceptionMapper())
-		.addResource(new PeopleResource(dao, registrationDao, sessionDao))
+		.addResource(new PeopleResource(dao, registrationDao, sessionDao, alertQueue))
 		.addResource(new RegistrationResource(registrationDao)).build();
 
 	/** Primary URI to test. */
@@ -106,7 +110,8 @@ public class PeopleResourceTest
 		PHONE_VERIFIED_AT = timestamp("2020-03-24T12:48:30-0000");
 		ALERTED_AT = timestamp("2020-04-15T12:02:30-0000");
 
-		when(twilio.send(any(SMSRequest.class))).thenAnswer(a -> LAST_SMS_RESPONSE = new SMSResponse((SMSRequest) a.getArgument(0)));
+		when(twilio.send(any(SMSRequest.class))).thenAnswer(a -> LAST_SMS_RESPONSE = new SMSResponse(a.getArgument(0, SMSRequest.class)));
+		when(alertQueue.sendMessage(any(String.class))).thenAnswer(a -> { LAST_ALERT = a.getArgument(0, String.class); return null; });
 	}
 
 	@Test
@@ -131,6 +136,32 @@ public class PeopleResourceTest
 		check(VALUE.withId(value.id).withCreatedAt(value.createdAt).withUpdatedAt(value.updatedAt), value);
 
 		SESSION = sessionDao.add(VALUE, false);
+	}
+
+	public static Stream<Arguments> alert_failure()
+	{
+		return Stream.of(
+			arguments(ADMIN, "INVALID", HTTP_STATUS_NOT_FOUND),
+			arguments(SESSION, VALUE.id, HTTP_STATUS_NOT_AUTHORIZED));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void alert_failure(final SessionValue session, final String id, final int status)
+	{
+		sessionDao.current(session);
+
+		Assertions.assertEquals(status, request(id + "/alert").method(HttpMethod.POST).getStatus());
+	}
+
+	@Test
+	public void alert_success()
+	{
+		sessionDao.current(ADMIN);
+
+		var response = request(VALUE.id + "/alert").method(HttpMethod.POST);
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+		Assertions.assertEquals("{\"personId\":\"" + VALUE.id + "\"}", LAST_ALERT, "Check LAST_ALERT");
 	}
 
 	@Test

@@ -1,5 +1,6 @@
 package app.allclear.platform.rest;
 
+import java.io.IOException;
 import java.util.List;
 
 import javax.ws.rs.*;
@@ -8,10 +9,14 @@ import javax.ws.rs.core.Response;
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 
+import com.azure.storage.queue.QueueClient;
 import com.codahale.metrics.annotation.Timed;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
+import app.allclear.common.jackson.JacksonUtils;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.resources.Headers;
 import app.allclear.common.value.CountResults;
@@ -40,15 +45,18 @@ public class PeopleResource
 {
 	private final PeopleDAO dao;
 	private final SessionDAO sessionDao;
+	private final QueueClient alertQueue;
 	private final RegistrationDAO registrationDao;
+	private final ObjectMapper mapper = JacksonUtils.createMapperAzure();
 
 	/** Populator.
 	 * 
 	 * @param dao
 	 */
-	public PeopleResource(final PeopleDAO dao, final RegistrationDAO registrationDao, final SessionDAO sessionDao)
+	public PeopleResource(final PeopleDAO dao, final RegistrationDAO registrationDao, final SessionDAO sessionDao, final QueueClient alertQueue)
 	{
 		this.dao = dao;
+		this.alertQueue = alertQueue;
 		this.sessionDao = sessionDao;
 		this.registrationDao = registrationDao;
 	}
@@ -86,6 +94,18 @@ public class PeopleResource
 		sessionDao.checkAdmin();	// Only admins can add application users.
 
 		return dao.add(value);
+	}
+
+	@POST
+	@Path("/{id}/alert") @Timed @UnitOfWork(readOnly=true, transactional=false)
+	@ApiOperation(value="alert", notes="Sends a New Facility Alert to the specified user.")
+	public Response alert(@PathParam("id") final String id) throws IOException, ObjectNotFoundException
+	{
+		sessionDao.checkAdmin();	// Only admins can manually trigger a New Facility Alert.
+
+		alertQueue.sendMessage(mapper.writeValueAsString(new AlertRequest(dao.findWithException(id).getId())));
+
+		return Response.ok().build();
 	}
 
 	@POST

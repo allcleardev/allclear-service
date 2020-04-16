@@ -15,6 +15,8 @@ import org.glassfish.jersey.client.ClientProperties;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import com.azure.storage.queue.QueueClient;
+
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 
@@ -70,7 +72,7 @@ public class PeopleFacilityResourceTest
 		.addResource(new AuthorizationExceptionMapper())
 		.addResource(new NotFoundExceptionMapper())
 		.addResource(new ValidationExceptionMapper())
-		.addResource(new PeopleResource(dao, registrationDao, sessionDao))
+		.addResource(new PeopleResource(dao, registrationDao, sessionDao, mock(QueueClient.class)))
 		.addResource(new RegistrationResource(registrationDao)).build();
 
 	/** Primary URI to test. */

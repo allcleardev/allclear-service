@@ -42,7 +42,7 @@ public class QueueManagerTest
 		queuer = new QueueManager(connectionString, 1, new TaskOperator<Request>(QUEUE_NAME,
 			r -> { assertThat(r.numOfFruits).isGreaterThan(2); Assertions.assertEquals(timestamp("2017-02-23T11:11:0" + r.numOfFruits + "+0000"), r.expiration, "Check expiration: " + r.numOfFruits); return true; },
 			Request.class, 10));
-		queue = queuer.queues.get(QUEUE_NAME);
+		queue = queuer.queue(QUEUE_NAME);
 	}
 
 	@Test
@@ -108,7 +108,7 @@ public class QueueManagerTest
 		var operator = new TaskOperator<Request>(QUEUE_NAME, x -> { System.out.println("Throttle: " + (++i[0])); if (5 == i[0]) throw new ThrottledException(x.toString()); return true; }, Request.class);
 		var queuer_ = new QueueManager(connectionString, 1, operator).withBatchSize(1);
 
-		var queue_ = queuer_.queues.get(QUEUE_NAME);
+		var queue_ = queuer_.queue(QUEUE_NAME);
 		for (int j = 0; j < 10; j++) queue_.sendMessage("{ \"numOfFruits\": " + j + " }");
 
 		queuer_.turnOn();

@@ -40,6 +40,7 @@ public class QueueManager implements Managed, Runnable
 	public final String connectionString;
 
 	final Map<String, QueueClient> queues;
+	public QueueClient queue(final String name) { return queues.get(name); }
 
 	/** Represents the list of task operators used to process the background requests. */
 	public Map<String, TaskOperator<?>> getOperators() { return operators; }

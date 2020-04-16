@@ -19,6 +19,7 @@ import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import app.allclear.common.AutoCloseableManager;
+import app.allclear.common.azure.QueueManager;
 import app.allclear.common.errors.*;
 import app.allclear.common.hibernate.HibernateBundle;
 import app.allclear.common.jackson.ObjectMapperProvider;
@@ -26,10 +27,13 @@ import app.allclear.common.jersey.CrossDomainHeadersFilter;
 import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.common.redis.RedisClient;
 import app.allclear.common.resources.*;
+import app.allclear.common.task.TaskOperator;
 import app.allclear.google.client.MapClient;
 import app.allclear.platform.dao.*;
 import app.allclear.platform.entity.*;
+import app.allclear.platform.model.AlertRequest;
 import app.allclear.platform.rest.*;
+import app.allclear.platform.task.AlertTask;
 import app.allclear.twilio.client.TwilioClient;
 
 /** Represents the Dropwizard application entry point.
@@ -45,6 +49,7 @@ public class App extends Application<Config>
 	private static final Logger log = LoggerFactory.getLogger(App.class);
 
 	public static final String APP_NAME = "AllClear Platform";
+	public static final String QUEUE_ALERT = "alert";
 
 	public static final Class<?>[] ENTITIES = new Class<?>[] { Conditions.class, Exposures.class, Facility.class, FacilityX.class, People.class, PeopleFacility.class, Symptoms.class, SymptomsLog.class, Tests.class };
 
@@ -99,9 +104,14 @@ public class App extends Application<Config>
 
 		var factory = transHibernateBundle.getSessionFactory();
 		var adminDao = new AdminDAO(conf.admins);
+		var facilityDao = new FacilityDAO(factory);
 		var peopleDao = new PeopleDAO(factory);
 		var sessionDao = new SessionDAO(session, twilio, conf);
 		var registrationDao = new RegistrationDAO(session, twilio, conf);
+		var task = new QueueManager(conf.queue, 5,
+				new TaskOperator<>(QUEUE_ALERT, new AlertTask(factory, peopleDao, facilityDao, sessionDao), AlertRequest.class));
+
+		lifecycle.manage(task);
 
 		var jersey = env.jersey();
         jersey.register(MultiPartFeature.class);
@@ -121,13 +131,14 @@ public class App extends Application<Config>
         jersey.register(new LogResource());
         jersey.register(new AuthFilter(sessionDao));
         jersey.register(new AdminResource(adminDao, sessionDao));
-        jersey.register(new FacilityResource(new FacilityDAO(factory), sessionDao, map));
+        jersey.register(new FacilityResource(facilityDao, sessionDao, map));
         jersey.register(new MapResource(map));
-		jersey.register(new PeopleResource(peopleDao, registrationDao, sessionDao));
+		jersey.register(new PeopleResource(peopleDao, registrationDao, sessionDao, task.queue(QUEUE_ALERT)));
 		jersey.register(new RegistrationResource(registrationDao));
 		jersey.register(new SessionResource(sessionDao));
 		jersey.register(new SymptomsLogResource(new SymptomsLogDAO(factory), sessionDao));
 		jersey.register(new TestsResource(new TestsDAO(factory, sessionDao)));
+		jersey.register(new TwilioResource(conf.twilio.authToken, peopleDao));
 		jersey.register(new TypeResource());
 
 		setupSwagger(conf, env);
