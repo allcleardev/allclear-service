@@ -1,8 +1,7 @@
 package app.allclear.platform.rest;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
+import javax.ws.rs.core.*;
 
 import java.util.Base64;
 import java.util.stream.Collectors;
@@ -54,40 +53,41 @@ public class TwilioResource
 		this.hmac = new HmacUtils(HmacAlgorithms.HMAC_SHA_1, authToken);
 	}
 
-	private void checkSignature(final HttpServletRequest request) throws NotAuthorizedException
+	private void checkSignature(final UriInfo uri,
+		final String signature,
+		final MultivaluedMap<String, String> params) throws NotAuthorizedException
 	{
-		var sig = StringUtils.trimToNull(request.getHeader(HEADER_SIGNATURE));
+		var sig = StringUtils.trimToNull(signature);
 		if (null == sig) throw new NotAuthorizedException("No signature was found.");
 
-		var url = request.getRequestURL();
-		var qs = request.getQueryString();
-		if (null != qs) url.append("?").append(qs);
-
-		var params = request.getParameterMap().entrySet()
+		var url = uri.getRequestUri().toString();
+		var params_ = params.entrySet()
 			.stream()
 			.sorted((a, b) -> a.getKey().compareTo(b.getKey()))
-			.map(e -> e.getKey() + e.getValue()[0])
+			.map(e -> e.getKey() + e.getValue().get(0))
 			.collect(Collectors.joining());
-		if (null != params) url.append(params);
-		log.info("CHECK_SIGNATURE_PARAMS: {} - '{}'", request.getParameterMap(), params);
+		if (null != params_) url+=params_;
+		log.info("CHECK_SIGNATURE_PARAMS: {} - '{}'", params, params_);
 
-		var sigg = encoder.encodeToString(hmac.hmac(url.toString()));
+		var sign = encoder.encodeToString(hmac.hmac(url.toString()));
 
-		log.info("CHECK_SIGNATURE: {} / {} - {}", sig, sigg, url);
+		log.info("CHECK_SIGNATURE: {} / {} - {}", sig, sign, url);
 
-		if (!sig.equals(sigg)) throw new NotAuthorizedException("The signature '" + sig + "' does not match the calculated signature '" + sigg + "'.");
+		if (!sig.equals(sign)) throw new NotAuthorizedException("The signature '" + sig + "' does not match the calculated signature '" + sign + "'.");
 	}
 
 	@POST
 	@Path("/alert") @Timed
 	@ApiOperation(value="alert", notes="Handles responses to our SMS alerts.")
-	public String handleAlert(@Context final HttpServletRequest request,
+	public String handleAlert(@Context final UriInfo uri,
+		@HeaderParam(HEADER_SIGNATURE) final String signature,
+		final MultivaluedMap<String, String> params,
 		@FormParam("From") final String from,
 		@FormParam("Body") final String body) throws NotAuthorizedException, ObjectNotFoundException
 	{
 		log.info("ALERT: {} - {}", from, body);
 
-		checkSignature(request);
+		checkSignature(uri, signature, params);
 
 		// Has the user asked to be unsubscribed?
 		if (StringUtils.isNotEmpty(body) && (-1 < body.toLowerCase().indexOf("unsubscribe")))
