@@ -239,6 +239,70 @@ public class ConfigTest
 	}
 
 	@Test
+	public void staging() throws Exception
+	{
+		var o = load("staging");
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals("staging", o.env, "Check env");
+		Assertions.assertFalse(o.disableSwagger, "Check disableSwagger");
+		Assertions.assertEquals("https://app-staging.allclear.app", o.baseUrl, "Check baseUrl");
+		Assertions.assertNull(o.alertSid, "Check alertSid");
+		Assertions.assertEquals("+16466321488", o.alertPhone, "Check alertPhone");
+		Assertions.assertNull(o.registrationSid, "Check registrationSid");
+		Assertions.assertEquals("+16466321488", o.registrationPhone, "Check registrationPhone");
+		Assertions.assertNull(o.authSid, "Check authSid");
+		Assertions.assertEquals("+16466321488", o.authPhone, "Check authPhone");
+		Assertions.assertEquals("New COVID-19 test locations are available in your area. Click here to view them on AllClear: https://app-staging.allclear.app/alert?lastAlertedAt=%s&phone=%s&token=%s", o.alertSMSMessage, "Check alertSMSMessage");
+		Assertions.assertEquals("Your AllClear passcode to register is %s or click this magic link https://app-staging.allclear.app/register?phone=%s&code=%s", o.registrationSMSMessage, "Check registrationSMSMessage");
+		Assertions.assertEquals("Your AllClear passcode to login is %s or click this magic link https://app-staging.allclear.app/auth?phone=%s&token=%s", o.authSMSMessage, "Check authSMSMessage");
+		assertThat(o.admins).as("Check admins").startsWith("DefaultEndpointsProtocol=https;AccountName=allclear-admins;AccountKey=").endsWith(";TableEndpoint=https://allclear-admins.table.cosmos.azure.com:443/;");
+		assertThat(o.queue).as("Check queue").startsWith("DefaultEndpointsProtocol=https;AccountName=allclearstagingqueues;AccountKey=").endsWith(";EndpointSuffix=core.windows.net");
+		Assertions.assertNotNull(o.session, "Check session");
+		Assertions.assertEquals("allclear-staging.redis.cache.windows.net", o.session.host, "Check session.host");
+		Assertions.assertEquals(6380, o.session.port, "Check session.port");
+		Assertions.assertEquals(200L, o.session.timeout, "Check session.timeout");
+		Assertions.assertEquals(10, o.session.poolSize, "Check session.poolSize");
+		Assertions.assertEquals("password", o.session.password, "Check session.password");
+		Assertions.assertTrue(o.session.ssl, "Check session.ssl");
+		Assertions.assertTrue(o.session.testWhileIdle, "Check session.testWhileIdle");
+		Assertions.assertFalse(o.session.test, "Check session.test");
+		Assertions.assertNotNull(o.twilio, "Check twilio");
+		Assertions.assertEquals(TwilioConfig.BASE_URL, o.twilio.baseUrl, "Check twilio.baseUrl");
+		Assertions.assertNotNull(o.twilio.accountId, "Check twilio.accountId");	// Could be the real account ID if the environment variable is set.
+		Assertions.assertNotNull(o.twilio.authToken, "Check twilio.authToken");	// Could be the real authorization token if the environment variable is set.
+
+		Assertions.assertEquals("com.mysql.jdbc.Driver", o.trans.getDriverClass(), "Check trans.driverClass");
+		Assertions.assertEquals("allclear", o.trans.getUser(), "Check trans.user");
+		Assertions.assertEquals("allclearpwd", o.trans.getPassword(), "Check trans.password");
+		Assertions.assertEquals("jdbc:mysql://allclear-staging.mysql.database.azure.com:3306/allclear?useEncoding=true&characterEncoding=UTF-8&prepStmtCacheSize=100&prepStmtCacheSqlLimit=1024&serverTimezone=UTC&useSSL=true&requireSSL=true",  o.trans.getUrl(), "Check trans.url");
+		Assertions.assertEquals(Duration.seconds(1L), o.trans.getMaxWaitForConnection(), "Check trans.maxWaitForConnection");
+		Assertions.assertEquals(Optional.of("SELECT 1"), o.trans.getValidationQuery(), "Check trans.validationQuery");
+		Assertions.assertEquals(Optional.of(Duration.seconds(10L)), o.trans.getValidationQueryTimeout(), "Check trans.validationQueryTimeout");
+		Assertions.assertEquals(5, o.trans.getMinSize(), "Check trans.minSize");
+		Assertions.assertEquals(20, o.trans.getMaxSize(), "Check trans.maxSize");
+		Assertions.assertNull(o.trans.getReadOnlyByDefault(), "Check trans.readOnlyByDefault");
+		Assertions.assertTrue(o.trans.getCheckConnectionWhileIdle(), "Check trans.checkConnectionWhileIdle");
+		Assertions.assertTrue(o.trans.getCheckConnectionOnBorrow(), "Check trans.checkConnectionOnBorrow");
+		Assertions.assertEquals(TransactionIsolation.READ_COMMITTED, o.trans.getDefaultTransactionIsolation(), "Check trans.defaultTransactionIsolation");
+		assertThat(o.trans.getProperties()).as("Check trans.properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect"));
+
+		Assertions.assertEquals("com.mysql.jdbc.Driver", o.read.getDriverClass(), "Check read.driverClass");
+		Assertions.assertEquals("allclear", o.read.getUser(), "Check read.user");
+		Assertions.assertEquals("allclearpwd", o.read.getPassword(), "Check read.password");
+		Assertions.assertEquals("jdbc:mysql://allclear-staging.mysql.database.azure.com:3306/allclear?useEncoding=true&characterEncoding=UTF-8&prepStmtCacheSize=100&prepStmtCacheSqlLimit=1024&serverTimezone=UTC&useSSL=true&requireSSL=true",  o.read.getUrl(), "Check read.url");
+		Assertions.assertEquals(Duration.seconds(1L), o.read.getMaxWaitForConnection(), "Check read.maxWaitForConnection");
+		Assertions.assertEquals(Optional.of("SELECT 1"), o.read.getValidationQuery(), "Check read.validationQuery");
+		Assertions.assertEquals(Optional.of(Duration.seconds(10L)), o.read.getValidationQueryTimeout(), "Check read.validationQueryTimeout");
+		Assertions.assertEquals(5, o.read.getMinSize(), "Check read.minSize");
+		Assertions.assertEquals(20, o.read.getMaxSize(), "Check read.maxSize");
+		Assertions.assertNull(o.read.getReadOnlyByDefault(), "Check read.readOnlyByDefault");
+		Assertions.assertTrue(o.read.getCheckConnectionWhileIdle(), "Check read.checkConnectionWhileIdle");
+		Assertions.assertTrue(o.read.getCheckConnectionOnBorrow(), "Check read.checkConnectionOnBorrow");
+		Assertions.assertEquals(TransactionIsolation.READ_COMMITTED, o.read.getDefaultTransactionIsolation(), "Check read.defaultTransactionIsolation");
+		assertThat(o.read.getProperties()).as("Check read.properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect"));
+	}
+
+	@Test
 	public void test() throws Exception
 	{
 		var o = load("test");
