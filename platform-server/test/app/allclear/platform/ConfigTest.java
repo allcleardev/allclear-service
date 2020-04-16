@@ -192,7 +192,7 @@ public class ConfigTest
 		Assertions.assertEquals("Your AllClear passcode to register is %s or click this magic link https://app.allclear.app/register?phone=%s&code=%s", o.registrationSMSMessage, "Check registrationSMSMessage");
 		Assertions.assertEquals("Your AllClear passcode to login is %s or click this magic link https://app.allclear.app/auth?phone=%s&token=%s", o.authSMSMessage, "Check authSMSMessage");
 		assertThat(o.admins).as("Check admins").startsWith("DefaultEndpointsProtocol=https;AccountName=allclear-admins;AccountKey=").endsWith(";TableEndpoint=https://allclear-admins.table.cosmos.azure.com:443/;");
-		Assertions.assertEquals("queueConnectionString", o.queue, "Check queue");
+		Assertions.assertEquals("DefaultEndpointsProtocol=https;AccountName=allclearprodqueues;AccountKey=queueConnectionString;EndpointSuffix=core.windows.net", o.queue, "Check queue");
 		Assertions.assertNotNull(o.session, "Check session");
 		Assertions.assertEquals("allclear-prod.redis.cache.windows.net", o.session.host, "Check session.host");
 		Assertions.assertEquals(6380, o.session.port, "Check session.port");
