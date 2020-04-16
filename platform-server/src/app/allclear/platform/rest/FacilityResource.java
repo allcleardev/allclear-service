@@ -18,6 +18,7 @@ import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.resources.Headers;
+import app.allclear.common.time.StopWatch;
 import app.allclear.common.value.OperationResponse;
 import app.allclear.google.client.MapClient;
 import app.allclear.google.model.GeocodeResult;
@@ -129,21 +130,32 @@ public class FacilityResource
 	public QueryResults<FacilityValue, FacilityFilter> search(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		final FacilityFilter filter) throws ValidationException
 	{
+		var timer = new StopWatch();
+
 		if ((null != filter.from) && (null != filter.from.location))
 		{
 			var o = geocode(filter.from.location);
 			if (null != o) filter.from = filter.from.copy(o.geometry.location);
+			log.info("GEOCODED: {} in {}", filter.from.location, timer.split());
 		}
 
 		var s = sessionDao.current();
-		var favoriteIds = dao.getIdsByPerson(s.person);
 		var restricted = (s.person() && !s.person.meetsCdcPriority3());	// Does the current user have restrictions imposed with regards to facilities that are open to them?
-		if (filter.restrictive & restricted)
+		if (filter.restrictive && restricted)
 			filter.withNotTestCriteriaId(TestCriteria.CDC_CRITERIA.id);
 
+		log.info("RESTRICTED: {} / {} in {}", filter.restrictive, restricted, timer.split());
+
 		var results = dao.search(filter);
+		log.info("SEARCHED: {} in {}", results.total, timer.split());
 		if (!results.noRecords())
+		{
+			var favoriteIds = dao.getIdsByPerson(s.person);
 			results.records.forEach(v -> v.favorite(favoriteIds).restricted = (restricted && v.restricted()));
+			log.info("FAVORITED: {} in {}", favoriteIds.size(), timer.split());
+		}
+
+		log.info("TOTAL: {} in {}", results.total, timer.total());
 
 		return results;
 	}
