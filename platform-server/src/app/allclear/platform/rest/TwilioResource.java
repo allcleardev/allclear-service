@@ -82,22 +82,22 @@ public class TwilioResource
 	@Path("/alert") @Timed
 	@ApiOperation(value="alert", notes="Handles responses to our SMS alerts.")
 	public String handleAlert(@Context final HttpServletRequest request,
-		@FormParam("To") final String to,
+		@FormParam("From") final String from,
 		@FormParam("Body") final String body) throws NotAuthorizedException, ObjectNotFoundException
 	{
-		log.info("ALERT: {} - {}", to, body);
+		log.info("ALERT: {} - {}", from, body);
 
 		checkSignature(request);
 
 		// Has the user asked to be unsubscribed?
 		if (StringUtils.isNotEmpty(body) && (-1 < body.toLowerCase().indexOf("unsubscribe")))
 		{
-			peopleDao.unalertByPhone(to);
-			log.info("UNSUBSCRIBED: {}", to);
+			peopleDao.unalertByPhone(from);
+			log.info("UNSUBSCRIBED: {}", from);
 			return String.format(RESPONSE, "You have been successfully unsubscribed from further alerts. Have a nice day.");
 		}
 
-		log.info("NO_ACTION: {}", to);
+		log.info("NO_ACTION: {}", from);
 		return RESPONSE_EMPTY;
 	}
 }
