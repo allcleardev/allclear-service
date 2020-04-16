@@ -45,7 +45,13 @@ public class QueueManager implements Managed, Runnable
 	/** Represents the list of task operators used to process the background requests. */
 	public Map<String, TaskOperator<?>> getOperators() { return operators; }
 	private Map<String, TaskOperator<?>> operators = null;
-	public QueueManager addOperator(TaskOperator<?> newValue) { operators.put(newValue.name, newValue); return this; }
+	public QueueManager addOperator(TaskOperator<?> o)
+	{
+		operators.put(o.name, o);
+		this.queues.put(o.name, new QueueClientBuilder().connectionString(connectionString)
+			.retryOptions(new RequestRetryOptions(EXPONENTIAL, o.maxTries, o.timeout, o.delayMS(), o.maxDelayMS(), null)).queueName(o.name).buildClient());
+		return this;
+	}
 	public TaskOperator<?> removeOperator(final String name) { return operators.remove(name); }
 
 	/** Represents the duration that the thread should sleep between processing. */
@@ -81,12 +87,7 @@ public class QueueManager implements Managed, Runnable
 		this.connectionString = connectionString;
 		this.queues = new HashMap<>(operators.length);
 		this.operators = new HashMap<>(operators.length);
-		for (var o : operators)
-		{
-			this.operators.put(o.name, o);
-			this.queues.put(o.name, new QueueClientBuilder().connectionString(connectionString)
-				.retryOptions(new RequestRetryOptions(EXPONENTIAL, o.maxTries, o.timeout, o.delayMS(), o.maxDelayMS(), null)).queueName(o.name).buildClient());
-		}
+		for (var o : operators) addOperator(o);
 
 		this.threads = threads;
 		this.executor = new ArrayList<>(threads);
