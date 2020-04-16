@@ -112,7 +112,7 @@ public class App extends Application<Config>
 		var task = new QueueManager(conf.queue, 2,
 				new TaskOperator<>(QUEUE_ALERT, new AlertTask(factory, peopleDao, facilityDao, sessionDao), AlertRequest.class, 10, 5, 60, 3600));
 
-		lifecycle.manage(task.addOperator(new TaskOperator<>(QUEUE_ALERT_INIT, new AlertInitTask(factory, peopleDao, task.queue(QUEUE_ALERT)), AlertInitRequest.class, 10, 5, 60, 3600)));
+		lifecycle.manage(task.addOperator(new TaskOperator<>(QUEUE_ALERT_INIT, new AlertInitTask(factory, peopleDao, task.queue(QUEUE_ALERT)), AlertInitRequest.class, 10, 120, 60, 3600)));
 
 		var jersey = env.jersey();
         jersey.register(MultiPartFeature.class);
