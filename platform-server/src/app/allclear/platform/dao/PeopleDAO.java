@@ -349,6 +349,25 @@ public class PeopleDAO extends AbstractDAO<People>
 		return true;
 	}
 
+	/** Switch on the ALERTABLE field on the user associated with the phone.
+	 * 
+	 * @param phone
+	 * @return TRUE if the user is found and is currently unalertable.
+	 * @throws ObjectNotFoundException
+	 */
+	public boolean alertByPhone(final String phone) throws ObjectNotFoundException
+	{
+		var record = findByPhone(phone);
+		if (null == record) throw new ObjectNotFoundException("The Phone Number '" + phone + "' could not be found.");
+
+		if (record.isAlertable()) return false;
+
+		record.setAlertable(true);
+		record.setUpdatedAt(new Date());
+
+		return true;
+	}
+
 	/** Switch off the ALERTABLE field on the user associated with the phone.
 	 * 
 	 * @param phone

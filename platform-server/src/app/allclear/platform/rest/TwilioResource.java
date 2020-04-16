@@ -47,7 +47,7 @@ public class TwilioResource
 
 	public static final String HEADER_SIGNATURE = "X-Twilio-Signature";
 	public static final String RESPONSE = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n" +
-		"<Response><Message>%s</Message></Response>";
+		"<Response><Message><Body>%s</Body></Message></Response>";
 	public static final String RESPONSE_EMPTY = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n<Response />";
 
 	public TwilioResource(final String authToken, final PeopleDAO peopleDao)
@@ -70,7 +70,6 @@ public class TwilioResource
 			.map(e -> e.getKey() + e.getValue().get(0))
 			.collect(Collectors.joining());
 		if (null != params_) url+=params_;
-		log.info("CHECK_SIGNATURE_PARAMS: {} - {} - '{}'", uri.getAbsolutePath(), params, params_);
 
 		var sign = encoder.encodeToString(hmac.hmac(url.toString()));
 
@@ -93,11 +92,20 @@ public class TwilioResource
 		checkSignature(uri, signature, params);
 
 		// Has the user asked to be unsubscribed?
-		if (StringUtils.isNotEmpty(body) && (-1 < body.toLowerCase().indexOf("unsubscribe")))
+		if (StringUtils.isNotEmpty(body))
 		{
-			peopleDao.unalertByPhone(from);
-			log.info("UNSUBSCRIBED: {}", from);
-			return String.format(RESPONSE, "You have been successfully unsubscribed from further alerts. Have a nice day.");
+			if (-1 < body.toLowerCase().indexOf("unsubscribe"))
+			{
+				peopleDao.unalertByPhone(from);
+				log.info("UNSUBSCRIBED: {}", from);
+				return String.format(RESPONSE, "You have been successfully unsubscribed from further alerts. Have a nice day.");
+			}
+			else if (-1 < body.toLowerCase().indexOf("start"))
+			{
+				peopleDao.alertByPhone(from);
+				log.info("SUBSCRIBED: {}", from);
+				return String.format(RESPONSE, "You have been successfully subscribed to our new facility alerts. Welcome aboard!");
+			}
 		}
 
 		log.info("NO_ACTION: {}", from);
