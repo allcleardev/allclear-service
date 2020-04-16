@@ -4,6 +4,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.*;
 
 import java.util.Base64;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.digest.HmacAlgorithms;
@@ -38,6 +39,7 @@ public class TwilioResource
 {
 	private static final Logger log = LoggerFactory.getLogger(TwilioResource.class);
 	private static final Base64.Encoder encoder = Base64.getEncoder();
+	static final Pattern PATTERN_HTTP = Pattern.compile("http:");
 
 	private final HmacUtils hmac; // .hmacHex(String);
 	private final PeopleDAO peopleDao;
@@ -60,14 +62,14 @@ public class TwilioResource
 		var sig = StringUtils.trimToNull(signature);
 		if (null == sig) throw new NotAuthorizedException("No signature was found.");
 
-		var url = uri.getRequestUri().toString();
+		var url = PATTERN_HTTP.matcher(uri.getRequestUri().toString()).replaceFirst("https:");	// For some reason, Jersey reports the call as HTTP even though sent via HTTPS. DLS on 4/16/2020.
 		var params_ = params.entrySet()
 			.stream()
 			.sorted((a, b) -> a.getKey().compareTo(b.getKey()))
 			.map(e -> e.getKey() + e.getValue().get(0))
 			.collect(Collectors.joining());
 		if (null != params_) url+=params_;
-		log.info("CHECK_SIGNATURE_PARAMS: {} - '{}'", params, params_);
+		log.info("CHECK_SIGNATURE_PARAMS: {} - {} - '{}'", uri.getAbsolutePath(), params, params_);
 
 		var sign = encoder.encodeToString(hmac.hmac(url.toString()));
 
