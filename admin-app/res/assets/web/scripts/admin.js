@@ -283,7 +283,7 @@ var PeopleHandler = new ListTemplate({
 	          new ListField('statusId', 'Status', false, 'peopleStatuses', undefined, 'None'),
 	          new ListField('statureId', 'Stature', false, 'peopleStatures', undefined, 'None'),
 	          new ListField('sexId', 'Sex', false, 'sexes', undefined, 'None'),
-	          new ListField('healthWorkerStatusId', 'Health Worker Status', false, 'healthWorkerStatuses', undefined, 'None'),
+	          new ListField('healthWorkerStatusId', 'Health Worker Status', true, 'healthWorkerStatuses'),
 	          new EditField('latitude', 'Latitude', false, false, 12, 12),
 	          new EditField('longitude', 'Longitude', false, false, 12, 12),
 	          new EditField('locationName', 'Location Name', false, false, 255, 50),
