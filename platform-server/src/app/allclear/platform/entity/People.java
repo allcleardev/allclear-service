@@ -39,6 +39,7 @@ import app.allclear.platform.value.PeopleValue;
 	@NamedQuery(name="findPeopleByEmail", query="SELECT OBJECT(o) FROM People o WHERE o.email = :email"),
 	@NamedQuery(name="findPeopleByPhone", query="SELECT OBJECT(o) FROM People o WHERE o.phone = :phone"),
 	@NamedQuery(name="findActivePeopleByIdOrName", query="SELECT OBJECT(o) FROM People o WHERE ((o.id LIKE :name) OR (o.name LIKE :name)) AND o.active = TRUE ORDER BY o.name"),
+	@NamedQuery(name="getActiveAlertablePeopleIdsByLongitude", query="SELECT o.id FROM People o WHERE o.id > :lastId AND o.latitude IS NOT NULL AND ((o.longitude >= :longitudeFrom) AND (o.longitude < :longitudeTo)) AND o.alertable = TRUE AND o.active = TRUE ORDER BY o.id"),
 	@NamedQuery(name="getPeopleIdByEmail", query="SELECT o.id FROM People o WHERE o.email = :email"),
 	@NamedQuery(name="getPeopleIdByPhone", query="SELECT o.id FROM People o WHERE o.phone = :phone")})
 public class People implements Serializable
@@ -189,6 +190,18 @@ public class People implements Serializable
 	public void setFacilities(final List<Facility> newValues) { facilities = newValues; }
 
 	public People() {}
+
+	/** For test */
+	public People(final String id, final BigDecimal latitude, final BigDecimal longitude, final boolean alertable, final boolean active)
+	{
+		this.id = this.name = this.phone = id;
+		this.latitude = latitude;
+		this.longitude = longitude;
+		this.healthWorkerStatusId = HealthWorkerStatus.NEITHER.id;
+		this.alertable = alertable;
+		this.active = active;
+		this.createdAt = this.updatedAt = new Date();
+	}
 
 	public People(final String id,
 		final String name,

@@ -482,6 +482,23 @@ public class PeopleDAO extends AbstractDAO<People>
 		return findWithException(id).toValueX();
 	}
 
+	/** Gets a list of People IDs that are active, alertable, and within a specific timezone.
+	 * 
+	 * @param lastId
+	 * @param zone
+	 * @param pageSize
+	 * @return never NULL
+	 */
+	public List<String> getActiveAlertableIdsByLongitude(final String lastId, final Timezone zone, final int pageSize)
+	{
+		return namedQuery("getActiveAlertablePeopleIdsByLongitude", String.class)
+			.setParameter("lastId", lastId)
+			.setParameter("longitudeFrom", zone.longitudeFrom)
+			.setParameter("longitudeTo", zone.longitudeTo)
+			.setMaxResults(pageSize)
+			.list();
+	}
+
 	/** Gets a list of active People by wildcard ID and/or name search.
 	 * 
 	 * @param name

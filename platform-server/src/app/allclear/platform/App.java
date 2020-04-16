@@ -31,9 +31,9 @@ import app.allclear.common.task.TaskOperator;
 import app.allclear.google.client.MapClient;
 import app.allclear.platform.dao.*;
 import app.allclear.platform.entity.*;
-import app.allclear.platform.model.AlertRequest;
+import app.allclear.platform.model.*;
 import app.allclear.platform.rest.*;
-import app.allclear.platform.task.AlertTask;
+import app.allclear.platform.task.*;
 import app.allclear.twilio.client.TwilioClient;
 
 /** Represents the Dropwizard application entry point.
@@ -50,6 +50,7 @@ public class App extends Application<Config>
 
 	public static final String APP_NAME = "AllClear Platform";
 	public static final String QUEUE_ALERT = "alert";
+	public static final String QUEUE_ALERT_INIT = "alert-init";
 
 	public static final Class<?>[] ENTITIES = new Class<?>[] { Conditions.class, Exposures.class, Facility.class, FacilityX.class, People.class, PeopleFacility.class, Symptoms.class, SymptomsLog.class, Tests.class };
 
@@ -111,7 +112,7 @@ public class App extends Application<Config>
 		var task = new QueueManager(conf.queue, 5,
 				new TaskOperator<>(QUEUE_ALERT, new AlertTask(factory, peopleDao, facilityDao, sessionDao), AlertRequest.class));
 
-		lifecycle.manage(task);
+		lifecycle.manage(task.addOperator(new TaskOperator<>(QUEUE_ALERT_INIT, new AlertInitTask(factory, peopleDao, task.queue(QUEUE_ALERT)), AlertInitRequest.class)));
 
 		var jersey = env.jersey();
         jersey.register(MultiPartFeature.class);

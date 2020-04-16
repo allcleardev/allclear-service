@@ -45,7 +45,7 @@ public class QueueManager implements Managed, Runnable
 	/** Represents the list of task operators used to process the background requests. */
 	public Map<String, TaskOperator<?>> getOperators() { return operators; }
 	private Map<String, TaskOperator<?>> operators = null;
-	public void addOperator(TaskOperator<?> newValue) { operators.put(newValue.name, newValue); }
+	public QueueManager addOperator(TaskOperator<?> newValue) { operators.put(newValue.name, newValue); return this; }
 	public TaskOperator<?> removeOperator(final String name) { return operators.remove(name); }
 
 	/** Represents the duration that the thread should sleep between processing. */
