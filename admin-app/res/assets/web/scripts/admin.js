@@ -244,8 +244,17 @@ var PeopleHandler = new ListTemplate({
 	EDIT_METHOD: 'put',
 
 	ROW_ACTIONS: [ new RowAction('authenticate', 'Authenticate'),
-	               new RowAction('openSymptomsLogs', 'Symptoms Logs') ],
+	               new RowAction('openSymptomsLogs', 'Symptoms Logs'),
+	               new RowAction('alert', 'Alert') ],
 
+	alert: function(c, e) {
+		var r = e.myRecord;
+		this.post(this.RESOURCE + '/' + r.id + '/alert', null, function(data) {
+			if (data && data.message) window.alert(data.message);
+
+			window.alert('The New Facility Alert has been sent to ' + r.phone + '.');
+		}
+	},
 	authenticate: function(c, e) {
 		this.post(this.RESOURCE + '/' + e.myRecord.id + '/auth', null, function(data) {
 			if (data.message) window.alert(data.message);
@@ -281,11 +290,14 @@ var PeopleHandler = new ListTemplate({
 	          new TagField('conditions', 'Conditions', false, 'types/conditions'),
 	          new TagField('exposures', 'Exposures', false, 'types/exposures'),
 	          new TagField('symptoms', 'Symptoms', false, 'types/symptoms'),
+	          new TagField('facilities', 'Facilities', false, 'facilities'),
 	          new BoolField('alertable', 'Is Alertable?', true),
 	          new BoolField('active', 'Is Active?', true),
 	          new TextField('authAt', 'Last Auth At', 'toDateTime'),
 	          new TextField('phoneVerifiedAt', 'Phone Verified At', 'toDateTime'),
 	          new TextField('emailVerifiedAt', 'Email Verified At', 'toDateTime'),
+	          new TextField('alertedOf', '# of Facilities  Alerted'),
+	          new TextField('alertedAt', 'Last Alerted At', 'toDateTime'),
 	          new TextField('createdAt', 'Created At', 'toDateTime'),
 	          new TextField('updatedAt', 'Updated At', 'toDateTime') ],
 
@@ -315,6 +327,9 @@ var PeopleHandler = new ListTemplate({
 		          new DatesField('authAt', 'Last Auth At', false),
 		          new DatesField('phoneVerifiedAt', 'Phone Verified At', false),
 		          new DatesField('emailVerifiedAt', 'Email Verified At', false),
+		          new EditField('alertedOf', '# of Facilities  Alerted', false, false, 5, 5),
+		          new RangeField('alertedOf', '# of Facilities  Alerted', false, 5, 5),
+		          new DatesField('alertedAt', 'Last Alerted At', false),
 		          new DatesField('createdAt', 'Created At', false),
 		          new DatesField('updatedAt', 'Updated At', false),
 		          new TagField('includeConditions', 'Include Conditions', false, 'types/conditions'),
@@ -323,6 +338,8 @@ var PeopleHandler = new ListTemplate({
 		          new TagField('excludeExposures', 'Exclude Exposures', false, 'types/exposures'),
 		          new TagField('includeSymptoms', 'Include Symptoms', false, 'types/symptoms'),
 		          new TagField('excludeSymptoms', 'Exclude Symptoms', false, 'types/symptoms'),
+		          new TagField('includeFacilities', 'Include Facilities', false, 'facilities'),
+		          new TagField('excludeFacilities', 'Exclude Facilities', false, 'facilities'),
 		          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ]
 	},
 
