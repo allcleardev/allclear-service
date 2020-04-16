@@ -69,6 +69,7 @@ public class TwilioResource
 			.map(e -> e.getKey() + e.getValue()[0])
 			.collect(Collectors.joining());
 		if (null != params) url.append(params);
+		log.info("CHECK_SIGNATURE_PARAMS: {} - '{}'", request.getParameterMap(), params);
 
 		var sigg = encoder.encodeToString(hmac.hmac(url.toString()));
 
