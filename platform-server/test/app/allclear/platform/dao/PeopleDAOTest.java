@@ -278,6 +278,30 @@ public class PeopleDAOTest
 			.hasMessage(message);
 	}
 
+	@Test
+	public void alertByPhone_00()
+	{
+		var record = dao.findWithException(VALUE.id);
+		assertThat(record.getUpdatedAt()).as("Check updatedAt: before").isEqualTo(record.getCreatedAt());
+		Assertions.assertFalse(record.isAlertable(), "Check alertable: first");
+
+		Assertions.assertFalse(dao.unalertByPhone(VALUE.phone), "unalertByPhone");
+		Assertions.assertFalse(dao.findWithException(VALUE.id).isAlertable(), "Check alertable: second");
+
+		Assertions.assertTrue(dao.alertByPhone(VALUE.phone), "alertByPhone");
+		Assertions.assertTrue(dao.findWithException(VALUE.id).isAlertable(), "Check alertable: third");
+
+		Assertions.assertFalse(dao.alertByPhone(VALUE.phone), "alertByPhone");
+		Assertions.assertTrue(dao.findWithException(VALUE.id).isAlertable(), "Check alertable: fourth");
+
+		Assertions.assertTrue(dao.unalertByPhone(VALUE.phone), "unalertByPhone");
+		Assertions.assertFalse((record = dao.findWithException(VALUE.id)).isAlertable(), "Check alertable: fifth");
+
+		assertThat(record.getUpdatedAt()).as("Check updatedAt: after").isAfter(record.getCreatedAt());
+
+		VALUE.withUpdatedAt(record.getUpdatedAt());
+	}
+
 	public static Stream<Arguments> check()
 	{
 		return Stream.of(
@@ -1304,7 +1328,6 @@ public class PeopleDAOTest
 		Assertions.assertEquals(expected.sex, value.sex, assertId + "Check sex");
 		Assertions.assertEquals(expected.healthWorkerStatusId, value.healthWorkerStatusId, assertId + "Check healthWorkerStatusId");
 		Assertions.assertEquals(expected.healthWorkerStatus, value.healthWorkerStatus, assertId + "Check healthWorkerStatus");
-		Assertions.assertEquals(expected.latitude, value.latitude, assertId + "Check latitude");
 		assertThat(value.latitude).as(assertId + "Check latitude").isEqualByComparingTo(expected.latitude);
 		assertThat(value.longitude).as(assertId + "Check longitude").isEqualByComparingTo(expected.longitude);
 		Assertions.assertEquals(expected.locationName, value.locationName, assertId + "Check locationName");
