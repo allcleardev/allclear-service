@@ -12,6 +12,7 @@ import org.apache.commons.codec.digest.HmacUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.*;
 
+import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 
 import com.codahale.metrics.annotation.Timed;
@@ -79,7 +80,7 @@ public class TwilioResource
 	}
 
 	@POST
-	@Path("/alert") @Timed
+	@Path("/alert") @UnitOfWork @Timed
 	@ApiOperation(value="alert", notes="Handles responses to our SMS alerts.")
 	public String handleAlert(@Context final UriInfo uri,
 		@HeaderParam(HEADER_SIGNATURE) final String signature,
