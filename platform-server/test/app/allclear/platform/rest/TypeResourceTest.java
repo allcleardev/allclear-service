@@ -123,4 +123,13 @@ public class TypeResourceTest
 
 		assertThat(response.readEntity(new GenericType<List<TestType>>() {})).isEqualTo(TestType.LIST);
 	}
+
+	@Test
+	public void getTimezones()
+	{
+		var response = request("timezones").get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		assertThat(response.readEntity(new GenericType<List<Timezone>>() {})).isEqualTo(Timezone.LIST);
+	}
 }

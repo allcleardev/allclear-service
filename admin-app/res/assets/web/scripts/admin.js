@@ -22,7 +22,7 @@ AdminApp.doHeapDump = function(body) { HeapDumpHandler.init(body); }
 AdminApp.doQueueStats = function(body) { QueuesHandler.init(body); }
 
 AdminApp.onPostInit = function(c) {
-	this.loadLists([ 'conditions', 'exposures', 'facilityTypes', 'healthWorkerStatuses', 'peopleStatuses', 'sexes', 'statures', 'symptoms', 'testCriteria', 'testTypes' ]);
+	this.loadLists([ 'conditions', 'exposures', 'facilityTypes', 'healthWorkerStatuses', 'peopleStatuses', 'sexes', 'statures', 'symptoms', 'testCriteria', 'testTypes', 'timezones' ]);
 }
 
 var UPLOAD_SOURCES_INSTRUCTIONS = 'Add comma separated text that is split by type, name, and code in that order.<br /><br />Types:<blockquote>';
@@ -319,6 +319,7 @@ var PeopleHandler = new ListTemplate({
 		          new ListField('statureId', 'Stature', false, 'statures', undefined, 'No Search'),
 		          new ListField('sexId', 'Sex', false, 'sexes', undefined, 'No Search'),
 		          new ListField('healthWorkerStatusId', 'Health Worker Status', false, 'healthWorkerStatuses', undefined, 'No Search'),
+		          new ListField('timezoneId', 'Timezone', false, 'timezones', undefined, 'No Search'),
 		          new EditField('latitude', 'Latitude', false, false, 12, 12),
 		          new EditField('longitude', 'Longitude', false, false, 12, 12),
 		          new EditField('locationName', 'Location Name', false, false, 255, 50),
@@ -327,6 +328,7 @@ var PeopleHandler = new ListTemplate({
 		          new DatesField('authAt', 'Last Auth At', false),
 		          new DatesField('phoneVerifiedAt', 'Phone Verified At', false),
 		          new DatesField('emailVerifiedAt', 'Email Verified At', false),
+		          new ListField('hasAlertedAt', 'Has Been Alerted?', false, 'yesNoOptions', undefined, 'No Search'),
 		          new EditField('alertedOf', '# of Facilities  Alerted', false, false, 5, 5),
 		          new RangeField('alertedOf', '# of Facilities  Alerted', false, 5, 5),
 		          new DatesField('alertedAt', 'Last Alerted At', false),

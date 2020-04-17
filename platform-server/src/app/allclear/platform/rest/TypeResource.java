@@ -73,4 +73,9 @@ public class TypeResource
 	@Path("/testTypes") @Timed
 	@ApiOperation(value="getTestTypes", notes="Gets a list of test types.", response=TestType.class, responseContainer="List")
 	public List<TestType> getTestTypes() { return TestType.LIST; }
+
+	@GET
+	@Path("/timezones") @Timed
+	@ApiOperation(value="getTimezones", notes="Gets a list of test types.", response=Timezone.class, responseContainer="List")
+	public List<Timezone> getTimezones() { return Timezone.LIST; }
 }

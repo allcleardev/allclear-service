@@ -3,6 +3,7 @@ package app.allclear.platform.dao;
 import static app.allclear.platform.type.Condition.*;
 import static app.allclear.platform.type.Exposure.*;
 import static app.allclear.platform.type.Symptom.*;
+import static app.allclear.platform.type.Timezone.*;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -658,6 +659,10 @@ public class PeopleDAOTest
 			arguments(new PeopleFilter(1, 20).withSexId("invalid"), 0L),
 			arguments(new PeopleFilter(1, 20).withHasSexId(false), 0L),
 			arguments(new PeopleFilter(1, 20).withHealthWorkerStatusId("invalid"), 0L),
+			arguments(new PeopleFilter(1, 20).withTimezoneId(EST.id), 0L),
+			arguments(new PeopleFilter(1, 20).withTimezoneId(CST.id), 0L),
+			arguments(new PeopleFilter(1, 20).withTimezoneId(MST.id), 0L),
+			arguments(new PeopleFilter(1, 20).withTimezoneId(PST.id), 0L),
 			arguments(new PeopleFilter(1, 20).withLatitude(upLat), 0L),
 			arguments(new PeopleFilter(1, 20).withHasLatitude(false), 0L),
 			arguments(new PeopleFilter(1, 20).withLatitudeFrom(upLat), 0L),
@@ -938,7 +943,7 @@ public class PeopleDAOTest
 	@Test
 	public void z_00_add_min()
 	{
-		Assertions.assertNotNull(VALUE = dao.add(new PeopleValue("minimal", "888-minimal", false)));
+		Assertions.assertNotNull(VALUE = dao.add(new PeopleValue("minimal", "888-minimal", false).withLatitude(bg("41.8781136")).withLongitude(bg("-87.6297982"))));
 	}
 
 	@Test
@@ -960,6 +965,22 @@ public class PeopleDAOTest
 		Assertions.assertNull(value.emailVerifiedAt, "Check emailVerifiedAt");
 		Assertions.assertEquals(VALUE.createdAt, value.createdAt, "Check createdAt");
 		Assertions.assertEquals(value.createdAt, value.updatedAt, "Check updatedAt");
+	}
+
+	public static Stream<Arguments> z_00_add_min_search()
+	{
+		return Stream.of(
+			arguments(new PeopleFilter(1, 20).withTimezoneId(EST.id), 0L),
+			arguments(new PeopleFilter(1, 20).withTimezoneId(CST.id), 1L),
+			arguments(new PeopleFilter(1, 20).withTimezoneId(MST.id), 0L),
+			arguments(new PeopleFilter(1, 20).withTimezoneId(PST.id), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_00_add_min_search(final PeopleFilter filter, final long total)
+	{
+		Assertions.assertEquals(total, dao.search(filter).total);
 	}
 
 	@Test

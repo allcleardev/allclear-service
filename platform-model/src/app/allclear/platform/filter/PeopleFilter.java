@@ -6,6 +6,7 @@ import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 
 import app.allclear.common.dao.QueryFilter;
+import app.allclear.platform.type.Timezone;
 
 /********************************************************************************************************************
 *
@@ -42,6 +43,7 @@ public class PeopleFilter extends QueryFilter
 	public String sexId = null;
 	public Boolean hasSexId = null;
 	public String healthWorkerStatusId = null;
+	public String timezoneId = null;
 	public BigDecimal latitude = null;
 	public Boolean hasLatitude = null;
 	public BigDecimal latitudeFrom = null;
@@ -105,6 +107,7 @@ public class PeopleFilter extends QueryFilter
 	public PeopleFilter withSexId(final String newValue) { sexId = newValue; return this; }
 	public PeopleFilter withHasSexId(final Boolean newValue) { hasSexId = newValue; return this; }
 	public PeopleFilter withHealthWorkerStatusId(final String newValue) { healthWorkerStatusId = newValue; return this; }
+	public PeopleFilter withTimezoneId(final String newValue) { timezoneId = newValue; return this; }
 	public PeopleFilter withLatitude(final BigDecimal newValue) { latitude = newValue; return this; }
 	public PeopleFilter withHasLatitude(final Boolean newValue) { hasLatitude = newValue; return this; }
 	public PeopleFilter withLatitudeFrom(final BigDecimal newValue) { latitudeFrom = newValue; return this; }
@@ -319,7 +322,14 @@ public class PeopleFilter extends QueryFilter
 		statureId = StringUtils.trimToNull(statureId);
 		sexId = StringUtils.trimToNull(sexId);
 		healthWorkerStatusId = StringUtils.trimToNull(healthWorkerStatusId);
+		timezoneId = StringUtils.trimToNull(timezoneId);
 		locationName = StringUtils.trimToNull(locationName);
+
+		if (null != timezoneId)	// Apply timezone value to their longitudinal constraints.
+		{
+			var zone = Timezone.get(timezoneId);
+			if (null != zone) withLongitudeFrom(zone.longitudeFrom).withLongitudeTo(zone.longitudeTo);
+		}
 
 		return this;
 	}
@@ -353,6 +363,7 @@ public class PeopleFilter extends QueryFilter
 			.append(", sexId: ").append(sexId)
 			.append(", hasSexId: ").append(hasSexId)
 			.append(", healthWorkerStatusId: ").append(healthWorkerStatusId)
+			.append(", timezoneId: ").append(timezoneId)
 			.append(", latitude: ").append(latitude)
 			.append(", hasLatitude: ").append(hasLatitude)
 			.append(", latitudeFrom: ").append(latitudeFrom)
