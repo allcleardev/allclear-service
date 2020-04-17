@@ -80,21 +80,21 @@ public class TypeResourceTest
 	}
 
 	@Test
-	public void getPeopleStatures()
-	{
-		var response = request("peopleStatures").get();
-		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
-
-		assertThat(response.readEntity(new GenericType<List<PeopleStature>>() {})).isEqualTo(PeopleStature.LIST);
-	}
-
-	@Test
 	public void getSexes()
 	{
 		var response = request("sexes").get();
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		assertThat(response.readEntity(new GenericType<List<Sex>>() {})).isEqualTo(Sex.LIST);
+	}
+
+	@Test
+	public void getStatures()
+	{
+		var response = request("statures").get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		assertThat(response.readEntity(new GenericType<List<Stature>>() {})).isEqualTo(Stature.LIST);
 	}
 
 	@Test

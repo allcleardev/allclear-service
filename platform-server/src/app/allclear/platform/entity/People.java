@@ -295,7 +295,7 @@ public class People implements Serializable
 			value.alertedOf = getAlertedOf();
 			value.alertedAt = getAlertedAt();
 
-			if (null != (value.statureId = getStatureId())) value.stature = PeopleStature.get(value.statureId);
+			if (null != (value.statureId = getStatureId())) value.stature = Stature.get(value.statureId);
 		}
 		value.createdAt = getCreatedAt();
 		setUpdatedAt(value.updatedAt = new Date());
@@ -358,7 +358,7 @@ public class People implements Serializable
 			getStatusId(),
 			(null != getStatusId()) ? PeopleStatus.get(getStatusId()) : null,
 			getStatureId(),
-			(null != getStatureId()) ? PeopleStature.get(getStatureId()) : null,
+			(null != getStatureId()) ? Stature.get(getStatureId()) : null,
 			getSexId(),
 			(null != getSexId()) ? Sex.get(getSexId()) : null,
 			getHealthWorkerStatusId(),

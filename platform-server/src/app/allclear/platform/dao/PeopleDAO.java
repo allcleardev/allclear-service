@@ -295,7 +295,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		if ((null != value.statusId) && (null == (value.status = PeopleStatus.get(value.statusId))))
 			validator.add("statusId", "The Status ID '%s' is invalid.", value.statusId);
 
-		if ((null != value.statureId) && (null == (value.stature = PeopleStature.get(value.statureId))))
+		if ((null != value.statureId) && (null == (value.stature = Stature.get(value.statureId))))
 			validator.add("statureId", "The Stature ID '%s' is invalid.", value.statureId);
 
 		if ((null != value.sexId) && (null == (value.sex = Sex.get(value.sexId))))

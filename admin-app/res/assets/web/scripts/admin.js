@@ -22,7 +22,7 @@ AdminApp.doHeapDump = function(body) { HeapDumpHandler.init(body); }
 AdminApp.doQueueStats = function(body) { QueuesHandler.init(body); }
 
 AdminApp.onPostInit = function(c) {
-	this.loadLists([ 'conditions', 'exposures', 'facilityTypes', 'healthWorkerStatuses', 'peopleStatuses', 'peopleStatures', 'sexes', 'symptoms', 'testCriteria', 'testTypes' ]);
+	this.loadLists([ 'conditions', 'exposures', 'facilityTypes', 'healthWorkerStatuses', 'peopleStatuses', 'sexes', 'statures', 'symptoms', 'testCriteria', 'testTypes' ]);
 }
 
 var UPLOAD_SOURCES_INSTRUCTIONS = 'Add comma separated text that is split by type, name, and code in that order.<br /><br />Types:<blockquote>';
@@ -281,7 +281,7 @@ var PeopleHandler = new ListTemplate({
 	          new EditField('lastName', 'Last Name', false, false, 32, 15),
 	          new DateField('dob', 'Date of Birth', false),
 	          new ListField('statusId', 'Status', false, 'peopleStatuses', undefined, 'None'),
-	          new ListField('statureId', 'Stature', false, 'peopleStatures', undefined, 'None'),
+	          new ListField('statureId', 'Stature', false, 'statures', undefined, 'None'),
 	          new ListField('sexId', 'Sex', false, 'sexes', undefined, 'None'),
 	          new ListField('healthWorkerStatusId', 'Health Worker Status', true, 'healthWorkerStatuses'),
 	          new EditField('latitude', 'Latitude', false, false, 12, 12),
@@ -316,7 +316,7 @@ var PeopleHandler = new ListTemplate({
 		          new DateField('dob', 'Date of Birth', false),
 		          new DatesField('dob', 'Date of Birth', false),
 		          new ListField('statusId', 'Status', false, 'peopleStatuses', undefined, 'No Search'),
-		          new ListField('statureId', 'Stature', false, 'peopleStatures', undefined, 'No Search'),
+		          new ListField('statureId', 'Stature', false, 'statures', undefined, 'No Search'),
 		          new ListField('sexId', 'Sex', false, 'sexes', undefined, 'No Search'),
 		          new ListField('healthWorkerStatusId', 'Health Worker Status', false, 'healthWorkerStatuses', undefined, 'No Search'),
 		          new EditField('latitude', 'Latitude', false, false, 12, 12),

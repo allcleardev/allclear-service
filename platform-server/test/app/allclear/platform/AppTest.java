@@ -96,12 +96,6 @@ public class AppTest
 	}
 
 	@Test
-	public void getPeopleStatures()
-	{
-		assertThat(request(types.path("peopleStatures")).get(PeopleStature[].class)).hasSize(PeopleStature.LIST.size());
-	}
-
-	@Test
 	public void getPerson()
 	{
 		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, request(people.path("INVALID")).get().getStatus());
@@ -111,6 +105,12 @@ public class AppTest
 	public void getSexes()
 	{
 		assertThat(request(types.path("sexes")).get(Sex[].class)).hasSize(Sex.LIST.size());
+	}
+
+	@Test
+	public void getStatures()
+	{
+		assertThat(request(types.path("statures")).get(Stature[].class)).hasSize(Stature.LIST.size());
 	}
 
 	@Test

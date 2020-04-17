@@ -53,7 +53,7 @@ public class PeopleValue implements Serializable
 	public String statusId = null;
 	public PeopleStatus status = null;
 	public String statureId = null;
-	public PeopleStature stature = null;
+	public Stature stature = null;
 	public String sexId = null;
 	public Sex sex = null;
 	public String healthWorkerStatusId = null;
@@ -95,7 +95,7 @@ public class PeopleValue implements Serializable
 	public PeopleValue withStatusId(final String newValue) { statusId = newValue; return this; }
 	public PeopleValue withStatus(final PeopleStatus newValue) { status = newValue; return this; }
 	public PeopleValue withStatureId(final String newValue) { statureId = newValue; return this; }
-	public PeopleValue withStature(final PeopleStature newValue) { stature = newValue; return this; }
+	public PeopleValue withStature(final Stature newValue) { stature = newValue; return this; }
 	public PeopleValue withSexId(final String newValue) { sexId = newValue; return this; }
 	public PeopleValue withSex(final Sex newValue) { sex = newValue; return this; }
 	public PeopleValue withHealthWorkerStatusId(final String newValue) { healthWorkerStatusId = newValue; return this; }
@@ -182,7 +182,7 @@ public class PeopleValue implements Serializable
 		final String statusId,
 		final PeopleStatus status,
 		final String statureId,
-		final PeopleStature stature,
+		final Stature stature,
 		final String sexId,
 		final Sex sex,
 		final String healthWorkerStatusId,

@@ -1,7 +1,7 @@
 package app.allclear.platform.entity;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static app.allclear.platform.type.PeopleStature.*;
+import static app.allclear.platform.type.Stature.*;
 import static app.allclear.testing.TestingUtils.*;
 
 import java.math.BigDecimal;

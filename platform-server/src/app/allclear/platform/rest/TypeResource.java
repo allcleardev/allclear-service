@@ -50,14 +50,14 @@ public class TypeResource
 	public List<PeopleStatus> getPeopleStatuses() { return PeopleStatus.LIST; }
 
 	@GET
-	@Path("/peopleStatures") @Timed
-	@ApiOperation(value="getPeopleStatures", notes="Gets a list of statuses that can be associated with a person.", response=PeopleStature.class, responseContainer="List")
-	public List<PeopleStature> getPeopleStatures() { return PeopleStature.LIST; }
-
-	@GET
 	@Path("/sexes") @Timed
 	@ApiOperation(value="getSexes", notes="Gets a list of sexes that a person can have.", response=Sex.class, responseContainer="List")
 	public List<Sex> getSexes() { return Sex.LIST; }
+
+	@GET
+	@Path("/statures") @Timed
+	@ApiOperation(value="getStatures", notes="Gets a list of statuses that can be associated with a person.", response=Stature.class, responseContainer="List")
+	public List<Stature> getStatures() { return Stature.LIST; }
 
 	@GET
 	@Path("/symptoms") @Timed

@@ -67,7 +67,7 @@ public class PeopleDAOTest
 	public void add()
 	{
 		var value = dao.add(VALUE = new PeopleValue("ronny", "888-555-1000", "ronny@gmail.com", "Ronald", "Howard",
-			DOB, PeopleStatus.INFECTED.id, PeopleStature.INFLUENCER.id, Sex.MALE.id, HealthWorkerStatus.LIVE_WITH.id,
+			DOB, PeopleStatus.INFECTED.id, Stature.INFLUENCER.id, Sex.MALE.id, HealthWorkerStatus.LIVE_WITH.id,
 			bg("86.5"), bg("-37.1"), "Phoenix, Arizona", false, true));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
@@ -79,7 +79,7 @@ public class PeopleDAOTest
 	public static PeopleValue createValid()
 	{
 		return new PeopleValue("bryce", "888-555-1001", "dallas@gmail.com", "Dallas", "Drawoh",
-			DOB_1, PeopleStatus.RECOVERED.id, PeopleStature.CELEBRITY.id, Sex.FEMALE.id, HealthWorkerStatus.HEALTH_WORKER.id,
+			DOB_1, PeopleStatus.RECOVERED.id, Stature.CELEBRITY.id, Sex.FEMALE.id, HealthWorkerStatus.HEALTH_WORKER.id,
 			bg("-86.5"), bg("37.1"), "Atlanta, GA", true, false);
 	}
 
