@@ -2,6 +2,7 @@ package app.allclear.common.azure;
 
 import static com.azure.storage.common.policy.RetryPolicyType.EXPONENTIAL;
 
+import java.io.IOException;
 import java.util.*;
 
 import org.slf4j.*;
@@ -29,6 +30,8 @@ public class QueueManager implements Managed, Runnable
 {
 	private static final Logger logger = LoggerFactory.getLogger(QueueManager.class);
 	static final ObjectMapper MAPPER = JacksonUtils.createMapperMS();
+	private static final Base64.Decoder decoder = Base64.getDecoder();
+
 	// private static final int DELAY_AFTER_ERROR = 5 * 60;	// 5 minutes.
 
 	/** Indicates that the background thread should continue operation. This flag is used within
@@ -227,7 +230,7 @@ public class QueueManager implements Managed, Runnable
 					final long time = System.currentTimeMillis();
 	
 					// Remove from queue if successful.
-					if (op.callback.process(MAPPER.readValue(request.getMessageText(), clazz)))
+					if (op.callback.process(deserialize(request.getMessageText(), clazz)))
 						queue.deleteMessage(request.getMessageId(), request.getPopReceipt());
 	
 					if (logger.isDebugEnabled())
@@ -253,7 +256,7 @@ public class QueueManager implements Managed, Runnable
 
 				catch (final JsonParseException ex)
 				{
-					logger.warn("Unparseable: {} - {}.", op.name, ex.getMessage());
+					logger.warn("UNPARSEABLE: {} - {}.", op.name, ex.getMessage());
 					queue.deleteMessage(request.getMessageId(), request.getPopReceipt());
 				}
 
@@ -276,5 +279,16 @@ public class QueueManager implements Managed, Runnable
 		}
 
 		return count;
+	}
+
+	<T> T deserialize(final String value, final Class<T> clazz) throws JsonParseException, IOException
+	{
+		try { return MAPPER.readValue(value, clazz); }
+		catch (final JsonParseException ex)
+		{
+			logger.warn("PARSE_RETRY: {}", value);
+
+			return MAPPER.readValue(decoder.decode(value), clazz);
+		}
 	}
 }

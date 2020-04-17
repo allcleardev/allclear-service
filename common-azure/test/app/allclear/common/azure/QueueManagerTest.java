@@ -3,6 +3,7 @@ package app.allclear.common.azure;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static app.allclear.testing.TestingUtils.timestamp;
 
+import java.util.Base64;
 import java.util.Date;
 import java.util.NoSuchElementException;
 
@@ -29,6 +30,7 @@ public class QueueManagerTest
 
 	private static QueueClient queue;
 	private static QueueManager queuer = null;
+	private static Base64.Encoder encoder = Base64.getEncoder();
 	private static final String connectionString = System.getenv("AZURE_QUEUE_CONNECTION_STRING");
 
 	private static int beforeRun_ = 0;
@@ -51,7 +53,7 @@ public class QueueManagerTest
 		Assertions.assertNotNull(queue.sendMessage("{ \"numOfFruits\": 3, \"expiration\": \"2017-02-23T11:11:03+0000\" }"));
 		Assertions.assertNotNull(queue.sendMessage("{ \"numOfFruits\": 4, \"expiration\": \"2017-02-23T11:11:04.000+0000\" }"));
 		Assertions.assertNotNull(queue.sendMessage("{ \"numOfFruits\": 5, \"expiration\": \"2017-02-23T11:11:05.000-0000\" }"));
-		Assertions.assertNotNull(queue.sendMessage("{ \"numOfFruits\": 6, \"expiration\": \"2017-02-23T11:11:06-0000\" }"));
+		Assertions.assertNotNull(queue.sendMessage(encoder.encodeToString("{ \"numOfFruits\": 6, \"expiration\": \"2017-02-23T11:11:06-0000\" }".getBytes())));
 		Assertions.assertNotNull(queue.sendMessage("{ \"numOfFruits\": 7, \"expiration\": \"2017-02-23T11:11:07Z\" }"));
 		Assertions.assertNotNull(queue.sendMessage("{ \"numOfFruits\": 8, \"expiration\": " + timestamp("2017-02-23T11:11:08+0000").getTime() + " }"));
 		Assertions.assertNotNull(queue.sendMessage(QueueManager.MAPPER.writeValueAsString(new Request(9, timestamp("2017-02-23T11:11:09+0000")))));
