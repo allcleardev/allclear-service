@@ -4,7 +4,6 @@ import java.util.*;
 
 import javax.persistence.*;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
@@ -77,10 +76,11 @@ public class Conditions implements PeopleChild
 		if (!(o instanceof Conditions)) return false;
 
 		var v = (Conditions) o;
-		return Objects.equals(personId, v.personId) &&
-			Objects.equals(conditionId, v.conditionId) &&
-			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND);
+		return Objects.equals(personId, v.personId) && Objects.equals(conditionId, v.conditionId);
 	}
+
+	@Override
+	public int hashCode() { return Objects.hash(personId, conditionId); }
 
 	@Transient
 	public CreatedValue toValue()

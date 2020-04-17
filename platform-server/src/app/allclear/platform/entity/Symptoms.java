@@ -4,7 +4,6 @@ import java.util.*;
 
 import javax.persistence.*;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
@@ -77,10 +76,11 @@ public class Symptoms implements PeopleChild
 		if (!(o instanceof Symptoms)) return false;
 
 		var v = (Symptoms) o;
-		return Objects.equals(personId, v.personId) &&
-			Objects.equals(symptomId, v.symptomId) &&
-			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND);
+		return Objects.equals(personId, v.personId) && Objects.equals(symptomId, v.symptomId);	// MUST exclude createdAt since this doubles as the PK class.
 	}
+
+	@Override
+	public int hashCode() { return Objects.hash(personId, symptomId); }
 
 	@Transient
 	public CreatedValue toValue()

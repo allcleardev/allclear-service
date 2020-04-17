@@ -5,7 +5,6 @@ import java.util.*;
 
 import javax.persistence.*;
 
-import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
@@ -82,10 +81,11 @@ public class PeopleFacility implements Serializable
 		if (!(o instanceof PeopleFacility)) return false;
 
 		var v = (PeopleFacility) o;
-		return Objects.equals(personId, v.personId) &&
-			Objects.equals(facilityId, v.facilityId) &&
-			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND);
+		return Objects.equals(personId, v.personId) && Objects.equals(facilityId, v.facilityId);	// MUST exclude createdAt since this doubles as the PK class.
 	}
+
+	@Override
+	public int hashCode() { return Objects.hash(personId, facilityId); }
 
 	@Transient
 	public PeopleValue toPerson() { return getPerson().toValue(); }
