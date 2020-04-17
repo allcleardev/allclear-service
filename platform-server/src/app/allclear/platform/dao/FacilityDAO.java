@@ -7,11 +7,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.hibernate.SessionFactory;
+import org.slf4j.*;
 
 import app.allclear.common.dao.*;
 import app.allclear.common.errors.*;
 import app.allclear.common.hibernate.AbstractDAO;
 import app.allclear.common.hibernate.NativeQueryBuilder;
+import app.allclear.common.time.StopWatch;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.filter.FacilityFilter;
 import app.allclear.platform.type.FacilityType;
@@ -31,6 +33,8 @@ import app.allclear.platform.value.PeopleValue;
 
 public class FacilityDAO extends AbstractDAO<Facility>
 {
+	private static final Logger log = LoggerFactory.getLogger(FacilityDAO.class);
+
 	private static final String SELECT = "SELECT OBJECT(o) FROM Facility o";
 	private static final String COUNT = "SELECT COUNT(o.id) FROM Facility o";
 	private static final String COUNT_ = "SELECT COUNT(o.id) FROM facility o";
@@ -277,22 +281,40 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	 */
 	public QueryResults<FacilityValue, FacilityFilter> search(final FacilityFilter filter) throws ValidationException
 	{
+		var timer = new StopWatch();
+
 		if ((null != filter.from) && filter.from.valid())
 		{
 			filter.sortOn = "meters";	// Only sort by meters. Default to returning the closest first. DLS on 4/3/2020.
 			var builder = createNativeQuery(filter.clean(), SELECT_, FacilityX.class);
+			log.info("BUILT_QUERY: {}", timer.split());
 			var v = new QueryResults<FacilityValue, FacilityFilter>(builder.aggregate(COUNT_), filter);
+			log.info("COUNT: {}", timer.split());
 			if (v.isEmpty()) return v;
 
-			return v.withRecords(builder.orderBy(ORDER.normalize(v)).run(v).stream().map(o -> o.toValue()).collect(Collectors.toList()));
+			var records = builder.orderBy(ORDER.normalize(v)).run(v);
+			log.info("QUERIED: {}", timer.split());
+
+			var values = records.stream().map(o -> o.toValue()).collect(Collectors.toList());
+			log.info("VALUED: {}", timer.split());
+
+			return v.withRecords(values);
 		}
 		else
 		{
 			var builder = createQueryBuilder(filter.clean(), SELECT);
+			log.info("BUILT_QUERY: {}", timer.split());
 			var v = new QueryResults<FacilityValue, FacilityFilter>(builder.aggregate(COUNT), filter);
+			log.info("COUNT: {}", timer.split());
 			if (v.isEmpty()) return v;
 
-			return v.withRecords(builder.orderBy(ORDER.normalize(v)).run(v).stream().map(o -> o.toValue()).collect(Collectors.toList()));
+			var records = builder.orderBy(ORDER.normalize(v)).run(v);
+			log.info("QUERIED: {}", timer.split());
+
+			var values = records.stream().map(o -> o.toValue()).collect(Collectors.toList());
+			log.info("VALUED: {}", timer.split());
+
+			return v.withRecords(values);
 		}
 	}
 
