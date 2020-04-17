@@ -32,6 +32,7 @@
         "port": 8080,
         "bindHost": null
     },
+    "gzip": { "enabled": true },
     "applicationContextPath": "/",
     "adminContextPath": "/internals",
     "requestLog": {
