@@ -845,7 +845,7 @@ Template.prototype.toBool = function(value)
 Template.prototype.today = Template.today = function()
 {
 	var v = new Date();
-	v.setHours(0, 0, 0, 0);
+	v.setUTCHours(0, 0, 0, 0);
 
 	return this.toDbDate(v);
 }
@@ -853,8 +853,8 @@ Template.prototype.today = Template.today = function()
 Template.prototype.weekAgo = Template.weekAgo = function()
 {
 	var v = new Date();
-	v.setHours(0, 0, 0, 0);
-	v.setDate(v.getDate() - 7);
+	v.setUTCHours(0, 0, 0, 0);
+	v.setUTCDate(v.getUTCDate() - 7);
 
 	return this.toDbDate(v);
 }
@@ -901,7 +901,7 @@ Template.prototype.toTime = function(value)
 
 Template.prototype.toDbDate = Template.toDbDate = function(value)
 {
-	return value.getFullYear() + '-' + this.padInt(value.getMonth() + 1) + '-' + this.padInt(value.getDate()) + "T00:00:00" + this.getTimezoneOffset();
+	return value.getUTCFullYear() + '-' + this.padInt(value.getUTCMonth() + 1) + '-' + this.padInt(value.getUTCDate()) + "T00:00:00Z";
 }
 
 Template.prototype.padInt = Template.padInt = function(value)

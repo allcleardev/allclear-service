@@ -73,8 +73,8 @@ DatePicker.open = function(c, d)
 
 	// Create date from POSIX integer.
 	var day, date = 1;
-	var m = d.getMonth();	// Get the month. Stop building the calendar once the month is different.
-	d.setDate(date);	// Set to first day of the month.
+	var m = d.getUTCMonth();	// Get the month. Stop building the calendar once the month is different.
+	d.setUTCDate(date);	// Set to first day of the month.
 	d.clone = function() { return new Date(this.getTime()); };
 
 	// Clear out before starting.
@@ -84,7 +84,7 @@ DatePicker.open = function(c, d)
 	o.appendChild(u = document.createElement('ul'));
 	u.className = 'header';
 	this.addFlippers(u, this.MONTHS[m], c, d, 'Month');
-	this.addFlippers(u, d.getFullYear(), c, d, 'FullYear');
+	this.addFlippers(u, d.getUTCFullYear(), c, d, 'FullYear');
 
 	o.appendChild(u = document.createElement('ul'));
 	u.className = 'caption';
@@ -105,7 +105,7 @@ DatePicker.open = function(c, d)
 		me.select(c, this.myValue);
 		return false;
 	}, d.clone());
-	d.setDate(++date);
+	d.setUTCDate(++date);
 
 	do
 	{
@@ -123,8 +123,8 @@ DatePicker.open = function(c, d)
 			return false;
 		}, d.clone());
 
-		d.setDate(++date);
-	} while (m == d.getMonth());
+		d.setUTCDate(++date);
+	} while (m == d.getUTCMonth());
 
 	// Put a buffer at the end for the remaining days.
 	u.appendChild(l = document.createElement('li'));
@@ -219,7 +219,7 @@ DatePicker.toInputDate = function(v)
 
 DatePicker.toInputDate_ = function(value)
 {
-	return (value.getMonth() + 1) + '/' + value.getDate() + '/' + value.getFullYear();
+	return (value.getUTCMonth() + 1) + '/' + value.getUTCDate() + '/' + value.getUTCFullYear();
 }
 
 DatePicker.parseInputDate = function(v)
@@ -241,8 +241,8 @@ DatePicker.parseInputDate = function(v)
 		throw 'Invalid input date: the date (' + f[1] + ') is not between 1 and 31.';
 
 	var value = new Date();
-	value.setHours(0, 0, 0, 0);	// Remove the time portion.
-	value.setMonth(m - 1, d);
+	value.setUTCHours(0, 0, 0, 0);	// Remove the time portion.
+	value.setUTCMonth(m - 1, d);
 
 	// If only two parts to the date string, assume the current year.
 	if (2 < f.length)
@@ -261,7 +261,7 @@ DatePicker.parseInputDate = function(v)
 		else if (100 > y)
 			y+= 1900;
 
-		value.setFullYear(y);
+		value.setUTCFullYear(y);
 	}
 
 	return value;
@@ -271,7 +271,7 @@ DatePicker.parseInputDate = function(v)
 DatePicker.parseDbDate = function(v)
 {
 	var v = new Date(v);
-	v.setHours(0, 0, 0, 0);
+	v.setUTCHours(0, 0, 0, 0);
 
 	return v;
 	/*
