@@ -243,14 +243,14 @@ public class AdminDAO
 		var filters = new LinkedList<String>();
 		filters.add(generateFilterCondition("PartitionKey", EQUAL, Admin.PARTITION));
 		if (null != filter.id) filters.add(generateFilterCondition("RowKey", EQUAL, filter.id));
-		if (null != filter.email) filters.add(generateFilterCondition("email", EQUAL, filter.email));
-		if (null != filter.firstName) filters.add(generateFilterCondition("firstName", EQUAL, filter.firstName));
-		if (null != filter.lastName) filters.add(generateFilterCondition("lastName", EQUAL, filter.lastName));
-		if (null != filter.supers) filters.add(generateFilterCondition("supers", EQUAL, filter.supers));
-		if (null != filter.createdAtFrom) filters.add(generateFilterCondition("createdAt", GREATER_THAN_OR_EQUAL, filter.createdAtFrom));
-		if (null != filter.createdAtTo) filters.add(generateFilterCondition("createdAt", LESS_THAN_OR_EQUAL, filter.createdAtTo));
-		if (null != filter.updatedAtFrom) filters.add(generateFilterCondition("updatedAt", GREATER_THAN_OR_EQUAL, filter.updatedAtFrom));
-		if (null != filter.updatedAtTo) filters.add(generateFilterCondition("updatedAt", LESS_THAN_OR_EQUAL, filter.updatedAtTo));
+		if (null != filter.email) filters.add(generateFilterCondition("Email", EQUAL, filter.email));
+		if (null != filter.firstName) filters.add(generateFilterCondition("FirstName", EQUAL, filter.firstName));
+		if (null != filter.lastName) filters.add(generateFilterCondition("LastName", EQUAL, filter.lastName));
+		if (null != filter.supers) filters.add(generateFilterCondition("Supers", EQUAL, filter.supers));
+		if (null != filter.createdAtFrom) filters.add(generateFilterCondition("CreatedAt", GREATER_THAN_OR_EQUAL, filter.createdAtFrom));
+		if (null != filter.createdAtTo) filters.add(generateFilterCondition("CreatedAt", LESS_THAN_OR_EQUAL, filter.createdAtTo));
+		if (null != filter.updatedAtFrom) filters.add(generateFilterCondition("UpdatedAt", GREATER_THAN_OR_EQUAL, filter.updatedAtFrom));
+		if (null != filter.updatedAtTo) filters.add(generateFilterCondition("UpdatedAt", LESS_THAN_OR_EQUAL, filter.updatedAtTo));
 
 		var query = from(Admin.class).where(filters.stream().map(o -> "(" + o + ") ").collect(Collectors.joining(AND)));
 

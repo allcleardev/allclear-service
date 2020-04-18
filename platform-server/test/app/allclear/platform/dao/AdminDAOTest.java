@@ -3,7 +3,7 @@ package app.allclear.platform.dao;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static app.allclear.common.crypto.Hasher.saltAndHash;
-// import static app.allclear.testing.TestingUtils.*;
+import static app.allclear.testing.TestingUtils.*;
 
 import java.util.stream.Stream;
 
@@ -206,12 +206,12 @@ public class AdminDAOTest
 
 	public static Stream<Arguments> search()
 	{
-		// var hourAgo = hourAgo();
-		// var hourAhead = hourAhead();
+		var hourAgo = hourAgo();
+		var hourAhead = hourAhead();
 
 		return Stream.of(
 			arguments(new AdminFilter(1, 20).withId(VALUE.id), 1L),
-			/* arguments(new AdminFilter(1, 20).withEmail(VALUE.email), 1L),
+			arguments(new AdminFilter(1, 20).withEmail(VALUE.email), 1L),
 			arguments(new AdminFilter(1, 20).withFirstName(VALUE.firstName), 1L),
 			arguments(new AdminFilter(1, 20).withLastName(VALUE.lastName), 1L),
 			arguments(new AdminFilter(1, 20).withSupers(VALUE.supers), 1L),
@@ -220,10 +220,10 @@ public class AdminDAOTest
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
 			arguments(new AdminFilter(1, 20).withUpdatedAtFrom(hourAgo), 1L),
 			arguments(new AdminFilter(1, 20).withUpdatedAtTo(hourAhead), 1L),
-			arguments(new AdminFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 1L), */
+			arguments(new AdminFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 1L),
 
 			// Negative tests
-			arguments(new AdminFilter(1, 20).withId("invalid"), 0L) /*,
+			arguments(new AdminFilter(1, 20).withId("invalid"), 0L),
 			arguments(new AdminFilter(1, 20).withEmail("invalid"), 0L),
 			arguments(new AdminFilter(1, 20).withFirstName("invalid"), 0L),
 			arguments(new AdminFilter(1, 20).withLastName("invalid"), 0L),
@@ -233,7 +233,7 @@ public class AdminDAOTest
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
 			arguments(new AdminFilter(1, 20).withUpdatedAtFrom(hourAhead), 0L),
 			arguments(new AdminFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
-			arguments(new AdminFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L) */);
+			arguments(new AdminFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L));
 	}
 
 	@ParameterizedTest
