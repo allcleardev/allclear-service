@@ -973,7 +973,8 @@ public class PeopleDAOTest
 			arguments(new PeopleFilter(1, 20).withTimezoneId(EST.id), 0L),
 			arguments(new PeopleFilter(1, 20).withTimezoneId(CST.id), 1L),
 			arguments(new PeopleFilter(1, 20).withTimezoneId(MST.id), 0L),
-			arguments(new PeopleFilter(1, 20).withTimezoneId(PST.id), 0L));
+			arguments(new PeopleFilter(1, 20).withTimezoneId(PST.id), 0L),
+			arguments(new PeopleFilter(1, 20).withTimezoneId("INVALID"), 1L));	// Equivalent of no search.
 	}
 
 	@ParameterizedTest
