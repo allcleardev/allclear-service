@@ -1,14 +1,14 @@
 {
   "env": "local",
 
-  "baseUrl": "${baseUrl:-http://localhost:8080}",
+  "baseUrl": "${APP_BASE_URL:-http://localhost:8080}",
   "registrationPhone": "+16466321488",
   "authPhone": "+16466321488",
 
   "admins": "DefaultEndpointsProtocol=https;AccountName=allclear-admins;AccountKey=${COSMOS_ACCOUNT_KEY:-accountKey};TableEndpoint=https://allclear-admins.table.cosmos.azure.com:443/;",
   "queue": "DefaultEndpointsProtocol=https;AccountName=allcleardevqueues;AccountKey=${QUEUE_ACCOUNT_KEY:-accountKey};EndpointSuffix=core.windows.net",
   "session": { "host": "localhost", "timeout": 200, "poolSize": 10, "testWhileIdle": true },
-  "twilio": { "baseUrl": "${twilio.baseUrl:-https://api.twilio.com/2010-04-01}", "accountId": "${twilio.accountId:-123}", "authToken": "${twilio.authToken:-token}" },
+  "twilio": { "baseUrl": "${TWILIO_BASE_URL:-https://api.twilio.com/2010-04-01}", "accountId": "${TWILIO_ACCOUNT_ID:-123}", "authToken": "${TWILIO_AUTH_TOKEN:-token}" },
  
   "trans": {
     "driverClass": "com.mysql.jdbc.Driver",

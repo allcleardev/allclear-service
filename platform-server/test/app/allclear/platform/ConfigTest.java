@@ -140,8 +140,8 @@ public class ConfigTest
 		Assertions.assertFalse(o.session.test, "Check session.test");
 		Assertions.assertNotNull(o.twilio, "Check twilio");
 		Assertions.assertEquals(TwilioConfig.BASE_URL, o.twilio.baseUrl, "Check twilio.baseUrl");
-		Assertions.assertEquals("123", o.twilio.accountId, "Check twilio.accountId");
-		Assertions.assertEquals("token", o.twilio.authToken, "Check twilio.authToken");
+		Assertions.assertNotNull(o.twilio.accountId, "Check twilio.accountId");	// Could be the real account ID if the environment variable is set.
+		Assertions.assertNotNull(o.twilio.authToken, "Check twilio.authToken");	// Could be the real authorization token if the environment variable is set.
 
 		Assertions.assertEquals("com.mysql.jdbc.Driver", o.trans.getDriverClass(), "Check trans.driverClass");
 		Assertions.assertEquals("allclear", o.trans.getUser(), "Check trans.user");
@@ -332,8 +332,8 @@ public class ConfigTest
 		Assertions.assertTrue(o.session.test, "Check session.test");
 		Assertions.assertNotNull(o.twilio, "Check twilio");
 		Assertions.assertEquals(TwilioConfig.BASE_URL, o.twilio.baseUrl, "Check twilio.baseUrl");
-		Assertions.assertEquals("123", o.twilio.accountId, "Check twilio.accountId");
-		Assertions.assertEquals("token", o.twilio.authToken, "Check twilio.authToken");
+		Assertions.assertNotNull(o.twilio.accountId, "Check twilio.accountId");	// Could be the real account ID if the environment variable is set.
+		Assertions.assertNotNull(o.twilio.authToken, "Check twilio.authToken");	// Could be the real authorization token if the environment variable is set.
 
 		Assertions.assertEquals("org.h2.Driver", o.trans.getDriverClass(), "Check trans.driverClass");
 		Assertions.assertNull(o.trans.getUser(), "Check trans.user");
