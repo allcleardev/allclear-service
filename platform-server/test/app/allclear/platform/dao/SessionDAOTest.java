@@ -189,6 +189,23 @@ public class SessionDAOTest
 		Assertions.assertFalse(redis.containsKey(SessionDAO.authKey("888-555-0011", token)), "Check redis: after");
 	}
 
+	@Test
+	public void auth_too_many()
+	{
+		Assertions.assertEquals(0L, dao.count("888-555-0012"));
+		Assertions.assertNotNull(dao.auth("888-555-0012"));
+
+		Assertions.assertEquals(1L, dao.count("888-555-0012"));
+		Assertions.assertNotNull(dao.auth("888-555-0012"));
+
+		Assertions.assertEquals(2L, dao.count("888-555-0012"));
+		Assertions.assertNotNull(dao.auth("888-555-0012"));
+
+		Assertions.assertEquals(3L, dao.count("888-555-0012"));
+		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.auth("888-555-0012")))
+			.hasMessage("Too many authentication requests for phone number '888-555-0012'");
+	}
+
 	public static Stream<Arguments> checkAdmin()
 	{
 		return Stream.of(

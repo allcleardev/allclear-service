@@ -44,6 +44,7 @@ public class RegistrationDAO
 {
 	private static final String ID = "registration:%s:%s";
 	private static final String MATCH = "registration:*";
+	public static final int MAX_TRIES = 3;
 	public static final int CODE_LENGTH = 6;
 	public static final int EXPIRATION = 10 * 60;	// Ten minutes
 	private static final ObjectMapper mapper = JacksonUtils.createMapper();
@@ -80,6 +81,8 @@ public class RegistrationDAO
 			.check();
 		
 		return redis.operation(c -> {
+			limit(c, request.phone);	// Ensure that the max current tries has not been exceeded. DLS on 4/19/2020.
+
 			int i = 0;
 			var code = RandomStringUtils.randomNumeric(CODE_LENGTH).toUpperCase();
 			var key = key(request.phone, code);
@@ -111,6 +114,8 @@ public class RegistrationDAO
 			.check();
 
 		return redis.operation(c -> {
+			limit(c, request.phone);	// Ensure that the max current tries has not been exceeded. DLS on 4/19/2020.
+
 			int i = 0;
 			var code = RandomStringUtils.randomNumeric(CODE_LENGTH).toUpperCase();
 			var key = key(request.phone, code);
@@ -258,5 +263,25 @@ public class RegistrationDAO
 
 			return r;
 		});
+	}
+
+	/** Counts the number of registration requests currently available for the specified phone number.
+	 * 
+	 * @param phone
+	 * @return 0 if none found.
+	 */
+	public long count(final String phone)
+	{
+		return (long) redis.operation(j -> count(j, phone));
+	}
+
+	int count(final Jedis j, final String phone)
+	{
+		return CollectionUtils.size(j.scan("", new ScanParams().count(100).match(key(phone, "*"))).getResult());
+	}
+
+	void limit(final Jedis j, final String phone) throws ValidationException
+	{
+		if (MAX_TRIES <= count(j, phone)) throw new ValidationException("phone", "Too many registration requests for phone number '" + phone + "'");
 	}
 }

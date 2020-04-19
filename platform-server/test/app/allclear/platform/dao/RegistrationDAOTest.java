@@ -85,6 +85,7 @@ public class RegistrationDAOTest
 		Assertions.assertNotNull(LAST_RESPONSE, "Check lastResponse");
 		Assertions.assertEquals(String.format(MESSAGE, code, encode(expectedPhone, UTF_8), code), LAST_RESPONSE.body, "Check lastResponse.body");
 		Assertions.assertEquals(1L, dao.search(new RegistrationFilter().withPhone(expectedPhone)).total, "Check search: before");	// CanNOT search with v1 format.
+		Assertions.assertEquals(1L, dao.count(expectedPhone), "Check count: before");
 
 		var o = dao.confirm(expectedPhone, code);
 		Assertions.assertNotNull(o, "Exists");
@@ -96,7 +97,8 @@ public class RegistrationDAOTest
 		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.confirm(expectedPhone, code)))
 			.as("Check confirm: after confirm")
 			.hasMessage("The supplied code is invalid.");
-		Assertions.assertEquals(0L, dao.search(new RegistrationFilter().withPhone(expectedPhone)).total, "Check search: before");
+		Assertions.assertEquals(0L, dao.search(new RegistrationFilter().withPhone(expectedPhone)).total, "Check search: after");
+		Assertions.assertEquals(0L, dao.count(expectedPhone), "Check count: after");
 	}
 
 	public static Stream<Arguments> add_again()
@@ -117,7 +119,9 @@ public class RegistrationDAOTest
 	@MethodSource
 	public void add_again(final PeopleValue person, final String expectedPhone)
 	{
+		Assertions.assertEquals(0L, dao.count(expectedPhone), "Check count: before");
 		var code = dao.start(person.normalize());
+		Assertions.assertEquals(1L, dao.count(expectedPhone), "Check count: after");
 
 		codes.put(expectedPhone, code);
 		VALUES.put(expectedPhone, new RegistrationValue(dao.key(expectedPhone, code), person, (long) RegistrationDAO.EXPIRATION));
@@ -129,6 +133,8 @@ public class RegistrationDAOTest
 		Assertions.assertEquals(9L, dao.search(new RegistrationFilter(1, 100)).total, "Check total: All");
 		Assertions.assertEquals(1L, dao.search(new RegistrationFilter(1, 100).withPhone("+18885551000")).total, "Check total: +18885551000");
 		Assertions.assertEquals(1L, dao.search(new RegistrationFilter(1, 100).withPhone("+18885551008")).total, "Check total: +18885551008");
+		Assertions.assertEquals(1L, dao.count("+18885551000"), "Check count: +18885551000");
+		Assertions.assertEquals(1L, dao.count("+18885551008"), "Check count: +18885551008");
 
 		var code = codes.get("+18885551008");
 		assertThat(code).as("Check code").isNotNull().hasSize(6).matches(PATTERN_CODE);
@@ -149,6 +155,8 @@ public class RegistrationDAOTest
 		Assertions.assertEquals(1L, dao.search(new RegistrationFilter(1, 100).withPhone("+18885551000")).total, "Check total: +18885551000");
 		Assertions.assertEquals(0L, dao.search(new RegistrationFilter(1, 100).withPhone("+18885551008")).total, "Check total: +18885551008");
 		Assertions.assertEquals(8L, dao.search(new RegistrationFilter(1, 100)).total, "Check total: All");
+		Assertions.assertEquals(1L, dao.count("+18885551000"), "Check count: +18885551000");
+		Assertions.assertEquals(0L, dao.count("+18885551008"), "Check count: +18885551008");
 	}
 
 	@Test
@@ -208,5 +216,23 @@ public class RegistrationDAOTest
 		Assertions.assertNull(dao.requestX("+18885551002", codes.get("+18885551002")));
 		Assertions.assertNotNull(dao.requestX("+18885551003", codes.get("+18885551003")));
 		Assertions.assertEquals(7L, dao.search(new RegistrationFilter(1, 100)).total, "Check total: All");
+	}
+
+	@Test
+	public void z_00_start_with_max_retries()
+	{
+		Assertions.assertEquals(1L, dao.count("+18885551003"), "Check count: first");
+		Assertions.assertNotNull(dao.start(new PeopleValue("fourth", "+18885551003", false)));
+
+		Assertions.assertEquals(2L, dao.count("+18885551003"), "Check count: second");
+		Assertions.assertNotNull(dao.start(new PeopleValue("fourth", "+18885551003", false)));
+
+		Assertions.assertEquals(3L, dao.count("+18885551003"), "Check count: third");
+		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.start(new PeopleValue("fourth", "+18885551003", false))))
+			.hasMessage("Too many registration requests for phone number '+18885551003'");
+
+		Assertions.assertEquals(3L, dao.count("+18885551003"), "Check count: third");
+		assertThat(Assertions.assertThrows(ValidationException.class, () -> dao.start(new StartRequest("+18885551003", false, false))))
+			.hasMessage("Too many registration requests for phone number '+18885551003'");
 	}
 }

@@ -39,6 +39,7 @@ public class SessionDAO
 {
 	private static final String ID = "session:%s";
 	private static final String MATCH = "session:*";
+	public static final int MAX_TRIES = 3;
 	private static final int AUTH_DURATION = 5 * 60;	// Five minutes
 	private static final int ALERT_DURATION = 24 * 60 * 60;	// 24 hours
 	private static final String AUTH_KEY = "authentication:%s:%s";
@@ -111,12 +112,16 @@ public class SessionDAO
 	 */
 	public String auth(final String phone)
 	{
-		var token = RandomStringUtils.randomNumeric(TOKEN_LENGTH).toUpperCase();
+		return redis.operation(j -> {
+			limit(j, phone);
 
-		twilio.send(new SMSRequest(conf.authSid, conf.authPhone, String.format(conf.authSMSMessage, token, encode(phone, UTF_8), encode(token, UTF_8)), phone));
-		redis.put(authKey(phone, token), phone, AUTH_DURATION);
+			var token = RandomStringUtils.randomNumeric(TOKEN_LENGTH).toUpperCase();
 
-		return token;
+			twilio.send(new SMSRequest(conf.authSid, conf.authPhone, String.format(conf.authSMSMessage, token, encode(phone, UTF_8), encode(token, UTF_8)), phone));
+			j.setex(authKey(phone, token), AUTH_DURATION, phone);
+
+			return token;
+		});
 	}
 
 	/** Sends an alert message with an authentication token to the specified phone number/user.
@@ -367,5 +372,25 @@ public class SessionDAO
 
 			return r;
 		});
+	}
+
+	/** Counts the number of authentication requests currently available for the specified phone number.
+	 * 
+	 * @param phone
+	 * @return 0 if none found.
+	 */
+	public long count(final String phone)
+	{
+		return (long) redis.operation(j -> count(j, phone));
+	}
+
+	int count(final Jedis j, final String phone)
+	{
+		return CollectionUtils.size(j.scan("", new ScanParams().count(100).match(authKey(phone, "*"))).getResult());
+	}
+
+	void limit(final Jedis j, final String phone) throws ValidationException
+	{
+		if (MAX_TRIES <= count(j, phone)) throw new ValidationException("phone", "Too many authentication requests for phone number '" + phone + "'");
 	}
 }
