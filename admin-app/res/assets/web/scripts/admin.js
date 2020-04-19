@@ -540,7 +540,7 @@ var ConfigurationHandler = new EditTemplate({
 	          new TextField('version', 'Version'),
 	          new TextField('baseUrl', 'Base URL'),
 	          new TextField('registrationPhone', 'Registration Sid/Phone', (v, p) => p ? p : v.registrationSid),
-	          new TextField('authPhone', 'Authentication Sid/Phone', (v, p) => p ? p : v.authenticationSid),
+	          new TextField('authPhone', 'Authentication Sid/Phone', (v, p) => p ? p : v.authSid),
 	          new TextField('alertPhone', 'Alert Sid/Phone', (v, p) => p ? p : v.alertSid),
 	          new TextField('registrationSMSMessage', 'Registration SMS Message'),
 	          new TextField('authSMSMessage', 'Authentication SMS Message'),
