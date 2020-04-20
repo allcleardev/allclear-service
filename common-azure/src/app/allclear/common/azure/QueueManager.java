@@ -1,5 +1,6 @@
 package app.allclear.common.azure;
 
+import static java.util.stream.Collectors.toList;
 import static com.azure.storage.common.policy.RetryPolicyType.EXPONENTIAL;
 
 import java.io.IOException;
@@ -16,6 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import app.allclear.common.errors.AbortException;
 import app.allclear.common.errors.ThrottledException;
 import app.allclear.common.jackson.JacksonUtils;
+import app.allclear.common.task.OperatorStats;
 import app.allclear.common.task.TaskOperator;
 
 /** A Dropwizard managed component that operates a background thread to process,
@@ -57,6 +59,14 @@ public class QueueManager implements Managed, Runnable
 		return this;
 	}
 	public TaskOperator<?> removeOperator(final String name) { return operators.remove(name); }
+
+	public List<OperatorStats> stats()
+	{
+		return operators.values()
+				.stream()
+				.map(v -> new OperatorStats(v.name, queue(v.name).getProperties().getApproximateMessagesCount(), 0, v.successes, v.skips, v.errors))
+				.collect(toList());
+	}
 
 	/** Represents the duration that the thread should sleep between processing. */
 	public long getSleep() { return sleep; }
@@ -231,7 +241,12 @@ public class QueueManager implements Managed, Runnable
 	
 					// Remove from queue if successful.
 					if (op.callback.process(deserialize(request.getMessageText(), clazz)))
+					{
+						op.successes++;
 						queue.deleteMessage(request.getMessageId(), request.getPopReceipt());
+					}
+					else
+						op.skips++;
 	
 					if (logger.isDebugEnabled())
 						logger.debug("Processed {} on thread '{}' in {} ms - {}.", op.name, Thread.currentThread().getName(), System.currentTimeMillis() - time, request.getMessageText());
@@ -245,17 +260,20 @@ public class QueueManager implements Managed, Runnable
 					// queue.delayMessage(operator.name, request.getReceiptHandle(), DELAY_AFTER_ERROR);
 
 					throttled = true;
+					op.errors++;
 					break;
 				}
 
 				catch (final AbortException ex)
 				{
+					op.errors++;
 					logger.warn("Aborted: {} - {}.", op.name, ex.getMessage());
 					queue.deleteMessage(request.getMessageId(), request.getPopReceipt());
 				}
 
 				catch (final JsonParseException ex)
 				{
+					op.errors++;
 					logger.warn("UNPARSEABLE: {} - {}.", op.name, ex.getMessage());
 					queue.deleteMessage(request.getMessageId(), request.getPopReceipt());
 				}
@@ -269,6 +287,7 @@ public class QueueManager implements Managed, Runnable
 					else
 						logger.warn("{} ({}): {}", operator.name, clazz, ex.getMessage());
 	
+					op.errors++;
 					// Increment the try count[0] & set a backoff delay.
 					// Also, put back on the queue.
 					// queue.delayMessage(operator.name, request.getReceiptHandle(), DELAY_AFTER_ERROR);

@@ -676,6 +676,7 @@ var QueuesHandler = new ListTemplate({
 	CAN_EDIT: false,
 	CAN_REMOVE: false,
 
+	/*
 	ROW_ACTIONS: [ new RowAction('viewQueue', 'View',),
 	               new RowAction('viewDLQ', 'View DLQ', 'dlqSize'),
 	               new RowAction('reQueue', 'Re-Queue', 'dlqSize') ],
@@ -693,10 +694,11 @@ var QueuesHandler = new ListTemplate({
 				me.init(c.body);
 		});
 	},
+	*/
 
 	COLUMNS: [ new TextColumn('name', 'Name'),
 	           new TextColumn('queueSize', 'Queue Size'),
-	           new TextColumn('dlqSize', 'DLQ Size'),
+	           // new TextColumn('dlqSize', 'DLQ Size'),
 	           new TextColumn('successes', '# Successes'),
 	           new TextColumn('skips', '# of Skips'),
 	           new TextColumn('errors', '# of Errors') ]

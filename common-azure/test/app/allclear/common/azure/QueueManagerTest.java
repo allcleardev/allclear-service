@@ -62,11 +62,19 @@ public class QueueManagerTest
 	@Test
 	public void runQueue() throws Exception
 	{
+		var stats = queuer.stats();
+		assertThat(stats).as("Check stats: before").hasSize(1);
+		Assertions.assertEquals(7, stats.get(0).queueSize, "Check stats[0].queueSize: before");
+
 		Assertions.assertEquals(0, queuer.process());	// Not turned on yet.
 
 		queuer.turnOn();	// Make available for processing.
 
 		Assertions.assertEquals(7, queuer.process());	// Process again.
+
+		stats = queuer.stats();
+		assertThat(stats).as("Check stats: after").hasSize(1);
+		Assertions.assertEquals(0, stats.get(0).queueSize, "Check stats[0].queueSize: after");
 	}
 
 	@Test

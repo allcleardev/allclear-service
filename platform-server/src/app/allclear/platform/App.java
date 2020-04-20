@@ -135,6 +135,7 @@ public class App extends Application<Config>
         jersey.register(new FacilityResource(facilityDao, sessionDao, map));
         jersey.register(new MapResource(map));
 		jersey.register(new PeopleResource(peopleDao, registrationDao, sessionDao, task.queue(QUEUE_ALERT)));
+		jersey.register(new app.allclear.common.azure.QueueResource(task));
 		jersey.register(new RegistrationResource(registrationDao));
 		jersey.register(new SessionResource(sessionDao));
 		jersey.register(new SymptomsLogResource(new SymptomsLogDAO(factory), sessionDao));
