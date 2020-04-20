@@ -802,6 +802,7 @@ public class PeopleResourceTest
 	{
 		return Stream.of(
 			arguments(new PeopleValue()),
+			arguments(new PeopleValue("lenny", "888-555-2201", false)),	// Phone number already exists.
 			arguments(new PeopleValue(null, "888-555-2200", false)),
 			arguments(new PeopleValue("lenny", "aaa-aaa-aaaa", false)),
 			arguments(new PeopleValue("lenny", null, false)));
