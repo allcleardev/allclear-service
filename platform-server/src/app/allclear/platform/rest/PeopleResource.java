@@ -178,7 +178,7 @@ public class PeopleResource
 	public Response start(final StartRequest request) throws ValidationException
 	{
 		if (dao.existsByPhone(request.phone))	// Make sure that the user phone number doesn't already exist.
-			throw new ValidationException("An account with that phone number already exists. Please sign in below instead.");
+			throw new ValidationException("An account with that phone number already exists. Please sign in above instead.");
 
 		registrationDao.start(request);
 
@@ -231,7 +231,7 @@ public class PeopleResource
 		dao.validate(value.withId("TEMP123"));	// Set temporary ID so that it passes validation.
 
 		if (dao.existsByPhone(value.normalize().phone))	// Make sure that the user phone number doesn't already exist.
-			throw new ValidationException("An account with that phone number already exists. Please sign in below instead.");
+			throw new ValidationException("An account with that phone number already exists. Please sign in above instead.");
 
 		registrationDao.start(value.withId(null));	// Remove the temporary ID before caching.
 
