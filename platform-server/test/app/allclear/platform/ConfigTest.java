@@ -289,16 +289,16 @@ public class ConfigTest
 		Assertions.assertEquals("com.mysql.jdbc.Driver", o.read.getDriverClass(), "Check read.driverClass");
 		Assertions.assertEquals("allclear", o.read.getUser(), "Check read.user");
 		Assertions.assertEquals("allclearpwd", o.read.getPassword(), "Check read.password");
-		Assertions.assertEquals("jdbc:mysql://allclear-staging.mysql.database.azure.com:3306/allclear?useEncoding=true&characterEncoding=UTF-8&prepStmtCacheSize=100&prepStmtCacheSqlLimit=1024&serverTimezone=UTC&useSSL=true&requireSSL=true",  o.read.getUrl(), "Check read.url");
+		Assertions.assertEquals("jdbc:mysql://ro-allclear-staging.mysql.database.azure.com:3306/allclear?useEncoding=true&characterEncoding=UTF-8&prepStmtCacheSize=100&prepStmtCacheSqlLimit=1024&serverTimezone=UTC&useSSL=true&requireSSL=true",  o.read.getUrl(), "Check read.url");
 		Assertions.assertEquals(Duration.seconds(1L), o.read.getMaxWaitForConnection(), "Check read.maxWaitForConnection");
 		Assertions.assertEquals(Optional.of("SELECT 1"), o.read.getValidationQuery(), "Check read.validationQuery");
 		Assertions.assertEquals(Optional.of(Duration.seconds(10L)), o.read.getValidationQueryTimeout(), "Check read.validationQueryTimeout");
 		Assertions.assertEquals(5, o.read.getMinSize(), "Check read.minSize");
 		Assertions.assertEquals(20, o.read.getMaxSize(), "Check read.maxSize");
-		Assertions.assertNull(o.read.getReadOnlyByDefault(), "Check read.readOnlyByDefault");
+		Assertions.assertTrue(o.read.getReadOnlyByDefault(), "Check read.readOnlyByDefault");
 		Assertions.assertTrue(o.read.getCheckConnectionWhileIdle(), "Check read.checkConnectionWhileIdle");
 		Assertions.assertTrue(o.read.getCheckConnectionOnBorrow(), "Check read.checkConnectionOnBorrow");
-		Assertions.assertEquals(TransactionIsolation.READ_COMMITTED, o.read.getDefaultTransactionIsolation(), "Check read.defaultTransactionIsolation");
+		Assertions.assertEquals(TransactionIsolation.READ_UNCOMMITTED, o.read.getDefaultTransactionIsolation(), "Check read.defaultTransactionIsolation");
 		assertThat(o.read.getProperties()).as("Check read.properties").contains(MapEntry.entry("hibernate.dialect", "org.hibernate.dialect.MySQL57Dialect"));
 	}
 
