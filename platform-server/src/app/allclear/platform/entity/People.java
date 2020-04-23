@@ -380,7 +380,7 @@ public class People implements Serializable
 	@Transient
 	public PeopleValue toValueX()
 	{
-		var facilities_ = CollectionUtils.isEmpty(getFacilities()) ? null : getFacilities().stream().map(o -> o.toValue()).collect(toList());
+		var facilities_ = CollectionUtils.isEmpty(getFacilities()) ? null : getFacilities().stream().map(o -> o.toValue().withFavorite(true)).collect(toList());
 
 		return toValue().withConditions(toCreatedValues(getConditions()))
 			.withExposures(toCreatedValues(getExposures()))

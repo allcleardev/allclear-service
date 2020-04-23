@@ -123,6 +123,7 @@ public class FacilityValue implements Serializable
 	public FacilityValue withUpdatedAt(final Date newValue) { updatedAt = newValue; return this; }
 	public FacilityValue withMeters(final Long newValue) { meters = newValue; return this; }
 	public FacilityValue withRestricted(final Boolean newValue) { restricted = newValue; return this; }
+	public FacilityValue withFavorite(final Boolean newValue) { favorite = newValue; return this; }
 	public FacilityValue favorite(final List<Long> ids) { favorite = ids.contains(id); return this; }
 
 	public FacilityValue() {}
