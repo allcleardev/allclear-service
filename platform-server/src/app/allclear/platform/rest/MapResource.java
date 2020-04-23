@@ -56,7 +56,7 @@ public class MapResource
 			var l = r.geometry.location;
 			return new GeocodedResponse(r.streetNumber().shortName,
 				r.streetName().shortName,
-				r.city().shortName,
+				r.city().longName,
 				r.county().shortName,
 				r.state().longName,
 				r.country().shortName,
