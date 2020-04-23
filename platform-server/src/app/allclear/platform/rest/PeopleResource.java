@@ -151,7 +151,7 @@ public class PeopleResource
 
 	@POST
 	@Path("/{id}/facilities") @Timed @UnitOfWork
-	@ApiOperation(value="addFacilities", notes="Associates one or more facilities with a person.", response=PeopleValue.class)
+	@ApiOperation(value="addFacilities", notes="Associates one or more facilities with a person. Administrator usage only.", response=PeopleValue.class)
 	public CountResults addFacilities(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@PathParam("id") final String id,
 		final List<Long> facilityIds) throws ObjectNotFoundException, ValidationException
@@ -271,7 +271,7 @@ public class PeopleResource
 
 	@DELETE
 	@Path("/{id}/facilities") @Timed @UnitOfWork
-	@ApiOperation(value="removeFacilities", notes="Removes one or more facility associations from a person.", response=PeopleValue.class)
+	@ApiOperation(value="removeFacilities", notes="Removes one or more facility associations from a person. Administrator usage only.", response=PeopleValue.class)
 	public CountResults removeFacilities(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@PathParam("id") final String id,
 		final List<Long> facilityIds) throws ObjectNotFoundException, ValidationException

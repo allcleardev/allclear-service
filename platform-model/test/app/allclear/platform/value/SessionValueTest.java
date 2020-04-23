@@ -20,6 +20,32 @@ import app.allclear.platform.model.StartRequest;
 public class SessionValueTest
 {
 	@Test
+	public void create_anonymous()
+	{
+		var o = SessionValue.anonymous();
+		assertThat(o.id).as("Check ID").hasSize(36);
+		Assertions.assertFalse(o.rememberMe, "Check rememberMe");
+		Assertions.assertEquals(SessionValue.DURATION_SHORT, o.duration, "Check duration");
+		Assertions.assertEquals(30 * 60, o.seconds(), "Check seconds");
+		Assertions.assertNull(o.admin, "Check admin");
+		Assertions.assertNull(o.person, "Check person");
+		Assertions.assertNull(o.registration, "Check registration");
+		assertThat(o.expiresAt).as("Check expiresAt").isCloseTo(new Date(System.currentTimeMillis() + SessionValue.DURATION_SHORT), 100L);
+		assertThat(o.lastAccessedAt).as("Check lastAccessedAt").isCloseTo(new Date(), 100L).isEqualTo(o.createdAt);
+		Assertions.assertFalse(o.admin(), "Check admin()");
+		Assertions.assertFalse(o.supers(), "Check supers()");
+		Assertions.assertFalse(o.person(), "Check person()");
+		Assertions.assertFalse(o.registration(), "Check registration()");
+
+		ThreadUtils.sleep(2000L);
+
+		var expiresAt = new Date(o.expiresAt.getTime());
+		var lastAccessedAt = new Date(o.lastAccessedAt.getTime());
+		assertThat(o.accessed().expiresAt).as("Check accessed: expiresAt").isAfter(expiresAt);
+		assertThat(o.accessed().lastAccessedAt).as("Check accessed: lastAccessedAt").isAfter(lastAccessedAt);
+	}
+
+	@Test
 	public void create_admin()
 	{
 		var o = new SessionValue(false, new AdminValue("andy", false));

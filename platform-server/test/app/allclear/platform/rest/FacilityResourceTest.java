@@ -24,8 +24,7 @@ import io.dropwizard.testing.junit5.ResourceExtension;
 
 import app.allclear.junit.hibernate.*;
 import app.allclear.common.dao.QueryResults;
-import app.allclear.common.errors.NotFoundExceptionMapper;
-import app.allclear.common.errors.ValidationExceptionMapper;
+import app.allclear.common.errors.*;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.common.value.OperationResponse;
@@ -67,6 +66,7 @@ public class FacilityResourceTest
 	private static SessionValue PERSON_UNRESTRICTED = null;
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
+		.addResource(new AuthorizationExceptionMapper())
 		.addResource(new NotFoundExceptionMapper())
 		.addResource(new ValidationExceptionMapper())
 		.addResource(resource = new FacilityResource(dao, sessionDao, map)).build();
@@ -102,6 +102,8 @@ public class FacilityResourceTest
 	@Test
 	public void add()
 	{
+		sessionDao.current(ADMIN = sessionDao.add(new AdminValue("admin"), false));
+
 		var now = new Date();
 		var response = request()
 			.post(Entity.entity(VALUE = new FacilityValue("Julius", "56 First Street", "Louisville", "KY", bg("-35"), bg("52.607"),
@@ -112,11 +114,25 @@ public class FacilityResourceTest
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE.withId(1L).withCreatedAt(now).withUpdatedAt(now), value);
 
-		ADMIN = sessionDao.add(new AdminValue("admin"), false);
 		PERSON = sessionDao.add(peopleDao.add(new PeopleValue("firstPerson", "888-555-1000", true)), false);
 		PERSON_UNRESTRICTED = sessionDao.add(peopleDao.add(new PeopleValue("secondPerson", "888-555-1001", true).withSymptoms(Symptom.FEVER)), false);
 
 		peopleDao.addFacilities(PERSON.person.id, List.of(VALUE.id));
+	}
+
+	@Test
+	public void add_noAuth()
+	{
+		count(new FacilityFilter(), 1L);
+
+		sessionDao.current(PERSON);
+
+		var response = request()
+			.post(Entity.entity(new FacilityValue("Julius + 1", "56 First Street", "Louisville", "KY", bg("-35"), bg("52.607"),
+				true, false, true, false, true, false, true, false), UTF8MediaType.APPLICATION_JSON_TYPE));
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, response.getStatus(), "Status");
+
+		count(new FacilityFilter(), 1L);
 	}
 
 	@Test
@@ -259,6 +275,17 @@ public class FacilityResourceTest
 	}
 
 	@Test
+	public void modify_noAuth()
+	{
+		sessionDao.current(PERSON);
+
+		var response = request()
+			.put(Entity.entity(new FacilityValue("Julius + 1", "56 First Street", "Louisville", "KY", bg("-35"), bg("52.607"),
+				true, false, true, false, true, false, true, false).withId(VALUE.id), UTF8MediaType.APPLICATION_JSON_TYPE));
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, response.getStatus(), "Status");
+	}
+
+	@Test
 	public void populate_all()
 	{
 		var v = resource.populate(new FacilityValue().withAddress("56 First Street"));
@@ -302,6 +329,14 @@ public class FacilityResourceTest
 		Assertions.assertEquals("New Hampshire", v.state, "Check state");
 		Assertions.assertEquals(bg("40.7487855"), v.latitude, "Check latitude");
 		Assertions.assertEquals(bg("3.14"), v.longitude, "Check longitude");
+	}
+
+	@Test
+	public void remove_noAuth()
+	{
+		sessionDao.current(PERSON);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request(VALUE.id.toString()).delete().getStatus(), "Status");
 	}
 
 	public static Stream<Arguments> search()
@@ -436,6 +471,23 @@ public class FacilityResourceTest
 			Assertions.assertEquals(total, results.records.size(), assertId + "Check records.size");
 			results.records.forEach(v -> Assertions.assertFalse(v.restricted, "Check restricted: " + v.name));
 		}
+	}
+
+	@Test
+	public void search_withAnonymous()
+	{
+		sessionDao.clear();
+
+		var response = request("search").post(Entity.json(new FacilityFilter()));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var results = response.readEntity(TYPE_QUERY_RESULTS);
+		Assertions.assertNotNull(results, "Exists");
+		assertThat(results.records).as("Check records").hasSize(1);
+
+		var value = results.records.get(0);
+		Assertions.assertFalse(value.favorite, "Check favorite");
+		Assertions.assertFalse(value.restricted, "Check restricted");
 	}
 
 	@Test

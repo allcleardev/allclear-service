@@ -45,6 +45,7 @@ public class SessionDAO
 	private static final String AUTH_KEY = "authentication:%s:%s";
 	private final ObjectMapper mapper = JacksonUtils.createMapper();
 	public static final int TOKEN_LENGTH = RegistrationDAO.CODE_LENGTH;
+	public static final SessionValue ANONYMOUS = SessionValue.anonymous();
 
 	public static String key(final String id) { return String.format(ID, id); }
 	public static String authKey(final String phone, final String token) { return String.format(AUTH_KEY, phone, token); }
@@ -179,6 +180,16 @@ public class SessionDAO
 	 * @return NULL if there is no current session
 	 */
 	public SessionValue current() { return current.get(); }
+
+	/** Gets the current session if available otherwise retrieves the Anonymous session.
+	 * 
+	 * @return never NULL.
+	 */
+	public SessionValue currentOrAnon()
+	{
+		var o = current();
+		return (null != o) ? o : ANONYMOUS;
+	}
 
 	/** Internal/test usage - sets the current threads associated session.
 	 * 

@@ -22,6 +22,7 @@ public class SessionValue implements Serializable
 
 	public static final long DURATION_SHORT = 30L * 60L * 1000L;
 	public static final long DURATION_LONG = 30L * 24L * 60L * 60L * 1000L;
+	public static SessionValue anonymous() { return new SessionValue(); }	// ALLCLEAR-320: DLS on 4/23/2020.
 
 	// Members
 	public final String id;
@@ -66,6 +67,17 @@ public class SessionValue implements Serializable
 			new Date(now.getTime() + duration),
 			now,
 			createdAt);
+	}
+
+	private SessionValue()	// Anonymous. ALLCLEAR-320: DLS on 4/23/2020.
+	{
+		this(
+			false,
+			DURATION_SHORT,
+			null,
+			null,
+			null,
+			new Date());
 	}
 
 	public SessionValue(final StartRequest registration)

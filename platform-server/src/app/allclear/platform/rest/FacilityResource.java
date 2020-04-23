@@ -103,6 +103,8 @@ public class FacilityResource
 	public FacilityValue add(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		final FacilityValue value) throws ValidationException
 	{
+		sessionDao.checkAdmin();
+
 		return dao.add(populate(value));
 	}
 
@@ -112,6 +114,8 @@ public class FacilityResource
 	public FacilityValue set(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		final FacilityValue value) throws ValidationException
 	{
+		sessionDao.checkAdmin();
+
 		return dao.update(populate(value));
 	}
 
@@ -121,6 +125,8 @@ public class FacilityResource
 	public OperationResponse remove(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@PathParam("id") final Long id) throws ValidationException
 	{
+		sessionDao.checkAdmin();
+
 		return new OperationResponse(dao.remove(id));
 	}
 
@@ -139,7 +145,7 @@ public class FacilityResource
 			log.info("GEOCODED: {} in {}", filter.from.location, timer.split());
 		}
 
-		var s = sessionDao.current();
+		var s = sessionDao.currentOrAnon();
 		var restricted = (s.person() && !s.person.meetsCdcPriority3());	// Does the current user have restrictions imposed with regards to facilities that are open to them?
 		if (filter.restrictive && restricted)
 			filter.withNotTestCriteriaId(TestCriteria.CDC_CRITERIA.id);
