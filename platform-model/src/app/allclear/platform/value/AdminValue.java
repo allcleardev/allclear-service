@@ -22,7 +22,7 @@ public class AdminValue implements Serializable
 
 	public static final String TABLE = "admin";
 	public static final int MAX_LEN_ID = 64;
-	public static final int MAX_LEN_PASSWORD = 30;
+	public static final int MAX_LEN_PASSWORD = 40;	// Leave long enough for a UUID.
 	public static final int MIN_LEN_PASSWORD = 8;
 	public static final int MAX_LEN_EMAIL = 128;
 	public static final int MAX_LEN_FIRST_NAME = 32;

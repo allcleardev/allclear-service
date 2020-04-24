@@ -64,7 +64,7 @@ var AdminsHandler = new ListTemplate({
 	           new TextColumn('createdAt', 'Created At', 'toDateTime'),
 	           new TextColumn('updatedAt', 'Updated At', 'toDateTime') ],
 	FIELDS: [ new EditField('id', 'ID', true, false, 128, 50),
-	          new PassField('password', 'Password', true, 32, 10),
+	          new PassField('password', 'Password', true, 40, 40),
 	          new EditField('email', 'Email', true, false, 128, 50),
 	          new EditField('firstName', 'First Name', true, false, 32, 50),
 	          new EditField('lastName', 'Last Name', true, false, 32, 50),

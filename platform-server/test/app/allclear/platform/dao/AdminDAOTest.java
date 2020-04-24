@@ -5,6 +5,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static app.allclear.common.crypto.Hasher.saltAndHash;
 import static app.allclear.testing.TestingUtils.*;
 
+import java.util.UUID;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -51,7 +52,7 @@ public class AdminDAOTest
 	@Test
 	public void add()
 	{
-		var value = dao.add(VALUE = new AdminValue("tester-b", CURRENT_PASSWORD = "Password_1", "dsmall@allclear.app", "Dave", "Small", true));
+		var value = dao.add(VALUE = new AdminValue("tester-b", CURRENT_PASSWORD = UUID.randomUUID().toString(), "dsmall@allclear.app", "Dave", "Small", true));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
@@ -133,7 +134,7 @@ public class AdminDAOTest
 	@Test
 	public void authenticate()
 	{
-		var value = dao.authenticate(new AuthenticationRequest("tester-b", "Password_1", false));
+		var value = dao.authenticate(new AuthenticationRequest("tester-b", CURRENT_PASSWORD, false));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
@@ -141,6 +142,7 @@ public class AdminDAOTest
 	public static Stream<Arguments> authenticate_fail()
 	{
 		return Stream.of(
+				arguments("tester-b", "Password_1"),
 				arguments("tester-b", "Password_2"),
 				arguments("tester-a", "Password_1"),
 				arguments("kathy", "Password_2")
@@ -185,6 +187,9 @@ public class AdminDAOTest
 	@Test
 	public void modify()
 	{
+		count(new AdminFilter().withFirstName("Dave"), 1L);
+		count(new AdminFilter().withFirstName("David"), 0L);
+
 		var value = dao.update(VALUE.withFirstName("David"));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
@@ -193,6 +198,8 @@ public class AdminDAOTest
 	@Test @Disabled
 	public void modify_count()
 	{
+		count(new AdminFilter().withFirstName("Dave"), 0L);
+		count(new AdminFilter().withFirstName("David"), 1L);
 	}
 
 	@Test
