@@ -4,7 +4,8 @@ AdminApp.TABS = [ { id: 'doPeople', caption: 'People', children: [ { id: 'doRegi
 	                                                               { id: 'doTests', caption: 'Tests' } ] },
 	{ id: 'doFacilities', caption: 'Facilities' },
 	{ id: 'doLogs', caption: 'Logs', children: [ { id: 'doQueueStats', caption: 'Queue Stats' } ] },
-	{ id: 'doSessions', caption: 'Sessions', children: [ { id: 'doAdmins', caption: 'Admins' } ] },
+	{ id: 'doSessions', caption: 'Sessions', children: [ { id: 'doAdmins', caption: 'Admins' },
+	                                                     { id: 'doCustomers', caption: 'Customers' } ] },
 	{ id: 'doConfig', caption: 'Config', children: [ { id: 'doHibernate', caption: 'Hibernate' },
 	                                                 { id: 'doHeapDump', caption: 'Heap Dump' } ] } ];
 
@@ -15,6 +16,7 @@ AdminApp.doFacilities = function(body) { FacilitiesHandler.filter({ pageSize: 10
 AdminApp.doLogs = function(body) { LogsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doSessions = function(body) { SessionsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doAdmins = function(body) { AdminsHandler.init(body); }
+AdminApp.doCustomers = function(body) { CustomersHandler.init(body); }
 AdminApp.doConfig = function(body) { ConfigurationHandler.init(body); }
 AdminApp.doHibernate = function(body) { HibernateHandler.init(body); }
 AdminApp.doHeapDump = function(body) { HeapDumpHandler.init(body); }
@@ -83,7 +85,53 @@ var AdminsHandler = new ListTemplate({
 		          new EditField('lastName', 'Last Name', false, false, 32, 50),
 		          new ListField('supers', 'Super?', false, 'yesNoOptions', undefined, 'No Search'),
 		          new DatesField('createdAt', 'Created At'),
-		          new DatesField('updatedAt', 'Updated At') ]
+		          new DatesField('updatedAt', 'Updated At'),
+		          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ]
+	}
+});
+
+var CustomersHandler = new ListTemplate({
+	NAME: 'customer',
+	SINGULAR: 'Customer',
+	PLURAL: 'Customers',
+	RESOURCE: 'customers',
+
+	CAN_ADD: true,
+	CAN_EDIT: true,
+	CAN_REMOVE: true,
+	EDIT_METHOD: 'put',
+
+	onEditorPostLoad: function(c) {
+		if (c.value.id) c.form.elements['id'].disabled = true;	// CanNOT update the ID. Must remove and re-add with different ID. DLS on 1/2/2019.
+	},
+
+	COLUMNS: [ new TextColumn('id', 'ID', undefined, true),
+	           new EditColumn('name', 'Name'),
+	           new EditColumn('limit', 'Limit'),
+	           new TextColumn('active', 'Active?'),
+	           new TextColumn('createdAt', 'Created At', 'toDateTime'),
+	           new TextColumn('updatedAt', 'Updated At', 'toDateTime') ],
+	FIELDS: [ new TextField('id', 'ID'),
+	          new EditField('name', 'Name', true, false, 128, 50),
+	          new EditField('limit', 'Limit', true, false, 10, 5, 'Indicates the maximum number of calls per second. Zero indicates no limit.'),
+	          new BoolField('active', 'Active?', false),
+	          new TextField('createdAt', 'Created At', 'toDateTime'),
+	          new TextField('updatedAt', 'Updated At', 'toDateTime') ],
+	SEARCH: {
+		NAME: 'customer',
+		SINGULAR: 'Customer',
+		PLURAL: 'Customers',
+		RESOURCE: 'customers',
+
+		FIELDS: [ new EditField('id', 'ID', false, false, 40, 40),
+		          new EditField('name', 'Name', false, false, 128, 50),
+		          new ListField('hasLimit', 'Has Limit?', false, 'yesNoOptions', undefined, 'No Search'),
+		          new EditField('limit', 'Limit', false, false, 10, 5),
+		          new RangeField('limit', 'Limit', false, 10, 5),
+		          new ListField('active', 'Active?', false, 'yesNoOptions', undefined, 'No Search'),
+		          new DatesField('createdAt', 'Created At'),
+		          new DatesField('updatedAt', 'Updated At'),
+		          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ]
 	}
 });
 
