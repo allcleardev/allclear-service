@@ -18,8 +18,7 @@ import com.microsoft.azure.storage.table.CloudTable;
 import com.microsoft.azure.storage.table.TableQuery;
 
 import app.allclear.common.dao.QueryResults;
-import app.allclear.common.errors.ValidationException;
-import app.allclear.common.errors.Validator;
+import app.allclear.common.errors.*;
 import app.allclear.platform.entity.Admin;
 import app.allclear.platform.filter.AdminFilter;
 import app.allclear.platform.model.AuthenticationRequest;
@@ -168,15 +167,15 @@ public class AdminDAO
 	 *
 	 * @param id
 	 * @return never NULL.
-	 * @throws ValidationException if the identifier is invalid.
+	 * @throws ObjectNotFoundException if the identifier is invalid.
 	 */
-	public Admin findWithException(final String id) throws ValidationException
+	public Admin findWithException(final String id) throws ObjectNotFoundException
 	{
 		try
 		{
 			var record = find(id);
 			if (null == record)
-				throw new ValidationException("id", "Could not find the Admin because id '" + id + "' is invalid.");
+				throw new ObjectNotFoundException("Could not find the Admin because id '" + id + "' is invalid.");
 
 			return record;
 		}
@@ -202,9 +201,9 @@ public class AdminDAO
 	 *
 	 * @param id
 	 * @return never NULL.
-	 * @throws ValidationException if the identifier is valid.
+	 * @throws ObjectNotFoundException if the identifier is valid.
 	 */
-	public AdminValue getByIdWithException(final String id) throws ValidationException
+	public AdminValue getByIdWithException(final String id) throws ObjectNotFoundException
 	{
 		return findWithException(id).toValue();
 	}

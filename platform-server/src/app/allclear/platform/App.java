@@ -105,6 +105,7 @@ public class App extends Application<Config>
 
 		var factory = transHibernateBundle.getSessionFactory();
 		var adminDao = new AdminDAO(conf.admins);
+		var customerDao = new CustomerDAO(conf.env, conf.admins);
 		var facilityDao = new FacilityDAO(factory);
 		var peopleDao = new PeopleDAO(factory);
 		var sessionDao = new SessionDAO(session, twilio, conf);
@@ -132,6 +133,7 @@ public class App extends Application<Config>
         jersey.register(new LogResource());
         jersey.register(new AuthFilter(sessionDao));
         jersey.register(new AdminResource(adminDao, sessionDao));
+        jersey.register(new CustomerResource(customerDao));
         jersey.register(new FacilityResource(facilityDao, sessionDao, map));
         jersey.register(new MapResource(map));
 		jersey.register(new PeopleResource(peopleDao, registrationDao, sessionDao, task.queue(QUEUE_ALERT)));

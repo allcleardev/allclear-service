@@ -27,6 +27,7 @@ public class Validator
 	public static final Pattern PATTERN_PHONE = Pattern.compile("\\+[\\d]+");
 	public static final Pattern PATTERN_UPPER_CASE = Pattern.compile("[A-Z]");
 	public static final Pattern PATTERN_PASSWORD_INVALID = Pattern.compile("[^a-zA-Z\\d\\~\\!\\@\\#\\$\\%\\^\\&\\*\\(\\)\\-\\_\\+\\=]");
+	public static final Pattern PATTERN_UUID = Pattern.compile("\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}");
 
 	public static final String CODE_MISSING_FIELD = "VC-101";
 	public static final String CODE_MISSING_TOO_LONG = "VC-102";

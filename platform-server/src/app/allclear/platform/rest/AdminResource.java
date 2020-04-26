@@ -11,6 +11,7 @@ import io.swagger.annotations.*;
 
 import com.codahale.metrics.annotation.Timed;
 import app.allclear.common.dao.QueryResults;
+import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.resources.Headers;
@@ -59,7 +60,7 @@ public class AdminResource
 	@Path("/{id}") @Timed
 	@ApiOperation(value="get", notes="Gets a single Admin by its primary key.", response=AdminValue.class)
 	public AdminValue get(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
-		@PathParam("id") final String id) throws ValidationException
+		@PathParam("id") final String id) throws ObjectNotFoundException
 	{
 		return dao.getByIdWithException(id);
 	}
@@ -67,7 +68,7 @@ public class AdminResource
 	@GET
 	@Path("/self") @Timed
 	@ApiOperation(value="get", notes="Gets the current user's Admin profile.", response=AdminValue.class)
-	public AdminValue get(@HeaderParam(Headers.HEADER_SESSION) final String sessionId) throws ValidationException
+	public AdminValue get(@HeaderParam(Headers.HEADER_SESSION) final String sessionId) throws ObjectNotFoundException
 	{
 		return dao.getByIdWithException(sessionDao.current().admin.id);
 	}

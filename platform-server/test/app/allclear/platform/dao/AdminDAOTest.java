@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
+import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.entity.Admin;
@@ -52,7 +53,7 @@ public class AdminDAOTest
 	@Test
 	public void add()
 	{
-		var value = dao.add(VALUE = new AdminValue("tester-b", CURRENT_PASSWORD = UUID.randomUUID().toString(), "dsmall@allclear.app", "Dave", "Small", true));
+		var value = dao.add(VALUE = new AdminValue("~tester-b", CURRENT_PASSWORD = UUID.randomUUID().toString(), "dsmall@allclear.app", "Dave", "Small", true));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
@@ -134,7 +135,7 @@ public class AdminDAOTest
 	@Test
 	public void authenticate()
 	{
-		var value = dao.authenticate(new AuthenticationRequest("tester-b", CURRENT_PASSWORD, false));
+		var value = dao.authenticate(new AuthenticationRequest("~tester-b", CURRENT_PASSWORD, false));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
@@ -142,9 +143,9 @@ public class AdminDAOTest
 	public static Stream<Arguments> authenticate_fail()
 	{
 		return Stream.of(
-				arguments("tester-b", "Password_1"),
-				arguments("tester-b", "Password_2"),
-				arguments("tester-a", "Password_1"),
+				arguments("~tester-b", "Password_1"),
+				arguments("~tester-b", "Password_2"),
+				arguments("~tester-a", "Password_1"),
 				arguments("kathy", "Password_2")
 			);
 	}
@@ -167,7 +168,7 @@ public class AdminDAOTest
 	@Test
 	public void findWithException()
 	{
-		assertThrows(ValidationException.class, () -> dao.findWithException(VALUE.id + "INVALID"));
+		assertThrows(ObjectNotFoundException.class, () -> dao.findWithException(VALUE.id + "INVALID"));
 	}
 
 	@Test
@@ -181,7 +182,7 @@ public class AdminDAOTest
 	@Test
 	public void getWithException()
 	{
-		assertThrows(ValidationException.class, () -> dao.getByIdWithException(VALUE.id + "INVALID"));
+		assertThrows(ObjectNotFoundException.class, () -> dao.getByIdWithException(VALUE.id + "INVALID"));
 	}
 
 	@Test
@@ -351,7 +352,7 @@ public class AdminDAOTest
 	@Test
 	public void testRemove_find()
 	{
-		assertThrows(ValidationException.class, () -> dao.findWithException(VALUE.id));
+		assertThrows(ObjectNotFoundException.class, () -> dao.findWithException(VALUE.id));
 	}
 
 	/** Test removal after the search. */
