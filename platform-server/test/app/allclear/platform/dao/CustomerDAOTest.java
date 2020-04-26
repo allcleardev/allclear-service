@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static app.allclear.testing.TestingUtils.*;
 
+import java.util.Date;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +15,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import app.allclear.common.errors.ObjectNotFoundException;
+import app.allclear.common.errors.ThrottledException;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.errors.Validator;
 import app.allclear.platform.ConfigTest;
@@ -96,6 +98,33 @@ public class CustomerDAOTest
 	public void add_tooHighLimit()
 	{
 		assertThrows(ValidationException.class, () -> dao.add(createValid().withLimit(CustomerValue.MAX_LIMIT + 1)));
+	}
+
+	@Test
+	public void authenticate()
+	{
+		count(new CustomerFilter().withHasLastAccessedAt(true), 0L);
+		count(new CustomerFilter().withHasLastAccessedAt(false), 1L);
+		Assertions.assertEquals(0L, dao.findWithException(VALUE.id).getLastAccessedAt());
+
+		assertThrows(ThrottledException.class, () -> dao.access(VALUE.id, VALUE.limit));
+		count(new CustomerFilter().withHasLastAccessedAt(true), 0L);
+		count(new CustomerFilter().withHasLastAccessedAt(false), 1L);
+		Assertions.assertEquals(0L, dao.findWithException(VALUE.id).getLastAccessedAt());
+
+		assertThrows(ObjectNotFoundException.class, () -> dao.access("INVALID", 0));
+		count(new CustomerFilter().withHasLastAccessedAt(true), 0L);
+		count(new CustomerFilter().withHasLastAccessedAt(false), 1L);
+		Assertions.assertEquals(0L, dao.findWithException(VALUE.id).getLastAccessedAt());
+
+		var value = dao.access(VALUE.id, VALUE.limit - 1);
+		Assertions.assertNotNull(value, "Exists");
+		assertThat(value.lastAccessedAt).as("lastAccessedAt Exists").isNotNull().isCloseTo(new Date(), 500L);
+		count(new CustomerFilter().withHasLastAccessedAt(true), 1L);
+		count(new CustomerFilter().withHasLastAccessedAt(false), 0L);
+		Assertions.assertEquals(value.lastAccessedAt.getTime(), dao.findWithException(VALUE.id).getLastAccessedAt());
+
+		VALUE.lastAccessedAt = value.lastAccessedAt;
 	}
 
 	@Test
@@ -194,6 +223,9 @@ public class CustomerDAOTest
 			arguments(new CustomerFilter(1, 20).withLimitFrom(VALID.limit), 1L),
 			arguments(new CustomerFilter(1, 20).withLimitTo(VALID.limit), 1L),
 			arguments(new CustomerFilter(1, 20).withActive(VALID.active), 1L),
+			arguments(new CustomerFilter(1, 20).withHasLastAccessedAt(true), 1L),
+			arguments(new CustomerFilter(1, 20).withLastAccessedAtFrom(hourAgo), 1L),
+			arguments(new CustomerFilter(1, 20).withLastAccessedAtTo(hourAhead), 1L),
 			arguments(new CustomerFilter(1, 20).withCreatedAtFrom(hourAgo), 1L),
 			arguments(new CustomerFilter(1, 20).withCreatedAtTo(hourAhead), 1L),
 			arguments(new CustomerFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
@@ -209,6 +241,9 @@ public class CustomerDAOTest
 			arguments(new CustomerFilter(1, 20).withLimitFrom(VALID.limit + 1), 0L),
 			arguments(new CustomerFilter(1, 20).withLimitTo(VALID.limit - 1), 0L),
 			arguments(new CustomerFilter(1, 20).withActive(!VALID.active), 0L),
+			arguments(new CustomerFilter(1, 20).withHasLastAccessedAt(false), 0L),
+			arguments(new CustomerFilter(1, 20).withLastAccessedAtFrom(hourAhead), 0L),
+			arguments(new CustomerFilter(1, 20).withLastAccessedAtTo(hourAgo), 0L),
 			arguments(new CustomerFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
 			arguments(new CustomerFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
 			arguments(new CustomerFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
@@ -271,6 +306,13 @@ public class CustomerDAOTest
 			arguments(new CustomerFilter("active", "invalid"), "active", "DESC"),	// Invalid sort direction is converted to the default.
 			arguments(new CustomerFilter("active", "DESC"), "active", "DESC"),
 			arguments(new CustomerFilter("active", "desc"), "active", "DESC"),
+
+			arguments(new CustomerFilter("lastAccessedAt", null), "lastAccessedAt", "DESC"), // Missing sort direction is converted to the default.
+			arguments(new CustomerFilter("lastAccessedAt", "ASC"), "lastAccessedAt", "ASC"),
+			arguments(new CustomerFilter("lastAccessedAt", "asc"), "lastAccessedAt", "ASC"),
+			arguments(new CustomerFilter("lastAccessedAt", "invalid"), "lastAccessedAt", "DESC"),	// Invalid sort direction is converted to the default.
+			arguments(new CustomerFilter("lastAccessedAt", "DESC"), "lastAccessedAt", "DESC"),
+			arguments(new CustomerFilter("lastAccessedAt", "desc"), "lastAccessedAt", "DESC"),
 
 			arguments(new CustomerFilter("createdAt", null), "createdAt", "DESC"), // Missing sort direction is converted to the default.
 			arguments(new CustomerFilter("createdAt", "ASC"), "createdAt", "ASC"),
@@ -344,6 +386,10 @@ public class CustomerDAOTest
 		Assertions.assertEquals(expected.name, record.getName(), assertId + "Check name");
 		Assertions.assertEquals(expected.limit, record.getLimit(), assertId + "Check limit");
 		Assertions.assertEquals(expected.active, record.getActive(), assertId + "Check active");
+		if (null == expected.lastAccessedAt)
+			Assertions.assertEquals(0L, record.getLastAccessedAt(), "Check lastAccessedAt");
+		else
+			Assertions.assertEquals(expected.lastAccessedAt.getTime(), record.getLastAccessedAt(), "Check lastAccessedAt");
 		Assertions.assertEquals(expected.createdAt, record.getCreatedAt(), assertId + "Check createdAt");
 		Assertions.assertEquals(expected.updatedAt, record.getUpdatedAt(), assertId + "Check updatedAt");
 	}
@@ -356,6 +402,7 @@ public class CustomerDAOTest
 		Assertions.assertEquals(expected.name, value.name, assertId + "Check name");
 		Assertions.assertEquals(expected.limit, value.limit, assertId + "Check limit");
 		Assertions.assertEquals(expected.active, value.active, assertId + "Check active");
+		Assertions.assertEquals(expected.lastAccessedAt, value.lastAccessedAt, assertId + "Check lastAccessedAt");
 		Assertions.assertEquals(expected.createdAt, value.createdAt, assertId + "Check createdAt");
 		Assertions.assertEquals(expected.updatedAt, value.updatedAt, assertId + "Check updatedAt");
 	}

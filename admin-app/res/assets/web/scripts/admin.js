@@ -109,12 +109,14 @@ var CustomersHandler = new ListTemplate({
 	           new EditColumn('name', 'Name'),
 	           new EditColumn('limit', 'Limit'),
 	           new TextColumn('active', 'Active?'),
+	           new TextColumn('lastAccessedAt', 'Last Accessed At', 'toDateTime'),
 	           new TextColumn('createdAt', 'Created At', 'toDateTime'),
 	           new TextColumn('updatedAt', 'Updated At', 'toDateTime') ],
 	FIELDS: [ new TextField('id', 'ID'),
 	          new EditField('name', 'Name', true, false, 128, 50),
 	          new EditField('limit', 'Limit', true, false, 10, 5, 'Indicates the maximum number of calls per second. Zero indicates no limit.'),
 	          new BoolField('active', 'Active?', false),
+	          new TextField('lastAccessedAt', 'Last Accessed At', 'toDateTime'),
 	          new TextField('createdAt', 'Created At', 'toDateTime'),
 	          new TextField('updatedAt', 'Updated At', 'toDateTime') ],
 	SEARCH: {
@@ -129,6 +131,8 @@ var CustomersHandler = new ListTemplate({
 		          new EditField('limit', 'Limit', false, false, 10, 5),
 		          new RangeField('limit', 'Limit', false, 10, 5),
 		          new ListField('active', 'Active?', false, 'yesNoOptions', undefined, 'No Search'),
+		          new ListField('hasLastAccessedAt', 'Has Accessed?', false, 'yesNoOptions', undefined, 'No Search'),
+		          new DatesField('lastAccessedAt', 'Last Accessed At'),
 		          new DatesField('createdAt', 'Created At'),
 		          new DatesField('updatedAt', 'Updated At'),
 		          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ]

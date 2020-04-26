@@ -31,6 +31,7 @@ public class CustomerValue implements Serializable
 	public String name = null;
 	public int limit = 0;	// Zero indicates no throttling limit.
 	public boolean active;
+	public Date lastAccessedAt = null;
 	public Date createdAt = null;
 	public Date updatedAt = null;
 
@@ -39,6 +40,7 @@ public class CustomerValue implements Serializable
 	public CustomerValue withName(final String newValue) { name = newValue; return this; }
 	public CustomerValue withLimit(final int newValue) { limit = newValue; return this; }
 	public CustomerValue withActive(final boolean newValue) { active = newValue; return this; }
+	public CustomerValue withLastAccessedAt(final Date newValue) { lastAccessedAt = newValue; return this; }
 	public CustomerValue withCreatedAt(final Date newValue) { createdAt = newValue; return this; }
 	public CustomerValue withUpdatedAt(final Date newValue) { updatedAt = newValue; return this; }
 
@@ -58,13 +60,14 @@ public class CustomerValue implements Serializable
 		final int limit,
 		final boolean active)
 	{
-		this(null, name, limit, active, null, null);
+		this(null, name, limit, active, null, null, null);
 	}
 
 	public CustomerValue(final String id,
 		final String name,
 		final int limit,
 		final boolean active,
+		final Date lastAccessedAt,
 		final Date createdAt,
 		final Date updatedAt)
 	{
@@ -72,6 +75,7 @@ public class CustomerValue implements Serializable
 		this.name = name;
 		this.limit = limit;
 		this.active = active;
+		this.lastAccessedAt = lastAccessedAt;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 	}

@@ -38,6 +38,12 @@ public class Customer extends TableServiceEntity implements Serializable
 	public boolean active;
 	public void setActive(final boolean newValue) { active = newValue; }
 
+	public long getLastAccessedAt() { return lastAccessedAt; }
+	public long lastAccessedAt;
+	public void setLastAccessedAt(final long newValue) { lastAccessedAt = newValue; }
+	public Date lastAccessedAt() { return (0L < lastAccessedAt) ? new Date(lastAccessedAt) : null; }
+	public Customer accessed() { lastAccessedAt = System.currentTimeMillis(); return this; }
+
 	public Date getCreatedAt() { return createdAt; }
 	public Date createdAt;
 	public void setCreatedAt(final Date newValue) { createdAt = newValue; }
@@ -54,6 +60,7 @@ public class Customer extends TableServiceEntity implements Serializable
 		this.name = value.name;
 		this.limit = value.limit;
 		this.active = value.active;
+		this.lastAccessedAt = 0L;
 		this.createdAt = value.createdAt = this.updatedAt = value.updatedAt = new Date();
 	}
 
@@ -68,6 +75,7 @@ public class Customer extends TableServiceEntity implements Serializable
 			Objects.equals(name, v.name) &&
 			(limit == v.limit) && 
 			(active == v.active) &&
+			(lastAccessedAt == v.lastAccessedAt) && 
 			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND) &&
 			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
 	}
@@ -77,6 +85,7 @@ public class Customer extends TableServiceEntity implements Serializable
 		setName(value.name);
 		setLimit(value.limit);
 		setActive(value.active);
+		value.lastAccessedAt = lastAccessedAt();
 		value.createdAt = getCreatedAt();
 		setUpdatedAt(value.updatedAt = new Date());
 
@@ -90,6 +99,7 @@ public class Customer extends TableServiceEntity implements Serializable
 			getName(),
 			getLimit(),
 			getActive(),
+			lastAccessedAt(),
 			getCreatedAt(),
 			getUpdatedAt());
 	}

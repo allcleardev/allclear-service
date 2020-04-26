@@ -65,6 +65,29 @@ public class CustomerDAO
 		return value;
 	}
 
+	/** Retrieve the specified Customer, checks for throttling, marks as accessed, and returns.
+	 * 
+	 * @param id
+	 * @param count number of requests by this customer in the current session.
+	 * @return never NULL
+	 * @throws ObjectNotFoundException
+	 * @throws ThrottledException
+	 */
+	public CustomerValue access(final String id, final int count) throws ObjectNotFoundException, ThrottledException
+	{
+		try
+		{
+			var record = _findWithException(id);
+			var limit = record.getLimit();
+			if ((0 < limit) && (count >= limit)) throw new ThrottledException("Client '" + record.getName() + "' has exceeded its limit of '" + limit + "' requests per second.");
+
+			table.execute(merge(record.accessed()));
+
+			return record.toValue();
+		}
+		catch (final StorageException ex) { throw new RuntimeException(ex); }
+	}
+
 	/** Updates a single Customer value.
 	 *
 	 * @param value
@@ -259,6 +282,9 @@ public class CustomerDAO
 		if (null != filter.limitFrom) filters.add(generateFilterCondition("Limit", GREATER_THAN_OR_EQUAL, filter.limitFrom));
 		if (null != filter.limitTo) filters.add(generateFilterCondition("Limit", LESS_THAN_OR_EQUAL, filter.limitTo));
 		if (null != filter.active) filters.add(generateFilterCondition("Active", EQUAL, filter.active));
+		if (null != filter.hasLastAccessedAt) filters.add(generateFilterCondition("LastAccessedAt", filter.hasLastAccessedAt ? GREATER_THAN : EQUAL, 0L));
+		if (null != filter.lastAccessedAtFrom) filters.add(generateFilterCondition("LastAccessedAt", GREATER_THAN_OR_EQUAL, filter.lastAccessedAtFrom.getTime()));
+		if (null != filter.lastAccessedAtTo) filters.add(generateFilterCondition("LastAccessedAt", LESS_THAN_OR_EQUAL, filter.lastAccessedAtTo.getTime()));
 		if (null != filter.createdAtFrom) filters.add(generateFilterCondition("CreatedAt", GREATER_THAN_OR_EQUAL, filter.createdAtFrom));
 		if (null != filter.createdAtTo) filters.add(generateFilterCondition("CreatedAt", LESS_THAN_OR_EQUAL, filter.createdAtTo));
 		if (null != filter.updatedAtFrom) filters.add(generateFilterCondition("UpdatedAt", GREATER_THAN_OR_EQUAL, filter.updatedAtFrom));

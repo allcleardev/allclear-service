@@ -80,6 +80,23 @@ public class CustomerResourceTest
 	}
 
 	@Test
+	public void authenticate()
+	{
+		count(new CustomerFilter().withHasLastAccessedAt(true), 0L);
+		count(new CustomerFilter().withHasLastAccessedAt(false), 1L);
+		Assertions.assertNull(dao.getByIdWithException(VALUE.id).lastAccessedAt);
+
+		var value = dao.access(VALUE.id, CustomerValue.MAX_LIMIT + 1);	// Does NOT trigger throttle exception because no limit is specified on the customer.
+		Assertions.assertNotNull(value, "Exists");
+		assertThat(value.lastAccessedAt).as("lastAccessedAt Exists").isNotNull().isCloseTo(new Date(), 500L);
+		count(new CustomerFilter().withHasLastAccessedAt(true), 1L);
+		count(new CustomerFilter().withHasLastAccessedAt(false), 0L);
+		Assertions.assertEquals(value.lastAccessedAt, dao.getByIdWithException(VALUE.id).lastAccessedAt);
+
+		VALUE.lastAccessedAt = value.lastAccessedAt;
+	}
+
+	@Test
 	public void find()
 	{
 		var response = request(target().queryParam("name", "Ann")).get();
@@ -157,6 +174,9 @@ public class CustomerResourceTest
 			arguments(new CustomerFilter(1, 20).withLimitFrom(VALUE.limit), 1L),
 			arguments(new CustomerFilter(1, 20).withLimitTo(VALUE.limit), 1L),
 			arguments(new CustomerFilter(1, 20).withActive(VALUE.active), 1L),
+			arguments(new CustomerFilter(1, 20).withHasLastAccessedAt(true), 1L),
+			arguments(new CustomerFilter(1, 20).withLastAccessedAtFrom(hourAgo), 1L),
+			arguments(new CustomerFilter(1, 20).withLastAccessedAtTo(hourAhead), 1L),
 			arguments(new CustomerFilter(1, 20).withCreatedAtFrom(hourAgo), 1L),
 			arguments(new CustomerFilter(1, 20).withCreatedAtTo(hourAhead), 1L),
 			arguments(new CustomerFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
@@ -172,6 +192,9 @@ public class CustomerResourceTest
 			arguments(new CustomerFilter(1, 20).withLimitFrom(VALUE.limit + 1), 0L),
 			arguments(new CustomerFilter(1, 20).withLimitTo(VALUE.limit - 1), 0L),
 			arguments(new CustomerFilter(1, 20).withActive(!VALUE.active), 0L),
+			arguments(new CustomerFilter(1, 20).withHasLastAccessedAt(false), 0L),
+			arguments(new CustomerFilter(1, 20).withLastAccessedAtFrom(hourAhead), 0L),
+			arguments(new CustomerFilter(1, 20).withLastAccessedAtTo(hourAgo), 0L),
 			arguments(new CustomerFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
 			arguments(new CustomerFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
 			arguments(new CustomerFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
