@@ -28,9 +28,9 @@ public class RedisClient extends HealthCheck implements Closeable, Map<String, S
 	private final JedisPool pool;
 
 	/** Default/empty - called from derived classes. */
-	protected RedisClient()
+	protected RedisClient(final JedisPool pool)
 	{
-		pool = null;
+		this.pool = pool;
 	}
 
 	/** Populator.
@@ -39,7 +39,7 @@ public class RedisClient extends HealthCheck implements Closeable, Map<String, S
 	 */
 	public RedisClient(final RedisConfig conf)
 	{
-		final JedisPoolConfig config = new JedisPoolConfig();
+		var config = new JedisPoolConfig();
 		config.setTestWhileIdle(conf.testWhileIdle);
 		if (null != conf.poolSize) config.setMaxTotal(conf.poolSize);
 		if (null != conf.timeout) config.setMaxWaitMillis(conf.timeout);
