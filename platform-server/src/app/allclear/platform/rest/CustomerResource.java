@@ -10,6 +10,7 @@ import com.codahale.metrics.annotation.Timed;
 import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.mediatype.UTF8MediaType;
+import app.allclear.common.resources.Headers;
 import app.allclear.common.value.OperationResponse;
 import app.allclear.platform.dao.CustomerDAO;
 import app.allclear.platform.filter.CustomerFilter;
@@ -45,7 +46,8 @@ public class CustomerResource
 	@GET
 	@Path("/{id}") @Timed
 	@ApiOperation(value="get", notes="Gets a single Customer by its primary key.", response=CustomerValue.class)
-	public CustomerValue get(@PathParam("id") final String id) throws ValidationException
+	public CustomerValue get(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@PathParam("id") final String id) throws ValidationException
 	{
 		return dao.getByIdWithException(id);
 	}
@@ -53,7 +55,8 @@ public class CustomerResource
 	@GET
 	@Timed
 	@ApiOperation(value="find", notes="Finds Customers by wildcard name search.", response=CustomerValue.class, responseContainer="List")
-	public List<CustomerValue> find(@QueryParam("name") @ApiParam(name="name", value="Value for the wildcard search") final String name)
+	public List<CustomerValue> find(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@QueryParam("name") @ApiParam(name="name", value="Value for the wildcard search") final String name)
 	{
 		return dao.getByName(name);
 	}
@@ -61,7 +64,8 @@ public class CustomerResource
 	@POST
 	@Timed
 	@ApiOperation(value="add", notes="Adds a single Customer. Returns the supplied Customer value with the auto generated identifier populated.", response=CustomerValue.class)
-	public CustomerValue add(final CustomerValue value) throws ValidationException
+	public CustomerValue add(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final CustomerValue value) throws ValidationException
 	{
 		return dao.add(value);
 	}
@@ -69,7 +73,8 @@ public class CustomerResource
 	@PUT
 	@Timed
 	@ApiOperation(value="set", notes="Updates an existing single Customer. Returns the supplied Customer value with the auto generated identifier populated.", response=CustomerValue.class)
-	public CustomerValue set(final CustomerValue value) throws ValidationException
+	public CustomerValue set(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final CustomerValue value) throws ValidationException
 	{
 		return dao.update(value);
 	}
@@ -77,7 +82,8 @@ public class CustomerResource
 	@DELETE
 	@Path("/{id}") @Timed
 	@ApiOperation(value="remove", notes="Removes/deactivates a single Customer by its primary key.")
-	public OperationResponse remove(@PathParam("id") final String id) throws ValidationException
+	public OperationResponse remove(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@PathParam("id") final String id) throws ValidationException
 	{
 		return new OperationResponse(dao.remove(id));
 	}
@@ -85,7 +91,8 @@ public class CustomerResource
 	@POST
 	@Path("/search") @Timed
 	@ApiOperation(value="search", notes="Searches the Customers based on the supplied filter.", response=QueryResults.class)
-	public QueryResults<CustomerValue, CustomerFilter> search(final CustomerFilter filter) throws ValidationException
+	public QueryResults<CustomerValue, CustomerFilter> search(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final CustomerFilter filter) throws ValidationException
 	{
 		return dao.search(filter);
 	}
