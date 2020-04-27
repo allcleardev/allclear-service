@@ -30,6 +30,7 @@ public class SessionValue implements Serializable
 	public final long duration;	// Millseconds
 	public final AdminValue admin;
 	public final PeopleValue person;
+	public final CustomerValue customer;
 	public final StartRequest registration;
 	public final Date expiresAt;
 	public final Date lastAccessedAt;
@@ -64,6 +65,7 @@ public class SessionValue implements Serializable
 			null,
 			person,
 			null,
+			null,
 			new Date(now.getTime() + duration),
 			now,
 			createdAt);
@@ -77,6 +79,7 @@ public class SessionValue implements Serializable
 			null,
 			null,
 			null,
+			null,
 			new Date());
 	}
 
@@ -85,6 +88,7 @@ public class SessionValue implements Serializable
 		this(
 			false,
 			DURATION_SHORT,
+			null,
 			null,
 			null,
 			registration,
@@ -98,6 +102,7 @@ public class SessionValue implements Serializable
 			admin,
 			null,
 			null,
+			null,
 			new Date());
 	}
 
@@ -108,6 +113,7 @@ public class SessionValue implements Serializable
 			null,
 			person,
 			null,
+			null,
 			new Date());
 	}
 
@@ -115,6 +121,7 @@ public class SessionValue implements Serializable
 		final long duration,
 		final AdminValue admin,
 		final PeopleValue person,
+		final CustomerValue customer,
 		final StartRequest registration,
 		final Date createdAt)
 	{
@@ -123,6 +130,7 @@ public class SessionValue implements Serializable
 			duration,
 			admin,
 			person,
+			customer,
 			registration,
 			new Date(createdAt.getTime() + duration),
 			createdAt,
@@ -134,6 +142,7 @@ public class SessionValue implements Serializable
 		@JsonProperty("duration") final long duration,
 		@JsonProperty("admin") final AdminValue admin,
 		@JsonProperty("person") final PeopleValue person,
+		@JsonProperty("customer") final CustomerValue customer,
 		@JsonProperty("registration") final StartRequest registration,
 		@JsonProperty("expiresAt") final Date expiresAt,
 		@JsonProperty("lastAccessedAt") final Date lastAccessedAt,
@@ -144,6 +153,7 @@ public class SessionValue implements Serializable
 		this.duration = duration;
 		this.admin = admin;
 		this.person = person;
+		this.customer = customer;
 		this.registration = registration;
 		this.expiresAt = expiresAt;
 		this.lastAccessedAt = lastAccessedAt;

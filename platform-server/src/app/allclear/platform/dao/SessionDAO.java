@@ -351,6 +351,7 @@ public class SessionDAO
 			null,
 			person,
 			null,
+			null,
 			value.expiresAt,
 			value.lastAccessedAt,
 			value.createdAt);
