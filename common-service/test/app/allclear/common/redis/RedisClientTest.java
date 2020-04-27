@@ -9,6 +9,7 @@ import org.junit.*;
 import org.junit.runners.MethodSorters;
 
 import app.allclear.junit.redis.RedisServerRule;
+import app.allclear.redis.JedisConfig;
 
 /** Functional test class that verifies the RedisClient class.
  * 
@@ -27,7 +28,7 @@ public class RedisClientTest extends AbstractRedisClientTest
 	@BeforeClass
 	public static void up()
 	{
-		client = new RedisClient(new RedisConfig("localhost", 6378, 200L, 5));
+		client = new RedisClient(new JedisConfig("localhost", 6378, 200L, 5));
 		init();
 	}
 

@@ -84,10 +84,17 @@ project(':common-model') {
   }
 }
 
+project(':common-redis') {
+  dependencies {
+    testCompile project(':common-testing')
+  }
+}
+
 project(':common-service') {
   dependencies {
     compile project(':common-model')
     compile project(':common-jersey')
+    compile project(':common-redis')
     testCompile project(':common-testing')
   }
 }

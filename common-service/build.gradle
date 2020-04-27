@@ -4,7 +4,6 @@ dependencies {
   compile "io.dropwizard:dropwizard-db:${dropwizardVersion}"
   compile "com.sun.activation:javax.activation:${javaxActivationVersion}"
   compile "javax.xml.bind:jaxb-api:${javaxXmlBindVersion}"
-  compile "redis.clients:jedis:${jedisVersion}"
   // compile "com.readytalk:metrics3-statsd:${readytalkVersion}"
   compile "io.swagger:swagger-jersey2-jaxrs:${swaggerVersion}"
 }

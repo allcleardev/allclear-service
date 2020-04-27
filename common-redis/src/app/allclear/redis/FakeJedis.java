@@ -1,4 +1,4 @@
-package app.allclear.common.redis;
+package app.allclear.redis;
 
 import java.util.*;
 import java.util.stream.Collectors;

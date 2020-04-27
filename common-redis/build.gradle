@@ -1,0 +1,4 @@
+dependencies {
+  compile "com.fasterxml.jackson.core:jackson-annotations:${jacksonVersion}"
+  compile "redis.clients:jedis:${jedisVersion}"
+}

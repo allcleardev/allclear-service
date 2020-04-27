@@ -12,8 +12,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import app.allclear.common.DWUtil;
 import app.allclear.common.ManifestUtils;
-import app.allclear.common.redis.RedisConfig;
 import app.allclear.common.value.ManifestValue;
+import app.allclear.redis.JedisConfig;
 import app.allclear.twilio.client.TwilioConfig;
 
 /** Value object that represents the application configuration properties.
@@ -53,7 +53,7 @@ public class Config extends Configuration implements Serializable
 
 	public final String queue;	// Connection string to the queue space.
 	public final String admins;
-	public final RedisConfig session;
+	public final JedisConfig session;
 	public final TwilioConfig twilio;
 
 	public String getVersion() { return manifest.version; }
@@ -68,7 +68,7 @@ public class Config extends Configuration implements Serializable
 		@JsonProperty("registrationPhone") final String registrationPhone,
 		@JsonProperty("queue") final String queue,
 		@JsonProperty("admins") final String admins,
-		@JsonProperty("session") final RedisConfig session,
+		@JsonProperty("session") final JedisConfig session,
 		@JsonProperty("twilio") final TwilioConfig twilio)
 	{
 		this.env = env;

@@ -8,6 +8,7 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import app.allclear.junit.redis.RedisServerRule;
 import app.allclear.common.errors.ErrorInfo;
 import app.allclear.common.redis.*;
+import app.allclear.redis.JedisConfig;
 
 /** Function test that verifies the TaskManager and the RedisClient.
  * 
@@ -25,7 +26,7 @@ public class RedisTaskManagerTest extends TaskManagerTest
 	@BeforeEach
 	public void up() throws Exception
 	{
-		var client = new RedisClient(new RedisConfig("localhost", 6378, 200L, 5));
+		var client = new RedisClient(new JedisConfig("localhost", 6378, 200L, 5));
 		client.clear();	// Always start from scratch.
 
 		reset();

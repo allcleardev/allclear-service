@@ -18,7 +18,7 @@ import io.dropwizard.util.Duration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import app.allclear.common.redis.RedisConfig;
+import app.allclear.redis.JedisConfig;
 import app.allclear.twilio.client.TwilioConfig;
 
 /** Unit test class that verifies the Config POJO.
@@ -131,7 +131,7 @@ public class ConfigTest
 		assertThat(o.queue).as("Check queue").startsWith("DefaultEndpointsProtocol=https;AccountName=allcleardevqueues;AccountKey=").endsWith(";EndpointSuffix=core.windows.net");
 		Assertions.assertNotNull(o.session, "Check session");
 		Assertions.assertEquals("localhost", o.session.host, "Check session.host");
-		Assertions.assertEquals(RedisConfig.PORT_DEFAULT, o.session.port, "Check session.port");
+		Assertions.assertEquals(JedisConfig.PORT_DEFAULT, o.session.port, "Check session.port");
 		Assertions.assertEquals(200L, o.session.timeout, "Check session.timeout");
 		Assertions.assertEquals(10, o.session.poolSize, "Check session.poolSize");
 		Assertions.assertNull(o.session.password, "Check session.password");
@@ -323,7 +323,7 @@ public class ConfigTest
 		assertThat(o.queue).as("Check queue").startsWith("DefaultEndpointsProtocol=https;AccountName=allcleardevqueues;AccountKey=").endsWith(";EndpointSuffix=core.windows.net");
 		Assertions.assertNotNull(o.session, "Check session");
 		Assertions.assertNull(o.session.host, "Check session.host");
-		Assertions.assertEquals(RedisConfig.PORT_DEFAULT, o.session.port, "Check session.port");
+		Assertions.assertEquals(JedisConfig.PORT_DEFAULT, o.session.port, "Check session.port");
 		Assertions.assertNull(o.session.timeout, "Check session.timeout");
 		Assertions.assertNull(o.session.poolSize, "Check session.poolSize");
 		Assertions.assertNull(o.session.password, "Check session.password");

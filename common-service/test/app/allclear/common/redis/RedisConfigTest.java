@@ -3,6 +3,8 @@ package app.allclear.common.redis;
 import org.junit.Assert;
 import org.junit.jupiter.api.*;
 
+import app.allclear.redis.JedisConfig;
+
 /** Unit test that verifies the RedisConfig POJO.
  * 
  * @author smalleyd
@@ -16,7 +18,7 @@ public class RedisConfigTest
 	@Test
 	public void create()
 	{
-		var value = new RedisConfig("host1", 123, 105L, 15, null, true, false, true);
+		var value = new JedisConfig("host1", 123, 105L, 15, null, true, false, true);
 
 		Assert.assertNotNull("Exists", value);
 		Assert.assertEquals("Check host", "host1", value.host);
@@ -32,7 +34,7 @@ public class RedisConfigTest
 	@Test
 	public void createWithDefaults()
 	{
-		var value = new RedisConfig("host2", null, null, null, "1a2b3c", null, null, null);
+		var value = new JedisConfig("host2", null, null, null, "1a2b3c", null, null, null);
 
 		Assert.assertNotNull("Exists", value);
 		Assert.assertEquals("Check host", "host2", value.host);

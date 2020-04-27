@@ -2,7 +2,7 @@
 **/build
 **/.classpath
 **/.gradle
-**/jmeter.log
+**/*.log
 **/.project
 question-service-server/data
 question-service-server/db/out

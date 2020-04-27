@@ -8,6 +8,8 @@ import redis.clients.jedis.*;
 
 import com.codahale.metrics.health.HealthCheck;
 
+import app.allclear.redis.JedisConfig;
+
 /** Class that provides access to Redis through the standard Java Map interface.
  * 
  * @author smalleyd
@@ -37,14 +39,9 @@ public class RedisClient extends HealthCheck implements Closeable, Map<String, S
 	 * 
 	 * @param conf
 	 */
-	public RedisClient(final RedisConfig conf)
+	public RedisClient(final JedisConfig conf)
 	{
-		var config = new JedisPoolConfig();
-		config.setTestWhileIdle(conf.testWhileIdle);
-		if (null != conf.poolSize) config.setMaxTotal(conf.poolSize);
-		if (null != conf.timeout) config.setMaxWaitMillis(conf.timeout);
-
-		pool = new JedisPool(config, conf.host, conf.port, 500, conf.password, conf.ssl);
+		pool = conf.pool();
 	}
 
 	@Override

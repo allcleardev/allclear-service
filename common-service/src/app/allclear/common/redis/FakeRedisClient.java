@@ -1,6 +1,6 @@
 package app.allclear.common.redis;
 
-import redis.clients.jedis.*;
+import app.allclear.redis.FakeJedisPool;
 
 /** RedisClient implementation that uses non-remote data structures. Used for unit tests.
  * 
@@ -14,15 +14,7 @@ public class FakeRedisClient extends RedisClient
 {
 	public FakeRedisClient()
 	{
-		this(new JedisPool() {
-			private final FakeJedis jedis = new FakeJedis();
-			@Override public Jedis getResource() { return jedis; }
-		});
-	}
-
-	private FakeRedisClient(final JedisPool pool)
-	{
-		super(pool);
+		super(new FakeJedisPool());
 	}
 
 	@Override
