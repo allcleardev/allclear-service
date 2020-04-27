@@ -109,6 +109,7 @@ project(':common-hibernate') {
 project(':google-client') {
   dependencies {
     compile project(':google-model')
+    testCompile project(':common-redis')
     testCompile project(':common-testing')
   }
 }

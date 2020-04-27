@@ -53,6 +53,7 @@ public class Config extends Configuration implements Serializable
 
 	public final String queue;	// Connection string to the queue space.
 	public final String admins;
+	public final JedisConfig geocode;
 	public final JedisConfig session;
 	public final TwilioConfig twilio;
 
@@ -68,6 +69,7 @@ public class Config extends Configuration implements Serializable
 		@JsonProperty("registrationPhone") final String registrationPhone,
 		@JsonProperty("queue") final String queue,
 		@JsonProperty("admins") final String admins,
+		@JsonProperty("geocode") final JedisConfig geocode,
 		@JsonProperty("session") final JedisConfig session,
 		@JsonProperty("twilio") final TwilioConfig twilio)
 	{
@@ -98,6 +100,7 @@ public class Config extends Configuration implements Serializable
 
 		this.queue = queue;
 		this.admins = admins;
+		this.geocode = geocode;
 		this.session = session;
 		this.twilio = twilio;
 	}

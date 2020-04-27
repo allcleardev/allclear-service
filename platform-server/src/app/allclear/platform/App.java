@@ -95,7 +95,7 @@ public class App extends Application<Config>
 		log.info("Migrations: completed");
 
 		var lifecycle = env.lifecycle();
-		var map = new MapClient();
+		var map = new MapClient(conf.geocode.pool());
 		var session = conf.session.test ? new FakeRedisClient() : new RedisClient(conf.session);
 		var twilio = new TwilioClient(conf.twilio);
 

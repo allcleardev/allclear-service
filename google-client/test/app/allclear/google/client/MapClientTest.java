@@ -1,10 +1,17 @@
 package app.allclear.google.client;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.math.BigDecimal;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import app.allclear.redis.FakeJedisPool;
 
 /** Functional test class that verifies the MapClient component.
  * 
@@ -14,15 +21,37 @@ import org.junit.jupiter.api.*;
  *
  */
 
-@Disabled	// Requires Google Map key in the environment variable which is NOT on the build server. DLS on 4/5/2020.
+// @Disabled	// Requires Google Map key in the environment variable which is NOT on the build server. DLS on 4/5/2020.
+@TestMethodOrder(MethodOrderer.Alphanumeric.class)
 public class MapClientTest
 {
-	private static final MapClient client = new MapClient();
+	private static final MapClient client = new MapClient(new FakeJedisPool());
+
+	public static Stream<Arguments> success()
+	{
+		// Alternates for the cache.
+		return Stream.of(arguments("924 Willow Ave, Hoboken, NJ", 0, 1L),
+			arguments("924 willow ave, hoboken, nj", 1, 1L),
+			arguments("924 WILLOW AVE, HOBOKEN, NJ", 2, 1L),
+			arguments("924 willow ave, hoboken, new jersey", 2, 2L),
+			arguments("924 willow avenue, hoboken, nj", 2, 3L),
+			arguments("924 Willow AVE, Hoboken, NJ", 3, 3L),
+			arguments("924 willow ave, hoboken, New Jersey", 4, 3L),
+			arguments("924 willow avenue, hoboken, nj", 5, 3L));
+	}
 
 	@Test
-	public void success()
+	public void before()
 	{
-		var o = client.geocode("924 Willow Ave, Hoboken, NJ");
+		Assertions.assertEquals(0L, client.cacheSize(), "Check cacheSize");
+		Assertions.assertEquals(0, client.geocodeCacheHits(), "Check geocodeCacheHits");
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void success(final String address, final int geocodeCacheHits, final long cacheSize)
+	{
+		var o = client.geocode(address);
 		assertThat(o.results).as("Check results.size").hasSize(1);
 
 		var result = o.results.get(0);
@@ -38,6 +67,9 @@ public class MapClientTest
 		Assertions.assertEquals("07030", result.postalCode().longName, "Check result.postalCode.longName");
 		Assertions.assertEquals(new BigDecimal("40.7487855"), result.geometry.location.lat, "Check result.geometry.location.lat");
 		Assertions.assertEquals(new BigDecimal("-74.0315385"), result.geometry.location.lng, "Check result.geometry.location.lng");
+
+		Assertions.assertEquals(cacheSize, client.cacheSize(), "Check cacheSize");
+		Assertions.assertEquals(geocodeCacheHits, client.geocodeCacheHits(), "Chek geocodeCacheHits");
 	}
 
 	@Test
@@ -45,5 +77,12 @@ public class MapClientTest
 	{
 		var o = client.geocode("20200 54th Ave W, Lynnwood, WA 98036");
 		Assertions.assertTrue(o.ok(), "Check ok");
+	}
+
+	@Test
+	public void success_00_check()
+	{
+		Assertions.assertEquals(4L, client.cacheSize(), "Check cacheSize");
+		Assertions.assertEquals(5, client.geocodeCacheHits());	// No change
 	}
 }
