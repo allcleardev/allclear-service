@@ -41,6 +41,7 @@ public class SessionValue implements Serializable
 	public boolean admin() { return (null != admin); }
 	public boolean supers() { return admin() && admin.supers; }
 	public boolean person() { return (null != person); }
+	public boolean customer() { return (null != customer); }
 	public boolean registration() { return (null != registration); }
 	public String name() { return (admin()) ? admin.id : (person() ? person.name : registration.phone); }
 
@@ -79,6 +80,18 @@ public class SessionValue implements Serializable
 			null,
 			null,
 			null,
+			null,
+			new Date());
+	}
+
+	public SessionValue(final CustomerValue customer)
+	{
+		this(
+			false,
+			DURATION_SHORT,
+			null,
+			null,
+			customer,
 			null,
 			new Date());
 	}

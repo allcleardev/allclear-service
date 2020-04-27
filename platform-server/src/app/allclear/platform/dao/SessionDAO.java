@@ -203,6 +203,7 @@ public class SessionDAO
 		return value;
 	}
 
+	SessionValue current(final CustomerValue value) { return current(new SessionValue(value)); }
 	SessionValue current(final PeopleValue value) { return current(new SessionValue(false, value)); }	// For tests
 
 	/** Set the current threads associated session based on the supplied session ID.

@@ -20,32 +20,6 @@ import app.allclear.platform.model.StartRequest;
 public class SessionValueTest
 {
 	@Test
-	public void create_anonymous()
-	{
-		var o = SessionValue.anonymous();
-		assertThat(o.id).as("Check ID").hasSize(36);
-		Assertions.assertFalse(o.rememberMe, "Check rememberMe");
-		Assertions.assertEquals(SessionValue.DURATION_SHORT, o.duration, "Check duration");
-		Assertions.assertEquals(30 * 60, o.seconds(), "Check seconds");
-		Assertions.assertNull(o.admin, "Check admin");
-		Assertions.assertNull(o.person, "Check person");
-		Assertions.assertNull(o.registration, "Check registration");
-		assertThat(o.expiresAt).as("Check expiresAt").isCloseTo(new Date(System.currentTimeMillis() + SessionValue.DURATION_SHORT), 100L);
-		assertThat(o.lastAccessedAt).as("Check lastAccessedAt").isCloseTo(new Date(), 100L).isEqualTo(o.createdAt);
-		Assertions.assertFalse(o.admin(), "Check admin()");
-		Assertions.assertFalse(o.supers(), "Check supers()");
-		Assertions.assertFalse(o.person(), "Check person()");
-		Assertions.assertFalse(o.registration(), "Check registration()");
-
-		ThreadUtils.sleep(2000L);
-
-		var expiresAt = new Date(o.expiresAt.getTime());
-		var lastAccessedAt = new Date(o.lastAccessedAt.getTime());
-		assertThat(o.accessed().expiresAt).as("Check accessed: expiresAt").isAfter(expiresAt);
-		assertThat(o.accessed().lastAccessedAt).as("Check accessed: lastAccessedAt").isAfter(lastAccessedAt);
-	}
-
-	@Test
 	public void create_admin()
 	{
 		var o = new SessionValue(false, new AdminValue("andy", false));
@@ -57,12 +31,71 @@ public class SessionValueTest
 		Assertions.assertEquals("andy", o.admin.id, "Check admin.id");
 		Assertions.assertFalse(o.admin.supers, "Check admin.supers");
 		Assertions.assertNull(o.person, "Check person");
+		Assertions.assertNull(o.customer, "Check customer");
 		Assertions.assertNull(o.registration, "Check registration");
 		assertThat(o.expiresAt).as("Check expiresAt").isCloseTo(new Date(System.currentTimeMillis() + SessionValue.DURATION_SHORT), 100L);
 		assertThat(o.lastAccessedAt).as("Check lastAccessedAt").isCloseTo(new Date(), 100L).isEqualTo(o.createdAt);
 		Assertions.assertTrue(o.admin(), "Check admin()");
 		Assertions.assertFalse(o.supers(), "Check supers()");
 		Assertions.assertFalse(o.person(), "Check person()");
+		Assertions.assertFalse(o.customer(), "Check customer()");
+		Assertions.assertFalse(o.registration(), "Check registration()");
+
+		ThreadUtils.sleep(2000L);
+
+		var expiresAt = new Date(o.expiresAt.getTime());
+		var lastAccessedAt = new Date(o.lastAccessedAt.getTime());
+		assertThat(o.accessed().expiresAt).as("Check accessed: expiresAt").isAfter(expiresAt);
+		assertThat(o.accessed().lastAccessedAt).as("Check accessed: lastAccessedAt").isAfter(lastAccessedAt);
+	}
+
+	@Test
+	public void create_anonymous()
+	{
+		var o = SessionValue.anonymous();
+		assertThat(o.id).as("Check ID").hasSize(36);
+		Assertions.assertFalse(o.rememberMe, "Check rememberMe");
+		Assertions.assertEquals(SessionValue.DURATION_SHORT, o.duration, "Check duration");
+		Assertions.assertEquals(30 * 60, o.seconds(), "Check seconds");
+		Assertions.assertNull(o.admin, "Check admin");
+		Assertions.assertNull(o.person, "Check person");
+		Assertions.assertNull(o.customer, "Check customer");
+		Assertions.assertNull(o.registration, "Check registration");
+		assertThat(o.expiresAt).as("Check expiresAt").isCloseTo(new Date(System.currentTimeMillis() + SessionValue.DURATION_SHORT), 100L);
+		assertThat(o.lastAccessedAt).as("Check lastAccessedAt").isCloseTo(new Date(), 100L).isEqualTo(o.createdAt);
+		Assertions.assertFalse(o.admin(), "Check admin()");
+		Assertions.assertFalse(o.supers(), "Check supers()");
+		Assertions.assertFalse(o.person(), "Check person()");
+		Assertions.assertFalse(o.customer(), "Check customer()");
+		Assertions.assertFalse(o.registration(), "Check registration()");
+
+		ThreadUtils.sleep(2000L);
+
+		var expiresAt = new Date(o.expiresAt.getTime());
+		var lastAccessedAt = new Date(o.lastAccessedAt.getTime());
+		assertThat(o.accessed().expiresAt).as("Check accessed: expiresAt").isAfter(expiresAt);
+		assertThat(o.accessed().lastAccessedAt).as("Check accessed: lastAccessedAt").isAfter(lastAccessedAt);
+	}
+
+	@Test
+	public void create_customer()
+	{
+		var o = new SessionValue(new CustomerValue("Techmo"));
+		assertThat(o.id).as("Check ID").hasSize(36);
+		Assertions.assertFalse(o.rememberMe, "Check rememberMe");
+		Assertions.assertEquals(SessionValue.DURATION_SHORT, o.duration, "Check duration");
+		Assertions.assertEquals(30 * 60, o.seconds(), "Check seconds");
+		Assertions.assertNull(o.admin, "Check admin");
+		Assertions.assertNull(o.person, "Check person");
+		Assertions.assertNotNull(o.customer, "Check customer");
+		Assertions.assertEquals("Techmo", o.customer.name, "Check customer.name");
+		Assertions.assertNull(o.registration, "Check registration");
+		assertThat(o.expiresAt).as("Check expiresAt").isCloseTo(new Date(System.currentTimeMillis() + SessionValue.DURATION_SHORT), 100L);
+		assertThat(o.lastAccessedAt).as("Check lastAccessedAt").isCloseTo(new Date(), 100L).isEqualTo(o.createdAt);
+		Assertions.assertFalse(o.admin(), "Check admin()");
+		Assertions.assertFalse(o.supers(), "Check supers()");
+		Assertions.assertFalse(o.person(), "Check person()");
+		Assertions.assertTrue(o.customer(), "Check customer()");
 		Assertions.assertFalse(o.registration(), "Check registration()");
 
 		ThreadUtils.sleep(2000L);
@@ -86,12 +119,14 @@ public class SessionValueTest
 		Assertions.assertEquals("stevie", o.person.name, "Check person.name");
 		Assertions.assertEquals("888-555-0001", o.person.phone, "Check person.phone");
 		Assertions.assertTrue(o.person.active, "Check person.active");
+		Assertions.assertNull(o.customer, "Check customer");
 		Assertions.assertNull(o.registration, "Check registration");
 		assertThat(o.expiresAt).as("Check expiresAt").isCloseTo(new Date(System.currentTimeMillis() + SessionValue.DURATION_SHORT), 100L);
 		assertThat(o.lastAccessedAt).as("Check lastAccessedAt").isCloseTo(new Date(), 100L).isEqualTo(o.createdAt);
 		Assertions.assertFalse(o.admin(), "Check admin()");
 		Assertions.assertFalse(o.supers(), "Check supers()");
 		Assertions.assertTrue(o.person(), "Check person()");
+		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(o.registration(), "Check registration()");
 
 		ThreadUtils.sleep(2000L);
@@ -115,12 +150,14 @@ public class SessionValueTest
 		Assertions.assertEquals("moira", o.person.name, "Check person.name");
 		Assertions.assertEquals("888-555-0002", o.person.phone, "Check person.phone");
 		Assertions.assertFalse(o.person.active, "Check person.active");
+		Assertions.assertNull(o.customer, "Check customer");
 		Assertions.assertNull(o.registration, "Check registration");
 		assertThat(o.expiresAt).as("Check expiresAt").isCloseTo(new Date(System.currentTimeMillis() + SessionValue.DURATION_LONG), 100L);
 		assertThat(o.lastAccessedAt).as("Check lastAccessedAt").isCloseTo(new Date(), 100L).isEqualTo(o.createdAt);
 		Assertions.assertFalse(o.admin(), "Check admin()");
 		Assertions.assertFalse(o.supers(), "Check supers()");
 		Assertions.assertTrue(o.person(), "Check person()");
+		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(o.registration(), "Check registration()");
 
 		ThreadUtils.sleep(2000L);
@@ -141,6 +178,7 @@ public class SessionValueTest
 		Assertions.assertEquals(30 * 60, o.seconds(), "Check seconds");
 		Assertions.assertNull(o.admin, "Check admin");
 		Assertions.assertNull(o.person, "Check person");
+		Assertions.assertNull(o.customer, "Check customer");
 		Assertions.assertNotNull(o.registration, "Check registration");
 		Assertions.assertEquals("+18885550003", o.registration.phone, "Check registration.phone");
 		Assertions.assertTrue(o.registration.beenTested, "Check registration.beenTested");
@@ -150,6 +188,7 @@ public class SessionValueTest
 		Assertions.assertFalse(o.admin(), "Check admin()");
 		Assertions.assertFalse(o.supers(), "Check supers()");
 		Assertions.assertFalse(o.person(), "Check person()");
+		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertTrue(o.registration(), "Check registration()");
 
 		ThreadUtils.sleep(2000L);
@@ -171,12 +210,14 @@ public class SessionValueTest
 		Assertions.assertEquals("johnny", s.person.name, "Check person.name");
 		Assertions.assertEquals("888-555-0004", s.person.phone, "Check person.phone");
 		Assertions.assertTrue(s.person.active, "Check person.active");
+		Assertions.assertNull(o.customer, "Check customer");
 		Assertions.assertNull(s.registration, "Check registration");
 		assertThat(s.expiresAt).as("Check expiresAt").isCloseTo(new Date(System.currentTimeMillis() + SessionValue.DURATION_LONG), 100L).isAfter(o.expiresAt);
 		assertThat(s.lastAccessedAt).as("Check lastAccessedAt").isCloseTo(new Date(), 100L).isAfter(o.createdAt).isAfter(o.lastAccessedAt);
 		Assertions.assertFalse(s.admin(), "Check admin()");
 		Assertions.assertFalse(s.supers(), "Check supers()");
 		Assertions.assertTrue(s.person(), "Check person()");
+		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(s.registration(), "Check registration()");
 
 		ThreadUtils.sleep(2000L);
@@ -191,12 +232,14 @@ public class SessionValueTest
 		Assertions.assertEquals("barbara", ss.person.name, "Check person.name");
 		Assertions.assertEquals("888-555-0005", ss.person.phone, "Check person.phone");
 		Assertions.assertTrue(ss.person.active, "Check person.active");
+		Assertions.assertNull(o.customer, "Check customer");
 		Assertions.assertNull(ss.registration, "Check registration");
 		assertThat(ss.expiresAt).as("Check expiresAt").isCloseTo(new Date(System.currentTimeMillis() + SessionValue.DURATION_SHORT), 100L).isAfter(o.expiresAt);
 		assertThat(ss.lastAccessedAt).as("Check lastAccessedAt").isCloseTo(new Date(), 100L).isAfter(o.createdAt).isAfter(s.lastAccessedAt);
 		Assertions.assertFalse(ss.admin(), "Check admin()");
 		Assertions.assertFalse(ss.supers(), "Check supers()");
 		Assertions.assertTrue(ss.person(), "Check person()");
+		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(ss.registration(), "Check registration()");
 	}
 
@@ -212,12 +255,14 @@ public class SessionValueTest
 		Assertions.assertEquals("mandy", o.admin.id, "Check admin.id");
 		Assertions.assertTrue(o.admin.supers, "Check admin.supers");
 		Assertions.assertNull(o.person, "Check person");
+		Assertions.assertNull(o.customer, "Check customer");
 		Assertions.assertNull(o.registration, "Check registration");
 		assertThat(o.expiresAt).as("Check expiresAt").isCloseTo(new Date(System.currentTimeMillis() + SessionValue.DURATION_LONG), 100L);
 		assertThat(o.lastAccessedAt).as("Check lastAccessedAt").isCloseTo(new Date(), 100L).isEqualTo(o.createdAt);
 		Assertions.assertTrue(o.admin(), "Check admin()");
 		Assertions.assertTrue(o.supers(), "Check supers()");
 		Assertions.assertFalse(o.person(), "Check person()");
+		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(o.registration(), "Check registration()");
 
 		ThreadUtils.sleep(2000L);

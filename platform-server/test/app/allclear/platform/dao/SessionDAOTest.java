@@ -288,6 +288,18 @@ public class SessionDAOTest
 	}
 
 	@Test
+	public void current_customer()
+	{
+		Assertions.assertEquals(9, redis.size(), "Before");
+
+		dao.current(new CustomerValue("Wesley"));
+
+		Assertions.assertEquals(9, redis.size(), "After");	// No change because it doesn't get pushed to Redis. It's just for the current instance.
+
+		dao.clear();
+	}
+
+	@Test
 	public void current_invalidId()
 	{
 		assertThat(Assertions.assertThrows(NotAuthenticatedException.class, () -> dao.current("INVALID")))
