@@ -14,10 +14,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import app.allclear.common.errors.ObjectNotFoundException;
-import app.allclear.common.errors.ThrottledException;
-import app.allclear.common.errors.ValidationException;
-import app.allclear.common.errors.Validator;
+import app.allclear.common.errors.*;
+import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.entity.Customer;
 import app.allclear.platform.filter.CustomerFilter;
@@ -38,13 +36,14 @@ import app.allclear.platform.value.CustomerValue;
 public class CustomerDAOTest
 {
 	private static CustomerDAO dao = null;
+	private static final FakeRedisClient redis = new FakeRedisClient();
 	private static CustomerValue VALUE = null;
 	private static CustomerValue VALID = null;
 
 	@BeforeAll
 	public static void up() throws Exception
 	{
-		dao = new CustomerDAO("test", ConfigTest.loadTest().admins);
+		dao = new CustomerDAO("test", ConfigTest.loadTest().admins, redis);
 	}
 
 	@Test
@@ -107,17 +106,19 @@ public class CustomerDAOTest
 		count(new CustomerFilter().withHasLastAccessedAt(false), 1L);
 		Assertions.assertEquals(0L, dao.findWithException(VALUE.id).getLastAccessedAt());
 
-		assertThrows(ThrottledException.class, () -> dao.access(VALUE.id, VALUE.limit));
+		redis.put(dao.limitKey(VALUE.id), VALUE.limit + "");
+		assertThrows(ThrottledException.class, () -> dao.access(VALUE.id));
 		count(new CustomerFilter().withHasLastAccessedAt(true), 0L);
 		count(new CustomerFilter().withHasLastAccessedAt(false), 1L);
 		Assertions.assertEquals(0L, dao.findWithException(VALUE.id).getLastAccessedAt());
 
-		assertThrows(ObjectNotFoundException.class, () -> dao.access("INVALID", 0));
+		assertThrows(ObjectNotFoundException.class, () -> dao.access("INVALID"));
 		count(new CustomerFilter().withHasLastAccessedAt(true), 0L);
 		count(new CustomerFilter().withHasLastAccessedAt(false), 1L);
 		Assertions.assertEquals(0L, dao.findWithException(VALUE.id).getLastAccessedAt());
 
-		var value = dao.access(VALUE.id, VALUE.limit - 1);
+		redis.put(dao.limitKey(VALUE.id), (VALUE.limit - 1) + "");
+		var value = dao.access(VALUE.id);
 		Assertions.assertNotNull(value, "Exists");
 		assertThat(value.lastAccessedAt).as("lastAccessedAt Exists").isNotNull().isCloseTo(new Date(), 500L);
 		count(new CustomerFilter().withHasLastAccessedAt(true), 1L);

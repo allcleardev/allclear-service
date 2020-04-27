@@ -431,6 +431,9 @@ public class FakeRedisClient extends RedisClient
 			@Override public ScanResult<Map.Entry<String, String>> hscan(final String key, final String cursor, final ScanParams params) { return new ScanResult<Map.Entry<String, String>>("0", new ArrayList<>(me.maps.get(key).entrySet())); };
 			@Override public Map<String, String> hgetAll(final String key) { return me.hash(key); }
 			@Override public Long hset(final String key, final Map<String, String> values) { me.hash(key, values); return 1L; }
+			@Override public Long incr(final String key) {
+				return Long.valueOf(me.map.compute(key, (k, v) -> (((null != v) ? Long.valueOf(v) : 0L) + 1L) + ""));
+			}
 			@Override public ScanResult<String> scan(final String cursor, final ScanParams params) {
 				var keys = me.keySet();
 				var m = new HashMap<byte[], String>(2);

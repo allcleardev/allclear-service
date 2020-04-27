@@ -105,7 +105,7 @@ public class App extends Application<Config>
 
 		var factory = transHibernateBundle.getSessionFactory();
 		var adminDao = new AdminDAO(conf.admins);
-		var customerDao = new CustomerDAO(conf.env, conf.admins);
+		var customerDao = new CustomerDAO(conf.env, conf.admins, session);
 		var facilityDao = new FacilityDAO(factory);
 		var peopleDao = new PeopleDAO(factory);
 		var sessionDao = new SessionDAO(session, twilio, conf);

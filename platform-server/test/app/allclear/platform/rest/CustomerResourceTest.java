@@ -22,6 +22,7 @@ import io.dropwizard.testing.junit5.ResourceExtension;
 import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.*;
 import app.allclear.common.mediatype.UTF8MediaType;
+import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.common.value.OperationResponse;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.dao.CustomerDAO;
@@ -44,6 +45,7 @@ import app.allclear.platform.value.CustomerValue;
 public class CustomerResourceTest
 {
 	private static CustomerDAO dao = null;
+	private static final FakeRedisClient redis = new FakeRedisClient();
 	private static CustomerValue VALUE = null;
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
@@ -62,7 +64,7 @@ public class CustomerResourceTest
 	@BeforeAll
 	public static void up() throws Exception
 	{
-		dao = new CustomerDAO("test", ConfigTest.loadTest().admins);
+		dao = new CustomerDAO("test", ConfigTest.loadTest().admins, redis);
 	}
 
 	@Test
@@ -86,7 +88,8 @@ public class CustomerResourceTest
 		count(new CustomerFilter().withHasLastAccessedAt(false), 1L);
 		Assertions.assertNull(dao.getByIdWithException(VALUE.id).lastAccessedAt);
 
-		var value = dao.access(VALUE.id, CustomerValue.MAX_LIMIT + 1);	// Does NOT trigger throttle exception because no limit is specified on the customer.
+		redis.put(dao.limitKey(VALUE.id), (CustomerValue.MAX_LIMIT + 1) + "");
+		var value = dao.access(VALUE.id);	// Does NOT trigger throttle exception because no limit is specified on the customer.
 		Assertions.assertNotNull(value, "Exists");
 		assertThat(value.lastAccessedAt).as("lastAccessedAt Exists").isNotNull().isCloseTo(new Date(), 500L);
 		count(new CustomerFilter().withHasLastAccessedAt(true), 1L);

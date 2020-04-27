@@ -20,6 +20,7 @@ import com.microsoft.azure.storage.table.TableQuery;
 
 import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.*;
+import app.allclear.common.redis.RedisClient;
 import app.allclear.platform.entity.Customer;
 import app.allclear.platform.filter.CustomerFilter;
 import app.allclear.platform.value.CustomerValue;
@@ -36,17 +37,20 @@ public class CustomerDAO
 {
 	private static final Logger log = LoggerFactory.getLogger(CustomerDAO.class);
 	public static final String TABLE = "customers";
+	public static final String LIMIT_KEY = "customer:%s:%d";
 
 	private final String env;
 	private final CloudTable table;
+	private final RedisClient redis;
 
-	public CustomerDAO(final String env,  final String connectionString)
+	public CustomerDAO(final String env,  final String connectionString, final RedisClient redis)
 		throws InvalidKeyException, StorageException, URISyntaxException
 	{
 		(table = CloudStorageAccount.parse(connectionString).createCloudTableClient().getTableReference(TABLE)).createIfNotExists();
 		log.info("TABLE: " + table);
 
 		this.env = env;
+		this.redis = redis;
 	}
 
 	/** Adds a single Customer value.
@@ -68,18 +72,28 @@ public class CustomerDAO
 	/** Retrieve the specified Customer, checks for throttling, marks as accessed, and returns.
 	 * 
 	 * @param id
-	 * @param count number of requests by this customer in the current session.
 	 * @return never NULL
 	 * @throws ObjectNotFoundException
 	 * @throws ThrottledException
 	 */
-	public CustomerValue access(final String id, final int count) throws ObjectNotFoundException, ThrottledException
+	public CustomerValue access(final String id) throws ObjectNotFoundException, ThrottledException
 	{
 		try
 		{
 			var record = _findWithException(id);
 			var limit = record.getLimit();
-			if ((0 < limit) && (count >= limit)) throw new ThrottledException("Client '" + record.getName() + "' has exceeded its limit of '" + limit + "' requests per second.");
+			if (0 < limit)	// Limit exists
+			{
+				var count = redis.operation(j -> {
+					var key = limitKey(id);	// Create a key to the second.
+					var o = j.incr(key);
+					j.expire(key, 5);	// Make sure that it self clears when not needed anymore.
+
+					return o.intValue();
+				});
+
+				if (count > limit) throw new ThrottledException("Client '" + record.getName() + "' has exceeded its limit of '" + limit + "' requests per second.");
+			}
 
 			table.execute(merge(record.accessed()));
 
@@ -87,6 +101,8 @@ public class CustomerDAO
 		}
 		catch (final StorageException ex) { throw new RuntimeException(ex); }
 	}
+
+	public String limitKey(final String id) { return String.format(LIMIT_KEY, id, System.currentTimeMillis() / 1000L); }
 
 	/** Updates a single Customer value.
 	 *
