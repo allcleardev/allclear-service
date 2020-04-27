@@ -601,6 +601,7 @@ var ConfigurationHandler = new EditTemplate({
 	          new TextField('admins', 'Cosmos Table Endpoint', (v, p) => p.TableEndpoint),
 	          new TextField('queue', 'Queue Table Account', (v, p) => p.AccountName),
 	          new TextField('queue', 'Queue Endpoint Suffix', (v, p) => p.EndpointSuffix),
+	          new TextField('geocode', 'Geocode Redis Host', (v, p) => p.host),
 	          new TextField('session', 'Session Redis Host', (v, p) => p.host),
 	          new TextField('twilio', 'Twilio', (v, p) => p.baseUrl),
 	          new TextField('trans', 'mySQL URL', (v, p) => p.url),
