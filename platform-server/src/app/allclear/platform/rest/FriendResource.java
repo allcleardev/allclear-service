@@ -9,6 +9,7 @@ import io.swagger.annotations.*;
 
 import com.codahale.metrics.annotation.Timed;
 import app.allclear.common.dao.QueryResults;
+import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.resources.Headers;
@@ -28,7 +29,7 @@ import app.allclear.platform.value.FriendValue;
 *
 **********************************************************************************/
 
-@Path("/friends")
+@Path("/friend")
 @Consumes(UTF8MediaType.APPLICATION_JSON)
 @Produces(UTF8MediaType.APPLICATION_JSON)
 @Api(value="Friend")
@@ -52,7 +53,7 @@ public class FriendResource
 	@ApiOperation(value="get", notes="Gets a single Friend by its primary key. For Administrators.", response=FriendValue.class)
 	public FriendValue get(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@PathParam("personId") final String personId,
-		@PathParam("inviteeId") final String inviteeId) throws ValidationException
+		@PathParam("inviteeId") final String inviteeId) throws ObjectNotFoundException
 	{
 		sessionDao.checkAdmin();
 

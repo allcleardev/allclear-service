@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
 import app.allclear.junit.hibernate.*;
+import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.platform.App;
 import app.allclear.platform.entity.Friend;
@@ -52,6 +53,14 @@ public class FriendDAOTest
 	private static Date ACCEPTED_AT_1;
 	private static Date REJECTED_AT_1;
 
+	private static FriendFilter acceptedAt() { return acceptedAt(ACCEPTED_AT); }
+	private static FriendFilter acceptedAt1() { return acceptedAt(ACCEPTED_AT_1); }
+	private static FriendFilter acceptedAt(final Date v) { return new FriendFilter().withAcceptedAtFrom(hours(v, -1)).withAcceptedAtTo(hours(v, 1)); }
+
+	private static FriendFilter rejectedAt() { return rejectedAt(REJECTED_AT); }
+	private static FriendFilter rejectedAt1() { return rejectedAt(REJECTED_AT_1); }
+	private static FriendFilter rejectedAt(final Date v) { return new FriendFilter().withRejectedAtFrom(hours(v, -1)).withRejectedAtTo(hours(v, 1)); }
+
 	@BeforeAll
 	public static void up() throws Exception
 	{
@@ -59,10 +68,10 @@ public class FriendDAOTest
 		dao = new FriendDAO(factory);
 		peopleDao = new PeopleDAO(factory);
 
-		ACCEPTED_AT = timestamp("2020-04-27T20:27:15-0000");
-		REJECTED_AT = timestamp("2020-04-27T20:37:15-0000");
-		ACCEPTED_AT_1 = timestamp("2020-04-27T20:47:15-0000");
-		REJECTED_AT_1 = timestamp("2020-04-27T20:57:15-0000");
+		ACCEPTED_AT = timestamp("2020-04-25T20:27:15-0000");
+		REJECTED_AT = timestamp("2020-04-26T20:27:15-0000");
+		ACCEPTED_AT_1 = timestamp("2020-04-27T20:27:15-0000");
+		REJECTED_AT_1 = timestamp("2020-04-28T20:27:15-0000");
 	}
 
 	@Test
@@ -71,8 +80,7 @@ public class FriendDAOTest
 		PERSON = peopleDao.add(new PeopleValue("first", "888-555-1000", true));
 		PERSON_1 = peopleDao.add(new PeopleValue("second", "888-555-1001", true));
 
-		// TODO: populate the VALUE with data.
-		var value = dao.add(VALUE = new FriendValue());
+		var value = dao.add(VALUE = new FriendValue(PERSON.id, PERSON_1.id, ACCEPTED_AT, REJECTED_AT));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
@@ -82,8 +90,7 @@ public class FriendDAOTest
 	*/
 	private FriendValue createValid()
 	{
-		// TODO: populate the valid value with data.
-		return new FriendValue();
+		return new FriendValue(PERSON_1.id, PERSON.id, ACCEPTED_AT_1, REJECTED_AT_1);
 	}
 
 	@Test
@@ -123,12 +130,6 @@ public class FriendDAOTest
 	}
 
 	@Test
-	public void add_missingCreatedAt()
-	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withCreatedAt(null)));
-	}
-
-	@Test
 	public void find()
 	{
 		var record = dao.findWithException(VALUE.personId, VALUE.inviteeId);
@@ -139,13 +140,13 @@ public class FriendDAOTest
 	@Test
 	public void findWithException_invalid_personId()
 	{
-		assertThrows(ValidationException.class, () -> dao.findWithException("INVALID", VALUE.inviteeId));
+		assertThrows(ObjectNotFoundException.class, () -> dao.findWithException("INVALID", VALUE.inviteeId));
 	}
 
 	@Test
 	public void findWithException_invalid_inviteeId()
 	{
-		assertThrows(ValidationException.class, () -> dao.findWithException(VALUE.personId, "INVALID"));
+		assertThrows(ObjectNotFoundException.class, () -> dao.findWithException(VALUE.personId, "INVALID"));
 	}
 
 	@Test
@@ -159,23 +160,24 @@ public class FriendDAOTest
 	@Test
 	public void getWithException_invalid_personId()
 	{
-		assertThrows(ValidationException.class, () -> dao.getByIdWithException("INVALID", VALUE.inviteeId));
+		assertThrows(ObjectNotFoundException.class, () -> dao.getByIdWithException("INVALID", VALUE.inviteeId));
 	}
 
 	@Test
 	public void getWithException_invalid_inviteeId()
 	{
-		assertThrows(ValidationException.class, () -> dao.getByIdWithException(VALUE.personId, "INVALID"));
+		assertThrows(ObjectNotFoundException.class, () -> dao.getByIdWithException(VALUE.personId, "INVALID"));
 	}
 
 	@Test
 	public void modify()
 	{
-		// TODO: fill in search details // count(new FriendFilter(), 1L);
-		// TODO: fill in search details // count(new FriendFilter(), 0L);
+		count(acceptedAt(), 1L);
+		count(rejectedAt(), 1L);
+		count(acceptedAt1(), 0L);
+		count(rejectedAt1(), 0L);
 
-		// TODO: provide a change to the VALUE.
-		var value = dao.update(VALUE);
+		var value = dao.update(VALUE.withAcceptedAt(ACCEPTED_AT_1).withRejectedAt(REJECTED_AT_1));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
@@ -183,8 +185,10 @@ public class FriendDAOTest
 	@Test
 	public void modify_count()
 	{
-		// TODO: fill in search details // count(new FriendFilter(), 0L);
-		// TODO: fill in search details // count(new FriendFilter(), 1L);
+		count(acceptedAt(), 0L);
+		count(rejectedAt(), 0L);
+		count(acceptedAt1(), 1L);
+		count(rejectedAt1(), 1L);
 	}
 
 	@Test
@@ -192,7 +196,8 @@ public class FriendDAOTest
 	{
 		var record = dao.findWithException(VALUE.personId, VALUE.inviteeId);
 		Assertions.assertNotNull(record, "Exists");
-		// TODO: check the changed property.
+		Assertions.assertEquals(ACCEPTED_AT_1, record.getAcceptedAt(), "Check acceptedAt");
+		Assertions.assertEquals(REJECTED_AT_1, record.getRejectedAt(), "Check rejectedAt");
 		check(VALUE, record);
 	}
 
@@ -206,29 +211,21 @@ public class FriendDAOTest
 			arguments(new FriendFilter(1, 20).withInviteeId(VALUE.inviteeId), 1L),
 			arguments(new FriendFilter(1, 20).withUserId(VALUE.inviteeId), 1L),
 			arguments(new FriendFilter(1, 20).withHasAcceptedAt(true), 1L),
-			arguments(new FriendFilter(1, 20).withAcceptedAtFrom(hourAgo), 1L),
-			arguments(new FriendFilter(1, 20).withAcceptedAtTo(hourAhead), 1L),
-			arguments(new FriendFilter(1, 20).withAcceptedAtFrom(hourAgo).withAcceptedAtTo(hourAhead), 1L),
+			arguments(acceptedAt1(), 1L),
 			arguments(new FriendFilter(1, 20).withHasRejectedAt(true), 1L),
-			arguments(new FriendFilter(1, 20).withRejectedAtFrom(hourAgo), 1L),
-			arguments(new FriendFilter(1, 20).withRejectedAtTo(hourAhead), 1L),
-			arguments(new FriendFilter(1, 20).withRejectedAtFrom(hourAgo).withRejectedAtTo(hourAhead), 1L),
+			arguments(rejectedAt1(), 1L),
 			arguments(new FriendFilter(1, 20).withCreatedAtFrom(hourAgo), 1L),
 			arguments(new FriendFilter(1, 20).withCreatedAtTo(hourAhead), 1L),
 			arguments(new FriendFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
 
 			// Negative tests
-			arguments(new FriendFilter(1, 20).withPersonId("invalid"), 0L),
-			arguments(new FriendFilter(1, 20).withInviteeId("invalid"), 0L),
-			arguments(new FriendFilter(1, 20).withInviteeId("invalid"), 0L),
+			arguments(new FriendFilter(1, 20).withPersonId(VALUE.inviteeId), 0L),
+			arguments(new FriendFilter(1, 20).withInviteeId(VALUE.personId), 0L),
+			arguments(new FriendFilter(1, 20).withUserId(VALUE.personId), 0L),	// The creator of the invitation canNOT see rejected requests.
 			arguments(new FriendFilter(1, 20).withHasAcceptedAt(false), 0L),
-			arguments(new FriendFilter(1, 20).withAcceptedAtFrom(hourAhead), 0L),
-			arguments(new FriendFilter(1, 20).withAcceptedAtTo(hourAgo), 0L),
-			arguments(new FriendFilter(1, 20).withAcceptedAtFrom(hourAhead).withAcceptedAtTo(hourAgo), 0L),
+			arguments(acceptedAt(), 0L),
 			arguments(new FriendFilter(1, 20).withHasRejectedAt(false), 0L),
-			arguments(new FriendFilter(1, 20).withRejectedAtFrom(hourAhead), 0L),
-			arguments(new FriendFilter(1, 20).withRejectedAtTo(hourAgo), 0L),
-			arguments(new FriendFilter(1, 20).withRejectedAtFrom(hourAhead).withRejectedAtTo(hourAgo), 0L),
+			arguments(rejectedAt(), 0L),
 			arguments(new FriendFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
 			arguments(new FriendFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
 			arguments(new FriendFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L));
@@ -336,7 +333,7 @@ public class FriendDAOTest
 	@Test
 	public void testRemove_find()
 	{
-		assertThrows(ValidationException.class, () -> dao.findWithException(VALUE.personId, VALUE.inviteeId));
+		assertThrows(ObjectNotFoundException.class, () -> dao.findWithException(VALUE.personId, VALUE.inviteeId));
 	}
 
 	/** Test removal after the search. */
@@ -344,7 +341,8 @@ public class FriendDAOTest
 	public void testRemove_search()
 	{
 		count(new FriendFilter().withPersonId(VALUE.personId).withInviteeId(VALUE.inviteeId), 0L);
-		// TODO: provide secondary test count.
+		count(acceptedAt1(), 0L);
+		count(rejectedAt1(), 0L);
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.

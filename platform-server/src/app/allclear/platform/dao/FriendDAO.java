@@ -86,13 +86,16 @@ public class FriendDAO extends AbstractDAO<Friend>
 
 		// Validation foreign keys.
 		var session = currentSession();
-		if (null == session.get(People.class, value.personId))
-			validator.add("personId", "The Person ID, %s, is invalid.", value.personId);
-		if (null == session.get(People.class, value.inviteeId))
-			validator.add("inviteeId", "The Invitee ID, %s, is invalid.", value.inviteeId);
+		var person = session.get(People.class, value.personId);
+		var invitee = session.get(People.class, value.inviteeId);
+		if (null == person) validator.add("personId", "The Person ID, %s, is invalid.", value.personId);
+		if (null == invitee) validator.add("inviteeId", "The Invitee ID, %s, is invalid.", value.inviteeId);
 
 		// Throw exception if errors exist.
 		validator.check();
+
+		// Populate CMR fields.
+		value.withPersonName(person.getName()).withInviteeName(invitee.getName());
 	}
 
 	/** Removes a single Friend value.

@@ -6,6 +6,8 @@ import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**********************************************************************************
 *
 *	Value object class that represents the friend table.
@@ -34,6 +36,7 @@ public class FriendValue implements Serializable
 	public Date createdAt = null;
 
 	// Accessors
+	@JsonProperty(access=JsonProperty.Access.READ_ONLY)
 	public String getId() { return new StringBuilder(personId).append("/").append(inviteeId).toString(); }	// Identifier for REST calls.
 
 	// Mutators
