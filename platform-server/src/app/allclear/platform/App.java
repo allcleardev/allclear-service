@@ -52,7 +52,7 @@ public class App extends Application<Config>
 	public static final String QUEUE_ALERT = "alert";
 	public static final String QUEUE_ALERT_INIT = "alert-init";
 
-	public static final Class<?>[] ENTITIES = new Class<?>[] { Conditions.class, Exposures.class, Facility.class, FacilityX.class, People.class, PeopleFacility.class, Symptoms.class, SymptomsLog.class, Tests.class };
+	public static final Class<?>[] ENTITIES = new Class<?>[] { Conditions.class, Exposures.class, Facility.class, FacilityX.class, Friend.class, People.class, PeopleFacility.class, Symptoms.class, SymptomsLog.class, Tests.class };
 
 	private final HibernateBundle<Config> transHibernateBundle = new HibernateBundle<>(People.class, ENTITIES) {
 		@Override public DataSourceFactory getDataSourceFactory(final Config conf) { return conf.trans; }
@@ -135,6 +135,7 @@ public class App extends Application<Config>
         jersey.register(new AdminResource(adminDao, sessionDao));
         jersey.register(new CustomerResource(customerDao));
         jersey.register(new FacilityResource(facilityDao, sessionDao, map));
+        jersey.register(new FriendResource(new FriendDAO(factory), sessionDao));
         jersey.register(new MapResource(map));
 		jersey.register(new PeopleResource(peopleDao, registrationDao, sessionDao, task.queue(QUEUE_ALERT)));
 		jersey.register(new app.allclear.common.azure.QueueResource(task));

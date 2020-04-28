@@ -408,4 +408,27 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.1.9_ALLCLEAR-354" author="smalleyd">
+		<createTable tableName="friend" remarks="Represents a friend request.">
+			<column name="person_id" type="VARCHAR(10)" remarks="Refers to the person initiating the request.">
+				<constraints nullable="false" />
+			</column>
+			<column name="invitee_id" type="VARCHAR(10)" remarks="Refers to the person receiving the request.">
+				<constraints nullable="false" />
+			</column>
+			<column name="accepted_at" type="DATETIME" remarks="Represents the date-time when the request was accepted." />
+			<column name="rejected_at" type="DATETIME" remarks="Represents the date-time when the request was rejected." />
+			<column name="created_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was created.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey tableName="friend" columnNames="person_id, invitee_id" constraintName="pk_friend" />
+		<addForeignKeyConstraint baseTableName="friend" baseColumnNames="person_id" referencedTableName="people" referencedColumnNames="id" constraintName="fk_friend_1" />
+		<addForeignKeyConstraint baseTableName="friend" baseColumnNames="invitee_id" referencedTableName="people" referencedColumnNames="id" constraintName="fk_friend_2" />
+
+		<rollback>
+			<dropTable tableName="friend" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>
