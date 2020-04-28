@@ -21,8 +21,7 @@ import io.dropwizard.testing.junit5.ResourceExtension;
 
 import app.allclear.junit.hibernate.*;
 import app.allclear.common.dao.QueryResults;
-import app.allclear.common.errors.NotFoundExceptionMapper;
-import app.allclear.common.errors.ValidationExceptionMapper;
+import app.allclear.common.errors.*;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.common.value.OperationResponse;
@@ -58,8 +57,11 @@ public class FriendResourceTest
 	private static FriendValue VALUE_1 = null;
 	private static PeopleValue PERSON = null;
 	private static PeopleValue PERSON_1 = null;
+	private static SessionValue SESSION = null;
+	private static SessionValue SESSION_1 = null;
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
+		.addResource(new AuthorizationExceptionMapper())
 		.addResource(new NotFoundExceptionMapper())
 		.addResource(new ValidationExceptionMapper())
 		.addResource(new FriendResource(dao, sessionDao)).build();
@@ -91,6 +93,8 @@ public class FriendResourceTest
 	{
 		PERSON = peopleDao.add(new PeopleValue("first", "888-555-1000", true));
 		PERSON_1 = peopleDao.add(new PeopleValue("second", "888-555-1001", true));
+		SESSION = new SessionValue(false, PERSON);
+		SESSION_1 = new SessionValue(false, PERSON_1);
 		VALUE_1 = new FriendValue(PERSON.id, PERSON_1.id);	// NOT added. Just used for the ID field.
 
 		var now = new Date();
@@ -101,6 +105,16 @@ public class FriendResourceTest
 		var value = response.readEntity(FriendValue.class);
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE.withCreatedAt(now).withPersonName(PERSON_1.name).withInviteeName(PERSON.name), value);
+	}
+
+	public static Stream<SessionValue> get_person_sessions() { return Stream.of(SESSION, SESSION_1); }
+
+	@ParameterizedTest
+	@MethodSource("get_person_sessions")
+	public void add_noAuth(final SessionValue s)
+	{
+		sessionDao.current(s);
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request().post(Entity.json(VALUE_1)).getStatus(), "Check first");
 	}
 
 	@Test @Disabled
@@ -122,6 +136,14 @@ public class FriendResourceTest
 		var value = response.readEntity(FriendValue.class);
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
+	}
+
+	@ParameterizedTest
+	@MethodSource("get_person_sessions")
+	public void get_noAuth(final SessionValue s)
+	{
+		sessionDao.current(s);
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, get(VALUE.getId()).getStatus(), "Check first");
 	}
 
 	/** Helper method - calls the GET endpoint. */
@@ -166,11 +188,28 @@ public class FriendResourceTest
 		check(VALUE, value);
 	}
 
+	@ParameterizedTest
+	@MethodSource("get_person_sessions")
+	public void modify_noAuth(final SessionValue s)
+	{
+		sessionDao.current(s);
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED,
+			request().put(Entity.json(new FriendValue(PERSON_1.id, PERSON.id).withRejectedAt(new Date()))).getStatus());
+	}
+
 	@Test
 	public void modify_revert()
 	{
 		var response = request().put(Entity.entity(VALUE.withAcceptedAt(null), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+	}
+
+	@ParameterizedTest
+	@MethodSource("get_person_sessions")
+	public void remove_noAuth(final SessionValue s)
+	{
+		sessionDao.current(s);
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request(VALUE.getId()).delete().getStatus());
 	}
 
 	public static Stream<Arguments> search()
@@ -236,6 +275,28 @@ public class FriendResourceTest
 			}
 			Assertions.assertEquals(total, results.records.size(), assertId + "Check records.size");
 		}
+	}
+
+	@ParameterizedTest
+	@MethodSource("get_person_sessions")
+	public void search_auth_00(final SessionValue s)
+	{
+		sessionDao.current(s);
+		search(new FriendFilter(), 1L);
+	}
+
+	@Test
+	public void search_auth_01()
+	{
+		Assertions.assertEquals(HTTP_STATUS_OK, request().put(Entity.json(VALUE.withRejectedAt(new Date()))).getStatus());	// Once rejected - only the invitee can see the request.
+	}
+
+	@ParameterizedTest
+	@MethodSource("get_person_sessions")
+	public void search_auth_02(final SessionValue s)
+	{
+		sessionDao.current(s);
+		search(new FriendFilter(), VALUE.inviteeId.equals(s.person.id) ? 1L : 0L);
 	}
 
 	/** Test removal after the search. */

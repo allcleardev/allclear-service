@@ -11,7 +11,7 @@
   <!-- logger name="app.allclear.common.dao.QueryBuilder" level="DEBUG" />
   <logger name="app.allclear.common.hibernate.HibernateQueryBuilder" level="DEBUG" / -->
 
-  <root level="info">
+  <root level="warn">
     <appender-ref ref="STDOUT" />
   </root>
 </configuration>
