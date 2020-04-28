@@ -5,6 +5,7 @@ import static app.allclear.common.dao.OrderByBuilder.*;
 import java.util.stream.Collectors;
 
 import org.hibernate.SessionFactory;
+import org.slf4j.*;
 
 import app.allclear.common.dao.*;
 import app.allclear.common.errors.*;
@@ -13,6 +14,7 @@ import app.allclear.common.hibernate.HibernateQueryBuilder;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.filter.FriendFilter;
 import app.allclear.platform.value.FriendValue;
+import app.allclear.platform.value.PeopleValue;
 
 /**********************************************************************************
 *
@@ -26,6 +28,8 @@ import app.allclear.platform.value.FriendValue;
 
 public class FriendDAO extends AbstractDAO<Friend>
 {
+	private static final Logger log = LoggerFactory.getLogger(FriendDAO.class);
+
 	private static final String SELECT = "SELECT OBJECT(o) FROM Friend o";
 	private static final String COUNT = "SELECT COUNT(o.personId) FROM Friend o";
 	private static final OrderByBuilder ORDER = new OrderByBuilder('o', 
@@ -51,6 +55,7 @@ public class FriendDAO extends AbstractDAO<Friend>
 	public FriendValue add(final FriendValue value) throws ValidationException
 	{
 		validate(value);
+		if (null != find(value)) throw new ValidationException("The friendship request already exists.");
 
 		persist(new Friend(value));
 
@@ -67,6 +72,68 @@ public class FriendDAO extends AbstractDAO<Friend>
 		validate(value);
 
 		return findWithException(value.personId, value.inviteeId).update(value);
+	}
+
+	/** Starts a friendship request with the specified user.
+	 * 
+	 * @param person
+	 * @param inviteeId
+	 * @return never NULL
+	 * @throws ValidationException
+	 */
+	public FriendValue start(final PeopleValue person, final String inviteeId) throws ValidationException
+	{
+		var value = new FriendValue(person, inviteeId);
+		var record = find(value);
+		if (null != record)
+		{
+			if (record.rejected()) throw new ValidationException("The friendship request cannot be issued.");	// Do NOT allow a user to request a friendship if the invitee has already previously rejected. DLS on 4/28/2020.
+			if (record.accepted()) throw new ValidationException("The friendship request has already been accepted.");
+
+			return record.toValue();	// Already exists.
+		}
+
+		var invitee = currentSession().get(People.class, value.inviteeId);
+		if (null == invitee) throw new ValidationException("inviteeId", String.format("The Invitee ID, %s, is invalid.", value.inviteeId));
+
+		persist(new Friend(value));
+
+		return value;
+	}
+
+	/** Accepts a friendship request to the current user.
+	 * 
+	 * @param invitee
+	 * @param personId
+	 * @return the new permanent Friendship value.
+	 * @throws ValidationException
+	 */
+	public FriendValue accept(final PeopleValue invitee, final String personId) throws ValidationException
+	{
+		var record = find(personId, invitee.id);
+		if (null == record) throw new ValidationException("The friendship request does not exist.");
+		if (record.accepted()) throw new ValidationException("The friendship request has already been accepted.");
+		if (record.rejected()) log.warn("User {} is accepting a friendship request by '{}' that he/she had previously rejected.", invitee, record.getPersonId());
+
+		// TODO: create the permanent FRIENDSHIP record. DLS on 4/28/2020.
+		return record.accept().toValue();
+	}
+
+	/** Rejects a friendship request to the current user.
+	 * 
+	 * @param invitee
+	 * @param personId
+	 * @return the existing Friend value.
+	 * @throws ValidationException
+	 */
+	public FriendValue reject(final PeopleValue invitee, final String personId) throws ValidationException
+	{
+		var record = find(personId, invitee.id);
+		if (null == record) throw new ValidationException("The friendship request does not exist.");
+		if (record.rejected()) throw new ValidationException("The friendship request has already been rejected.");
+
+		// TODO: if accepted, remove the permanent FRIENDSHIP record too before rejecting. Should be returned from the "Friend.reject" method.
+		return record.reject().toValue();
 	}
 
 	/** Validates a single Friend value.
@@ -98,6 +165,11 @@ public class FriendDAO extends AbstractDAO<Friend>
 		value.withPersonName(person.getName()).withInviteeName(invitee.getName());
 	}
 
+	boolean remove(final FriendValue value) throws ValidationException
+	{
+		return remove(value.personId, value.inviteeId);
+	}
+
 	/** Removes a single Friend value.
 	 *
 	 * @param personId
@@ -114,6 +186,13 @@ public class FriendDAO extends AbstractDAO<Friend>
 
 		return true;
 	}
+
+	/** Finds a single Friend entity by value.person and value.invitee.
+	 * 
+	 * @param value
+	 * @return NULL if not found.
+	 */
+	Friend find(final FriendValue value) { return find(value.personId, value.inviteeId); }
 
 	/** Finds a single Friend entity by person and invitee.
 	 * 

@@ -67,7 +67,7 @@ public class FriendResourceTest
 		.addResource(new FriendResource(dao, sessionDao)).build();
 
 	/** Primary URI to test. */
-	private static final String TARGET = "/friend";
+	private static final String TARGET = "/friends";
 
 	/** Generic types for reading values from responses. */
 	private static final GenericType<List<FriendValue>> TYPE_LIST_VALUE = new GenericType<List<FriendValue>>() {};

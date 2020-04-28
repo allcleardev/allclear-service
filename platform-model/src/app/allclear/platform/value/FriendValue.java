@@ -50,6 +50,13 @@ public class FriendValue implements Serializable
 
 	public FriendValue() {}
 
+	public FriendValue(final PeopleValue person,
+		final String inviteeId)
+	{
+		this(person.id, inviteeId, null, null);
+		this.personName = person.name;
+	}
+
 	public FriendValue(final String personId,
 		final String inviteeId)
 	{

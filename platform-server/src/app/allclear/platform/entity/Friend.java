@@ -48,11 +48,27 @@ public class Friend implements Serializable
 	public Date getAcceptedAt() { return acceptedAt; }
 	public Date acceptedAt;
 	public void setAcceptedAt(final Date newValue) { acceptedAt = newValue; }
+	@Transient public boolean accepted() { return null != acceptedAt; }
+	@Transient public Friend accept()
+	{
+		acceptedAt = new Date();
+		rejectedAt = null;	// In case had been previously rejected.
+
+		return this;
+	}
 
 	@Column(name="rejected_at", columnDefinition="DATETIME", nullable=true)
 	public Date getRejectedAt() { return rejectedAt; }
 	public Date rejectedAt;
 	public void setRejectedAt(final Date newValue) { rejectedAt = newValue; }
+	@Transient public boolean rejected() { return null != rejectedAt; }
+	@Transient public Friend reject()
+	{
+		acceptedAt = null;	// In case had been previously accepted.
+		rejectedAt = new Date();
+
+		return this;
+	}
 
 	@Column(name="created_at", columnDefinition="DATETIME", nullable=false)
 	public Date getCreatedAt() { return createdAt; }

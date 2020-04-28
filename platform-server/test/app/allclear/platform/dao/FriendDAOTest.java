@@ -1,5 +1,6 @@
 package app.allclear.platform.dao;
 
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static app.allclear.testing.TestingUtils.*;
@@ -45,6 +46,7 @@ public class FriendDAOTest
 	private static FriendDAO dao = null;
 	private static PeopleDAO peopleDao = null;
 	private static FriendValue VALUE = null;
+	private static FriendValue VALUE_1 = null;
 	private static PeopleValue PERSON = null;
 	private static PeopleValue PERSON_1 = null;
 
@@ -91,6 +93,13 @@ public class FriendDAOTest
 	private FriendValue createValid()
 	{
 		return new FriendValue(PERSON_1.id, PERSON.id, ACCEPTED_AT_1, REJECTED_AT_1);
+	}
+
+	@Test
+	public void add_dupe()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.add(new FriendValue(PERSON.id, PERSON_1.id))))
+			.hasMessage("The friendship request already exists.");
 	}
 
 	@Test
@@ -343,6 +352,28 @@ public class FriendDAOTest
 		count(new FriendFilter().withPersonId(VALUE.personId).withInviteeId(VALUE.inviteeId), 0L);
 		count(acceptedAt1(), 0L);
 		count(rejectedAt1(), 0L);
+	}
+
+	@Test
+	public void y_00_add_multiple()
+	{
+		Assertions.assertNotNull(VALUE = dao.add(new FriendValue(PERSON.id, PERSON_1.id)), "Check first");
+		Assertions.assertNotNull(VALUE_1 = dao.add(new FriendValue(PERSON_1.id, PERSON.id)), "Check second");
+	}
+
+	@Test
+	public void y_00_add_multiple_check()
+	{
+		var filter = new FriendFilter();
+		count(filter, 2L);
+		search(filter, 2L);
+	}
+
+	@Test
+	public void y_01_clear()
+	{
+		Assertions.assertTrue(dao.remove(VALUE), "Check first");
+		Assertions.assertTrue(dao.remove(VALUE_1), "Check second");
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.

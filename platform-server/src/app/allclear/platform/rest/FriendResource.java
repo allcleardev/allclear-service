@@ -29,7 +29,7 @@ import app.allclear.platform.value.FriendValue;
 *
 **********************************************************************************/
 
-@Path("/friend")
+@Path("/friends")
 @Consumes(UTF8MediaType.APPLICATION_JSON)
 @Produces(UTF8MediaType.APPLICATION_JSON)
 @Api(value="Friend")
@@ -61,12 +61,19 @@ public class FriendResource
 	}
 
 	@GET
-	@Timed @UnitOfWork(readOnly=true, transactional=false)
-	@ApiOperation(value="find", notes="Finds Friends by wildcard name search.", response=FriendValue.class, responseContainer="List")
-	public List<FriendValue> find(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
-		@QueryParam("name") @ApiParam(name="name", value="Value for the wildcard search") final String name)
+	@Path("/start") @Timed @UnitOfWork(readOnly=true, transactional=false)
+	@ApiOperation(value="start", notes="Retrieves outstanding friendship requests initiated by the current user.", response=FriendValue.class, responseContainer="List")
+	public List<FriendValue> start(@HeaderParam(Headers.HEADER_SESSION) final String sessionId)
 	{
-		return null;	// dao.getActiveByIdOrName(name);
+		return dao.search(new FriendFilter().withPersonId(sessionDao.checkPerson().id).withHasAcceptedAt(false).withHasRejectedAt(false)).records;
+	}
+
+	@GET
+	@Path("/incoming") @Timed @UnitOfWork(readOnly=true, transactional=false)
+	@ApiOperation(value="incoming", notes="Retrieves incoming friendship requests sent to the current user.", response=FriendValue.class, responseContainer="List")
+	public List<FriendValue> incoming(@HeaderParam(Headers.HEADER_SESSION) final String sessionId)
+	{
+		return dao.search(new FriendFilter().withInviteeId(sessionDao.checkPerson().id).withHasAcceptedAt(false).withHasRejectedAt(false)).records;
 	}
 
 	@POST
@@ -80,6 +87,15 @@ public class FriendResource
 		return dao.add(value);
 	}
 
+	@POST
+	@Path("/start") @Timed @UnitOfWork
+	@ApiOperation(value="start", notes="Initiates a friendship request.", response=FriendValue.class)
+	public FriendValue start(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@QueryParam("inviteeId") final String inviteeId) throws ValidationException
+	{
+		return dao.start(sessionDao.checkPerson(), inviteeId);
+	}
+
 	@PUT
 	@Timed @UnitOfWork
 	@ApiOperation(value="set", notes="Updates an existing single Friend. For Administrators.", response=FriendValue.class)
@@ -89,6 +105,24 @@ public class FriendResource
 		sessionDao.checkAdmin();
 
 		return dao.update(value);
+	}
+
+	@PUT
+	@Path("/accept") @Timed @UnitOfWork
+	@ApiOperation(value="accept", notes="Accepts a friendship request.", response=FriendValue.class)
+	public FriendValue accept(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@QueryParam("personId") final String personId) throws ValidationException
+	{
+		return dao.accept(sessionDao.checkPerson(), personId);
+	}
+
+	@PUT
+	@Path("/reject") @Timed @UnitOfWork
+	@ApiOperation(value="reject", notes="Rejects a friendship request.", response=FriendValue.class)
+	public FriendValue reject(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@QueryParam("personId") final String personId) throws ValidationException
+	{
+		return dao.reject(sessionDao.checkPerson(), personId);
 	}
 
 	@DELETE
