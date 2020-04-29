@@ -49,6 +49,7 @@ public class FriendDAOTest
 	private static FriendValue VALUE_1 = null;
 	private static PeopleValue PERSON = null;
 	private static PeopleValue PERSON_1 = null;
+	private static PeopleValue INACTIVE = null;
 
 	private static Date ACCEPTED_AT;
 	private static Date REJECTED_AT;
@@ -81,6 +82,7 @@ public class FriendDAOTest
 	{
 		PERSON = peopleDao.add(new PeopleValue("first", "888-555-1000", true));
 		PERSON_1 = peopleDao.add(new PeopleValue("second", "888-555-1001", true));
+		INACTIVE = peopleDao.add(new PeopleValue("inactive", "888-555-2000", false));
 
 		var value = dao.add(VALUE = new FriendValue(PERSON.id, PERSON_1.id, ACCEPTED_AT, REJECTED_AT));
 		Assertions.assertNotNull(value, "Exists");
@@ -100,6 +102,27 @@ public class FriendDAOTest
 	{
 		assertThat(assertThrows(ValidationException.class, () -> dao.add(new FriendValue(PERSON.id, PERSON_1.id))))
 			.hasMessage("The friendship request already exists.");
+	}
+
+	@Test
+	public void add_self()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.add(new FriendValue(PERSON.id, PERSON.id))))
+			.hasMessage("You cannot send a friend request to yourself.");
+	}
+
+	@Test
+	public void add_inactivePerson()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.add(new FriendValue(INACTIVE.id, PERSON.id))))
+			.hasMessage("The Person ID, " + INACTIVE.id + ", is invalid.");
+	}
+
+	@Test
+	public void add_inactiveInvitee()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.add(new FriendValue(PERSON.id, INACTIVE.id))))
+			.hasMessage("The Invitee ID, " + INACTIVE.id + ", is invalid.");
 	}
 
 	@Test
@@ -370,10 +393,153 @@ public class FriendDAOTest
 	}
 
 	@Test
-	public void y_01_clear()
+	public void y_00_clear()
 	{
 		Assertions.assertTrue(dao.remove(VALUE), "Check first");
 		Assertions.assertTrue(dao.remove(VALUE_1), "Check second");
+	}
+
+	@Test
+	public void y_00_clear_check()
+	{
+		var filter = new FriendFilter();
+		count(filter, 0L);
+		search(filter, 0L);
+	}
+
+	@Test
+	public void z_00()
+	{
+		var o = dao.start(PERSON_1, PERSON.id);
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals(PERSON_1.id, o.personId, "Check personId");
+		Assertions.assertEquals(PERSON.id, o.inviteeId, "Check inviteeId");
+		Assertions.assertNull(o.acceptedAt, "Check acceptedAt");
+		Assertions.assertNull(o.rejectedAt, "Check rejectedAt");
+	}
+
+	@Test
+	public void z_00_check()
+	{
+		var o = dao.getById(PERSON_1.id, PERSON.id);
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals(PERSON_1.id, o.personId, "Check personId");
+		Assertions.assertEquals(PERSON.id, o.inviteeId, "Check inviteeId");
+		Assertions.assertNull(o.acceptedAt, "Check acceptedAt");
+		Assertions.assertNull(o.rejectedAt, "Check rejectedAt");
+	}
+
+	@Test
+	public void z_00_check_again() { z_00(); }
+
+	@Test
+	public void z_00_check_again_check() { z_00_check(); }
+
+	@Test
+	public void z_00_invalid_inviteeId()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.start(PERSON_1, "INVALID")))
+			.hasMessage("The Invitee ID, INVALID, is invalid.");
+	}
+
+	@Test
+	public void z_00_invalid_personId()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.start(new PeopleValue().withId("INVALID"), PERSON.id)))
+			.hasMessage("The Person ID, INVALID, is invalid.");
+	}
+
+	@Test
+	public void z_01_accept()
+	{
+		var o = dao.accept(PERSON, PERSON_1.id);	// Invitee calls the accept method so is first.
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals(PERSON_1.id, o.personId, "Check personId");
+		Assertions.assertEquals(PERSON.id, o.inviteeId, "Check inviteeId");
+		assertThat(o.acceptedAt).as("Check acceptedAt").isNotNull().isAfter(o.createdAt).isCloseTo(new Date(), 500L);
+		Assertions.assertNull(o.rejectedAt, "Check rejectedAt");
+	}
+
+	@Test
+	public void z_01_accept_check()
+	{
+		var o = dao.getById(PERSON_1.id, PERSON.id);
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals(PERSON_1.id, o.personId, "Check personId");
+		Assertions.assertEquals(PERSON.id, o.inviteeId, "Check inviteeId");
+		assertThat(o.acceptedAt).as("Check acceptedAt").isNotNull().isAfter(o.createdAt).isCloseTo(new Date(), 500L);
+		Assertions.assertNull(o.rejectedAt, "Check rejectedAt");
+	}
+
+	@Test
+	public void z_01_accept_done()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.accept(PERSON, PERSON_1.id)))
+			.hasMessage("The friendship request has already been accepted.");
+	}
+
+	@Test
+	public void z_01_accept_done_check() { z_01_accept_check(); }
+
+	@Test
+	public void z_01_accept_now_start_again()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.start(PERSON_1, PERSON.id)))
+			.hasMessage("The friendship request has already been accepted.");
+	}
+
+	@Test
+	public void z_01_accept_reject()
+	{
+		var o = dao.reject(PERSON, PERSON_1.id);	// Invitee calls the reject method so is first.
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals(PERSON_1.id, o.personId, "Check personId");
+		Assertions.assertEquals(PERSON.id, o.inviteeId, "Check inviteeId");
+		Assertions.assertNull(o.acceptedAt, "Check acceptedAt");
+		assertThat(o.rejectedAt).as("Check rejectedAt").isNotNull().isAfter(o.createdAt).isCloseTo(new Date(), 500L);
+	}
+
+	@Test
+	public void z_01_accept_reject_check()
+	{
+		var o = dao.getById(PERSON_1.id, PERSON.id);
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals(PERSON_1.id, o.personId, "Check personId");
+		Assertions.assertEquals(PERSON.id, o.inviteeId, "Check inviteeId");
+		Assertions.assertNull(o.acceptedAt, "Check acceptedAt");
+		assertThat(o.rejectedAt).as("Check rejectedAt").isNotNull().isAfter(o.createdAt).isCloseTo(new Date(), 500L);
+	}
+
+	@Test
+	public void z_01_accept_reject_done()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.reject(PERSON, PERSON_1.id)))
+			.hasMessage("The friendship request has already been rejected.");
+	}
+
+	@Test
+	public void z_01_accept_reject_done_check() { z_01_accept_reject_check(); }
+
+	@Test
+	public void z_01_accept_reject_reaccept()
+	{
+		var o = dao.accept(PERSON, PERSON_1.id);	// Invitee calls the accept method so is first.
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals(PERSON_1.id, o.personId, "Check personId");
+		Assertions.assertEquals(PERSON.id, o.inviteeId, "Check inviteeId");
+		assertThat(o.acceptedAt).as("Check acceptedAt").isNotNull().isAfter(o.createdAt).isCloseTo(new Date(), 500L);
+		Assertions.assertNull(o.rejectedAt, "Check rejectedAt");
+	}
+
+	@Test
+	public void z_01_accept_reject_reaccept_check()
+	{
+		var o = dao.getById(PERSON_1.id, PERSON.id);
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals(PERSON_1.id, o.personId, "Check personId");
+		Assertions.assertEquals(PERSON.id, o.inviteeId, "Check inviteeId");
+		assertThat(o.acceptedAt).as("Check acceptedAt").isNotNull().isAfter(o.createdAt).isCloseTo(new Date(), 500L);
+		Assertions.assertNull(o.rejectedAt, "Check rejectedAt");
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.

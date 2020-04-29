@@ -83,7 +83,8 @@ public class FriendDAO extends AbstractDAO<Friend>
 	 */
 	public FriendValue start(final PeopleValue person, final String inviteeId) throws ValidationException
 	{
-		var value = new FriendValue(person, inviteeId);
+		var value = validate(new FriendValue(person, inviteeId));
+
 		var record = find(value);
 		if (null != record)
 		{
@@ -92,9 +93,6 @@ public class FriendDAO extends AbstractDAO<Friend>
 
 			return record.toValue();	// Already exists.
 		}
-
-		var invitee = currentSession().get(People.class, value.inviteeId);
-		if (null == invitee) throw new ValidationException("inviteeId", String.format("The Invitee ID, %s, is invalid.", value.inviteeId));
 
 		persist(new Friend(value));
 
@@ -141,7 +139,7 @@ public class FriendDAO extends AbstractDAO<Friend>
 	 * @param value
 	 * @throws ValidationException
 	 */
-	public void validate(final FriendValue value) throws ValidationException
+	public FriendValue validate(final FriendValue value) throws ValidationException
 	{
 		value.clean();
 		var validator = new Validator();
@@ -151,18 +149,22 @@ public class FriendDAO extends AbstractDAO<Friend>
 			.ensureExistsAndLength("inviteeId", "Invitee", value.inviteeId, FriendValue.MAX_LEN_INVITEE_ID)
 			.check();
 
+		if (value.personId.equals(value.inviteeId)) validator.add("inviteId", "You cannot send a friend request to yourself.").check();
+
 		// Validation foreign keys.
 		var session = currentSession();
 		var person = session.get(People.class, value.personId);
 		var invitee = session.get(People.class, value.inviteeId);
-		if (null == person) validator.add("personId", "The Person ID, %s, is invalid.", value.personId);
-		if (null == invitee) validator.add("inviteeId", "The Invitee ID, %s, is invalid.", value.inviteeId);
+		if ((null == person) || !person.isActive()) validator.add("personId", "The Person ID, %s, is invalid.", value.personId);
+		if ((null == invitee) || !invitee.isActive()) validator.add("inviteeId", "The Invitee ID, %s, is invalid.", value.inviteeId);
 
 		// Throw exception if errors exist.
 		validator.check();
 
 		// Populate CMR fields.
 		value.withPersonName(person.getName()).withInviteeName(invitee.getName());
+
+		return value;
 	}
 
 	boolean remove(final FriendValue value) throws ValidationException
