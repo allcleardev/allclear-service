@@ -2,6 +2,7 @@ package app.allclear.platform.dao;
 
 import static app.allclear.common.dao.OrderByBuilder.*;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.hibernate.SessionFactory;
@@ -113,8 +114,10 @@ public class FriendDAO extends AbstractDAO<Friend>
 		if (record.accepted()) throw new ValidationException("The friendship request has already been accepted.");
 		if (record.rejected()) log.warn("User {} is accepting a friendship request by '{}' that he/she had previously rejected.", invitee, record.getPersonId());
 
-		// TODO: create the permanent FRIENDSHIP record. DLS on 4/28/2020.
-		return record.accept().toValue();
+		var s = currentSession();
+		record.accept().forEach(o -> s.saveOrUpdate(o));	// Save the new Friendship records. Creates both sides of the friendship.
+
+		return record.toValue();
 	}
 
 	/** Rejects a friendship request to the current user.
@@ -129,8 +132,12 @@ public class FriendDAO extends AbstractDAO<Friend>
 		var record = find(personId, invitee.id);
 		if (null == record) throw new ValidationException("The friendship request does not exist.");
 		if (record.rejected()) throw new ValidationException("The friendship request has already been rejected.");
+		else if (record.accepted())	// Delete the existing FRIENDSHIP records before rejecting if the prior status is acceptance.
+		{
+			var s = currentSession();
+			ships(record).forEach(o -> s.delete(o));
+		}
 
-		// TODO: if accepted, remove the permanent FRIENDSHIP record too before rejecting. Should be returned from the "Friend.reject" method.
 		return record.reject().toValue();
 	}
 
@@ -225,6 +232,36 @@ public class FriendDAO extends AbstractDAO<Friend>
 
 		return record;
 	}
+
+	/** Finds one side of the Friendship.
+	 *  
+	 * @param personId
+	 * @param friendId
+	 * @return NULL if not found.
+	 */
+	Friendship ship(final String personId, final String friendId)
+	{
+		return namedQuery("findFriendship", Friendship.class)
+			.setParameter("personId", personId)
+			.setParameter("friendId", friendId)
+			.uniqueResult();
+	}
+
+	/** Finds both sides of the Friendship.
+	 *  
+	 * @param personId
+	 * @param friendId
+	 * @return never NULL.
+	 */
+	List<Friendship> ships(final String personId, final String friendId)
+	{
+		return namedQuery("findFriendshipX", Friendship.class)
+			.setParameter("personId", personId)
+			.setParameter("friendId", friendId)
+			.list();
+	}
+
+	List<Friendship> ships(final Friend record) { return ships(record.getPersonId(), record.getInviteeId()); }
 
 	/** Gets a single Friend value by identifier.
 	 *

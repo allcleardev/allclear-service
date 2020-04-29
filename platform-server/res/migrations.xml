@@ -426,7 +426,23 @@
 		<addForeignKeyConstraint baseTableName="friend" baseColumnNames="person_id" referencedTableName="people" referencedColumnNames="id" constraintName="fk_friend_1" />
 		<addForeignKeyConstraint baseTableName="friend" baseColumnNames="invitee_id" referencedTableName="people" referencedColumnNames="id" constraintName="fk_friend_2" />
 
+		<createTable tableName="friendship" remarks="Represents a persistent friendship after the request has been accepted.">
+			<column name="person_id" type="VARCHAR(10)" remarks="Refers to the my side of the friendship.">
+				<constraints nullable="false" />
+			</column>
+			<column name="friend_id" type="VARCHAR(10)" remarks="Refers to the friend.">
+				<constraints nullable="false" />
+			</column>
+			<column name="created_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was created.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey tableName="friendship" columnNames="person_id, friend_id" constraintName="pk_friendship" />
+		<addForeignKeyConstraint baseTableName="friendship" baseColumnNames="person_id" referencedTableName="people" referencedColumnNames="id" constraintName="fk_friendship_1" />
+		<addForeignKeyConstraint baseTableName="friendship" baseColumnNames="friend_id" referencedTableName="people" referencedColumnNames="id" constraintName="fk_friendship_2" />
+
 		<rollback>
+			<dropTable tableName="friendship" />
 			<dropTable tableName="friend" />
 		</rollback>
 	</changeSet>

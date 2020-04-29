@@ -22,6 +22,7 @@ import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.platform.App;
 import app.allclear.platform.entity.Friend;
+import app.allclear.platform.entity.Friendship;
 import app.allclear.platform.filter.FriendFilter;
 import app.allclear.platform.value.FriendValue;
 import app.allclear.platform.value.PeopleValue;
@@ -427,6 +428,7 @@ public class FriendDAOTest
 		Assertions.assertEquals(PERSON.id, o.inviteeId, "Check inviteeId");
 		Assertions.assertNull(o.acceptedAt, "Check acceptedAt");
 		Assertions.assertNull(o.rejectedAt, "Check rejectedAt");
+		assertThat(dao.ships(PERSON_1.id, PERSON.id)).as("Check ships").isEmpty();
 	}
 
 	@Test
@@ -522,6 +524,8 @@ public class FriendDAOTest
 	@Test
 	public void z_01_accept()
 	{
+		assertThat(dao.ships(PERSON_1.id, PERSON.id)).as("Check ships").isEmpty();
+
 		var o = dao.accept(PERSON, PERSON_1.id);	// Invitee calls the accept method so is first.
 		Assertions.assertNotNull(o, "Exists");
 		Assertions.assertEquals(PERSON_1.id, o.personId, "Check personId");
@@ -529,6 +533,8 @@ public class FriendDAOTest
 		assertThat(o.acceptedAt).as("Check acceptedAt").isNotNull().isAfter(o.createdAt).isCloseTo(new Date(), 500L);
 		Assertions.assertNull(o.rejectedAt, "Check rejectedAt");
 	}
+
+	private static Friendship ship(final PeopleValue person, final PeopleValue friend) { return new Friendship(person.id, friend.id, null); }
 
 	@Test
 	public void z_01_accept_check()
@@ -539,6 +545,7 @@ public class FriendDAOTest
 		Assertions.assertEquals(PERSON.id, o.inviteeId, "Check inviteeId");
 		assertThat(o.acceptedAt).as("Check acceptedAt").isNotNull().isAfter(o.createdAt).isCloseTo(new Date(), 500L);
 		Assertions.assertNull(o.rejectedAt, "Check rejectedAt");
+		assertThat(dao.ships(PERSON_1.id, PERSON.id)).as("Check ships").containsOnly(ship(PERSON, PERSON_1), ship(PERSON_1, PERSON));
 	}
 
 	@Test
@@ -581,6 +588,7 @@ public class FriendDAOTest
 		Assertions.assertEquals(PERSON.id, o.inviteeId, "Check inviteeId");
 		Assertions.assertNull(o.acceptedAt, "Check acceptedAt");
 		assertThat(o.rejectedAt).as("Check rejectedAt").isNotNull().isAfter(o.createdAt).isCloseTo(new Date(), 500L);
+		assertThat(dao.ships(PERSON_1.id, PERSON.id)).as("Check ships").isEmpty();
 	}
 
 	@Test
@@ -623,6 +631,7 @@ public class FriendDAOTest
 		Assertions.assertEquals(PERSON.id, o.inviteeId, "Check inviteeId");
 		assertThat(o.acceptedAt).as("Check acceptedAt").isNotNull().isAfter(o.createdAt).isCloseTo(new Date(), 500L);
 		Assertions.assertNull(o.rejectedAt, "Check rejectedAt");
+		assertThat(dao.ships(PERSON_1.id, PERSON.id)).as("Check ships").containsOnly(ship(PERSON, PERSON_1), ship(PERSON_1, PERSON));
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.

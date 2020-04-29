@@ -30,7 +30,7 @@ public class RedisClient extends HealthCheck implements Closeable, Map<String, S
 	private final JedisPool pool;
 
 	/** Default/empty - called from derived classes. */
-	protected RedisClient(final JedisPool pool)
+	public RedisClient(final JedisPool pool)
 	{
 		this.pool = pool;
 	}

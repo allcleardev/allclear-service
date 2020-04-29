@@ -2,6 +2,7 @@ package app.allclear.platform.entity;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Stream;
 
 import javax.persistence.*;
 
@@ -49,12 +50,12 @@ public class Friend implements Serializable
 	public Date acceptedAt;
 	public void setAcceptedAt(final Date newValue) { acceptedAt = newValue; }
 	@Transient public boolean accepted() { return null != acceptedAt; }
-	@Transient public Friend accept()
+	@Transient public Stream<Friendship> accept()
 	{
 		acceptedAt = new Date();
 		rejectedAt = null;	// In case had been previously rejected.
 
-		return this;
+		return Stream.of(new Friendship(personId, inviteeId, acceptedAt), new Friendship(inviteeId, personId, acceptedAt));	// CREATE both sides of the friendship.
 	}
 
 	@Column(name="rejected_at", columnDefinition="DATETIME", nullable=true)

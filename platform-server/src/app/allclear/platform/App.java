@@ -24,7 +24,6 @@ import app.allclear.common.errors.*;
 import app.allclear.common.hibernate.HibernateBundle;
 import app.allclear.common.jackson.ObjectMapperProvider;
 import app.allclear.common.jersey.CrossDomainHeadersFilter;
-import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.common.redis.RedisClient;
 import app.allclear.common.resources.*;
 import app.allclear.common.task.TaskOperator;
@@ -51,8 +50,9 @@ public class App extends Application<Config>
 	public static final String APP_NAME = "AllClear Platform";
 	public static final String QUEUE_ALERT = "alert";
 	public static final String QUEUE_ALERT_INIT = "alert-init";
+	public static final String SESSION = "session-cache";
 
-	public static final Class<?>[] ENTITIES = new Class<?>[] { Conditions.class, Exposures.class, Facility.class, FacilityX.class, Friend.class, People.class, PeopleFacility.class, Symptoms.class, SymptomsLog.class, Tests.class };
+	public static final Class<?>[] ENTITIES = new Class<?>[] { Conditions.class, Exposures.class, Facility.class, FacilityX.class, Friend.class, Friendship.class, People.class, PeopleFacility.class, Symptoms.class, SymptomsLog.class, Tests.class };
 
 	private final HibernateBundle<Config> transHibernateBundle = new HibernateBundle<>(People.class, ENTITIES) {
 		@Override public DataSourceFactory getDataSourceFactory(final Config conf) { return conf.trans; }
@@ -96,7 +96,7 @@ public class App extends Application<Config>
 
 		var lifecycle = env.lifecycle();
 		var map = new MapClient(conf.geocode.pool());
-		var session = conf.session.test ? new FakeRedisClient() : new RedisClient(conf.session);
+		var session = new RedisClient(conf.session.pool());
 		var twilio = new TwilioClient(conf.twilio);
 
 		lifecycle.manage(new AutoCloseableManager(map));
@@ -115,6 +115,9 @@ public class App extends Application<Config>
 
 		lifecycle.manage(task.addOperator(new TaskOperator<>(QUEUE_ALERT_INIT, new AlertInitTask(factory, peopleDao, task.queue(QUEUE_ALERT)), AlertInitRequest.class, 10, 120, 60, 3600)));
 
+		var hc = env.healthChecks();
+		hc.register(SESSION, session);
+
 		var jersey = env.jersey();
         jersey.register(MultiPartFeature.class);
         jersey.register(new ObjectMapperProvider());
@@ -127,7 +130,7 @@ public class App extends Application<Config>
         jersey.register(new LockAcquisitionExceptionMapper());
         jersey.register(new LockTimeoutExceptionMapper());
         jersey.register(new ThrowableExceptionMapper());
-        jersey.register(new InfoResource(conf, env.healthChecks(), List.of(HibernateBundle.PRIMARY), conf.getVersion()));
+        jersey.register(new InfoResource(conf, hc, List.of(HibernateBundle.PRIMARY), conf.getVersion()));
         jersey.register(new HeapDumpResource());
         jersey.register(new HibernateResource(factory));
         jersey.register(new LogResource());
