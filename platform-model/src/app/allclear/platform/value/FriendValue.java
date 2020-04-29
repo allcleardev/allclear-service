@@ -104,8 +104,8 @@ public class FriendValue implements Serializable
 		return Objects.equals(personId, v.personId) &&
 			Objects.equals(inviteeId, v.inviteeId) &&
 			Objects.equals(inviteeName, v.inviteeName) &&
-			DateUtils.truncatedEquals(acceptedAt, v.acceptedAt, Calendar.SECOND) &&
-			DateUtils.truncatedEquals(rejectedAt, v.rejectedAt, Calendar.SECOND) &&
+			((acceptedAt == v.acceptedAt) || DateUtils.truncatedEquals(acceptedAt, v.acceptedAt, Calendar.SECOND)) &&
+			((rejectedAt == v.rejectedAt) || DateUtils.truncatedEquals(rejectedAt, v.rejectedAt, Calendar.SECOND)) &&
 			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND);
 	}
 

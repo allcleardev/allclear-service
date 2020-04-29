@@ -1,15 +1,20 @@
 package app.allclear.platform.rest;
 
+import static java.util.stream.Collectors.*;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static app.allclear.testing.TestingUtils.*;
 
 import java.util.*;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 
+import org.glassfish.jersey.client.ClientProperties;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -59,6 +64,8 @@ public class FriendResourceTest
 	private static PeopleValue PERSON_1 = null;
 	private static SessionValue SESSION = null;
 	private static SessionValue SESSION_1 = null;
+	private static List<PeopleValue> INVITEES = null;
+	private static List<SessionValue> INVITEES_ = null;
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
 		.addResource(new AuthorizationExceptionMapper())
@@ -96,6 +103,8 @@ public class FriendResourceTest
 		SESSION = new SessionValue(false, PERSON);
 		SESSION_1 = new SessionValue(false, PERSON_1);
 		VALUE_1 = new FriendValue(PERSON.id, PERSON_1.id);	// NOT added. Just used for the ID field.
+		INVITEES = IntStream.range(0, 5).mapToObj(i -> peopleDao.add(new PeopleValue("invitee-" + i, "888-555-200" + i, true))).collect(toList());
+		INVITEES_ = INVITEES.stream().map(o -> new SessionValue(false, o)).collect(toList());
 
 		var now = new Date();
 		var response = request()
@@ -334,8 +343,154 @@ public class FriendResourceTest
 		count(new FriendFilter().withInviteeId(VALUE.inviteeId), 0L);
 	}
 
+	@Test
+	public void z_00()
+	{
+		for (var i : INVITEES_)
+		{
+			sessionDao.current(i);
+			assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: " + i.person.name).isNullOrEmpty();
+			assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + i.person.name).isNullOrEmpty();
+		}
+
+		sessionDao.current(SESSION);
+		assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: first").isNullOrEmpty();
+		assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: first").isNullOrEmpty();
+
+		var response = request(target().path("start").queryParam("inviteeId", INVITEES.get(2).id)).method(HttpMethod.POST);
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());
+
+		var value = VALUE = response.readEntity(FriendValue.class);
+		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertEquals(PERSON.id, value.personId, "Check personId");
+		Assertions.assertEquals(INVITEES.get(2).id, value.inviteeId, "Check inviteeId");
+		Assertions.assertNull(value.acceptedAt, "Check acceptedAt");
+		Assertions.assertNull(value.rejectedAt, "Check rejectedAt");
+		assertThat(value.createdAt).as("Check createdAt").isCloseTo(new Date(), 500L);
+	}
+
+	@Test
+	public void z_01()
+	{
+		var j = 0;
+		var s = Set.of(2);
+		for (var i : INVITEES_)
+		{
+			sessionDao.current(i);
+			assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: " + i.person.name).isNullOrEmpty();
+			if (s.contains(j++))
+			{
+				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + i.person.name).containsExactly(VALUE);
+			}
+			else
+			{
+				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + i.person.name).isNullOrEmpty();
+			}
+		}
+
+		sessionDao.current(SESSION);
+		assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: first").containsExactly(VALUE);
+		assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: first").isNullOrEmpty();
+
+		var response = request(target().path("start").queryParam("inviteeId", INVITEES.get(3).id)).method(HttpMethod.POST);
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());
+
+		var value = VALUE_1 = response.readEntity(FriendValue.class);
+		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertEquals(PERSON.id, value.personId, "Check personId");
+		Assertions.assertEquals(INVITEES.get(3).id, value.inviteeId, "Check inviteeId");
+		Assertions.assertNull(value.acceptedAt, "Check acceptedAt");
+		Assertions.assertNull(value.rejectedAt, "Check rejectedAt");
+		assertThat(value.createdAt).as("Check createdAt").isCloseTo(new Date(), 500L);
+	}
+
+	@Test
+	public void z_02()
+	{
+		var j = 0;
+		var s = Set.of(2, 3);
+		for (var i : INVITEES_)
+		{
+			sessionDao.current(i);
+			assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: " + i.person.name).isNullOrEmpty();
+			if (s.contains(j++))
+			{
+				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + i.person.name).containsExactly(3 == j ? VALUE : VALUE_1);	// j is now incremented so use 3 index.
+			}
+			else
+			{
+				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + i.person.name).isNullOrEmpty();
+			}
+		}
+
+		sessionDao.current(SESSION);
+		assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: first").containsOnly(VALUE, VALUE_1);
+		assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: first").isNullOrEmpty();
+
+		sessionDao.current(INVITEES_.get(3));
+		var response = request(target().path("accept").queryParam("personId", PERSON.id)).method(HttpMethod.PUT);
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());
+
+		var value = response.readEntity(FriendValue.class);
+		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertEquals(PERSON.id, value.personId, "Check personId");
+		Assertions.assertEquals(INVITEES.get(3).id, value.inviteeId, "Check inviteeId");
+		assertThat(value.acceptedAt).as("Check acceptedAt").isAfter(value.createdAt).isCloseTo(new Date(), 500L);
+		Assertions.assertNull(value.rejectedAt, "Check rejectedAt");
+	}
+
+	@Test
+	public void z_03()
+	{
+		var j = 0;
+		var s = Set.of(2);
+		for (var i : INVITEES_)
+		{
+			sessionDao.current(i);
+			assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: " + i.person.name).isNullOrEmpty();
+			if (s.contains(j++))
+			{
+				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + i.person.name).containsExactly(VALUE);
+			}
+			else
+			{
+				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + i.person.name).isNullOrEmpty();
+			}
+		}
+
+		sessionDao.current(SESSION);
+		assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: first").containsOnly(VALUE);
+		assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: first").isNullOrEmpty();
+
+		sessionDao.current(INVITEES_.get(2));
+		var response = request(target().path("reject").queryParam("personId", PERSON.id)).method(HttpMethod.PUT);
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());
+
+		var value = response.readEntity(FriendValue.class);
+		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertEquals(PERSON.id, value.personId, "Check personId");
+		Assertions.assertEquals(INVITEES.get(2).id, value.inviteeId, "Check inviteeId");
+		Assertions.assertNull(value.acceptedAt, "Check acceptedAt");
+		assertThat(value.rejectedAt).as("Check rejectedAt").isAfter(value.createdAt).isCloseTo(new Date(), 500L);
+	}
+
+	@Test
+	public void z_09()
+	{
+		for (var i : INVITEES_)
+		{
+			sessionDao.current(i);
+			assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: " + i.person.name).isNullOrEmpty();
+			assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + i.person.name).isNullOrEmpty();
+		}
+
+		sessionDao.current(SESSION);
+		assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: first").isNullOrEmpty();
+		assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: first").isNullOrEmpty();
+	}
+
 	/** Helper method - creates the base WebTarget. */
-	private WebTarget target() { return RULE.client().target(TARGET); }
+	private WebTarget target() { return RULE.client().property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, "true").target(TARGET); }
 
 	/** Helper method - creates the request from the WebTarget. */
 	private Invocation.Builder request() { return request(target()); }

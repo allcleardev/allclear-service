@@ -61,9 +61,9 @@ public class FriendResource
 	}
 
 	@GET
-	@Path("/start") @Timed @UnitOfWork(readOnly=true, transactional=false)
-	@ApiOperation(value="start", notes="Retrieves outstanding friendship requests initiated by the current user.", response=FriendValue.class, responseContainer="List")
-	public List<FriendValue> start(@HeaderParam(Headers.HEADER_SESSION) final String sessionId)
+	@Path("/starts") @Timed @UnitOfWork(readOnly=true, transactional=false)
+	@ApiOperation(value="starts", notes="Retrieves outstanding friendship requests initiated by the current user.", response=FriendValue.class, responseContainer="List")
+	public List<FriendValue> starts(@HeaderParam(Headers.HEADER_SESSION) final String sessionId)
 	{
 		return dao.search(new FriendFilter().withPersonId(sessionDao.checkPerson().id).withHasAcceptedAt(false).withHasRejectedAt(false)).records;
 	}
