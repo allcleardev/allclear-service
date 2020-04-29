@@ -22,6 +22,7 @@ import app.allclear.common.resources.Headers;
 import app.allclear.common.value.CountResults;
 import app.allclear.common.value.OperationResponse;
 import app.allclear.platform.dao.*;
+import app.allclear.platform.entity.Named;
 import app.allclear.platform.filter.PeopleFilter;
 import app.allclear.platform.model.*;
 import app.allclear.platform.value.PeopleValue;
@@ -279,6 +280,14 @@ public class PeopleResource
 		sessionDao.checkAdmin();	// Only admin can perform this operation on select users.
 
 		return new CountResults(dao.removeFacilities(id, facilityIds));
+	}
+
+	@POST
+	@Path("/find") @Timed @UnitOfWork(readOnly=true, transactional=false)
+	@ApiOperation(value="find", notes="Finds a list of People names by their screen names or phone numbers. Provides a simplified search.", response=Named.class, responseContainer="List")
+	public List<Named> find(final PeopleFindRequest request) throws ValidationException
+	{
+		return dao.find(request);
 	}
 
 	@POST

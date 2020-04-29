@@ -15,9 +15,11 @@ import org.hibernate.id.IdentifierGenerationException;
 import app.allclear.common.dao.*;
 import app.allclear.common.errors.*;
 import app.allclear.common.hibernate.AbstractDAO;
+import app.allclear.common.hibernate.NativeQueryBuilder;
 import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.filter.PeopleFilter;
+import app.allclear.platform.model.PeopleFindRequest;
 import app.allclear.platform.type.*;
 import app.allclear.platform.value.PeopleValue;
 
@@ -36,7 +38,9 @@ public class PeopleDAO extends AbstractDAO<People>
 	public static final int MAX_FACILITIES = 20;
 
 	private static final String SELECT = "SELECT OBJECT(o) FROM People o";
+	private static final String SELECT_NAMES = "SELECT o.id, o.name FROM people o";
 	private static final String COUNT = "SELECT COUNT(o.id) FROM People o";
+	private static final OrderByBuilder.Sort SORT_NAME = new OrderByBuilder.Sort("name", "o.name", "ASC", true, null);
 	private static final OrderByBuilder ORDER = new OrderByBuilder('o', 
 		"id", ASC,
 		"name", ASC,
@@ -507,6 +511,24 @@ public class PeopleDAO extends AbstractDAO<People>
 	public List<PeopleValue> getActiveByIdOrName(final String name)
 	{
 		return findActiveByIdOrName(name).stream().map(o -> o.toValue()).collect(Collectors.toList());
+	}
+
+	/** Finds a list of People names by name or phone number.
+	 * 
+	 * @param request
+	 * @return never NULL
+	 * @throws ValidationException if the request does not contain any filter parameters.
+	 */
+	public List<Named> find(final PeopleFindRequest request) throws ValidationException
+	{
+		if (!request.valid()) throw new ValidationException("Please provide at least one name or one phone number.");
+
+		return new NativeQueryBuilder<Named>(currentSession(), SELECT_NAMES, Named.class, "o")
+			.addIn("names", "o.name IN {}", request.names)
+			.addIn("phones", "o.phone IN {}", request.phones)
+			.add("active", "o.active = :active", true)
+			.orderBy(SORT_NAME)
+			.run();
 	}
 
 	/** Searches the People entity based on the supplied filter.

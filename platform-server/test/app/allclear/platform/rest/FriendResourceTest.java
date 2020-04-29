@@ -489,6 +489,19 @@ public class FriendResourceTest
 		assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: first").isNullOrEmpty();
 	}
 
+	@Test
+	public void z_10_admin_access_failures()
+	{
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request("starts").get().getStatus());
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request("incoming").get().getStatus());
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED,
+			request(target().path("start").queryParam("inviteeId", INVITEES.get(4).id)).method(HttpMethod.POST).getStatus());
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED,
+			request(target().path("accept").queryParam("personId", PERSON_1.id)).method(HttpMethod.PUT).getStatus());
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED,
+			request(target().path("reject").queryParam("personId", PERSON_1.id)).method(HttpMethod.PUT).getStatus());
+	}
+
 	/** Helper method - creates the base WebTarget. */
 	private WebTarget target() { return RULE.client().property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, "true").target(TARGET); }
 

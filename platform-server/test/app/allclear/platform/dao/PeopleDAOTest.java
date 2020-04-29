@@ -1,5 +1,7 @@
 package app.allclear.platform.dao;
 
+import static java.util.stream.Collectors.*;
+
 import static app.allclear.platform.type.Condition.*;
 import static app.allclear.platform.type.Exposure.*;
 import static app.allclear.platform.type.Symptom.*;
@@ -12,6 +14,7 @@ import static app.allclear.testing.TestingUtils.*;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -28,8 +31,10 @@ import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.App;
+import app.allclear.platform.entity.Named;
 import app.allclear.platform.entity.People;
 import app.allclear.platform.filter.PeopleFilter;
+import app.allclear.platform.model.PeopleFindRequest;
 import app.allclear.platform.type.*;
 import app.allclear.platform.value.PeopleValue;
 
@@ -1221,6 +1226,54 @@ public class PeopleDAOTest
 	public void z_12_modifyWithANullChild_count()
 	{
 		countByChildren(1L, 0L);
+	}
+
+	private static List<Named> n(final int... indices)
+	{
+		return Arrays.stream(indices).mapToObj(i -> StringUtils.leftPad(i + "", 3, '0')).map(v -> new Named(v)).collect(toList());
+	}
+
+	@Test
+	public void z_20()
+	{
+		IntStream.range(0, 100).mapToObj(i -> StringUtils.leftPad(i + "", 3, '0')).forEach(i -> dao.add(new PeopleValue(i, "+1" + i, !i.endsWith("7"))));
+	}
+
+	public static Stream<Arguments> z_20_find()
+	{
+		return Stream.of(
+			arguments(List.of("004", "007", "020", "200", "060", "\t", "005", "26"), null, null, new int[] { 4, 5, 20, 60 }),
+			arguments(List.of("004", "007", "020", "200", "060", "\t", "005", "26"), null, 2L, new int[] { 4 }),	// Only one is returned because the list is cut short.
+			arguments(List.of("004", "007", "020", "200", "060", "\t", "005", "26"), List.of(" ", " \n "), 2L, new int[] { 4 }),
+			arguments(List.of("", "  ", " \n"), List.of("+1075", "080", "12", "+1087", "+1015", "+1037", "\n\n", "+1043", "+1007", "", "002", "1000", "+1011"), 30L, new int[] { 2, 11, 15, 43, 75, 80 }),
+			arguments(List.of("", "050", " \n"), List.of("+1075", "080", "12", "+1087", "+1015", "+1037", "\n\n", "+1043", "+1007", "", "002", "1000", "+1011"), 30L, new int[] {}),	// Intersection of names and phones filter do not have overlapping results.
+			arguments(List.of("", "050", " \n", "037", "015", "043"), List.of("+1075", "080", "12", "+1087", "+1015", "+1037", "\n\n", "+1043", "+1007", "", "002", "1000", "+1011"), 30L, new int[] { 15, 43 })
+		 );
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_20_find(final List<String> names, final List<String> phones, final Long pageSize, final int[] indices)
+	{
+		assertThat(dao.find(new PeopleFindRequest(names, phones, pageSize))).isEqualTo(n(indices));
+	}
+
+	public static Stream<PeopleFindRequest> z_20_find_invalid()
+	{
+		return Stream.of(
+			new PeopleFindRequest(null, null, null),
+			new PeopleFindRequest(List.of(), null, null),
+			new PeopleFindRequest(null, List.of(), null),
+			new PeopleFindRequest(List.of(), List.of(), null),
+			new PeopleFindRequest(List.of(" ", " \n"), List.of(" ", " \t "), null));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_20_find_invalid(final PeopleFindRequest request)
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.find(request)))
+			.hasMessage("Please provide at least one name or one phone number.");
 	}
 
 	private void countByChildren(final long first, final long second)

@@ -29,6 +29,7 @@ import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.*;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.redis.FakeRedisClient;
+import app.allclear.common.value.NamedValue;
 import app.allclear.common.value.OperationResponse;
 import app.allclear.platform.App;
 import app.allclear.platform.Config;
@@ -93,6 +94,7 @@ public class PeopleResourceTest
 	private static final String REGISTRATIONS = "/registrations";
 
 	/** Generic types for reading values from responses. */
+	private static final GenericType<List<NamedValue>> TYPE_LIST_NAMED = new GenericType<List<NamedValue>>() {};
 	private static final GenericType<List<PeopleValue>> TYPE_LIST_VALUE = new GenericType<List<PeopleValue>>() {};
 	private static final GenericType<QueryResults<PeopleValue, PeopleFilter>> TYPE_QUERY_RESULTS =
 		new GenericType<QueryResults<PeopleValue, PeopleFilter>>() {};
@@ -120,7 +122,7 @@ public class PeopleResourceTest
 		sessionDao.current(ADMIN = sessionDao.add(new AdminValue("admin"), false));
 
 		var response = request()
-			.post(Entity.entity(VALUE = new PeopleValue("minimal", "888-minimal", true)
+			.post(Entity.entity(VALUE = new PeopleValue("minimal", "+18885551000", true)
 				.withAuthAt(AUTH_AT).withEmailVerifiedAt(EMAIL_VERIFIED_AT).withPhoneVerifiedAt(PHONE_VERIFIED_AT).withAlertedOf(ALERTED_OF).withAlertedAt(ALERTED_AT),
 					UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
@@ -213,12 +215,45 @@ public class PeopleResourceTest
 		var response = request(target().queryParam("name", "min")).get();
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 		assertThat(response.readEntity(TYPE_LIST_VALUE)).containsExactly(VALUE);
+	}
 
+	@Test
+	public void find_with_name()
+	{
+		var t = request("find");
+		var n = new NamedValue(VALUE.id, VALUE.name);
+		var req = Entity.json(new PeopleFindRequest(List.of(VALUE.name), null, null));
+
+		sessionDao.current(SESSION);
+		assertThat(t.post(req, TYPE_LIST_NAMED)).containsExactly(n);
+
+		sessionDao.current(ADMIN);
+		assertThat(t.post(req, TYPE_LIST_NAMED)).containsExactly(n);
+	}
+
+	@Test
+	public void find_with_phone()
+	{
+		var t = request("find");
+		var n = new NamedValue(VALUE.id, VALUE.name);
+		var req = Entity.json(new PeopleFindRequest(List.of(), List.of(VALUE.phone, "888-minimal"), null));
+
+		sessionDao.current(SESSION);
+		assertThat(t.post(req, TYPE_LIST_NAMED)).containsExactly(n);
+
+		sessionDao.current(ADMIN);
+		assertThat(t.post(req, TYPE_LIST_NAMED)).containsExactly(n);
+	}
+
+	@Test
+	public void find_z_deactivated()
+	{
+		sessionDao.current(ADMIN);
 		dao.findWithException(VALUE.id).setActive(VALUE.active = false);
 	}
 
 	@Test
-	public void find_after_deactivated()
+	public void find_z_deactivated_check()
 	{
 		var response = request(target().queryParam("name", "min")).get();
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
