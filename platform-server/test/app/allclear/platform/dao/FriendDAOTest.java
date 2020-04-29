@@ -436,6 +436,41 @@ public class FriendDAOTest
 	public void z_00_check_again_check() { z_00_check(); }
 
 	@Test
+	public void z_00_empty_inviteeId()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.start(PERSON_1, "  ")))
+			.hasMessage("Invitee is not set.");
+	}
+
+	@Test
+	public void z_00_empty_personId()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.start(new PeopleValue().withId(" \t \t \n "), PERSON.id)))
+			.hasMessage("Person is not set.");
+	}
+
+	@Test
+	public void z_00_inactive_inviteeId()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.start(PERSON_1, INACTIVE.id)))
+			.hasMessage("The Invitee ID, " + INACTIVE.id + ", is invalid.");
+	}
+
+	@Test
+	public void z_00_inactive_personId()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.start(INACTIVE, PERSON.id)))
+			.hasMessage("The Person ID, " + INACTIVE.id + ", is invalid.");
+	}
+
+	@Test
+	public void z_00_invalid_acceptance()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.accept(PERSON_1, PERSON.id)))
+			.hasMessage("The friendship request does not exist.");
+	}
+
+	@Test
 	public void z_00_invalid_inviteeId()
 	{
 		assertThat(assertThrows(ValidationException.class, () -> dao.start(PERSON_1, "INVALID")))
@@ -447,6 +482,41 @@ public class FriendDAOTest
 	{
 		assertThat(assertThrows(ValidationException.class, () -> dao.start(new PeopleValue().withId("INVALID"), PERSON.id)))
 			.hasMessage("The Person ID, INVALID, is invalid.");
+	}
+
+	@Test
+	public void z_00_invalid_rejection()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.reject(PERSON_1, PERSON.id)))
+			.hasMessage("The friendship request does not exist.");
+	}
+
+	@Test
+	public void z_00_long_inviteeId()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.start(PERSON_1, StringUtils.repeat('A', PeopleValue.MAX_LEN_ID + 1))))
+			.hasMessage("Invitee 'AAAAAAAAAAA' is longer than the expected size of 10.");
+	}
+
+	@Test
+	public void z_00_long_personId()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.start(new PeopleValue().withId(StringUtils.repeat('A', PeopleValue.MAX_LEN_ID + 1)), PERSON.id)))
+			.hasMessage("Person 'AAAAAAAAAAA' is longer than the expected size of 10.");
+	}
+
+	@Test
+	public void z_00_missing_inviteeId()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.start(PERSON_1, null)))
+			.hasMessage("Invitee is not set.");
+	}
+
+	@Test
+	public void z_00_missing_personId()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.start(new PeopleValue().withId(null), PERSON.id)))
+			.hasMessage("Person is not set.");
 	}
 
 	@Test
@@ -489,6 +559,9 @@ public class FriendDAOTest
 	}
 
 	@Test
+	public void z_01_accept_now_start_again_check() { z_01_accept_done_check(); }
+
+	@Test
 	public void z_01_accept_reject()
 	{
 		var o = dao.reject(PERSON, PERSON_1.id);	// Invitee calls the reject method so is first.
@@ -519,6 +592,16 @@ public class FriendDAOTest
 
 	@Test
 	public void z_01_accept_reject_done_check() { z_01_accept_reject_check(); }
+
+	@Test
+	public void z_01_accept_reject_now_start_again()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.start(PERSON_1, PERSON.id)))
+			.hasMessage("The friendship request cannot be reissued.");
+	}
+
+	@Test
+	public void z_01_accept_reject_now_start_again_check() { z_01_accept_reject_done_check(); }
 
 	@Test
 	public void z_01_accept_reject_reaccept()

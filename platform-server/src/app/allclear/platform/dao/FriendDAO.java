@@ -88,7 +88,7 @@ public class FriendDAO extends AbstractDAO<Friend>
 		var record = find(value);
 		if (null != record)
 		{
-			if (record.rejected()) throw new ValidationException("The friendship request cannot be issued.");	// Do NOT allow a user to request a friendship if the invitee has already previously rejected. DLS on 4/28/2020.
+			if (record.rejected()) throw new ValidationException("The friendship request cannot be reissued.");	// Do NOT allow a user to request a friendship if the invitee has already previously rejected. DLS on 4/28/2020.
 			if (record.accepted()) throw new ValidationException("The friendship request has already been accepted.");
 
 			return record.toValue();	// Already exists.
