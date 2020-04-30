@@ -36,6 +36,9 @@ public class AlertInitRequest implements Serializable
 	}
 
 	@Override
+	public int hashCode() { return Objects.hashCode(timezoneId); }
+
+	@Override
 	public String toString()
 	{
 		return new StringBuilder("{ timezoneId: ").append(timezoneId)

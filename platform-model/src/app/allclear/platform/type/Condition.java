@@ -60,4 +60,7 @@ public class Condition implements Serializable
 		var v = (Condition) o;
 		return Objects.equals(id, v.id) && Objects.equals(name, v.name); 
 	}
+
+	@Override
+	public int hashCode() { return id.hashCode(); }
 }

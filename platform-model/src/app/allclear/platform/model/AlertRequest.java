@@ -34,6 +34,9 @@ public class AlertRequest implements Serializable
 	}
 
 	@Override
+	public int hashCode() { return Objects.hashCode(personId); }
+
+	@Override
 	public String toString()
 	{
 		return new StringBuilder("{ personId: ").append(personId)

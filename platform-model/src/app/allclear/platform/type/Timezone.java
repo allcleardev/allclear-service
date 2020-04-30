@@ -63,6 +63,9 @@ public class Timezone implements Serializable
 	}
 
 	@Override
+	public int hashCode() { return id.hashCode(); }
+
+	@Override
 	public String toString()
 	{
 		return new StringBuilder("{ id: ").append(id)

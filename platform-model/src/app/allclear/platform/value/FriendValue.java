@@ -110,6 +110,12 @@ public class FriendValue implements Serializable
 	}
 
 	@Override
+	public int hashCode()
+	{
+		return Objects.hash(personId, inviteeId);
+	}
+
+	@Override
 	public String toString()
 	{
 		return new StringBuilder("{ personId: ").append(personId)

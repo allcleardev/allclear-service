@@ -52,4 +52,7 @@ public class Stature implements Serializable
 		var v = (Stature) o;
 		return Objects.equals(id, v.id) && Objects.equals(name, v.name); 
 	}
+
+	@Override
+	public int hashCode() { return id.hashCode(); }
 }

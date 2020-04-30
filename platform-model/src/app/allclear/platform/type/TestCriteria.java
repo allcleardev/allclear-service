@@ -56,4 +56,7 @@ public class TestCriteria implements Serializable
 		var v = (TestCriteria) o;
 		return Objects.equals(id, v.id) && Objects.equals(name, v.name) && (restricted == v.restricted); 
 	}
+
+	@Override
+	public int hashCode() { return id.hashCode(); }
 }

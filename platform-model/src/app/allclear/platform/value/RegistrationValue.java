@@ -61,6 +61,12 @@ public class RegistrationValue implements Serializable
 	}
 
 	@Override
+	public int hashCode()
+	{
+		return Objects.hashCode(key);
+	}
+
+	@Override
 	public String toString()
 	{
 		return new StringBuilder("{ key: ").append(key)

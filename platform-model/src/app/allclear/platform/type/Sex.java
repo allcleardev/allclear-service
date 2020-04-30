@@ -53,4 +53,7 @@ public class Sex implements Serializable
 		var v = (Sex) o;
 		return Objects.equals(id, v.id) && Objects.equals(name, v.name); 
 	}
+
+	@Override
+	public int hashCode() { return id.hashCode(); }
 }

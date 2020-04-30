@@ -58,4 +58,7 @@ public class Exposure implements Serializable
 		var v = (Exposure) o;
 		return Objects.equals(id, v.id) && Objects.equals(name, v.name); 
 	}
+
+	@Override
+	public int hashCode() { return id.hashCode(); }
 }

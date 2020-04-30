@@ -46,6 +46,9 @@ public class StartRequest implements Serializable
 	}
 
 	@Override
+	public int hashCode() { return Objects.hashCode(phone); }
+
+	@Override
 	public String toString()
 	{
 		return new StringBuilder("{ phone: ").append(phone)
