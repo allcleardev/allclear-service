@@ -17,12 +17,14 @@ public class AdminTest
 	@Test
 	public void check()
 	{
-		var o = new Admin(new AdminValue("larry").withPassword("Password_1"));
+		var o = new Admin("test", new AdminValue("larry").withPassword("Password_1"));
+		Assertions.assertEquals("test", o.getPartitionKey(), "Check partitionKey");
 		Assertions.assertTrue(o.check("Password_1"), "Check valid");
 		Assertions.assertFalse(o.check("password_1"), "Check valid");
 		Assertions.assertFalse(o.check("Password_2"), "Check invalid");
 
 		o.update(new AdminValue("larry").withPassword("Password_2"));
+		Assertions.assertEquals("test", o.getPartitionKey(), "Check partitionKey");
 		Assertions.assertTrue(o.check("Password_2"), "Check updated");
 		Assertions.assertFalse(o.check("password_2"), "Check invalid");
 		Assertions.assertFalse(o.check("Password_1"), "Check invalid");

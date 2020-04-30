@@ -36,13 +36,19 @@ public class AdminDAO
 {
 	private static final Logger log = LoggerFactory.getLogger(AdminDAO.class);
 	public static final String TABLE = "admins";
+	public static final String PARTITION_DEFAULT = "ADMIN";
 
 	private final CloudTable table;
+	private final String partition;
 
-	public AdminDAO(final String connectionString) throws InvalidKeyException, StorageException, URISyntaxException
+	public AdminDAO(final String connectionString) throws InvalidKeyException, StorageException, URISyntaxException { this(connectionString, PARTITION_DEFAULT); }
+	public AdminDAO(final String connectionString, final String partition)
+		throws InvalidKeyException, StorageException, URISyntaxException
 	{
 		(table = CloudStorageAccount.parse(connectionString).createCloudTableClient().getTableReference(TABLE)).createIfNotExists();
 		log.info("TABLE: " + table);
+
+		this.partition = partition;
 	}
 
 	/** Adds a single Admin value.
@@ -97,7 +103,7 @@ public class AdminDAO
 				validator	// MUST have password on addition.
 					.ensureExistsAndLength("password", "Password", value.password, AdminValue.MAX_LEN_PASSWORD).check();
 	
-				table.execute(insert(record = new Admin(value)));
+				table.execute(insert(record = new Admin(partition, value)));
 			}
 			else
 			{
@@ -160,7 +166,7 @@ public class AdminDAO
 
 	Admin find(final String id) throws StorageException
 	{
-		return table.execute(retrieve(Admin.PARTITION, id, Admin.class)).getResultAsType();
+		return table.execute(retrieve(partition, id, Admin.class)).getResultAsType();
 	}
 
 	/** Finds a single Admin entity by identifier.
@@ -240,12 +246,13 @@ public class AdminDAO
 	public TableQuery<Admin> createQueryBuilder(final AdminFilter filter) throws ValidationException
 	{
 		var filters = new LinkedList<String>();
-		filters.add(generateFilterCondition("PartitionKey", EQUAL, Admin.PARTITION));
+		filters.add(generateFilterCondition("PartitionKey", EQUAL, partition));
 		if (null != filter.id) filters.add(generateFilterCondition("RowKey", EQUAL, filter.id));
 		if (null != filter.email) filters.add(generateFilterCondition("Email", EQUAL, filter.email));
 		if (null != filter.firstName) filters.add(generateFilterCondition("FirstName", EQUAL, filter.firstName));
 		if (null != filter.lastName) filters.add(generateFilterCondition("LastName", EQUAL, filter.lastName));
 		if (null != filter.supers) filters.add(generateFilterCondition("Supers", EQUAL, filter.supers));
+		if (null != filter.editor) filters.add(generateFilterCondition("Editor", EQUAL, filter.editor));
 		if (null != filter.createdAtFrom) filters.add(generateFilterCondition("CreatedAt", GREATER_THAN_OR_EQUAL, filter.createdAtFrom));
 		if (null != filter.createdAtTo) filters.add(generateFilterCondition("CreatedAt", LESS_THAN_OR_EQUAL, filter.createdAtTo));
 		if (null != filter.updatedAtFrom) filters.add(generateFilterCondition("UpdatedAt", GREATER_THAN_OR_EQUAL, filter.updatedAtFrom));

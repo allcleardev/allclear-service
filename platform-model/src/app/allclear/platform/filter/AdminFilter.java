@@ -26,6 +26,7 @@ public class AdminFilter extends QueryFilter
 	public String firstName = null;
 	public String lastName = null;
 	public Boolean supers = null;
+	public Boolean editor = null;
 	public Date createdAtFrom = null;
 	public Date createdAtTo = null;
 	public Date updatedAtFrom = null;
@@ -37,6 +38,7 @@ public class AdminFilter extends QueryFilter
 	public AdminFilter withFirstName(final String newValue) { firstName = newValue; return this; }
 	public AdminFilter withLastName(final String newValue) { lastName = newValue; return this; }
 	public AdminFilter withSupers(final Boolean newValue) { supers = newValue; return this; }
+	public AdminFilter withEditor(final Boolean newValue) { editor = newValue; return this; }
 	public AdminFilter withCreatedAtFrom(final Date newValue) { createdAtFrom = newValue; return this; }
 	public AdminFilter withCreatedAtTo(final Date newValue) { createdAtTo = newValue; return this; }
 	public AdminFilter withUpdatedAtFrom(final Date newValue) { updatedAtFrom = newValue; return this; }
@@ -77,6 +79,7 @@ public class AdminFilter extends QueryFilter
 		@param firstName represents the "first_name" field.
 		@param lastName represents the "last_name" field.
 		@param supers represents the "supers" field.
+		@param editor represents the "editor" field.
 		@param createdAtFrom represents the "created_at" field - lower boundary.
 		@param createdAtTo represents the "created_at" field - upper boundary.
 		@param updatedAtFrom represents the "updated_at" field - lower boundary.
@@ -87,6 +90,7 @@ public class AdminFilter extends QueryFilter
 		final String firstName,
 		final String lastName,
 		final Boolean supers,
+		final Boolean editor,
 		final Date createdAtFrom,
 		final Date createdAtTo,
 		final Date updatedAtFrom,
@@ -97,6 +101,7 @@ public class AdminFilter extends QueryFilter
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.supers = supers;
+		this.editor = editor;
 		this.createdAtFrom = createdAtFrom;
 		this.createdAtTo = createdAtTo;
 		this.updatedAtFrom = updatedAtFrom;
@@ -134,6 +139,7 @@ public class AdminFilter extends QueryFilter
 			.append(", firstName: ").append(firstName)
 			.append(", lastName: ").append(lastName)
 			.append(", supers: ").append(supers)
+			.append(", editor: ").append(editor)
 			.append(", createdAtFrom: ").append(createdAtFrom)
 			.append(", createdAtTo: ").append(createdAtTo)
 			.append(", updatedAtFrom: ").append(updatedAtFrom)

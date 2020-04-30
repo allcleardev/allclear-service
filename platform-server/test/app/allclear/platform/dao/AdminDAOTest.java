@@ -47,13 +47,13 @@ public class AdminDAOTest
 	@BeforeAll
 	public static void up() throws Exception
 	{
-		dao = new AdminDAO(ConfigTest.loadTest().admins);
+		dao = new AdminDAO(ConfigTest.loadTest().admins, "test");
 	}
 
 	@Test
 	public void add()
 	{
-		var value = dao.add(VALUE = new AdminValue("~tester-b", CURRENT_PASSWORD = UUID.randomUUID().toString(), "dsmall@allclear.app", "Dave", "Small", true));
+		var value = dao.add(VALUE = new AdminValue("~tester-b", CURRENT_PASSWORD = UUID.randomUUID().toString(), "dsmall@allclear.app", "Dave", "Small", true, false));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
@@ -63,7 +63,7 @@ public class AdminDAOTest
 	*/
 	private AdminValue createValid()
 	{
-		return new AdminValue("kathy", "Password_2", "kathy@gmail.com", "Kathy", "Reiner", false);
+		return new AdminValue("kathy", "Password_2", "kathy@gmail.com", "Kathy", "Reiner", false, false);
 	}
 
 	@Test
@@ -223,6 +223,7 @@ public class AdminDAOTest
 			arguments(new AdminFilter(1, 20).withFirstName(VALUE.firstName), 1L),
 			arguments(new AdminFilter(1, 20).withLastName(VALUE.lastName), 1L),
 			arguments(new AdminFilter(1, 20).withSupers(VALUE.supers), 1L),
+			arguments(new AdminFilter(1, 20).withEditor(VALUE.editor), 1L),
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAgo), 1L),
 			arguments(new AdminFilter(1, 20).withCreatedAtTo(hourAhead), 1L),
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
@@ -236,6 +237,7 @@ public class AdminDAOTest
 			arguments(new AdminFilter(1, 20).withFirstName("invalid"), 0L),
 			arguments(new AdminFilter(1, 20).withLastName("invalid"), 0L),
 			arguments(new AdminFilter(1, 20).withSupers(!VALUE.supers), 0L),
+			arguments(new AdminFilter(1, 20).withEditor(!VALUE.editor), 0L),
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
 			arguments(new AdminFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
@@ -313,6 +315,13 @@ public class AdminDAOTest
 			arguments(new AdminFilter("supers", "DESC"), "supers", "DESC"),
 			arguments(new AdminFilter("supers", "desc"), "supers", "DESC"),
 
+			arguments(new AdminFilter("editor", null), "editor", "DESC"), // Missing sort direction is converted to the default.
+			arguments(new AdminFilter("editor", "ASC"), "editor", "ASC"),
+			arguments(new AdminFilter("editor", "asc"), "editor", "ASC"),
+			arguments(new AdminFilter("editor", "invalid"), "editor", "DESC"),	// Invalid sort direction is converted to the default.
+			arguments(new AdminFilter("editor", "DESC"), "editor", "DESC"),
+			arguments(new AdminFilter("editor", "desc"), "editor", "DESC"),
+
 			arguments(new AdminFilter("createdAt", null), "createdAt", "DESC"), // Missing sort direction is converted to the default.
 			arguments(new AdminFilter("createdAt", "ASC"), "createdAt", "ASC"),
 			arguments(new AdminFilter("createdAt", "asc"), "createdAt", "ASC"),
@@ -362,6 +371,44 @@ public class AdminDAOTest
 		count(new AdminFilter().withId(VALUE.id), 0L);
 	}
 
+	@Test
+	public void z_add_editor()
+	{
+		var value = dao.add(createValid().withEditor(true));
+		Assertions.assertTrue(value.editor, "Check editor");
+		Assertions.assertFalse(value.canAdmin(), "Check canAdmin()");
+	}
+
+	@Test
+	public void z_get_editor()
+	{
+		var value = VALUE = dao.getById("kathy");
+		Assertions.assertTrue(value.editor, "Check editor");
+		Assertions.assertFalse(value.canAdmin(), "Check canAdmin()");
+	}
+
+	@Test
+	public void z_modify_editor()
+	{
+		var value = dao.update(VALUE.withEditor(false));
+		Assertions.assertFalse(value.editor, "Check editor");
+		Assertions.assertTrue(value.canAdmin(), "Check canAdmin()");
+	}
+
+	@Test
+	public void z_modify_editor_get()
+	{
+		var value = VALUE = dao.getById("kathy");
+		Assertions.assertFalse(value.editor, "Check editor");
+		Assertions.assertTrue(value.canAdmin(), "Check canAdmin()");
+	}
+
+	@Test
+	public void z_remove_editor()
+	{
+		Assertions.assertTrue(dao.remove("kathy"));
+	}
+
 	/** Helper method - calls the DAO count call and compares the expected total value.
 	 *
 	 * @param filter
@@ -382,6 +429,7 @@ public class AdminDAOTest
 		Assertions.assertEquals(expected.firstName, record.getFirstName(), assertId + "Check firstName");
 		Assertions.assertEquals(expected.lastName, record.getLastName(), assertId + "Check lastName");
 		Assertions.assertEquals(expected.supers, record.getSupers(), assertId + "Check supers");
+		Assertions.assertEquals(expected.editor, record.getEditor(), assertId + "Check editor");
 		Assertions.assertEquals(expected.createdAt, record.getCreatedAt(), assertId + "Check createdAt");
 		Assertions.assertEquals(expected.updatedAt, record.getUpdatedAt(), assertId + "Check updatedAt");
 	}
@@ -396,6 +444,8 @@ public class AdminDAOTest
 		Assertions.assertEquals(expected.firstName, value.firstName, assertId + "Check firstName");
 		Assertions.assertEquals(expected.lastName, value.lastName, assertId + "Check lastName");
 		Assertions.assertEquals(expected.supers, value.supers, assertId + "Check supers");
+		Assertions.assertEquals(expected.editor, value.editor, assertId + "Check editor");
+		Assertions.assertEquals(!expected.editor || expected.supers, value.canAdmin(), assertId + "Check canAdmin()");
 		Assertions.assertEquals(expected.createdAt, value.createdAt, assertId + "Check createdAt");
 		Assertions.assertEquals(expected.updatedAt, value.updatedAt, assertId + "Check updatedAt");
 	}

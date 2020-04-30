@@ -69,7 +69,7 @@ public class AdminResourceTest
 	@BeforeAll
 	public static void up() throws Exception
 	{
-		dao = new AdminDAO(conf.admins);
+		dao = new AdminDAO(conf.admins, "test");
 	}
 
 	@Test
@@ -77,7 +77,7 @@ public class AdminResourceTest
 	{
 		var now = new Date();
 		var response = request()
-			.post(Entity.entity(VALUE = new AdminValue("~abby~", "Password_1", "abby@me.me", "Abby", "Dorn", false), UTF8MediaType.APPLICATION_JSON_TYPE));	// MUST use ~abby~ since there is only one database instance across all environments. DLS on 4/27/2020.
+			.post(Entity.entity(VALUE = new AdminValue("~abby~", "Password_1", "abby@me.me", "Abby", "Dorn", false, false), UTF8MediaType.APPLICATION_JSON_TYPE));	// MUST use ~abby~ since there is only one database instance across all environments. DLS on 4/27/2020.
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var value = response.readEntity(AdminValue.class);
@@ -164,6 +164,7 @@ public class AdminResourceTest
 			arguments(new AdminFilter(1, 20).withFirstName(VALUE.firstName), 1L),
 			arguments(new AdminFilter(1, 20).withLastName(VALUE.lastName), 1L),
 			arguments(new AdminFilter(1, 20).withSupers(VALUE.supers), 1L),
+			arguments(new AdminFilter(1, 20).withEditor(VALUE.editor), 1L),
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAgo), 1L),
 			arguments(new AdminFilter(1, 20).withCreatedAtTo(hourAhead), 1L),
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
@@ -177,6 +178,7 @@ public class AdminResourceTest
 			arguments(new AdminFilter(1, 20).withFirstName("invalid"), 0L),
 			arguments(new AdminFilter(1, 20).withLastName("invalid"), 0L),
 			arguments(new AdminFilter(1, 20).withSupers(!VALUE.supers), 0L),
+			arguments(new AdminFilter(1, 20).withEditor(!VALUE.editor), 0L),
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
 			arguments(new AdminFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
@@ -245,7 +247,7 @@ public class AdminResourceTest
 	public void testRemove_search()
 	{
 		count(new AdminFilter().withId(VALUE.id), 0L);
-		count(new AdminFilter().withSupers(true), 1L);
+		count(new AdminFilter().withSupers(true), 0L);
 	}
 
 	/** Helper method - creates the base WebTarget. */
@@ -276,6 +278,8 @@ public class AdminResourceTest
 		Assertions.assertEquals(expected.firstName, value.firstName, assertId + "Check firstName");
 		Assertions.assertEquals(expected.lastName, value.lastName, assertId + "Check lastName");
 		Assertions.assertEquals(expected.supers, value.supers, assertId + "Check supers");
+		Assertions.assertEquals(expected.editor, value.editor, assertId + "Check editor");
+		Assertions.assertEquals(!expected.editor || expected.supers, value.canAdmin(), assertId + "Check canAdmin()");
 		assertThat(value.createdAt).as(assertId + "Check createdAt").isCloseTo(expected.createdAt, 500L);
 		assertThat(value.updatedAt).as(assertId + "Check updatedAt").isCloseTo(expected.updatedAt, 500L);
 	}

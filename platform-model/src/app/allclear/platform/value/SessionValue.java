@@ -40,6 +40,8 @@ public class SessionValue implements Serializable
 	public int seconds() { return (int) (duration / 1000L); }
 	public boolean admin() { return (null != admin); }
 	public boolean supers() { return admin() && admin.supers; }
+	public boolean editor() { return admin() && admin.editor; }
+	public boolean canAdmin() { return admin() && admin.canAdmin(); }
 	public boolean person() { return (null != person); }
 	public boolean customer() { return (null != customer); }
 	public boolean registration() { return (null != registration); }
