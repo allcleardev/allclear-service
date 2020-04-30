@@ -3,6 +3,15 @@ WORKDIR /app
 COPY . /app
 RUN gradle build shadowJar
 
+FROM sonarsource/sonar-scanner-cli as scan
+WORKDIR /app
+ARG GIT_BRANCH
+ARG SONAR_TOKEN
+COPY --from=build /app/* /app/
+COPY ./build.gradle /app/
+USER root
+RUN ./scan.bash
+
 # matches the FROM in gradle:jdk11
 FROM adoptopenjdk:13-jdk-hotspot
 WORKDIR /app

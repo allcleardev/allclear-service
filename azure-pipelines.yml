@@ -37,6 +37,7 @@ stages:
         repository: $(imageRepository)
         dockerfile: $(dockerfilePath)
         containerRegistry: $(dockerRegistryServiceConnection)
+        arguments: --build-arg GIT_BRANCH=$(Build.SourceBranchName) --build-arg SONAR_TOKEN=$(SONAR_TOKEN)
         tags: |
           latest
           $(tag)
@@ -48,6 +49,7 @@ stages:
         repository: $(imageRepository)
         dockerfile: $(dockerfilePath)
         containerRegistry: $(dockerRegistryServiceConnection)
+        arguments: --build-arg GIT_BRANCH=$(Build.SourceBranchName)
         tags: |
           dev
           $(tag)
