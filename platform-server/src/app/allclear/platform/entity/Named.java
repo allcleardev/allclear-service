@@ -34,6 +34,8 @@ public class Named
 		return Objects.equals(name, v.name);
 	}
 
+	@Override public int hashCode() { return Objects.hashCode(id); }
+
 	@Override
 	public String toString() { return name; }
 }

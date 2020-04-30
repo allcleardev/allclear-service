@@ -95,6 +95,8 @@ public class Admin extends TableServiceEntity implements Serializable
 			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
 	}
 
+	@Override public int hashCode() { return Objects.hashCode(getRowKey()); }
+
 	public Admin update(final AdminValue value)
 	{
 		if (null != value.password)

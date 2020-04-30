@@ -450,15 +450,15 @@ public class PeopleResourceTest
 	{
 		sessionDao.current(SESSION);
 
-		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request("search").post(Entity.json(new PeopleFilter())).getStatus());
-
-		sessionDao.current(ADMIN);
+		search(new PeopleFilter(), 0L);	// Can only friends.
 	}
 
 	/** Test removal after the search. */
 	@Test
 	public void testRemove()
 	{
+		sessionDao.current(ADMIN);
+
 		remove(VALUE.id + "INVALID", false);
 		remove(VALUE.id, true);
 		remove(VALUE.id, false);

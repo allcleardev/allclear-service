@@ -80,6 +80,8 @@ public class Customer extends TableServiceEntity implements Serializable
 			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
 	}
 
+	@Override public int hashCode() { return Objects.hashCode(id()); }
+
 	public Customer update(final CustomerValue value)
 	{
 		setName(value.name);

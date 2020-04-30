@@ -297,7 +297,10 @@ var PeopleHandler = new ListTemplate({
 
 	ROW_ACTIONS: [ new RowAction('authenticate', 'Authenticate'),
 	               new RowAction('openSymptomsLogs', 'Symptoms Logs'),
-	               new RowAction('alert', 'Alert') ],
+	               new RowAction('alert', 'Alert'),
+	               new RowAction('openFriendRequests', 'Friend Requests'),
+	               new RowAction('openInvitees', 'Invitees'),
+	               new RowAction('openFriendships', 'Friendships') ],
 
 	alert: function(c, e) {
 		var r = e.myRecord;
@@ -313,6 +316,9 @@ var PeopleHandler = new ListTemplate({
 			else SessionsHandler.EDITOR.doValue(data);
 		});
 	},
+	openInvitees: function(c, e) { this.FRIENDS.filter({ inviteeId: e.myRecord.id }); },
+	openFriendRequests: function(c, e) { this.FRIENDS.filter({ personId: e.myRecord.id }); },
+	openFriendships: function(c, e) { PeopleHandler.filter({ friendshipId: e.myRecord.id, pageSize: 100 }); },
 	openSymptomsLogs: function(c, e) { this.SYMPTOMS_LOG.filter({ personId: e.myRecord.id, pageSize: 100 }); },
 
 	COLUMNS: [ new IdColumn('id', 'ID', true),
@@ -386,6 +392,12 @@ var PeopleHandler = new ListTemplate({
 		          new DatesField('alertedAt', 'Last Alerted At', false),
 		          new DatesField('createdAt', 'Created At', false),
 		          new DatesField('updatedAt', 'Updated At', false),
+		          new DropField('friendId', 'Friend Requester', false, fillPeopleDropdownList, 'friendName'),
+		          new TextField('friendName', '', undefined, undefined, true),
+		          new DropField('inviteeId', 'Invitee', false, fillPeopleDropdownList, 'inviteeName'),
+		          new TextField('inviteeName', '', undefined, undefined, true),
+		          new DropField('friendshipId', 'Friendship', false, fillPeopleDropdownList, 'friendshipName'),
+		          new TextField('friendshipName', '', undefined, undefined, true),
 		          new TagField('includeConditions', 'Include Conditions', false, 'types/conditions'),
 		          new TagField('excludeConditions', 'Exclude Conditions', false, 'types/conditions'),
 		          new TagField('includeExposures', 'Include Exposures', false, 'types/exposures'),
@@ -396,6 +408,50 @@ var PeopleHandler = new ListTemplate({
 		          new TagField('excludeFacilities', 'Exclude Facilities', false, 'facilities'),
 		          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ]
 	},
+
+	FRIENDS: new ListTemplate({
+		NAME: 'friend',
+		SINGULAR: 'Friend Request',
+		PLURAL: 'Friend Requests',
+		RESOURCE: 'friends',
+
+		CAN_ADD: true,
+		CAN_EDIT: true,
+		CAN_REMOVE: true,
+
+		openOwner: (c, e) => { PeopleHandler.EDITOR.doEdit(e.myRecord.personId); },
+		openInvitee: (c, e) => { PeopleHandler.EDITOR.doEdit(e.myRecord.inviteeId); },
+
+		COLUMNS: [ new TextColumn('id', 'ID', undefined, true),
+		           new TextColumn('personName', 'Owner', undefined, false, false, 'openOwner'),
+		           new TextColumn('inviteeName', 'Invitee', undefined, false, false, 'openInvitee'),
+		           new TextColumn('acceptedAt', 'Accepted At', 'toDateTime'),
+		           new TextColumn('rejectedAt', 'Rejected At', 'toDateTime'),
+		           new TextColumn('createdAt', 'Created At', 'toDateTime') ],
+		FIELDS: [ new DropField('personId', 'Owner', true, fillPeopleDropdownList, 'personName'),
+		          new TextField('personName', '', undefined, undefined, true),
+		          new DropField('inviteeId', 'Invitee', true, fillPeopleDropdownList, 'inviteeName'),
+		          new TextField('inviteeName', '', undefined, undefined, true),
+		          new TextField('acceptedAt', 'Accepted At', 'toDateTime'),
+		          new TextField('rejectedAt', 'Rejected At', 'toDateTime'),
+		          new TextField('createdAt', 'Created At', 'toDateTime') ],
+		SEARCH: {
+			NAME: 'friend',
+			SINGULAR: 'Friend Request',
+			PLURAL: 'Friend Requests',
+			RESOURCE: 'friends',
+
+			FIELDS: [ new DropField('personId', 'Owner', false, fillPeopleDropdownList, 'personName'),
+			          new TextField('personName', '', undefined, undefined, true),
+			          new DropField('inviteeId', 'Invitee', true, fillPeopleDropdownList, 'inviteeName'),
+			          new TextField('inviteeName', '', undefined, undefined, true),
+			          new ListField('hasAcceptedAt', 'Has Been Accepted', false, 'yesNoOptions', undefined, 'No Search'),
+			          new DatesField('acceptedAt', 'Accepted At', false),
+			          new ListField('hasRejectedAt', 'Has Been Rejected', false, 'yesNoOptions', undefined, 'No Search'),
+			          new DatesField('rejectedAt', 'Rejected At', false),
+			          new DatesField('createdAt', 'Created At', false) ]
+		}
+	}),
 
 	SYMPTOMS_LOG: new ListTemplate({
 		NAME: 'symptomsLog',

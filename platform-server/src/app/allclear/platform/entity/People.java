@@ -183,6 +183,26 @@ public class People implements Serializable
 	public List<Tests> tests;
 	public void setTests(final List<Tests> newValues) { tests = newValues; }
 
+	@OneToMany(cascade={CascadeType.REMOVE}, fetch=FetchType.LAZY, mappedBy="person")	// Friend requests
+	public List<Friend> getFriends() { return friends; }
+	public List<Friend> friends;
+	public void setFriends(final List<Friend> newValues) { friends = newValues; }
+
+	@OneToMany(cascade={CascadeType.REMOVE}, fetch=FetchType.LAZY, mappedBy="invitee")	// Needed for cascading deletes.
+	public List<Friend> getInvitees() { return invitees; }
+	public List<Friend> invitees;
+	public void setInvitees(final List<Friend> newValues) { invitees = newValues; }
+
+	@OneToMany(cascade={CascadeType.REMOVE}, fetch=FetchType.LAZY, mappedBy="person")	// Persistent friendships after acceptance of the requests.
+	public List<Friendship> getFriendships() { return friendships; }
+	public List<Friendship> friendships;
+	public void setFriendships(final List<Friendship> newValues) { friendships = newValues; }
+
+	@OneToMany(cascade={CascadeType.REMOVE}, fetch=FetchType.LAZY, mappedBy="friend")	// Othersize of the friendship. Needed for cascading deletes.
+	public List<Friendship> getOthers() { return others; }
+	public List<Friendship> others;
+	public void setOthers(final List<Friendship> newValues) { others = newValues; }
+
 	@ManyToMany(cascade={CascadeType.REMOVE}, fetch=FetchType.LAZY)
 	@JoinTable(name="people_facility", joinColumns=@JoinColumn(name="person_id"), inverseJoinColumns=@JoinColumn(name="facility_id"))
 	public List<Facility> getFacilities() { return facilities; }
@@ -333,6 +353,8 @@ public class People implements Serializable
 			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND) &&
 			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
 	}
+
+	@Override public int hashCode() { return Objects.hashCode(id); }
 
 	@Transient
 	public People auth()

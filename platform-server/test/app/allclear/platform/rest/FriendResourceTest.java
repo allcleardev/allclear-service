@@ -34,6 +34,7 @@ import app.allclear.platform.App;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.dao.*;
 import app.allclear.platform.filter.FriendFilter;
+import app.allclear.platform.filter.PeopleFilter;
 import app.allclear.platform.value.*;
 
 /**********************************************************************************
@@ -348,12 +349,19 @@ public class FriendResourceTest
 	{
 		for (var i : INVITEES_)
 		{
+			var p = i.person;
 			sessionDao.current(i);
-			assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: " + i.person.name).isNullOrEmpty();
-			assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + i.person.name).isNullOrEmpty();
+			assertThat(peopleIds(p.id, null, null)).as("Check friend-requests: " + p.name).isNullOrEmpty();
+			assertThat(peopleIds(null, p.id, null)).as("Check invitations: " + p.name).isNullOrEmpty();
+			assertThat(peopleIds(null, null, p.id)).as("Check friendships: " + p.name).isNullOrEmpty();
+			assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: " + p.name).isNullOrEmpty();
+			assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + p.name).isNullOrEmpty();
 		}
 
 		sessionDao.current(SESSION);
+		assertThat(peopleIds(PERSON.id, null, null)).as("Check friend-requests: " + PERSON.name).isNullOrEmpty();
+		assertThat(peopleIds(null, PERSON.id, null)).as("Check invitations: " + PERSON.name).isNullOrEmpty();
+		assertThat(peopleIds(null, null, PERSON.id)).as("Check friendships: " + PERSON.name).isNullOrEmpty();
 		assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: first").isNullOrEmpty();
 		assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: first").isNullOrEmpty();
 
@@ -376,19 +384,29 @@ public class FriendResourceTest
 		var s = Set.of(2);
 		for (var i : INVITEES_)
 		{
+			var p = i.person;
 			sessionDao.current(i);
-			assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: " + i.person.name).isNullOrEmpty();
+			assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: " + p.name).isNullOrEmpty();
 			if (s.contains(j++))
 			{
-				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + i.person.name).containsExactly(VALUE);
+				assertThat(peopleIds(p.id, null, null)).as("Check friend-requests: " + p.name).isNullOrEmpty();
+				assertThat(peopleIds(null, p.id, null)).as("Check invitations: " + p.name).containsExactly(PERSON.id);
+				assertThat(peopleIds(null, null, p.id)).as("Check friendships: " + p.name).isNullOrEmpty();
+				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + p.name).containsExactly(VALUE);
 			}
 			else
 			{
-				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + i.person.name).isNullOrEmpty();
+				assertThat(peopleIds(p.id, null, null)).as("Check friend-requests: " + p.name).isNullOrEmpty();
+				assertThat(peopleIds(null, p.id, null)).as("Check invitations: " + p.name).isNullOrEmpty();
+				assertThat(peopleIds(null, null, p.id)).as("Check friendships: " + p.name).isNullOrEmpty();
+				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + p.name).isNullOrEmpty();
 			}
 		}
 
 		sessionDao.current(SESSION);
+		assertThat(peopleIds(PERSON.id, null, null)).as("Check friend-requests: " + PERSON.name).containsExactly(INVITEES_.get(2).person.id);
+		assertThat(peopleIds(null, PERSON.id, null)).as("Check invitations: " + PERSON.name).isNullOrEmpty();
+		assertThat(peopleIds(null, null, PERSON.id)).as("Check friendships: " + PERSON.name).isNullOrEmpty();
 		assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: first").containsExactly(VALUE);
 		assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: first").isNullOrEmpty();
 
@@ -411,19 +429,29 @@ public class FriendResourceTest
 		var s = Set.of(2, 3);
 		for (var i : INVITEES_)
 		{
+			var p = i.person;
 			sessionDao.current(i);
 			assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: " + i.person.name).isNullOrEmpty();
 			if (s.contains(j++))
 			{
-				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + i.person.name).containsExactly(3 == j ? VALUE : VALUE_1);	// j is now incremented so use 3 index.
+				assertThat(peopleIds(p.id, null, null)).as("Check friend-requests: " + p.name).isNullOrEmpty();
+				assertThat(peopleIds(null, p.id, null)).as("Check invitations: " + p.name).containsExactly(PERSON.id);
+				assertThat(peopleIds(null, null, p.id)).as("Check friendships: " + p.name).isNullOrEmpty();
+				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + p.name).containsExactly(3 == j ? VALUE : VALUE_1);	// j is now incremented so use 3 index.
 			}
 			else
 			{
-				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + i.person.name).isNullOrEmpty();
+				assertThat(peopleIds(p.id, null, null)).as("Check friend-requests: " + p.name).isNullOrEmpty();
+				assertThat(peopleIds(null, p.id, null)).as("Check invitations: " + p.name).isNullOrEmpty();
+				assertThat(peopleIds(null, null, p.id)).as("Check friendships: " + p.name).isNullOrEmpty();
+				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + p.name).isNullOrEmpty();
 			}
 		}
 
 		sessionDao.current(SESSION);
+		assertThat(peopleIds(PERSON.id, null, null)).as("Check friend-requests: " + PERSON.name).containsOnly(INVITEES_.get(2).person.id, INVITEES_.get(3).person.id);
+		assertThat(peopleIds(null, PERSON.id, null)).as("Check invitations: " + PERSON.name).isNullOrEmpty();
+		assertThat(peopleIds(null, null, PERSON.id)).as("Check friendships: " + PERSON.name).isNullOrEmpty();
 		assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: first").containsOnly(VALUE, VALUE_1);
 		assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: first").isNullOrEmpty();
 
@@ -446,19 +474,36 @@ public class FriendResourceTest
 		var s = Set.of(2);
 		for (var i : INVITEES_)
 		{
+			var p = i.person;
 			sessionDao.current(i);
 			assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: " + i.person.name).isNullOrEmpty();
 			if (s.contains(j++))
 			{
-				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + i.person.name).containsExactly(VALUE);
+				assertThat(peopleIds(p.id, null, null)).as("Check friend-requests: " + p.name).isNullOrEmpty();
+				assertThat(peopleIds(null, p.id, null)).as("Check invitations: " + p.name).containsExactly(PERSON.id);
+				assertThat(peopleIds(null, null, p.id)).as("Check friendships: " + p.name).isNullOrEmpty();
+				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + p.name).containsExactly(VALUE);
+			}
+			else if (4 == j)
+			{
+				assertThat(peopleIds(p.id, null, null)).as("Check friend-requests: " + p.name).isNullOrEmpty();
+				assertThat(peopleIds(null, p.id, null)).as("Check invitations: " + p.name).containsExactly(PERSON.id);
+				assertThat(peopleIds(null, null, p.id)).as("Check friendships: " + p.name).containsExactly(PERSON.id);
+				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + p.name).isNullOrEmpty();
 			}
 			else
 			{
-				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + i.person.name).isNullOrEmpty();
+				assertThat(peopleIds(p.id, null, null)).as("Check friend-requests: " + p.name).isNullOrEmpty();
+				assertThat(peopleIds(null, p.id, null)).as("Check invitations: " + p.name).isNullOrEmpty();
+				assertThat(peopleIds(null, null, p.id)).as("Check friendships: " + p.name).isNullOrEmpty();
+				assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + p.name).isNullOrEmpty();
 			}
 		}
 
 		sessionDao.current(SESSION);
+		assertThat(peopleIds(PERSON.id, null, null)).as("Check friend-requests: " + PERSON.name).containsOnly(INVITEES_.get(2).person.id, INVITEES_.get(3).person.id);
+		assertThat(peopleIds(null, PERSON.id, null)).as("Check invitations: " + PERSON.name).isNullOrEmpty();
+		assertThat(peopleIds(null, null, PERSON.id)).as("Check friendships: " + PERSON.name).containsOnly(INVITEES_.get(3).person.id);
 		assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: first").containsOnly(VALUE);
 		assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: first").isNullOrEmpty();
 
@@ -477,14 +522,35 @@ public class FriendResourceTest
 	@Test
 	public void z_09()
 	{
+		var j = 0;
 		for (var i : INVITEES_)
 		{
+			var p = i.person;
 			sessionDao.current(i);
-			assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: " + i.person.name).isNullOrEmpty();
-			assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + i.person.name).isNullOrEmpty();
+			if (2 == j++)
+			{
+				assertThat(peopleIds(null, p.id, null)).as("Check invitations: " + p.name).containsExactly(PERSON.id);
+				assertThat(peopleIds(null, null, p.id)).as("Check friendships: " + p.name).isNullOrEmpty();
+			}
+			else if (4 == j)
+			{
+				assertThat(peopleIds(null, p.id, null)).as("Check invitations: " + p.name).containsExactly(PERSON.id);
+				assertThat(peopleIds(null, null, p.id)).as("Check friendships: " + p.name).containsExactly(PERSON.id);
+			}
+			else
+			{
+				assertThat(peopleIds(null, p.id, null)).as("Check invitations: " + p.name).isNullOrEmpty();
+				assertThat(peopleIds(null, null, p.id)).as("Check friendships: " + p.name).isNullOrEmpty();
+			}
+			assertThat(peopleIds(p.id, null, null)).as("Check friend-requests: " + p.name).isNullOrEmpty();
+			assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: " + p.name).isNullOrEmpty();
+			assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: " + p.name).isNullOrEmpty();
 		}
 
 		sessionDao.current(SESSION);
+		assertThat(peopleIds(PERSON.id, null, null)).as("Check friend-requests: " + PERSON.name).containsOnly(INVITEES_.get(2).person.id, INVITEES_.get(3).person.id);
+		assertThat(peopleIds(null, PERSON.id, null)).as("Check invitations: " + PERSON.name).isNullOrEmpty();
+		assertThat(peopleIds(null, null, PERSON.id)).as("Check friendships: " + PERSON.name).containsOnly(INVITEES_.get(3).person.id);
 		assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: first").isNullOrEmpty();
 		assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: first").isNullOrEmpty();
 	}
@@ -518,6 +584,12 @@ public class FriendResourceTest
 	private void count(final FriendFilter filter, long expectedTotal)
 	{
 		Assertions.assertEquals(expectedTotal, dao.count(filter), "COUNT " + filter + ": Check total");
+	}
+
+	private List<String> peopleIds(final String friendId, final String inviteeId, final String friendshipId)
+	{
+		var results = peopleDao.search(new PeopleFilter().withFriendId(friendId).withInviteeId(inviteeId).withFriendshipId(friendshipId));
+		return results.noRecords() ? null : results.records.stream().map(v -> v.id).collect(toList());
 	}
 
 	/** Helper method - checks an expected value against a supplied value object. */

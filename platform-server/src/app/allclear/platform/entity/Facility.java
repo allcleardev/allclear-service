@@ -346,6 +346,8 @@ public class Facility implements Serializable
 			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
 	}
 
+	@Override public int hashCode() { return Objects.hashCode(id); }
+
 	public Facility update(final FacilityValue value)
 	{
 		setName(value.name);

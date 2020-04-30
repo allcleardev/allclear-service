@@ -285,7 +285,8 @@ public class PeopleResource
 	@POST
 	@Path("/find") @Timed @UnitOfWork(readOnly=true, transactional=false)
 	@ApiOperation(value="find", notes="Finds a list of People names by their screen names or phone numbers. Provides a simplified search.", response=Named.class, responseContainer="List")
-	public List<Named> find(final PeopleFindRequest request) throws ValidationException
+	public List<Named> find(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final PeopleFindRequest request) throws ValidationException
 	{
 		return dao.find(request);
 	}
@@ -296,7 +297,8 @@ public class PeopleResource
 	public QueryResults<PeopleValue, PeopleFilter> search(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		final PeopleFilter filter) throws ValidationException
 	{
-		sessionDao.checkAdmin();	// Only admins can search on application users.
+		var s = sessionDao.current();
+		if (s.person()) filter.withFriendshipId(s.person.id);	// Non-admins can only see their friends.
 
 		return dao.search(filter);
 	}

@@ -76,6 +76,9 @@ public class PeopleFilter extends QueryFilter
 	public Date createdAtTo = null;
 	public Date updatedAtFrom = null;
 	public Date updatedAtTo = null;
+	public String friendId = null;	// Friend requests owned by
+	public String inviteeId = null;	// Incoming friend requests
+	public String friendshipId = null;	// Persistent friendships owned by
 	public List<String> includeConditions = null;
 	public List<String> excludeConditions = null;
 	public List<String> includeExposures = null;
@@ -140,6 +143,9 @@ public class PeopleFilter extends QueryFilter
 	public PeopleFilter withCreatedAtTo(final Date newValue) { createdAtTo = newValue; return this; }
 	public PeopleFilter withUpdatedAtFrom(final Date newValue) { updatedAtFrom = newValue; return this; }
 	public PeopleFilter withUpdatedAtTo(final Date newValue) { updatedAtTo = newValue; return this; }
+	public PeopleFilter withFriendId(final String newValue) { friendId = newValue; return this; }
+	public PeopleFilter withInviteeId(final String newValue) { inviteeId = newValue; return this; }
+	public PeopleFilter withFriendshipId(final String newValue) { friendshipId = newValue; return this; }
 	public PeopleFilter withIncludeConditions(final List<String> newValues) { includeConditions = newValues; return this; }
 	public PeopleFilter withIncludeConditions(final String... newValues) { return withIncludeConditions(Arrays.asList(newValues)); }
 	public PeopleFilter withExcludeConditions(final List<String> newValues) { excludeConditions = newValues; return this; }
@@ -331,6 +337,10 @@ public class PeopleFilter extends QueryFilter
 			if (null != zone) withLongitudeFrom(zone.longitudeFrom).withLongitudeTo(zone.longitudeTo);
 		}
 
+		friendId = StringUtils.trimToNull(friendId);
+		inviteeId = StringUtils.trimToNull(inviteeId);
+		friendshipId = StringUtils.trimToNull(friendshipId);
+
 		return this;
 	}
 
@@ -396,6 +406,9 @@ public class PeopleFilter extends QueryFilter
 			.append(", createdAtTo: ").append(createdAtTo)
 			.append(", updatedAtFrom: ").append(updatedAtFrom)
 			.append(", updatedAtTo: ").append(updatedAtTo)
+			.append(", friendId: ").append(friendId)
+			.append(", inviteeId: ").append(inviteeId)
+			.append(", friendshipId: ").append(friendshipId)
 			.append(", includeConditions: ").append(includeConditions)
 			.append(", excludeConditions: ").append(excludeConditions)
 			.append(", includeExposures: ").append(includeExposures)

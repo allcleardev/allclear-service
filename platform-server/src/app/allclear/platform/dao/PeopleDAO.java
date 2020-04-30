@@ -614,6 +614,9 @@ public class PeopleDAO extends AbstractDAO<People>
 			.add("createdAtTo", "o.createdAt <= :createdAtTo", filter.createdAtTo)
 			.add("updatedAtFrom", "o.updatedAt >= :updatedAtFrom", filter.updatedAtFrom)
 			.add("updatedAtTo", "o.updatedAt <= :updatedAtTo", filter.updatedAtTo)
+			.add("friendId", "iv.personId = :friendId", filter.friendId, "INNER JOIN o.invitees iv")	// Do NOT need to filter out rejected invitation as only admins can call.
+			.add("inviteeId", "fr.inviteeId = :inviteeId", filter.inviteeId, "INNER JOIN o.friends fr")
+			.add("friendshipId", "fs.friendId = :friendshipId", filter.friendshipId, "INNER JOIN o.friendships fs")
 			.addIn("includeConditions", "EXISTS (SELECT 1 FROM Conditions c WHERE c.personId = o.id AND c.conditionId IN {})", filter.includeConditions)
 			.addIn("excludeConditions", "NOT EXISTS (SELECT 1 FROM Conditions c WHERE c.personId = o.id AND c.conditionId IN {})", filter.excludeConditions)
 			.addIn("includeExposures", "EXISTS (SELECT 1 FROM Exposures c WHERE c.personId = o.id AND c.exposureId IN {})", filter.includeExposures)

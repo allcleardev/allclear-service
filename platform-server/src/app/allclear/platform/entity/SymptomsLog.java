@@ -114,6 +114,8 @@ public class SymptomsLog implements PeopleChild
 			DateUtils.truncatedEquals(endedAt, v.endedAt, Calendar.SECOND);
 	}
 
+	@Override public int hashCode() { return Objects.hashCode(id); }
+
 	@Transient
 	public CreatedValue toValue()
 	{

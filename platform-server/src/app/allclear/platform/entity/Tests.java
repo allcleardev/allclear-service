@@ -149,6 +149,8 @@ public class Tests implements Serializable
 			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
 	}
 
+	@Override public int hashCode() { return Objects.hashCode(id); }
+
 	@Transient
 	public TestsValue toValue()
 	{

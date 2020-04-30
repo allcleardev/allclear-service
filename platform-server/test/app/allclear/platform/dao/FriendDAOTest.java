@@ -1,11 +1,13 @@
 package app.allclear.platform.dao;
 
+import static java.util.stream.Collectors.*;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static app.allclear.testing.TestingUtils.*;
 
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +26,7 @@ import app.allclear.platform.App;
 import app.allclear.platform.entity.Friend;
 import app.allclear.platform.entity.Friendship;
 import app.allclear.platform.filter.FriendFilter;
+import app.allclear.platform.filter.PeopleFilter;
 import app.allclear.platform.value.FriendValue;
 import app.allclear.platform.value.PeopleValue;
 
@@ -429,6 +432,12 @@ public class FriendDAOTest
 		Assertions.assertNull(o.acceptedAt, "Check acceptedAt");
 		Assertions.assertNull(o.rejectedAt, "Check rejectedAt");
 		assertThat(dao.ships(PERSON_1.id, PERSON.id)).as("Check ships").isEmpty();
+		assertThat(peopleIds(PERSON_1.id, null, null)).as("Check friends").containsExactly(PERSON.id);
+		assertThat(peopleIds(PERSON.id, null, null)).as("Check friends").isNullOrEmpty();
+		assertThat(peopleIds(null, PERSON_1.id, null)).as("Check invitees").isNullOrEmpty();
+		assertThat(peopleIds(null, PERSON.id, null)).as("Check invitees").containsExactly(PERSON_1.id);
+		assertThat(peopleIds(null, null, PERSON_1.id)).as("Check friendships").isNullOrEmpty();
+		assertThat(peopleIds(null, null, PERSON.id)).as("Check friendships").isNullOrEmpty();
 	}
 
 	@Test
@@ -546,6 +555,12 @@ public class FriendDAOTest
 		assertThat(o.acceptedAt).as("Check acceptedAt").isNotNull().isAfter(o.createdAt).isCloseTo(new Date(), 500L);
 		Assertions.assertNull(o.rejectedAt, "Check rejectedAt");
 		assertThat(dao.ships(PERSON_1.id, PERSON.id)).as("Check ships").containsOnly(ship(PERSON, PERSON_1), ship(PERSON_1, PERSON));
+		assertThat(peopleIds(PERSON_1.id, null, null)).as("Check friends").containsExactly(PERSON.id);
+		assertThat(peopleIds(PERSON.id, null, null)).as("Check friends").isNullOrEmpty();
+		assertThat(peopleIds(null, PERSON_1.id, null)).as("Check invitees").isNullOrEmpty();
+		assertThat(peopleIds(null, PERSON.id, null)).as("Check invitees").containsExactly(PERSON_1.id);
+		assertThat(peopleIds(null, null, PERSON_1.id)).as("Check friendships").containsExactly(PERSON.id);
+		assertThat(peopleIds(null, null, PERSON.id)).as("Check friendships").containsExactly(PERSON_1.id);
 	}
 
 	@Test
@@ -589,6 +604,12 @@ public class FriendDAOTest
 		Assertions.assertNull(o.acceptedAt, "Check acceptedAt");
 		assertThat(o.rejectedAt).as("Check rejectedAt").isNotNull().isAfter(o.createdAt).isCloseTo(new Date(), 500L);
 		assertThat(dao.ships(PERSON_1.id, PERSON.id)).as("Check ships").isEmpty();
+		assertThat(peopleIds(PERSON_1.id, null, null)).as("Check friends").containsExactly(PERSON.id);
+		assertThat(peopleIds(PERSON.id, null, null)).as("Check friends").isNullOrEmpty();
+		assertThat(peopleIds(null, PERSON_1.id, null)).as("Check invitees").isNullOrEmpty();
+		assertThat(peopleIds(null, PERSON.id, null)).as("Check invitees").containsExactly(PERSON_1.id);
+		assertThat(peopleIds(null, null, PERSON_1.id)).as("Check friendships").isNullOrEmpty();
+		assertThat(peopleIds(null, null, PERSON.id)).as("Check friendships").isNullOrEmpty();
 	}
 
 	@Test
@@ -632,6 +653,12 @@ public class FriendDAOTest
 		assertThat(o.acceptedAt).as("Check acceptedAt").isNotNull().isAfter(o.createdAt).isCloseTo(new Date(), 500L);
 		Assertions.assertNull(o.rejectedAt, "Check rejectedAt");
 		assertThat(dao.ships(PERSON_1.id, PERSON.id)).as("Check ships").containsOnly(ship(PERSON, PERSON_1), ship(PERSON_1, PERSON));
+		assertThat(peopleIds(PERSON_1.id, null, null)).as("Check friends").containsExactly(PERSON.id);
+		assertThat(peopleIds(PERSON.id, null, null)).as("Check friends").isNullOrEmpty();
+		assertThat(peopleIds(null, PERSON_1.id, null)).as("Check invitees").isNullOrEmpty();
+		assertThat(peopleIds(null, PERSON.id, null)).as("Check invitees").containsExactly(PERSON_1.id);
+		assertThat(peopleIds(null, null, PERSON_1.id)).as("Check friendships").containsExactly(PERSON.id);
+		assertThat(peopleIds(null, null, PERSON.id)).as("Check friendships").containsExactly(PERSON_1.id);
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.
@@ -642,6 +669,12 @@ public class FriendDAOTest
 	private void count(final FriendFilter filter, final long expectedTotal)
 	{
 		Assertions.assertEquals(expectedTotal, dao.count(filter), "COUNT " + filter + ": Check total");
+	}
+
+	private List<String> peopleIds(final String friendId, final String inviteeId, final String friendshipId)
+	{
+		var results = peopleDao.search(new PeopleFilter().withFriendId(friendId).withInviteeId(inviteeId).withFriendshipId(friendshipId));
+		return results.noRecords() ? null : results.records.stream().map(v -> v.id).collect(toList());
 	}
 
 	/** Helper method - checks an expected value against a supplied entity record. */
