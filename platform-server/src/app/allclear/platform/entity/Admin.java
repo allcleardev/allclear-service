@@ -30,6 +30,10 @@ public class Admin extends TableServiceEntity implements Serializable
 	public String getPassword() { return password; }
 	public String password;
 	public void setPassword(final String newValue) { password = newValue; }
+	public void putPassword(final String newValue)
+	{
+		this.password = saltAndHash(identifier, newValue);
+	}
 
 	public String getEmail() { return email; }
 	public String email;
@@ -70,8 +74,8 @@ public class Admin extends TableServiceEntity implements Serializable
 		super(partition, value.id);
 
 		var now = new Date();
-		this.identifier = now.getTime();
-		this.password = saltAndHash(identifier, value.password);
+		this.identifier = now.getTime();	// SET 'identifier' first as it's used to salt the password hash. DLS on 5/1/2020.
+		putPassword(value.password);
 		this.email = value.email;
 		this.firstName = value.firstName;
 		this.lastName = value.lastName;
@@ -105,7 +109,7 @@ public class Admin extends TableServiceEntity implements Serializable
 	{
 		if (null != value.password)
 		{
-			setPassword(saltAndHash(identifier, value.password));
+			putPassword(value.password);
 			value.password = null;	// Do NOT reflect back the user password.
 		}
 

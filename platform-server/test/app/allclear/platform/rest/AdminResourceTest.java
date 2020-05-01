@@ -30,7 +30,9 @@ import app.allclear.platform.ConfigTest;
 import app.allclear.platform.dao.AdminDAO;
 import app.allclear.platform.dao.SessionDAO;
 import app.allclear.platform.filter.AdminFilter;
+import app.allclear.platform.model.*;
 import app.allclear.platform.value.AdminValue;
+import app.allclear.platform.value.SessionValue;
 
 /**********************************************************************************
 *
@@ -85,6 +87,30 @@ public class AdminResourceTest
 		check(VALUE.withCreatedAt(now).withUpdatedAt(now), value.withPassword("Password_1"));
 
 		VALUE.withPassword(null);	// For later checks
+	}
+
+	@Test
+	public void authenticate()
+	{
+		Assertions.assertEquals(HTTP_STATUS_OK, request("auth").post(Entity.json(new AuthenticationRequest("~abby~", "Password_1", false))).getStatus());
+		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, request("auth").post(Entity.json(new AuthenticationRequest("~abby~", "Password_2", false))).getStatus());
+	}
+
+	@Test
+	public void changePassword()
+	{
+		sessionDao.current(new SessionValue(false, VALUE));
+
+		Assertions.assertEquals(HTTP_STATUS_OK, request("self").put(Entity.json(new ChangePasswordRequest("Password_1", "Password_2", "Password_2"))).getStatus());
+	}
+
+	@Test
+	public void changePassword_check()
+	{
+		sessionDao.clear();
+
+		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, request("auth").post(Entity.json(new AuthenticationRequest("~abby~", "Password_1", false))).getStatus());
+		Assertions.assertEquals(HTTP_STATUS_OK, request("auth").post(Entity.json(new AuthenticationRequest("~abby~", "Password_2", false))).getStatus());
 	}
 
 	@Test @Disabled	// NOT implemented

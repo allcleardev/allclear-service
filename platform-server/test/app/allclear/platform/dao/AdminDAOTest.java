@@ -1,5 +1,6 @@
 package app.allclear.platform.dao;
 
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static app.allclear.common.crypto.Hasher.saltAndHash;
@@ -23,6 +24,7 @@ import app.allclear.platform.ConfigTest;
 import app.allclear.platform.entity.Admin;
 import app.allclear.platform.filter.AdminFilter;
 import app.allclear.platform.model.AuthenticationRequest;
+import app.allclear.platform.model.ChangePasswordRequest;
 import app.allclear.platform.value.AdminValue;
 
 /**********************************************************************************
@@ -43,6 +45,8 @@ public class AdminDAOTest
 	private static AdminDAO dao;
 	private static AdminValue VALUE = null;
 	private static String CURRENT_PASSWORD;
+	private static String NEW_PASSWORD;
+	private static String OLD_PASSWORD = "old";
 
 	@BeforeAll
 	public static void up() throws Exception
@@ -155,6 +159,68 @@ public class AdminDAOTest
 	public void authenticate_fail(final String userName, final String password)
 	{
 		assertThrows(ValidationException.class, () -> dao.authenticate(new AuthenticationRequest(userName, password, false)));
+	}
+
+	@Test
+	public void changePassword()
+	{
+		NEW_PASSWORD = UUID.randomUUID().toString();
+		Assertions.assertNotNull(dao.changePassword(VALUE, new ChangePasswordRequest(CURRENT_PASSWORD, NEW_PASSWORD, NEW_PASSWORD)));
+	}
+
+	@Test
+	public void changePassword_check()
+	{
+		var value = dao.authenticate(new AuthenticationRequest("~tester-b", NEW_PASSWORD, false));
+		Assertions.assertNotNull(value, "Exists");
+		check(VALUE, value);
+	}
+
+	@Test
+	public void changePassword_check_fail()
+	{
+		assertThrows(ValidationException.class, () -> dao.authenticate(new AuthenticationRequest("~tester-b", CURRENT_PASSWORD, false)));
+	}
+
+	public static Stream<Arguments> changePassword_failure()
+	{
+		var shortPwd = StringUtils.repeat('A', AdminValue.MIN_LEN_PASSWORD - 1);
+		var longPwd = StringUtils.repeat('A', AdminValue.MAX_LEN_PASSWORD + 1);
+
+		return Stream.of(
+				arguments("", "Password_2", "Password_2", "Current Password is not set."),
+				arguments(null, "Password_2", "Password_2", "Current Password is not set."),
+				arguments(NEW_PASSWORD, "", "Password_2", "New Password is not set."),
+				arguments(NEW_PASSWORD, null, "Password_2", "New Password is not set."),
+				arguments(NEW_PASSWORD, shortPwd, shortPwd, "New Password cannot be shorter than 8 characters."),
+				arguments(NEW_PASSWORD, longPwd, longPwd, "New Password cannot be longer than 40 characters."),
+				arguments(NEW_PASSWORD, "Password_2", "", "The New Password does not match the Confirmation Password."),
+				arguments(NEW_PASSWORD, "Password_2", null, "The New Password does not match the Confirmation Password."),
+				arguments(NEW_PASSWORD, "Password_2", "Password_3", "The New Password does not match the Confirmation Password."),
+				arguments(CURRENT_PASSWORD, "Password_2", "Password_2", "The Current Password is invalid.")
+			);
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void changePassword_failure(final String currentPassword, final String newPassword, final String confirmPassword, final String message)
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.changePassword(VALUE, new ChangePasswordRequest(currentPassword, newPassword, confirmPassword))))
+			.hasMessage(message);
+	}
+
+	@Test
+	public void changePassword_invalidUser()
+	{
+		assertThrows(ObjectNotFoundException.class,
+			() -> dao.changePassword(new AdminValue("invalid"), new ChangePasswordRequest(NEW_PASSWORD, "Password_2", "Password_2")));
+	}
+
+	@Test
+	public void changePassword_z_final()
+	{
+		OLD_PASSWORD = CURRENT_PASSWORD;
+		CURRENT_PASSWORD = NEW_PASSWORD;
 	}
 
 	@Test
@@ -425,6 +491,7 @@ public class AdminDAOTest
 		var assertId = "ID (" + expected.id + "): ";
 		Assertions.assertEquals(expected.id, record.id(), assertId + "Check id");
 		Assertions.assertEquals(saltAndHash(record.getIdentifier(), CURRENT_PASSWORD), record.getPassword(), assertId + "Check password");
+		Assertions.assertNotEquals(saltAndHash(record.getIdentifier(), OLD_PASSWORD), record.getPassword(), assertId + "Check password");
 		Assertions.assertEquals(expected.email, record.getEmail(), assertId + "Check email");
 		Assertions.assertEquals(expected.firstName, record.getFirstName(), assertId + "Check firstName");
 		Assertions.assertEquals(expected.lastName, record.getLastName(), assertId + "Check lastName");

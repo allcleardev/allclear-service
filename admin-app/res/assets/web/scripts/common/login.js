@@ -52,10 +52,24 @@ var LoginHandler = new EditTemplate({
 			{
 				a.innerHTML = v.id;
 				a.myRecord = v;
-				a.onclick = function(ev) { var t = this; AdminsHandler.EDITOR.doEdit(this.myRecord.id); };
+				a.onclick = function(ev) { var t = this; me.CHANGE_PASSWORD.doValue(this.myRecord); };
 				e.innerHTML = 'Logout';
 				e.onclick = function(ev) { me.doLogout(); return false; };
 			}
 		});
-	}
+	},
+
+	CHANGE_PASSWORD: new EditTemplate({
+		NAME: 'admin',
+		SINGULAR: 'Change Password',
+		PLURAL: 'Change Password',
+		RESOURCE: 'admins/self',
+
+		EDIT_METHOD: 'put',
+
+		FIELDS: [ new TextField('id', 'ID'),
+		          new PassField('currentPassword', 'Current Password', true, 40, 40),
+		          new PassField('newPassword', 'New Password', true, 40, 40),
+		          new PassField('confirmPassword', 'Confirm Password', true, 40, 40) ]
+	})
 });

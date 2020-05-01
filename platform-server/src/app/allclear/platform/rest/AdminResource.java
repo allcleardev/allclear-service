@@ -20,6 +20,7 @@ import app.allclear.platform.dao.AdminDAO;
 import app.allclear.platform.dao.SessionDAO;
 import app.allclear.platform.filter.AdminFilter;
 import app.allclear.platform.model.AuthenticationRequest;
+import app.allclear.platform.model.ChangePasswordRequest;
 import app.allclear.platform.value.AdminValue;
 import app.allclear.platform.value.SessionValue;
 
@@ -67,8 +68,8 @@ public class AdminResource
 
 	@GET
 	@Path("/self") @Timed
-	@ApiOperation(value="get", notes="Gets the current user's Admin profile.", response=AdminValue.class)
-	public AdminValue get(@HeaderParam(Headers.HEADER_SESSION) final String sessionId) throws ObjectNotFoundException
+	@ApiOperation(value="getSelf", notes="Gets the current user's Admin profile.", response=AdminValue.class)
+	public AdminValue getSelf(@HeaderParam(Headers.HEADER_SESSION) final String sessionId) throws ObjectNotFoundException
 	{
 		return dao.getByIdWithException(sessionDao.current().admin.id);
 	}
@@ -93,7 +94,7 @@ public class AdminResource
 
 	@POST
 	@Path("/auth") @Timed
-	@ApiOperation(value="add", notes="Authenticates a user.", response=SessionValue.class)
+	@ApiOperation(value="authenticate", notes="Authenticates a user.", response=SessionValue.class)
 	public SessionValue authenticate(final AuthenticationRequest request) throws ValidationException
 	{
 		if (null != sessionDao.current()) throw new ValidationException("You are already authenticated.");
@@ -112,11 +113,11 @@ public class AdminResource
 
 	@PUT
 	@Path("/self") @Timed
-	@ApiOperation(value="add", notes="Updates the current user's Admin profile.", response=AdminValue.class)
-	public AdminValue setSelf(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
-		final AdminValue value) throws ValidationException
+	@ApiOperation(value="changePassword", notes="Updates the current user's Admin profile.", response=AdminValue.class)
+	public AdminValue changePassword(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final ChangePasswordRequest request) throws ValidationException
 	{
-		return dao.update(value.withId(sessionDao.current().admin.id));
+		return dao.changePassword(sessionDao.current().admin, request);
 	}
 
 	@DELETE
@@ -130,8 +131,8 @@ public class AdminResource
 
 	@DELETE
 	@Path("/self") @Timed
-	@ApiOperation(value="remove", notes="Logs out the current Administrator.")
-	public OperationResponse remove(@HeaderParam(Headers.HEADER_SESSION) final String sessionId) throws ValidationException
+	@ApiOperation(value="logout", notes="Logs out the current Administrator.")
+	public OperationResponse logout(@HeaderParam(Headers.HEADER_SESSION) final String sessionId) throws ValidationException
 	{
 		sessionDao.remove();
 		return OperationResponse.SUCCESS;

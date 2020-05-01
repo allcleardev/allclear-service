@@ -22,6 +22,7 @@ import app.allclear.common.errors.*;
 import app.allclear.platform.entity.Admin;
 import app.allclear.platform.filter.AdminFilter;
 import app.allclear.platform.model.AuthenticationRequest;
+import app.allclear.platform.model.ChangePasswordRequest;
 import app.allclear.platform.value.AdminValue;
 
 /** Data access object that provides access to the Cosmos Table - 'allclear-admins'.
@@ -84,6 +85,27 @@ public class AdminDAO
 			return o.toValue();
 		}
 		catch (final StorageException ex) { throw new RuntimeException(ex); }
+	}
+
+	public AdminValue changePassword(final AdminValue value, final ChangePasswordRequest request)
+		throws ObjectNotFoundException, ValidationException
+	{
+		var record = findWithException(value.id);	// It's possible the user was deleted.
+		var validator = new Validator()
+			.ensureExists("currentPassword", "Current Password", request.currentPassword)
+			.ensureExistsAndLength("newPassword", "New Password", request.newPassword, AdminValue.MIN_LEN_PASSWORD, AdminValue.MAX_LEN_PASSWORD)
+			.check();
+
+		if (!request.newPassword.equals(request.confirmPassword))
+			validator.add("confirmPassword", "The New Password does not match the Confirmation Password.").check();
+
+		if (!record.check(request.currentPassword)) validator.add("currentPassword", "The Current Password is invalid.").check();
+
+		record.putPassword(request.newPassword);
+		try { table.execute(merge(record)); }
+		catch (final StorageException ex) { throw new RuntimeException(ex); }
+
+		return value;
 	}
 
 	/** Updates a single Admin value.
