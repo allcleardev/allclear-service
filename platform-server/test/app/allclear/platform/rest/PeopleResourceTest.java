@@ -688,7 +688,8 @@ public class PeopleResourceTest
 	@Test
 	public void z_07_get()
 	{
-		Assertions.assertEquals(SESSION_1.person, request(VALUE.id).get(PeopleValue.class));
+		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, request(VALUE.id).get().getStatus());	// NOT a friend.
+		Assertions.assertEquals(SESSION_1.person, request(SESSION_1.person.id).get(PeopleValue.class));
 	}
 
 	@Test
@@ -859,13 +860,13 @@ public class PeopleResourceTest
 	{
 		sessionDao.current(SESSION_1);
 
-		var response = request("doesNotMatter").get();
+		var response = request(SESSION_1.person.id).get();
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());
 
 		var now = new Date();
 		var value = response.readEntity(PeopleValue.class);
 		Assertions.assertNotNull(value, "Exists");
-		assertThat(value.id).as("Check ID").isNotNull().hasSize(6).isNotEqualTo("doesNotMatter");
+		assertThat(value.id).as("Check ID").isNotNull().hasSize(6).isEqualTo(SESSION_1.person.id);
 		Assertions.assertEquals("lenny", value.name, "Check name");
 		Assertions.assertEquals("+18885552200", value.phone, "Check phone");
 		Assertions.assertTrue(value.active, "Check active");

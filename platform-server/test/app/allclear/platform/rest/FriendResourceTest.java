@@ -72,10 +72,12 @@ public class FriendResourceTest
 		.addResource(new AuthorizationExceptionMapper())
 		.addResource(new NotFoundExceptionMapper())
 		.addResource(new ValidationExceptionMapper())
-		.addResource(new FriendResource(dao, sessionDao)).build();
+		.addResource(new FriendResource(dao, sessionDao))
+		.addResource(new PeopleResource(peopleDao, null, sessionDao, null)).build();
 
 	/** Primary URI to test. */
 	private static final String TARGET = "/friends";
+	private static final String PEOPLES = "/peoples";
 
 	/** Generic types for reading values from responses. */
 	private static final GenericType<List<FriendValue>> TYPE_LIST_VALUE = new GenericType<List<FriendValue>>() {};
@@ -344,6 +346,9 @@ public class FriendResourceTest
 		count(new FriendFilter().withInviteeId(VALUE.inviteeId), 0L);
 	}
 
+	private PeopleValue inv(final int i) { return INVITEES.get(i); }
+	private String invId(final int i) { return inv(i).id; }
+
 	@Test
 	public void z_00()
 	{
@@ -365,16 +370,18 @@ public class FriendResourceTest
 		assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: first").isNullOrEmpty();
 		assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: first").isNullOrEmpty();
 
-		var response = request(target().path("start").queryParam("inviteeId", INVITEES.get(2).id)).method(HttpMethod.POST);
+		var response = request(target().path("start").queryParam("inviteeId", invId(2))).method(HttpMethod.POST);
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());
 
 		var value = VALUE = response.readEntity(FriendValue.class);
 		Assertions.assertNotNull(value, "Exists");
 		Assertions.assertEquals(PERSON.id, value.personId, "Check personId");
-		Assertions.assertEquals(INVITEES.get(2).id, value.inviteeId, "Check inviteeId");
+		Assertions.assertEquals(invId(2), value.inviteeId, "Check inviteeId");
 		Assertions.assertNull(value.acceptedAt, "Check acceptedAt");
 		Assertions.assertNull(value.rejectedAt, "Check rejectedAt");
 		assertThat(value.createdAt).as("Check createdAt").isCloseTo(new Date(), 500L);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, person(invId(2)).getStatus());
 	}
 
 	@Test
@@ -410,16 +417,18 @@ public class FriendResourceTest
 		assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: first").containsExactly(VALUE);
 		assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: first").isNullOrEmpty();
 
-		var response = request(target().path("start").queryParam("inviteeId", INVITEES.get(3).id)).method(HttpMethod.POST);
+		var response = request(target().path("start").queryParam("inviteeId", invId(3))).method(HttpMethod.POST);
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());
 
 		var value = VALUE_1 = response.readEntity(FriendValue.class);
 		Assertions.assertNotNull(value, "Exists");
 		Assertions.assertEquals(PERSON.id, value.personId, "Check personId");
-		Assertions.assertEquals(INVITEES.get(3).id, value.inviteeId, "Check inviteeId");
+		Assertions.assertEquals(invId(3), value.inviteeId, "Check inviteeId");
 		Assertions.assertNull(value.acceptedAt, "Check acceptedAt");
 		Assertions.assertNull(value.rejectedAt, "Check rejectedAt");
 		assertThat(value.createdAt).as("Check createdAt").isCloseTo(new Date(), 500L);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, person(invId(3)).getStatus());
 	}
 
 	@Test
@@ -465,6 +474,12 @@ public class FriendResourceTest
 		Assertions.assertEquals(INVITEES.get(3).id, value.inviteeId, "Check inviteeId");
 		assertThat(value.acceptedAt).as("Check acceptedAt").isAfter(value.createdAt).isCloseTo(new Date(), 500L);
 		Assertions.assertNull(value.rejectedAt, "Check rejectedAt");
+
+		Assertions.assertEquals(PERSON, person(PERSON.id).readEntity(PeopleValue.class));
+
+		sessionDao.current(SESSION);
+		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, person(invId(2)).getStatus());
+		Assertions.assertEquals(inv(3), person(invId(3)).readEntity(PeopleValue.class));
 	}
 
 	@Test
@@ -486,6 +501,7 @@ public class FriendResourceTest
 			}
 			else if (4 == j)
 			{
+				Assertions.assertEquals(PERSON, person(PERSON.id).readEntity(PeopleValue.class));
 				assertThat(peopleIds(p.id, null, null)).as("Check friend-requests: " + p.name).isNullOrEmpty();
 				assertThat(peopleIds(null, p.id, null)).as("Check invitations: " + p.name).containsExactly(PERSON.id);
 				assertThat(peopleIds(null, null, p.id)).as("Check friendships: " + p.name).containsExactly(PERSON.id);
@@ -517,6 +533,12 @@ public class FriendResourceTest
 		Assertions.assertEquals(INVITEES.get(2).id, value.inviteeId, "Check inviteeId");
 		Assertions.assertNull(value.acceptedAt, "Check acceptedAt");
 		assertThat(value.rejectedAt).as("Check rejectedAt").isAfter(value.createdAt).isCloseTo(new Date(), 500L);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, person(PERSON.id).getStatus());
+
+		sessionDao.current(SESSION);
+		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, person(invId(2)).getStatus());
+		Assertions.assertEquals(inv(3), person(invId(3)).readEntity(PeopleValue.class));
 	}
 
 	@Test
@@ -529,6 +551,7 @@ public class FriendResourceTest
 			sessionDao.current(i);
 			if (2 == j++)
 			{
+				Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, person(PERSON.id).getStatus());
 				assertThat(peopleIds(null, p.id, null)).as("Check invitations: " + p.name).containsExactly(PERSON.id);
 				assertThat(peopleIds(null, null, p.id)).as("Check friendships: " + p.name).isNullOrEmpty();
 			}
@@ -539,6 +562,7 @@ public class FriendResourceTest
 			}
 			else
 			{
+				Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, person(PERSON.id).getStatus());
 				assertThat(peopleIds(null, p.id, null)).as("Check invitations: " + p.name).isNullOrEmpty();
 				assertThat(peopleIds(null, null, p.id)).as("Check friendships: " + p.name).isNullOrEmpty();
 			}
@@ -553,6 +577,9 @@ public class FriendResourceTest
 		assertThat(peopleIds(null, null, PERSON.id)).as("Check friendships: " + PERSON.name).containsOnly(INVITEES_.get(3).person.id);
 		assertThat(request("starts").get(TYPE_LIST_VALUE)).as("Check get-starts: first").isNullOrEmpty();
 		assertThat(request("incoming").get(TYPE_LIST_VALUE)).as("Check get-incoming: first").isNullOrEmpty();
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, person(invId(2)).getStatus());
+		Assertions.assertEquals(inv(3), person(invId(3)).readEntity(PeopleValue.class));
 	}
 
 	@Test
@@ -570,11 +597,13 @@ public class FriendResourceTest
 
 	/** Helper method - creates the base WebTarget. */
 	private WebTarget target() { return RULE.client().property(ClientProperties.SUPPRESS_HTTP_COMPLIANCE_VALIDATION, "true").target(TARGET); }
+	private WebTarget people() { return RULE.client().target(PEOPLES); }
 
 	/** Helper method - creates the request from the WebTarget. */
 	private Invocation.Builder request() { return request(target()); }
 	private Invocation.Builder request(final String path) { return request(target().path(path)); }
 	private Invocation.Builder request(final WebTarget target) { return target.request(UTF8MediaType.APPLICATION_JSON_TYPE); }
+	private Response person(final String id) { return request(people().path(id)).get(); }
 
 	/** Helper method - calls the DAO count call and compares the expected total value.
 	 *

@@ -38,6 +38,7 @@ import app.allclear.platform.value.PeopleValue;
 	@NamedQuery(name="findPeople", query="SELECT OBJECT(o) FROM People o WHERE o.name = :name"),
 	@NamedQuery(name="findPeopleByEmail", query="SELECT OBJECT(o) FROM People o WHERE o.email = :email"),
 	@NamedQuery(name="findPeopleByPhone", query="SELECT OBJECT(o) FROM People o WHERE o.phone = :phone"),
+	@NamedQuery(name="findPeopleViaFriendship", query="SELECT OBJECT(o) FROM Friendship f INNER JOIN f.friend o WHERE f.personId = :personId AND f.friendId = :friendId AND o.active = TRUE"),
 	@NamedQuery(name="getActiveAlertablePeopleIdsByLongitude", query="SELECT o.id FROM People o WHERE o.id > :lastId AND o.latitude IS NOT NULL AND ((o.longitude >= :longitudeFrom) AND (o.longitude < :longitudeTo)) AND o.alertable = TRUE AND o.active = TRUE ORDER BY o.id"),
 	@NamedQuery(name="getPeopleIdByEmail", query="SELECT o.id FROM People o WHERE o.email = :email"),
 	@NamedQuery(name="getPeopleIdByPhone", query="SELECT o.id FROM People o WHERE o.phone = :phone")})

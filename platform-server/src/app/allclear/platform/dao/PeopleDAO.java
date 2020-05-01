@@ -434,6 +434,14 @@ public class PeopleDAO extends AbstractDAO<People>
 	People find(final String name) { return namedQuery("findPeople").setParameter("name", name).uniqueResult(); }
 	People findByEmail(final String email) { return namedQuery("findPeopleByEmail").setParameter("email", email).uniqueResult(); }
 	People findByPhone(final String phone) { return namedQuery("findPeopleByPhone").setParameter("phone", phone).uniqueResult(); }
+	People findFriend(final String personId, final String friendId)
+	{
+		return namedQuery("findPeopleViaFriendship")
+			.setParameter("personId", personId)
+			.setParameter("friendId", friendId)
+			.uniqueResult();
+	}
+
 	List<People> findActiveByIdOrName(final String name) { return namedQuery("findActivePeopleByIdOrName").setParameter("name", name + "%").list(); }
 
 	/** Checks for the existence of an account. Used to ensure account validity before attempting to authenticate.
@@ -484,6 +492,21 @@ public class PeopleDAO extends AbstractDAO<People>
 	public PeopleValue getByIdWithException(final String id) throws ValidationException
 	{
 		return findWithException(id).toValueX();
+	}
+
+	/** Gets a single Friend of the specified Person.
+	 * 
+	 * @param personId
+	 * @param friendId
+	 * @return never NULL.
+	 * @throws ObjectNotFoundException if the friend is not a user or not a friend of the person.
+	 */
+	public PeopleValue getFriend(final String personId, final String friendId) throws ObjectNotFoundException
+	{
+		var o = findFriend(personId, friendId);
+		if (null == o) throw new ObjectNotFoundException("Could not find friend '" + friendId + "'.");
+
+		return o.toValueX();
 	}
 
 	/** Gets a list of People IDs that are active, alertable, and within a specific timezone.

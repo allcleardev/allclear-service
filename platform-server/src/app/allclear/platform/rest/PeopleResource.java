@@ -70,9 +70,9 @@ public class PeopleResource
 		@PathParam("id") final String id) throws ObjectNotFoundException
 	{
 		var o = sessionDao.checkAdminOrPerson();	// Only admins can see other application users.
-		var id_ = o.person() ? o.person.id : id;
+		if (o.admin() || o.person.id.equals(id)) return dao.getByIdWithException(id);
 
-		return dao.getByIdWithException(id_);
+		return dao.getFriend(o.person.id, id);
 	}
 
 	@GET
