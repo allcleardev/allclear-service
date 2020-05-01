@@ -99,8 +99,8 @@ public class TestsDAO extends AbstractDAO<Tests>
 	{
 		value.clean();
 		var validator = new Validator();
-		var auth = sessionDao.current();
-		if (!auth.admin()) value.personId = auth.person.id;
+		var auth = sessionDao.checkAdminOrPerson();
+		if (auth.person()) value.personId = auth.person.id;
 
 		// Throw exception after field existence checks and before FK checks.
 		validator.ensureExistsAndLength("personId", "Person", value.personId, TestsValue.MAX_LEN_PERSON_ID)
@@ -147,8 +147,8 @@ public class TestsDAO extends AbstractDAO<Tests>
 
 	Tests check(final Tests record) throws NotAuthorizedException
 	{
-		var auth = sessionDao.current();
-		if (auth.admin() || auth.person.id.equals(record.getPersonId())) return record;
+		var auth = sessionDao.checkAdminOrPerson();
+		if (auth.canAdmin() || auth.person.id.equals(record.getPersonId())) return record;
 
 		throw new NotAuthorizedException("The Person '" + auth.person + "' cannot access '" + record + "'.");
 	}
@@ -170,9 +170,9 @@ public class TestsDAO extends AbstractDAO<Tests>
 
 	List<Tests> findByPerson(final String personId)
 	{
-		var s = sessionDao.current();
+		var s = sessionDao.checkAdminOrPerson();
 		return namedQuery("findTestsByPerson")
-			.setParameter("personId", s.admin() ? personId : s.person.id)
+			.setParameter("personId", s.canAdmin() ? personId : s.person.id)
 			.list();
 	}
 
@@ -240,8 +240,8 @@ public class TestsDAO extends AbstractDAO<Tests>
 	private QueryBuilder<Tests> createQueryBuilder(final TestsFilter filter, final String select)
 		throws ValidationException
 	{
-		var auth = sessionDao.current();
-		if (!auth.admin()) filter.personId = auth.person.id;
+		var auth = sessionDao.checkAdminOrPerson();
+		if (auth.person()) filter.personId = auth.person.id;
 
 		return createQueryBuilder(select)
 			.add("id", "o.id = :id", filter.id)

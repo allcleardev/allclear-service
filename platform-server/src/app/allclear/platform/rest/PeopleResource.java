@@ -69,7 +69,7 @@ public class PeopleResource
 	public PeopleValue get(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@PathParam("id") final String id) throws ObjectNotFoundException
 	{
-		var o = sessionDao.current();	// Only admins can see other application users.
+		var o = sessionDao.checkAdminOrPerson();	// Only admins can see other application users.
 		var id_ = o.person() ? o.person.id : id;
 
 		return dao.getByIdWithException(id_);
@@ -81,7 +81,7 @@ public class PeopleResource
 	public List<PeopleValue> find(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@QueryParam("name") @ApiParam(name="name", value="Value for the wildcard search") final String name)
 	{
-		var o = sessionDao.current();	// Only admins can see other application users.
+		var o = sessionDao.checkAdminOrPerson();	// Only admins can see other application users.
 		if (o.person()) return List.of(dao.getByIdWithException(o.person.id));
 
 		return dao.getActiveByIdOrName(name);
@@ -193,8 +193,8 @@ public class PeopleResource
 	public PeopleValue set(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		final PeopleValue value) throws ValidationException
 	{
-		var o = sessionDao.current();
-		if (!o.admin())	// Non-admins can only update themselves.
+		var o = sessionDao.checkAdminOrPerson();
+		if (o.person())	// Non-admins can only update themselves.
 		{
 			return sessionDao.update(o, dao.update(value.withId(o.person.id), false)).person;
 		}
@@ -298,7 +298,7 @@ public class PeopleResource
 	public QueryResults<PeopleValue, PeopleFilter> search(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		final PeopleFilter filter) throws ValidationException
 	{
-		var s = sessionDao.current();
+		var s = sessionDao.checkAdminOrPerson();
 		if (s.person()) filter.withFriendshipId(s.person.id);	// Non-admins can only see their friends.
 
 		return dao.search(filter);

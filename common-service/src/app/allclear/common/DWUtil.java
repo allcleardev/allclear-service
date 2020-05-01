@@ -57,10 +57,10 @@ public class DWUtil
 			else if (file.isDirectory())
 				throw new IllegalArgumentException(String.format("The application credentials file '%s' is a directory. Must be a file.", fileName));
 	
-			try
+			try (var fs = new FileInputStream(file))
 			{
 				Properties prop = new Properties();
-				prop.load(new FileInputStream(file));
+				prop.load(fs);
 	
 				if (!prop.isEmpty())
 					for (Map.Entry<Object, Object> e : prop.entrySet())

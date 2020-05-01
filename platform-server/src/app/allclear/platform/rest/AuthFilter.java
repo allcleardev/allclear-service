@@ -55,12 +55,12 @@ public class AuthFilter implements ContainerRequestFilter
 		{
 			if (!session.registration()) throw new NotAuthenticatedException("Requires a Registration Session.");
 		}
-		else if (admin(path))
+		else if (admin(path))	// Where Administrators are managed.
 		{
-			if (!session.admin()) throw new NotAuthenticatedException("Requires an Administrative Session.");
+			if (!session.admin()) throw new NotAuthenticatedException("Requires an Administrative Session.");	// Editors can manage themselves.
 			if (!self(path) && !session.supers()) throw new NotAuthenticatedException("Requires a Super-Admin Session.");	// Only super-admins can administer Admins. But allow all admins to administer themselves.
 		}
-		else if (admins(path) && !session.admin())
+		else if (admins(path) && !session.canAdmin())	// Paths only available to administrators - no Editors.
 			throw new NotAuthenticatedException("Requires an Administrative Session.");
 		else if (session.registration() && requiresAuth(path))
 			throw new NotAuthenticatedException("Requires a Non-registration Session.");

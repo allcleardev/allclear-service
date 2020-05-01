@@ -225,7 +225,33 @@ public class SessionDAO
 	public AdminValue checkAdmin() throws NotAuthorizedException
 	{
 		var o = current();
-		if (!o.admin()) throw new NotAuthorizedException("Must be an Admin session.");
+		if (!o.canAdmin()) throw new NotAuthorizedException("Must be an Admin session.");
+
+		return o.admin;
+	}
+
+	/** Checks that the current session is associated with an Admin or Person - NOT an Editor.
+	 * 
+	 * @return never NULL
+	 * @throws NotAuthorizedException
+	 */
+	public SessionValue checkAdminOrPerson() throws NotAuthorizedException
+	{
+		var o = current();
+		if (o.person() || o.canAdmin()) return o;
+
+		throw new NotAuthorizedException("Must be an Admin session.");
+	}
+
+	/** Checks that the current session is associated with an Editor.
+	 * 
+	 * @return never NULL
+	 * @throws NotAuthorizedException
+	 */
+	public AdminValue checkEditor() throws NotAuthorizedException
+	{
+		var o = current();
+		if (!o.admin()) throw new NotAuthorizedException("Must be an Editor session.");	// All Admins account can act as Editor.
 
 		return o.admin;
 	}

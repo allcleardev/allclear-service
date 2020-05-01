@@ -46,6 +46,7 @@ public class SessionDAOTest
 	private static final SessionDAO dao = new SessionDAO(redis, twilio, ConfigTest.loadTest());
 
 	private static SessionValue ADMIN;
+	private static SessionValue EDITOR;
 	private static SessionValue PERSON;
 	private static SessionValue PERSON_1;
 	private static SessionValue START;
@@ -69,10 +70,30 @@ public class SessionDAOTest
 		Assertions.assertEquals("tim", ADMIN.admin.id, "Check admin.id");
 		Assertions.assertTrue(ADMIN.admin(), "Check admin()");
 		Assertions.assertFalse(ADMIN.supers(), "Check supers()");
+		Assertions.assertFalse(ADMIN.editor(), "Check editor()");
+		Assertions.assertTrue(ADMIN.canAdmin(), "Check canAdmin()");
 		Assertions.assertNull(ADMIN.registration, "Check registration");
 		Assertions.assertNull(ADMIN.person, "Check person");
 		Assertions.assertEquals(30 * 60, ADMIN.seconds(), "Check seconds");
 		Assertions.assertEquals(30L * 60L, redis.ttl(SessionDAO.key(ADMIN.id)), "Check expiration");
+	}
+
+	@Test
+	public void add_editor()
+	{
+		var now = new Date();
+		Assertions.assertNotNull(EDITOR = dao.add(new AdminValue("tim", false, true).withCreatedAt(now).withUpdatedAt(now), false));
+		Assertions.assertNotNull(EDITOR, "Exists");
+		Assertions.assertNotNull(EDITOR.admin, "Check admin");
+		Assertions.assertEquals("tim", EDITOR.admin.id, "Check admin.id");
+		Assertions.assertTrue(EDITOR.admin(), "Check admin()");
+		Assertions.assertFalse(EDITOR.supers(), "Check supers()");
+		Assertions.assertTrue(EDITOR.editor(), "Check editor()");
+		Assertions.assertFalse(EDITOR.canAdmin(), "Check canAdmin()");
+		Assertions.assertNull(EDITOR.registration, "Check registration");
+		Assertions.assertNull(EDITOR.person, "Check person");
+		Assertions.assertEquals(30 * 60, EDITOR.seconds(), "Check seconds");
+		Assertions.assertEquals(30L * 60L, redis.ttl(SessionDAO.key(EDITOR.id)), "Check expiration");
 	}
 
 	@Test
@@ -143,6 +164,8 @@ public class SessionDAOTest
 		Assertions.assertEquals("naomi", SUPER.admin.id, "Check admin.id");
 		Assertions.assertTrue(SUPER.admin(), "Check admin()");
 		Assertions.assertTrue(SUPER.supers(), "Check supers()");
+		Assertions.assertFalse(SUPER.editor(), "Check editor()");
+		Assertions.assertTrue(SUPER.canAdmin(), "Check canAdmin()");
 		Assertions.assertNull(SUPER.registration, "Check registration");
 		Assertions.assertNull(SUPER.person, "Check person");
 		Assertions.assertEquals(30 * 24 * 60 * 60, SUPER.seconds(), "Check seconds");
@@ -210,6 +233,7 @@ public class SessionDAOTest
 	{
 		return Stream.of(
 			arguments(ADMIN, true),
+			arguments(EDITOR, false),
 			arguments(PERSON, false),
 			arguments(PERSON_1, false),
 			arguments(START, false),
@@ -223,15 +247,39 @@ public class SessionDAOTest
 	{
 		dao.current(value);
 		if (success)
-			Assertions.assertNotNull(dao.checkAdmin());
+			assertThat(dao.checkAdmin()).isNotNull().isInstanceOf(AdminValue.class);
 		else
 			Assertions.assertThrows(NotAuthorizedException.class, () -> dao.checkAdmin());
+	}
+
+	public static Stream<Arguments> checkEditor()
+	{
+		return Stream.of(
+			arguments(ADMIN, true),	// All administrators can perform the Editor actions. DLS on 4/30/2020.
+			arguments(EDITOR, true),
+			arguments(PERSON, false),
+			arguments(PERSON_1, false),
+			arguments(START, false),
+			arguments(START_1, false),
+			arguments(SUPER, true));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void checkEditor(final SessionValue value, final boolean success)
+	{
+		dao.current(value);
+		if (success)
+			assertThat(dao.checkEditor()).isNotNull().isInstanceOf(AdminValue.class);
+		else
+			Assertions.assertThrows(NotAuthorizedException.class, () -> dao.checkEditor());
 	}
 
 	public static Stream<Arguments> checkPerson()
 	{
 		return Stream.of(
 			arguments(ADMIN, false),
+			arguments(EDITOR, false),
 			arguments(PERSON, true),
 			arguments(PERSON_1, true),
 			arguments(START, false),
@@ -245,7 +293,7 @@ public class SessionDAOTest
 	{
 		dao.current(value);
 		if (success)
-			Assertions.assertNotNull(dao.checkPerson());
+			assertThat(dao.checkPerson()).isNotNull().isInstanceOf(PeopleValue.class);
 		else
 			Assertions.assertThrows(NotAuthorizedException.class, () -> dao.checkPerson());
 	}
@@ -254,6 +302,7 @@ public class SessionDAOTest
 	{
 		return Stream.of(
 			arguments(ADMIN, false),
+			arguments(EDITOR, false),
 			arguments(PERSON, false),
 			arguments(PERSON_1, false),
 			arguments(START, false),
@@ -267,7 +316,7 @@ public class SessionDAOTest
 	{
 		dao.current(value);
 		if (success)
-			Assertions.assertNotNull(dao.checkAdmin());
+			assertThat(dao.checkSuper()).isNotNull().isInstanceOf(AdminValue.class);
 		else
 			Assertions.assertThrows(NotAuthorizedException.class, () -> dao.checkSuper());
 	}
@@ -290,11 +339,11 @@ public class SessionDAOTest
 	@Test
 	public void current_customer()
 	{
-		Assertions.assertEquals(9, redis.size(), "Before");
+		Assertions.assertEquals(10, redis.size(), "Before");
 
 		dao.current(new CustomerValue("Wesley"));
 
-		Assertions.assertEquals(9, redis.size(), "After");	// No change because it doesn't get pushed to Redis. It's just for the current instance.
+		Assertions.assertEquals(10, redis.size(), "After");	// No change because it doesn't get pushed to Redis. It's just for the current instance.
 
 		dao.clear();
 	}
@@ -329,8 +378,8 @@ public class SessionDAOTest
 	public void find()	// MUST do search test after ADD but before the STARTs are promoted. DLS on 4/7/2020.
 	{
 		var results = dao.search(new SessionFilter());
-		Assertions.assertEquals(6L, results.total, "Check total");
-		assertThat(results.records).as("Check records").hasSize(6).containsOnly(ADMIN, PERSON, PERSON_1, START, START_1, SUPER);
+		Assertions.assertEquals(7L, results.total, "Check total");
+		assertThat(results.records).as("Check records").hasSize(7).containsOnly(ADMIN, EDITOR, PERSON, PERSON_1, START, START_1, SUPER);
 	}
 
 	@Test
@@ -343,7 +392,7 @@ public class SessionDAOTest
 
 	public static Stream<SessionValue> find_with_filter()
 	{
-		return Stream.of(ADMIN, PERSON, PERSON_1, START, START_1, SUPER);
+		return Stream.of(ADMIN, EDITOR, PERSON, PERSON_1, START, START_1, SUPER);
 	}
 
 	@ParameterizedTest
@@ -371,6 +420,24 @@ public class SessionDAOTest
 		Assertions.assertEquals("tim", v.admin.id, "Check admin.id");
 		Assertions.assertTrue(v.admin(), "Check admin()");
 		Assertions.assertFalse(v.supers(), "Check supers()");
+		Assertions.assertFalse(v.editor(), "Check editor()");
+		Assertions.assertTrue(v.canAdmin(), "Check canAdmin()");
+		Assertions.assertNull(v.registration, "Check registration");
+		Assertions.assertNull(v.person, "Check person");
+		Assertions.assertFalse(v.rememberMe, "Check rememberMe");
+	}
+
+	@Test
+	public void get_editor()
+	{
+		var v = dao.get(EDITOR.id);
+		Assertions.assertNotNull(v, "Exists");
+		Assertions.assertNotNull(v.admin, "Check admin");
+		Assertions.assertEquals("tim", v.admin.id, "Check admin.id");
+		Assertions.assertTrue(v.admin(), "Check admin()");
+		Assertions.assertFalse(v.supers(), "Check supers()");
+		Assertions.assertTrue(v.editor(), "Check editor()");
+		Assertions.assertFalse(v.canAdmin(), "Check canAdmin()");
 		Assertions.assertNull(v.registration, "Check registration");
 		Assertions.assertNull(v.person, "Check person");
 		Assertions.assertFalse(v.rememberMe, "Check rememberMe");
@@ -447,6 +514,8 @@ public class SessionDAOTest
 		Assertions.assertEquals("naomi", v.admin.id, "Check admin.id");
 		Assertions.assertTrue(v.admin(), "Check admin()");
 		Assertions.assertTrue(v.supers(), "Check supers()");
+		Assertions.assertFalse(v.editor(), "Check editor()");
+		Assertions.assertTrue(v.canAdmin(), "Check canAdmin()");
 		Assertions.assertNull(v.registration, "Check registration");
 		Assertions.assertNull(v.person, "Check person");
 		Assertions.assertTrue(v.rememberMe, "Check rememberMe");
@@ -483,6 +552,14 @@ public class SessionDAOTest
 		dao.remove(ADMIN.id);
 
 		Assertions.assertThrows(NotAuthenticatedException.class, () -> dao.get(ADMIN.id));
+	}
+
+	@Test
+	public void testRemove_editor()
+	{
+		dao.remove(EDITOR.id);
+
+		Assertions.assertThrows(NotAuthenticatedException.class, () -> dao.get(EDITOR.id));
 	}
 
 	@Test
