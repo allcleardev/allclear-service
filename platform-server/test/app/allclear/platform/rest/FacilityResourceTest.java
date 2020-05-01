@@ -63,6 +63,7 @@ public class FacilityResourceTest
 	private static FacilityValue VALUE = null;
 	private static FacilityValue VALUE_1 = null;
 	private static SessionValue ADMIN = null;
+	private static CustomerValue CUSTOMER = null;
 	private static SessionValue EDITOR = null;
 	private static SessionValue PERSON = null;
 	private static SessionValue PERSON_UNRESTRICTED = null;
@@ -104,6 +105,7 @@ public class FacilityResourceTest
 	@Test
 	public void add()
 	{
+		CUSTOMER = new CustomerValue("customer");
 		EDITOR = sessionDao.add(new AdminValue("editor", false, true), false);
 		sessionDao.current(ADMIN = sessionDao.add(new AdminValue("admin"), false));
 
@@ -453,7 +455,8 @@ public class FacilityResourceTest
 
 	@ParameterizedTest
 	@MethodSource
-	public void search(final FacilityFilter filter, final long expectedTotal)
+	public void search(final FacilityFilter filter, final long expectedTotal) { search_(filter, expectedTotal); }
+	public QueryResults<FacilityValue, FacilityFilter> search_(final FacilityFilter filter, final long expectedTotal)
 	{
 		var response = request("search")
 			.post(Entity.entity(filter, UTF8MediaType.APPLICATION_JSON_TYPE));
@@ -479,6 +482,8 @@ public class FacilityResourceTest
 			Assertions.assertEquals(total, results.records.size(), assertId + "Check records.size");
 			results.records.forEach(v -> Assertions.assertFalse(v.restricted, "Check restricted: " + v.name));
 		}
+
+		return results;
 	}
 
 	@Test
@@ -550,6 +555,22 @@ public class FacilityResourceTest
 	}
 
 	@Test
+	public void set_00_search_as_anonymous()
+	{
+		sessionDao.clear();
+
+		search(new FacilityFilter(), 2L);
+	}
+
+	@Test
+	public void set_00_search_as_customer()
+	{
+		sessionDao.current(CUSTOMER);
+
+		search(new FacilityFilter(), 2L);
+	}
+
+	@Test
 	public void set_00_search_restrictive_as_admin()
 	{
 		var o = request("search").post(Entity.json(new FacilityFilter().withRestrictive(true)), TYPE_QUERY_RESULTS);
@@ -609,6 +630,22 @@ public class FacilityResourceTest
 	{
 		var response = get(VALUE_1.id);
 		Assertions.assertFalse(response.readEntity(FacilityValue.class).active);
+	}
+
+	@Test
+	public void set_01_search_as_anonymous()
+	{
+		sessionDao.clear();
+
+		search_(new FacilityFilter(), 1L).records.forEach(v -> Assertions.assertTrue(v.active));
+	}
+
+	@Test
+	public void set_01_search_as_customer()
+	{
+		sessionDao.current(CUSTOMER);
+
+		search_(new FacilityFilter(), 1L).records.forEach(v -> Assertions.assertTrue(v.active));
 	}
 
 	@Test

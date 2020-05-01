@@ -142,7 +142,7 @@ public class FacilityResource
 		}
 
 		var s = sessionDao.currentOrAnon();
-		if (s.person()) filter.withActive(true);	// Non-admins can only see active facilities. DLS on 5/1/2020.
+		if (!s.admin()) filter.withActive(true);	// Non-admins (people, customers, and anonymous) can only see active facilities. DLS on 5/1/2020.
 
 		var restricted = (s.person() && !s.person.meetsCdcPriority3());	// Does the current user have restrictions imposed with regards to facilities that are open to them?
 		if (filter.restrictive && restricted)
