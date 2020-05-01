@@ -22,7 +22,8 @@ import app.allclear.platform.dao.SessionDAO;
 public class AuthFilter implements ContainerRequestFilter
 {
 	public static final String PATH_ADMINS = "admins";
-	public static final List<String> PATHS_ADMINS = List.of("customers", "logs", "maps", "queues", "registrations");
+	public static final List<String> PATHS_ADMINS = List.of("customers", "logs", "queues", "registrations");
+	public static final List<String> PATHS_EDITORS = List.of("maps");	// Editors need the maps/geocode operation when managing facilities. DLS on 5/1/2020.
 	public static final String PATH_INFO_CONFIG = "info/config";
 	public static final String PATH_SELF = "/self";
 	public static final String PATH_TWILIO = "twilio/";	// Uses Digest Auth
@@ -62,6 +63,8 @@ public class AuthFilter implements ContainerRequestFilter
 		}
 		else if (admins(path) && !session.canAdmin())	// Paths only available to administrators - no Editors.
 			throw new NotAuthenticatedException("Requires an Administrative Session.");
+		else if (editors(path) && !session.admin())	// Paths only available to all administrators - including Editors.
+			throw new NotAuthenticatedException("Requires an Administrative Session.");
 		else if (session.registration() && requiresAuth(path))
 			throw new NotAuthenticatedException("Requires a Non-registration Session.");
 	}
@@ -74,6 +77,11 @@ public class AuthFilter implements ContainerRequestFilter
 	boolean admins(final String path)
 	{
 		return ((null != path) && PATHS_ADMINS.stream().anyMatch(v -> path.startsWith(v)));
+	}
+
+	boolean editors(final String path)
+	{
+		return ((null != path) && PATHS_EDITORS.stream().anyMatch(v -> path.startsWith(v)));
 	}
 
 	boolean requiresAuth(final String path)

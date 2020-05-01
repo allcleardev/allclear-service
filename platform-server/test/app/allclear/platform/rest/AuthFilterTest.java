@@ -129,6 +129,10 @@ public class AuthFilterTest
 			arguments("info/health", false),
 			arguments("info/ping", false),
 			arguments("info/version", false),
+			arguments("maps", false),
+			arguments("maps/geocode", false),
+			arguments("/maps", false),
+			arguments("/maps/geocode", false),
 			arguments("peoples/admin", false),
 			arguments("types/admin", false),
 			arguments("/peoples", false),
@@ -154,6 +158,62 @@ public class AuthFilterTest
 	public void admins(final String path, final boolean expected)
 	{
 		Assertions.assertEquals(expected, auth.admins(path));
+	}
+
+	public static Stream<Arguments> editors()
+	{
+		return Stream.of(
+			arguments(null, false),
+			arguments("", false),
+			arguments("a", false),
+			arguments("/a", false),
+			arguments("/admins", false),
+			arguments("admins", false),
+			arguments("admins/self", false),
+			arguments("admins/search", false),
+			arguments("/admins", false),
+			arguments("/admins/self", false),
+			arguments("/admins/search", false),
+			arguments("customers", false),
+			arguments("customers/123", false),
+			arguments("customers/search", false),
+			arguments("/customers", false),
+			arguments("/customers/123", false),
+			arguments("/customers/search", false),
+			arguments("info/config", false),
+			arguments("/info/config", false),
+			arguments("info/health", false),
+			arguments("info/ping", false),
+			arguments("info/version", false),
+			arguments("maps", true),
+			arguments("maps/geocode", true),
+			arguments("/maps", false),
+			arguments("/maps/geocode", false),
+			arguments("peoples/admin", false),
+			arguments("types/admin", false),
+			arguments("/peoples", false),
+			arguments("types/peopleStatuses", false),
+			arguments("/types/peopleStatuses", false),
+			arguments("types/peopleStatuses", false),
+			arguments("type/peopleStatuses", false),
+			arguments("peoples/auth", false),
+			arguments("peoples/authenticated", false),
+			arguments("peoples/confirm", false),
+			arguments("peoples-confirm", false),
+			arguments("peoples/start", false),
+			arguments("/peoples/start", false),
+			arguments("peoples/starts", false),
+			arguments("registrations", false),
+			arguments("/registrations", false),
+			arguments("registrations/key", false),
+			arguments("registrations/search", false));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void editors(final String path, final boolean expected)
+	{
+		Assertions.assertEquals(expected, auth.editors(path));
 	}
 
 	public static Stream<Arguments> requiresAuth()
@@ -284,7 +344,10 @@ public class AuthFilterTest
 			arguments("info/config", PERSON.id, "Requires an Administrative Session."),
 			arguments("info/config", START.id, "Requires an Administrative Session."),
 			arguments("logs", EDITOR.id, "Requires an Administrative Session."),
-			arguments("maps", EDITOR.id, "Requires an Administrative Session."),
+			arguments("maps", PERSON.id, "Requires an Administrative Session."),
+			arguments("maps", START.id, "Requires an Administrative Session."),
+			arguments("maps/geocode", PERSON.id, "Requires an Administrative Session."),
+			arguments("maps/geocode", START.id, "Requires an Administrative Session."),
 			arguments("queues", EDITOR.id, "Requires an Administrative Session."),
 			arguments("peoples", "", "Session ID is required."),
 			arguments("peoples", null, "Session ID is required."),
@@ -335,6 +398,12 @@ public class AuthFilterTest
 			arguments("facilities/search", START.id),	// Open to public.
 			arguments("facilities/search", SUPER.id),
 			arguments("info/config", SUPER.id),
+			arguments("maps", ADMIN.id),
+			arguments("maps", EDITOR.id),
+			arguments("maps", SUPER.id),
+			arguments("maps/geocode", ADMIN.id),
+			arguments("maps/geocode", EDITOR.id),
+			arguments("maps/geocode", SUPER.id),
 			arguments("peoples/start", ""),
 			arguments("peoples/confirm", null),
 			arguments("peoples/confirm", PERSON.id),
