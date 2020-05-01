@@ -103,9 +103,7 @@ public class FacilityResource
 	public FacilityValue add(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		final FacilityValue value) throws ValidationException
 	{
-		sessionDao.checkAdmin();
-
-		return dao.add(populate(value));
+		return dao.add(populate(value), sessionDao.checkEditor().canAdmin());
 	}
 
 	@PUT
@@ -114,9 +112,7 @@ public class FacilityResource
 	public FacilityValue set(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		final FacilityValue value) throws ValidationException
 	{
-		sessionDao.checkAdmin();
-
-		return dao.update(populate(value));
+		return dao.update(populate(value), sessionDao.checkEditor().canAdmin());
 	}
 
 	@DELETE
@@ -146,6 +142,8 @@ public class FacilityResource
 		}
 
 		var s = sessionDao.currentOrAnon();
+		if (s.person()) filter.withActive(true);	// Non-admins can only see active facilities. DLS on 5/1/2020.
+
 		var restricted = (s.person() && !s.person.meetsCdcPriority3());	// Does the current user have restrictions imposed with regards to facilities that are open to them?
 		if (filter.restrictive && restricted)
 			filter.withNotTestCriteriaId(TestCriteria.CDC_CRITERIA.id);

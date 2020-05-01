@@ -348,7 +348,7 @@ public class Facility implements Serializable
 
 	@Override public int hashCode() { return Objects.hashCode(id); }
 
-	public Facility update(final FacilityValue value)
+	public Facility update(final FacilityValue value, final boolean admin)
 	{
 		setName(value.name);
 		setAddress(value.address);
@@ -379,9 +379,17 @@ public class Facility implements Serializable
 		setInsuranceProvidersAccepted(value.insuranceProvidersAccepted);
 		setFreeOrLowCost(value.freeOrLowCost);
 		setNotes(value.notes);
-		setActive(value.active);
 		value.createdAt = getCreatedAt();
 		setUpdatedAt(value.updatedAt = new Date());
+
+		if (admin)
+		{
+			setActive(value.active);
+		}
+		else
+		{
+			value.active = isActive();
+		}
 
 		return this;
 	}

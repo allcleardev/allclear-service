@@ -101,7 +101,7 @@ public class TestsResourceTest
 	public void add()
 	{
 		sessionDao.current(ADMIN = sessionDao.add(new AdminValue("admin"), false));
-		FACILITY = facilityDao.add(FacilityDAOTest.createValid());
+		FACILITY = facilityDao.add(FacilityDAOTest.createValid(), true);
 		PERSON = peopleDao.add(PeopleDAOTest.createValid());
 
 		var now = new Date();

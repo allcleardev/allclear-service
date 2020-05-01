@@ -72,8 +72,9 @@ public class FacilityDAOTest
 		var value = dao.add(VALUE = new FacilityValue("Adam", "101 McClain Ave", "Miami", "FL", bg("45"), bg("-35"),
 			"888-555-1000", "888-555-1001", "adam@test.com", "http://www.adam.com", "http://www.adam.com/appoinment", "8AM to 10PM",
 			HOSPITAL.id, true, false, true, false, OTHER.id, "My other criteria", 2500, true, 16, "Doctor requires: something",
-			false, true, false, "These providers are accepted: One", true, "Quick notations", true));
+			false, true, false, "These providers are accepted: One", true, "Quick notations", true), true);
 		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertTrue(value.active, "Check active");
 		check(VALUE, value);
 
 		PERSON = peopleDao.add(new PeopleValue("first", "8885551000", true));
@@ -95,163 +96,163 @@ public class FacilityDAOTest
 	@Test
 	public void add_missingName()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withName(null)));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withName(null), true));
 	}
 
 	@Test
 	public void add_longName()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withName(StringUtils.repeat("A", FacilityValue.MAX_LEN_NAME + 1))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withName(StringUtils.repeat("A", FacilityValue.MAX_LEN_NAME + 1)), true));
 	}
 
 	@Test
 	public void add_missingAddress()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withAddress(null)));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withAddress(null), true));
 	}
 
 	@Test
 	public void add_longAddress()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withAddress(StringUtils.repeat("A", FacilityValue.MAX_LEN_ADDRESS + 1))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withAddress(StringUtils.repeat("A", FacilityValue.MAX_LEN_ADDRESS + 1)), true));
 	}
 
 	@Test
 	public void add_missingCity()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withCity(null)));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withCity(null), true));
 	}
 
 	@Test
 	public void add_longCity()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withCity(StringUtils.repeat("A", FacilityValue.MAX_LEN_CITY + 1))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withCity(StringUtils.repeat("A", FacilityValue.MAX_LEN_CITY + 1)), true));
 	}
 
 	@Test
 	public void add_missingState()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withState(null)));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withState(null), true));
 	}
 
 	@Test
 	public void add_longState()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withState(StringUtils.repeat("A", FacilityValue.MAX_LEN_STATE + 1))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withState(StringUtils.repeat("A", FacilityValue.MAX_LEN_STATE + 1)), true));
 	}
 
 	@Test
 	public void add_highLatitude()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withLatitude(bg("91"))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withLatitude(bg("91")), true));
 	}
 
 	@Test
 	public void add_lowLatitude()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withLatitude(bg("-91"))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withLatitude(bg("-91")), true));
 	}
 
 	@Test
 	public void add_highLongitude()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withLongitude(bg("181"))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withLongitude(bg("181")), true));
 	}
 
 	@Test
 	public void add_lowLongitude()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withLongitude(bg("-181"))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withLongitude(bg("-181")), true));
 	}
 
 	@Test
 	public void add_missingLongitude()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withLongitude(null)));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withLongitude(null), true));
 	}
 
 	@Test
 	public void add_longPhone()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withPhone(StringUtils.repeat("A", FacilityValue.MAX_LEN_PHONE + 1))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withPhone(StringUtils.repeat("A", FacilityValue.MAX_LEN_PHONE + 1)), true));
 	}
 
 	@Test
 	public void add_longAppointmentPhone()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withAppointmentPhone(StringUtils.repeat("A", FacilityValue.MAX_LEN_APPOINTMENT_PHONE + 1))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withAppointmentPhone(StringUtils.repeat("A", FacilityValue.MAX_LEN_APPOINTMENT_PHONE + 1)), true));
 	}
 
 	@Test
 	public void add_longEmail()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withEmail(StringUtils.repeat("A", FacilityValue.MAX_LEN_EMAIL + 1))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withEmail(StringUtils.repeat("A", FacilityValue.MAX_LEN_EMAIL + 1)), true));
 	}
 
 	@Test
 	public void add_longUrl()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withUrl(StringUtils.repeat("A", FacilityValue.MAX_LEN_URL + 1))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withUrl(StringUtils.repeat("A", FacilityValue.MAX_LEN_URL + 1)), true));
 	}
 
 	@Test
 	public void add_longAppointmentUrl()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withAppointmentUrl(StringUtils.repeat("A", FacilityValue.MAX_LEN_APPOINTMENT_URL + 1))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withAppointmentUrl(StringUtils.repeat("A", FacilityValue.MAX_LEN_APPOINTMENT_URL + 1)), true));
 	}
 
 	@Test
 	public void add_longHours()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withHours(StringUtils.repeat("A", FacilityValue.MAX_LEN_HOURS + 1))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withHours(StringUtils.repeat("A", FacilityValue.MAX_LEN_HOURS + 1)), true));
 	}
 
 	@Test
 	public void add_invalidTypeId()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withTypeId(StringUtils.repeat("1", FacilityValue.MAX_LEN_TYPE_ID))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withTypeId(StringUtils.repeat("1", FacilityValue.MAX_LEN_TYPE_ID)), true));
 	}
 
 	@Test
 	public void add_longTypeId()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withTypeId(StringUtils.repeat("A", FacilityValue.MAX_LEN_TYPE_ID + 1))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withTypeId(StringUtils.repeat("A", FacilityValue.MAX_LEN_TYPE_ID + 1)), true));
 	}
 
 	@Test
 	public void add_invalidTestCriteriaId()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withTestCriteriaId(StringUtils.repeat("1", FacilityValue.MAX_LEN_TEST_CRITERIA_ID))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withTestCriteriaId(StringUtils.repeat("1", FacilityValue.MAX_LEN_TEST_CRITERIA_ID)), true));
 	}
 
 	@Test
 	public void add_longTestCriteriaId()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withTestCriteriaId(StringUtils.repeat("A", FacilityValue.MAX_LEN_TEST_CRITERIA_ID + 1))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withTestCriteriaId(StringUtils.repeat("A", FacilityValue.MAX_LEN_TEST_CRITERIA_ID + 1)), true));
 	}
 
 	@Test
 	public void add_longOtherTestCriteria()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withOtherTestCriteria(StringUtils.repeat("A", FacilityValue.MAX_LEN_OTHER_TEST_CRITERIA + 1))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withOtherTestCriteria(StringUtils.repeat("A", FacilityValue.MAX_LEN_OTHER_TEST_CRITERIA + 1)), true));
 	}
 
 	@Test
 	public void add_longDoctorReferralCriteria()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withDoctorReferralCriteria(StringUtils.repeat("A", FacilityValue.MAX_LEN_DOCTOR_REFERRAL_CRITERIA + 1))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withDoctorReferralCriteria(StringUtils.repeat("A", FacilityValue.MAX_LEN_DOCTOR_REFERRAL_CRITERIA + 1)), true));
 	}
 
 	@Test
 	public void add_longInsuranceProvidersAccepted()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withInsuranceProvidersAccepted(StringUtils.repeat("A", FacilityValue.MAX_LEN_INSURANCE_PROVIDERS_ACCEPTED + 1))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withInsuranceProvidersAccepted(StringUtils.repeat("A", FacilityValue.MAX_LEN_INSURANCE_PROVIDERS_ACCEPTED + 1)), true));
 	}
 
 	@Test
 	public void add_longNotes()
 	{
-		assertThrows(ValidationException.class, () -> dao.add(createValid().withNotes(StringUtils.repeat("A", FacilityValue.MAX_LEN_NOTES + 1))));
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withNotes(StringUtils.repeat("A", FacilityValue.MAX_LEN_NOTES + 1)), true));
 	}
 
 	@Test
@@ -299,6 +300,7 @@ public class FacilityDAOTest
 	{
 		var value = dao.getByIdWithException(VALUE.id);
 		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertTrue(value.active, "Check active");
 		check(VALUE, value);
 	}
 
@@ -350,7 +352,7 @@ public class FacilityDAOTest
 		count(new FacilityFilter().withName(v.name), 0L);
 		count(new FacilityFilter().withActive(v.active), 0L);
 
-		var value = dao.update(v.withId(VALUE.id));
+		var value = dao.update(v.withId(VALUE.id), true);
 		Assertions.assertNotNull(value, "Exists");
 		check(v, value);
 
@@ -837,7 +839,7 @@ public class FacilityDAOTest
 	@Test
 	public void z_00_add()
 	{
-		VALUE = dao.add(createValid());
+		VALUE = dao.add(createValid(), true);
 		Assertions.assertNotNull(VALUE, "Exists");
 		Assertions.assertEquals(2L, VALUE.id, "Check ID");
 	}
@@ -852,7 +854,7 @@ public class FacilityDAOTest
 	@Test
 	public void z_00_modify()
 	{
-		VALUE = dao.add(createValid().withId(20L));
+		VALUE = dao.add(createValid().withId(20L), true);
 		Assertions.assertNotNull(VALUE, "Exists");
 		Assertions.assertEquals(2L, VALUE.id, "Check ID");
 	}
@@ -866,8 +868,8 @@ public class FacilityDAOTest
 	@Test
 	public void z_01_add_others()
 	{
-		dao.add(createValid().withName("restrictive-0").withTestCriteriaId(null));
-		dao.add(createValid().withName("restrictive-1").withTestCriteriaId(CDC_CRITERIA.id));
+		dao.add(createValid().withName("restrictive-0").withTestCriteriaId(null), true);
+		dao.add(createValid().withName("restrictive-1").withTestCriteriaId(CDC_CRITERIA.id), true);
 
 		peopleDao.addFacilities(PERSON.id, List.of(3L));
 		peopleDao.addFacilities(PERSON_1.id, List.of(2L, 4L));
@@ -908,6 +910,73 @@ public class FacilityDAOTest
 
 		ids = dao.search(new FacilityFilter().withNotTestCriteriaId(OTHER.id)).records.stream().map(v -> v.testCriteriaId).collect(toList());
 		assertThat(ids).hasSize(2).containsOnly(CDC_CRITERIA.id, null);
+	}
+
+	@Test
+	public void z_10_add_as_editor()
+	{
+		VALUE = dao.add(createValid().withName("byEditor").withActive(true), false);
+		Assertions.assertNotNull(VALUE.id, "Check ID");
+		Assertions.assertFalse(VALUE.active, "Check active");
+	}
+
+	@Test
+	public void z_10_add_as_editor_check()
+	{
+		var v = dao.getById(VALUE.id);
+		Assertions.assertEquals("byEditor", v.name, "Check name");
+		Assertions.assertFalse(v.active, "Check active");
+	}
+
+	@Test
+	public void z_10_modify_as_editor()
+	{
+		var v = dao.update(VALUE.withActive(true), false);
+		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
+		Assertions.assertFalse(v.active, "Check active");
+		Assertions.assertFalse(VALUE.active, "Check active");
+	}
+
+	@Test
+	public void z_10_modify_as_editor_check()
+	{
+		var v = dao.getById(VALUE.id);
+		Assertions.assertEquals("byEditor", v.name, "Check name");
+		Assertions.assertFalse(v.active, "Check active");
+	}
+
+	@Test
+	public void z_11_modify_as_admin()
+	{
+		var v = dao.update(VALUE.withActive(true), true);
+		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
+		Assertions.assertTrue(v.active, "Check active");
+		Assertions.assertTrue(VALUE.active, "Check active");
+	}
+
+	@Test
+	public void z_11_modify_as_admin_check()
+	{
+		var v = dao.getById(VALUE.id);
+		Assertions.assertEquals("byEditor", v.name, "Check name");
+		Assertions.assertTrue(v.active, "Check active");
+	}
+
+	@Test
+	public void z_12_modify_as_editor()
+	{
+		var v = dao.update(VALUE.withActive(false), false);
+		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
+		Assertions.assertTrue(v.active, "Check active");
+		Assertions.assertTrue(VALUE.active, "Check active");
+	}
+
+	@Test
+	public void z_12_modify_as_editor_check()
+	{
+		var v = dao.getById(VALUE.id);
+		Assertions.assertEquals("byEditor", v.name, "Check name");
+		Assertions.assertTrue(v.active, "Check active");
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.

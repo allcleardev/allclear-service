@@ -79,8 +79,8 @@ public class TestsDAOTest
 	{
 		EDITOR = sessionDao.add(new AdminValue("editor", false, true), false);
 		sessionDao.current(ADMIN = sessionDao.add(new AdminValue("admin"), false));
-		FACILITY = facilityDao.add(FacilityDAOTest.createValid());
-		FACILITY_1 = facilityDao.add(FacilityDAOTest.createValid().withName("second"));
+		FACILITY = facilityDao.add(FacilityDAOTest.createValid(), true);
+		FACILITY_1 = facilityDao.add(FacilityDAOTest.createValid().withName("second"), true);
 		PERSON = peopleDao.add(PeopleDAOTest.createValid());
 		PERSON_1 = peopleDao.add(PeopleDAOTest.createValid().withName("second").withPhone("+18885552000").withEmail(null));
 

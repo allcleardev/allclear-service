@@ -9,10 +9,14 @@ AdminApp.TABS = [ { id: 'doPeople', caption: 'People', children: [ { id: 'doRegi
 	{ id: 'doConfig', caption: 'Config', children: [ { id: 'doHibernate', caption: 'Hibernate' },
 	                                                 { id: 'doHeapDump', caption: 'Heap Dump' } ] } ];
 
+var EditorApp = new TabTemplate();
+
+EditorApp.TABS = [ { id: 'doFacilities', caption: 'Facilities' } ];
+
 AdminApp.doPeople = function(body) { PeopleHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doRegistrations = function(body) { RegistrationsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doTests = function(body) { TestsHandler.filter({ pageSize: 100 }, body); }
-AdminApp.doFacilities = function(body) { FacilitiesHandler.filter({ pageSize: 100 }, body); }
+AdminApp.doFacilities = EditorApp.doFacilities = function(body) { FacilitiesHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doLogs = function(body) { LogsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doSessions = function(body) { SessionsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doAdmins = function(body) { AdminsHandler.init(body); }
@@ -23,7 +27,7 @@ AdminApp.doHeapDump = function(body) { HeapDumpHandler.init(body); }
 
 AdminApp.doQueueStats = function(body) { QueuesHandler.init(body); }
 
-AdminApp.onPostInit = function(c) {
+AdminApp.onPostInit = EditorApp.onPostInit = function(c) {
 	this.loadLists([ 'conditions', 'exposures', 'facilityTypes', 'healthWorkerStatuses', 'peopleStatuses', 'sexes', 'statures', 'symptoms', 'testCriteria', 'testTypes', 'timezones' ]);
 }
 
@@ -153,6 +157,7 @@ var FacilitiesHandler = new ListTemplate({
 	CAN_REMOVE: true,
 	EDIT_METHOD: 'put',
 
+	onListPostLoad: c => c.defaultValue = { active: FACILITY_ACTIVE_DEFAULT },
 	onEditorPostLoad: function(c) {
 		var me = this;
 		var f = c.form;

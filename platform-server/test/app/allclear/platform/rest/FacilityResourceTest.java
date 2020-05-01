@@ -61,7 +61,9 @@ public class FacilityResourceTest
 	private static MapClient map = mock(MapClient.class);
 	private static FacilityResource resource = null;
 	private static FacilityValue VALUE = null;
+	private static FacilityValue VALUE_1 = null;
 	private static SessionValue ADMIN = null;
+	private static SessionValue EDITOR = null;
 	private static SessionValue PERSON = null;
 	private static SessionValue PERSON_UNRESTRICTED = null;
 
@@ -102,6 +104,7 @@ public class FacilityResourceTest
 	@Test
 	public void add()
 	{
+		EDITOR = sessionDao.add(new AdminValue("editor", false, true), false);
 		sessionDao.current(ADMIN = sessionDao.add(new AdminValue("admin"), false));
 
 		var now = new Date();
@@ -142,7 +145,7 @@ public class FacilityResourceTest
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 		assertThat(response.readEntity(TYPE_LIST_VALUE)).as("Check values").isEmpty();
 
-		dao.update(VALUE.withActive(true));
+		dao.update(VALUE.withActive(true), true);
 		VALUE.withUpdatedAt(new Date());
 	}
 
@@ -231,6 +234,11 @@ public class FacilityResourceTest
 	private Response get(final Long id)
 	{
 		return request(id.toString()).get();
+	}
+
+	private FacilityValue getX(final Long id)
+	{
+		return request(id.toString()).get(FacilityValue.class);
 	}
 
 	@Test
@@ -508,15 +516,16 @@ public class FacilityResourceTest
 	public void set_00()
 	{
 		var response = request().put(Entity.json(new FacilityValue("Alex", "8th Street",
-			true, false, true, false, true, false, true, false).withTestCriteriaId(CDC_CRITERIA.id)));
+			true, false, true, false, true, false, true, true).withTestCriteriaId(CDC_CRITERIA.id)));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
-		var v = response.readEntity(FacilityValue.class);
+		var v = VALUE_1 = response.readEntity(FacilityValue.class);
 		Assertions.assertEquals(2L, v.id, "Check ID");
 		Assertions.assertEquals("Hoboken", v.city, "Check city");
 		Assertions.assertEquals("New Jersey", v.state, "Check state");
 		Assertions.assertEquals(bg("40.7487855"), v.latitude, "Check latitude");
 		Assertions.assertEquals(bg("-74.0315385"), v.longitude, "Check longitude");
+		Assertions.assertTrue(v.active, "Check active");
 	}
 
 	@Test
@@ -589,6 +598,42 @@ public class FacilityResourceTest
 		o.records.forEach(v -> Assertions.assertFalse(v.favorite, "Check favorite: " + v.name + " - favorite"));
 	}
 
+	@Test
+	public void set_01()	// Deactivate the new facility
+	{
+		Assertions.assertEquals(HTTP_STATUS_OK, request().put(Entity.json(VALUE_1.withActive(false))).getStatus());
+	}
+
+	@Test
+	public void set_01_check()	// Deactivate the new facility
+	{
+		var response = get(VALUE_1.id);
+		Assertions.assertFalse(response.readEntity(FacilityValue.class).active);
+	}
+
+	@Test
+	public void set_01_search_restrictive_as_admin()
+	{
+		set_00_search_restrictive_as_admin();
+	}
+
+	public static Stream<SessionValue> set_01_search_as_person() { return Stream.of(PERSON, PERSON_UNRESTRICTED); }
+
+	@ParameterizedTest
+	@MethodSource
+	public void set_01_search_as_person(final SessionValue s)
+	{
+		sessionDao.current(s);
+
+		var o = request("search").post(Entity.json(new FacilityFilter().withRestrictive(true)), TYPE_QUERY_RESULTS);
+		Assertions.assertEquals(1L, o.total, "Check total: restricted");
+		assertThat(o.records).as("Check records: restricted").containsExactly(VALUE);
+
+		o = request("search").post(Entity.json(new FacilityFilter()), TYPE_QUERY_RESULTS);
+		Assertions.assertEquals(1L, o.total, "Check total: unrestricted");
+		assertThat(o.records).as("Check records: restricted").containsExactly(VALUE);
+	}
+
 	/** Test removal after the search. */
 	@Test
 	public void testRemove()
@@ -622,6 +667,125 @@ public class FacilityResourceTest
 		count(new FacilityFilter().withId(VALUE.id), 0L);
 		count(new FacilityFilter().withCity("New Orleans"), 0L);
 		count(new FacilityFilter().withState("LA"), 0L);
+	}
+
+	@Test
+	public void z_10_add_as_editor()
+	{
+		sessionDao.current(EDITOR);
+
+		VALUE = request().post(Entity.json(FacilityDAOTest.createValid().withName("byEditor").withActive(true)), FacilityValue.class);
+		Assertions.assertNotNull(VALUE.id, "Check ID");
+		Assertions.assertFalse(VALUE.active, "Check active");
+	}
+
+	@Test
+	public void z_10_add_as_editor_check()
+	{
+		sessionDao.current(EDITOR);
+
+		var v = getX(VALUE.id);
+		Assertions.assertEquals("byEditor", v.name, "Check name");
+		Assertions.assertFalse(v.active, "Check active");
+	}
+
+	@Test
+	public void z_10_add_as_person_search()
+	{
+		sessionDao.current(PERSON);
+
+		search(new FacilityFilter().withName("byEditor"), 0L);	// CanNOT see inactive facilities.
+	}
+
+	@Test
+	public void z_10_modify_as_editor()
+	{
+		sessionDao.current(EDITOR);
+
+		var v = request().put(Entity.json(VALUE.withActive(true)), FacilityValue.class);
+		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
+		Assertions.assertFalse(v.active, "Check active");
+		Assertions.assertTrue(VALUE.active, "Check active");	// Sent in as TRUE.
+
+		VALUE.withActive(false);
+	}
+
+	@Test
+	public void z_10_modify_as_editor_check()
+	{
+		sessionDao.current(EDITOR);
+
+		var v = getX(VALUE.id);
+		Assertions.assertEquals("byEditor", v.name, "Check name");
+		Assertions.assertFalse(v.active, "Check active");
+	}
+
+	@Test
+	public void z_10_modify_as_person_search()
+	{
+		sessionDao.current(PERSON);
+
+		search(new FacilityFilter().withName("byEditor"), 0L);	// CanNOT see inactive facilities.
+	}
+
+	@Test
+	public void z_11_modify_as_admin()
+	{
+		sessionDao.current(ADMIN);
+
+		var v = request().put(Entity.json(VALUE.withActive(true)), FacilityValue.class);
+		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
+		Assertions.assertTrue(v.active, "Check active");
+		Assertions.assertTrue(VALUE.active, "Check active");
+	}
+
+	@Test
+	public void z_11_modify_as_admin_check()
+	{
+		sessionDao.current(ADMIN);
+
+		var v = getX(VALUE.id);
+		Assertions.assertEquals("byEditor", v.name, "Check name");
+		Assertions.assertTrue(v.active, "Check active");
+	}
+
+	@Test
+	public void z_11_modify_as_person_search()
+	{
+		sessionDao.current(PERSON);
+
+		search(new FacilityFilter().withName("byEditor"), 1L);
+	}
+
+	@Test
+	public void z_12_modify_as_editor()
+	{
+		sessionDao.current(EDITOR);
+
+		var v = request().put(Entity.json(VALUE.withActive(false)), FacilityValue.class);
+		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
+		Assertions.assertTrue(v.active, "Check active");
+		Assertions.assertFalse(VALUE.active, "Check active");	// Sent int as FALSE.
+
+		VALUE.withActive(true);
+	}
+
+	@Test
+	public void z_12_modify_as_editor_check()
+	{
+		sessionDao.current(EDITOR);
+
+		var v = getX(VALUE.id);
+		Assertions.assertEquals("byEditor", v.name, "Check name");
+		Assertions.assertTrue(v.active, "Check active");
+	}
+
+	@Test
+	public void z_12_modify_as_person_search()
+	{
+		sessionDao.current(PERSON);
+
+		search(new FacilityFilter().withName("byEditor"), 1L);
 	}
 
 	/** Helper method - creates the base WebTarget. */

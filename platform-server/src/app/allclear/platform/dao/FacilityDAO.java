@@ -86,28 +86,34 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	/** Adds a single Facility value.
 	 *
 	 * @param value
+	 * @param admin
 	 * @return never NULL.
 	 * @throws ValidationException
 	 */
-	public FacilityValue add(final FacilityValue value) throws ValidationException
+	public FacilityValue add(final FacilityValue value, final boolean admin) throws ValidationException
 	{
-		return update(value);
+		return update(value, admin);
 	}
 
 	/** Updates a single Facility value.
 	 *
 	 * @param value
+	 * @param admin
 	 * @throws ValidationException
 	 */
-	public FacilityValue update(final FacilityValue value) throws ValidationException
+	public FacilityValue update(final FacilityValue value, final boolean admin) throws ValidationException
 	{
 		var cmrs = _validate(value);
 		var record = (Facility) cmrs[0];
 		if ((null == record) && (null != value.id))
 			record = findWithException(value.id);
 
-		if (null != record) record.update(value);
-		else record = persist(new Facility(value));
+		if (null != record) record.update(value, admin);
+		else
+		{
+			if (!admin) value.withActive(false);	// Editors can only add inactive facilities.
+			record = persist(new Facility(value));
+		}
 
 		return value.withId(record.getId());
 	}

@@ -95,7 +95,7 @@ public class PeopleFacilityResourceTest
 		Assertions.assertNotNull(value, "Exists");
 		SESSION = sessionDao.add(VALUE, false);
 
-		FACILITIES = IntStream.range(0, 25).mapToObj(i -> facilityDao.add(new FacilityValue(i))).collect(toList());
+		FACILITIES = IntStream.range(0, 25).mapToObj(i -> facilityDao.add(new FacilityValue(i), true)).collect(toList());
 		assertThat(FACILITIES).as("Check facilities").hasSize(25);
 	}
 

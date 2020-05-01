@@ -64,7 +64,7 @@ public class PeopleFacilityDAOTest
 		var value = dao.add(VALUE = new PeopleValue("min", "888-555-1000", true));
 		Assertions.assertNotNull(value, "Exists");
 
-		FACILITIES = IntStream.range(0, 25).mapToObj(i -> facilityDao.add(new FacilityValue(i))).collect(toList());
+		FACILITIES = IntStream.range(0, 25).mapToObj(i -> facilityDao.add(new FacilityValue(i), true)).collect(toList());
 		assertThat(FACILITIES).as("Check facilities").hasSize(25);
 	}
 
