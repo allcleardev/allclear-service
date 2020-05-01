@@ -77,6 +77,7 @@ public class PeopleResourceTest
 	private static SMSResponse LAST_SMS_RESPONSE;
 	private static RegistrationValue REGISTRATION;
 	private static SessionValue ADMIN;
+	private static SessionValue EDITOR;
 	private static SessionValue SESSION;
 	private static SessionValue SESSION_1;
 	private static Date LAST_UPDATED_AT = null;
@@ -119,6 +120,7 @@ public class PeopleResourceTest
 	@Test
 	public void add()
 	{
+		EDITOR = sessionDao.add(new AdminValue("editor", false, true), false);
 		sessionDao.current(ADMIN = sessionDao.add(new AdminValue("admin"), false));
 
 		var response = request()
@@ -138,6 +140,20 @@ public class PeopleResourceTest
 		check(VALUE.withId(value.id).withCreatedAt(value.createdAt).withUpdatedAt(value.updatedAt), value);
 
 		SESSION = sessionDao.add(VALUE, false);
+	}
+
+	@Test
+	public void add_as_editor()
+	{
+		sessionDao.current(EDITOR);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request().post(Entity.json(new PeopleValue("cannotAdd", "+18885551001", true))).getStatus());
+	}
+
+	@Test
+	public void add_as_editor_after()
+	{
+		sessionDao.current(ADMIN);
 	}
 
 	public static Stream<Arguments> alert_failure()
@@ -218,6 +234,20 @@ public class PeopleResourceTest
 	}
 
 	@Test
+	public void find_as_editor()
+	{
+		sessionDao.current(EDITOR);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request(target().queryParam("name", "min")).get().getStatus());
+	}
+
+	@Test
+	public void find_as_editor_after()
+	{
+		sessionDao.current(ADMIN);
+	}
+
+	@Test
 	public void find_with_name()
 	{
 		var t = request("find");
@@ -284,6 +314,20 @@ public class PeopleResourceTest
 	}
 
 	@Test
+	public void get_as_editor()
+	{
+		sessionDao.current(EDITOR);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, get(VALUE.id).getStatus());
+	}
+
+	@Test
+	public void get_as_editor_after()
+	{
+		sessionDao.current(ADMIN);
+	}
+
+	@Test
 	public void modify()
 	{
 		count(new PeopleFilter().withHasEmail(false), 1L);
@@ -295,6 +339,21 @@ public class PeopleResourceTest
 		var value = response.readEntity(PeopleValue.class);
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE.withUpdatedAt(new Date()), value);
+	}
+
+	@Test
+	public void modify_as_editor()
+	{
+		sessionDao.current(EDITOR);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED,
+			request().put(Entity.json(new PeopleValue("minimum", "888-555-1000", true).withEmail("max@allclear.app"))).getStatus());
+	}
+
+	@Test
+	public void modify_as_editor_after()
+	{
+		sessionDao.current(ADMIN);
 	}
 
 	@Test
@@ -443,6 +502,14 @@ public class PeopleResourceTest
 			}
 			Assertions.assertEquals(total, results.records.size(), assertId + "Check records.size");
 		}
+	}
+
+	@Test
+	public void search_as_editor()
+	{
+		sessionDao.current(EDITOR);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request("search").post(Entity.json(new PeopleFilter())).getStatus());
 	}
 
 	@Test

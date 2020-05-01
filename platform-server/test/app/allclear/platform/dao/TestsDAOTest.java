@@ -51,6 +51,7 @@ public class TestsDAOTest
 	private static TestsValue VALUE = null;
 	private static TestsValue VALUE_1 = null;
 	private static SessionValue ADMIN = null;
+	private static SessionValue EDITOR = null;
 	private static FacilityValue FACILITY = null;
 	private static FacilityValue FACILITY_1 = null;
 	private static PeopleValue PERSON = null;
@@ -76,6 +77,7 @@ public class TestsDAOTest
 	@Test
 	public void add()
 	{
+		EDITOR = sessionDao.add(new AdminValue("editor", false, true), false);
 		sessionDao.current(ADMIN = sessionDao.add(new AdminValue("admin"), false));
 		FACILITY = facilityDao.add(FacilityDAOTest.createValid());
 		FACILITY_1 = facilityDao.add(FacilityDAOTest.createValid().withName("second"));
@@ -93,6 +95,13 @@ public class TestsDAOTest
 	private TestsValue createValid()
 	{
 		return new TestsValue(PERSON_1.id, IGM_IGR_RAPID_TEST.id, TAKEN_ON_1, FACILITY_1.id, true, "Some more information");
+	}
+
+	@Test
+	public void add_as_editor()
+	{
+		sessionDao.current(EDITOR);
+		assertThrows(NotAuthorizedException.class, () -> dao.add(createValid()));
 	}
 
 	@Test
@@ -158,6 +167,13 @@ public class TestsDAOTest
 	}
 
 	@Test
+	public void find_as_editor()
+	{
+		sessionDao.current(EDITOR);
+		assertThrows(NotAuthorizedException.class, () -> dao.findWithException(VALUE.id));
+	}
+
+	@Test
 	public void find_as_person()
 	{
 		sessionDao.current(PERSON);
@@ -199,6 +215,14 @@ public class TestsDAOTest
 	}
 
 	@Test
+	public void getByPerson_by_editor()
+	{
+		sessionDao.current(EDITOR);
+		assertThrows(NotAuthorizedException.class, () -> dao.getByPerson(PERSON.id));
+		assertThrows(NotAuthorizedException.class, () -> dao.getByPerson(PERSON_1.id));
+	}
+
+	@Test
 	public void getByPerson_by_person()
 	{
 		sessionDao.current(PERSON);
@@ -234,6 +258,13 @@ public class TestsDAOTest
 		var value = dao.update(VALUE_1 = v.withId(VALUE.id));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE_1, value);
+	}
+
+	@Test
+	public void modify_as_editor()
+	{
+		sessionDao.current(EDITOR);
+		assertThrows(NotAuthorizedException.class, () -> dao.update(VALUE));	// Try to revert, but will fail.
 	}
 
 	@Test
@@ -339,6 +370,13 @@ public class TestsDAOTest
 			}
 			Assertions.assertEquals(total, results.records.size(), "Check records.size");
 		}
+	}
+
+	@Test
+	public void search_as_editor()
+	{
+		sessionDao.current(EDITOR);
+		assertThrows(NotAuthorizedException.class, () -> dao.search(new TestsFilter()));
 	}
 
 	@Test

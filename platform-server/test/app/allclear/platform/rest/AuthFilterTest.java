@@ -37,6 +37,7 @@ public class AuthFilterTest
 	private static final AuthFilter auth = new AuthFilter(dao);
 
 	private static SessionValue ADMIN;
+	private static SessionValue EDITOR;
 	private static SessionValue SUPER;
 	private static SessionValue PERSON;
 	private static SessionValue START;
@@ -45,6 +46,7 @@ public class AuthFilterTest
 	public static void up()
 	{
 		ADMIN = dao.add(new AdminValue("randy", false), false);
+		EDITOR = dao.add(new AdminValue("mandy", false, true), false);
 		PERSON = dao.add(new PeopleValue("bob", "888-555-0000", true), true);
 		START = dao.add(new StartRequest("888-555-0001", false, true));
 		SUPER = dao.add(new AdminValue("sandy", true), true);
@@ -264,25 +266,33 @@ public class AuthFilterTest
 			arguments("admins", PERSON.id, "Requires an Administrative Session."),
 			arguments("admins", START.id, "Requires an Administrative Session."),
 			arguments("admins", ADMIN.id, "Requires a Super-Admin Session."),
+			arguments("admins", EDITOR.id, "Requires a Super-Admin Session."),
 			arguments("admins/auth", PERSON.id, "Requires an Administrative Session."),	// admins/auth if NO session is provided.
 			arguments("admins/auth", START.id, "Requires an Administrative Session."),
 			arguments("admins/auth", ADMIN.id, "Requires a Super-Admin Session."),
+			arguments("admins/auth", EDITOR.id, "Requires a Super-Admin Session."),
 			arguments("admins/self", PERSON.id, "Requires an Administrative Session."),
 			arguments("admins/self", START.id, "Requires an Administrative Session."),
+			arguments("customers", EDITOR.id, "Requires an Administrative Session."),
 			arguments("customers", PERSON.id, "Requires an Administrative Session."),
 			arguments("customers", START.id, "Requires an Administrative Session."),
 			arguments("customers/key", PERSON.id, "Requires an Administrative Session."),
 			arguments("customers/search", START.id, "Requires an Administrative Session."),
 			arguments("facilities", START.id, "Requires a Non-registration Session."),
 			arguments("info/config", ADMIN.id, "Requires a Super-Admin Session."),
+			arguments("info/config", EDITOR.id, "Requires a Super-Admin Session."),
 			arguments("info/config", PERSON.id, "Requires an Administrative Session."),
 			arguments("info/config", START.id, "Requires an Administrative Session."),
+			arguments("logs", EDITOR.id, "Requires an Administrative Session."),
+			arguments("maps", EDITOR.id, "Requires an Administrative Session."),
+			arguments("queues", EDITOR.id, "Requires an Administrative Session."),
 			arguments("peoples", "", "Session ID is required."),
 			arguments("peoples", null, "Session ID is required."),
 			arguments("peoples", "INVALID", "The ID 'INVALID' is invalid."),
 			arguments("types/peopleStatuses", "INVALID", "The ID 'INVALID' is invalid."),
 			arguments("peoples/register", PERSON.id, "Requires a Registration Session."),
 			arguments("peoples", START.id, "Requires a Non-registration Session."),
+			arguments("registrations", EDITOR.id, "Requires an Administrative Session."),
 			arguments("registrations", PERSON.id, "Requires an Administrative Session."),
 			arguments("registrations", START.id, "Requires an Administrative Session."),
 			arguments("registrations/key", PERSON.id, "Requires an Administrative Session."),
@@ -308,16 +318,19 @@ public class AuthFilterTest
 			arguments("admins/self", SUPER.id),
 			arguments("admins/search", SUPER.id),
 			arguments("admins/self", ADMIN.id),
+			arguments("admins/self", EDITOR.id),
 			arguments("customers", ADMIN.id),
 			arguments("customers", SUPER.id),
 			arguments("customers/key", ADMIN.id),
 			arguments("customers/search", SUPER.id),
 			arguments("facilities", ADMIN.id),
+			arguments("facilities", EDITOR.id),
 			arguments("facilities", PERSON.id),	// POST, PUT, and DELETE access is limited in the actually Resource class.
 			arguments("facilities", SUPER.id),
 			arguments("facilities/search", ""),
 			arguments("facilities/search", null),
 			arguments("facilities/search", ADMIN.id),
+			arguments("facilities/search", EDITOR.id),
 			arguments("facilities/search", PERSON.id),
 			arguments("facilities/search", START.id),	// Open to public.
 			arguments("facilities/search", SUPER.id),
@@ -334,12 +347,13 @@ public class AuthFilterTest
 			arguments("registrations/search", SUPER.id),
 			arguments("twilio/alert", null),
 			arguments("twilio/alert", ADMIN.id),
+			arguments("twilio/alert", EDITOR.id),
 			arguments("twilio/alert", START.id),
 			arguments("twilio/alert", PERSON.id),
 			arguments("types/peopleStatuses", null),
+			arguments("types/peopleStatuses", EDITOR.id),
 			arguments("types/peopleStatuses", START.id),
-			arguments("types/peopleStatuses", PERSON.id)
-			);
+			arguments("types/peopleStatuses", PERSON.id));
 	}
 
 	@ParameterizedTest

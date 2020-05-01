@@ -252,6 +252,29 @@ public class SessionDAOTest
 			Assertions.assertThrows(NotAuthorizedException.class, () -> dao.checkAdmin());
 	}
 
+	public static Stream<Arguments> checkAdminOrPerson()
+	{
+		return Stream.of(
+			arguments(ADMIN, true),
+			arguments(EDITOR, false),
+			arguments(PERSON, true),
+			arguments(PERSON_1, true),
+			arguments(START, false),
+			arguments(START_1, false),
+			arguments(SUPER, true));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void checkAdminOrPerson(final SessionValue value, final boolean success)
+	{
+		dao.current(value);
+		if (success)
+			assertThat(dao.checkAdminOrPerson()).isNotNull().isInstanceOf(SessionValue.class);
+		else
+			Assertions.assertThrows(NotAuthorizedException.class, () -> dao.checkAdminOrPerson());
+	}
+
 	public static Stream<Arguments> checkEditor()
 	{
 		return Stream.of(
