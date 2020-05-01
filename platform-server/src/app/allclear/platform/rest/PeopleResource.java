@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
+import app.allclear.common.errors.Validator;
 import app.allclear.common.jackson.JacksonUtils;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.resources.Headers;
@@ -232,7 +233,7 @@ public class PeopleResource
 		dao.validate(value.withId("TEMP123"));	// Set temporary ID so that it passes validation.
 
 		if (dao.existsByPhone(value.normalize().phone))	// Make sure that the user phone number doesn't already exist.
-			throw new ValidationException("An account with that phone number already exists. Please sign in above instead.");
+			throw new ValidationException(Validator.CODE_ALREADY_REGISTERED, "phone", "An account with that phone number already exists. Please sign in above instead.");
 
 		registrationDao.start(value.withId(null));	// Remove the temporary ID before caching.
 

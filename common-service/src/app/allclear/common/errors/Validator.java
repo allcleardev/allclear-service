@@ -46,6 +46,7 @@ public class Validator
 	public static final String CODE_PASSWORD_MISSING_SYMBOL = "AP-112";
 	public static final String CODE_PASSWORD_INVALID_CHAR = "AP-113";
 	public static final String CODE_INVALID_VALUE = "AP-114";
+	public static final String CODE_ALREADY_REGISTERED = "REG-101";
 
 	private static final String NOT_SET = "%s is not set.";
 	private static final String TOO_SHORT = "%s cannot be shorter than %d characters.";
