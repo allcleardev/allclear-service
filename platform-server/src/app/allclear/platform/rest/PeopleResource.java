@@ -299,7 +299,7 @@ public class PeopleResource
 		final PeopleFilter filter) throws ValidationException
 	{
 		var s = sessionDao.checkAdminOrPerson();
-		if (s.person()) filter.withFriendshipId(s.person.id);	// Non-admins can only see their friends.
+		if (s.person()) filter.withActive(true).withFriendshipId(s.person.id);	// Non-admins can only see their friends.
 
 		return dao.search(filter);
 	}

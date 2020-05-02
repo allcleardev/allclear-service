@@ -55,7 +55,7 @@ public class AlertTask extends AbstractHibernateTask<AlertRequest>
 		var record = dao.findWithException(request.personId);
 		var lastAlertedAt = record.alertedAt();
 
-		final long count = facilitySearch.run(new FacilityFilter().withCreatedAtFrom(lastAlertedAt).withFrom(new GeoFilter(record.getLatitude(), record.getLongitude(), MILES_DEFAULT)));
+		final long count = facilitySearch.run(new FacilityFilter().withActive(true).withCreatedAtFrom(lastAlertedAt).withFrom(new GeoFilter(record.getLatitude(), record.getLongitude(), MILES_DEFAULT)));
 		if (0L < count)
 		{
 			log.info("FOUND ({}): {} new facilities.", request.personId, count);

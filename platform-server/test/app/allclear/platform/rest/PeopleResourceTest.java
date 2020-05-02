@@ -35,6 +35,7 @@ import app.allclear.platform.App;
 import app.allclear.platform.Config;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.dao.*;
+import app.allclear.platform.entity.Friendship;
 import app.allclear.platform.filter.*;
 import app.allclear.platform.model.*;
 import app.allclear.platform.value.*;
@@ -517,7 +518,7 @@ public class PeopleResourceTest
 	{
 		sessionDao.current(SESSION);
 
-		search(new PeopleFilter(), 0L);	// Can only friends.
+		search(new PeopleFilter(), 0L);	// Can only find friends.
 	}
 
 	/** Test removal after the search. */
@@ -916,6 +917,35 @@ public class PeopleResourceTest
 	public void z_15_start_fail(final PeopleValue value)
 	{
 		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, request("start").put(Entity.json(value)).getStatus());
+	}
+
+	private static PeopleValue bryce, jenny, lenny;
+
+	@Test
+	public void z_20()
+	{
+		sessionDao.current(ADMIN);
+
+		var values = dao.search(new PeopleFilter("name", "ASC")).records;
+		bryce = values.get(0);
+		jenny = dao.update(values.get(1).withActive(false), true);
+		lenny = values.get(2);
+
+		var now = new Date();
+		var s = transRule.getSession();
+		s.saveOrUpdate(new Friendship(jenny.id, bryce.id, now));
+		s.saveOrUpdate(new Friendship(lenny.id, bryce.id, now));
+	}
+
+	@Test
+	public void z_20_check()
+	{
+		sessionDao.current(new SessionValue(false, bryce));
+
+		var results = request("search").post(Entity.json(new PeopleFilter("name", "ASC")), TYPE_QUERY_RESULTS);
+		Assertions.assertNotNull(results, "Exists");
+		Assertions.assertEquals(1L, results.total, "Check total");	// Jenny is inactive.
+		assertThat(results.records).as("Check records").isNotNull().containsExactly(lenny);
 	}
 
 	private String code()
