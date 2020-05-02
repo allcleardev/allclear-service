@@ -55,6 +55,9 @@ public class FacilityResourceFacetTest
 	private static final SessionValue ADMIN = new SessionValue(false, new AdminValue("admin"));
 	private static final Map<String, List<CountByName>> CITIES = new HashMap<>();
 
+	private static int activeCount = 0;
+	private static int inactiveCount = 0;
+
 	public final ResourceExtension RULE = ResourceExtension.builder()
 		.addResource(new AuthorizationExceptionMapper())
 		.addResource(new NotFoundExceptionMapper())
@@ -85,9 +88,12 @@ public class FacilityResourceFacetTest
 	{
 		if (active)
 		{
+			activeCount++;
 			var o = CITIES.computeIfAbsent(state, k -> new LinkedList<CountByName>());
 			o.stream().filter(v -> v.name.equalsIgnoreCase(city)).findFirst().ifPresentOrElse(v -> v.total++, () -> o.add(new CountByName(city, 1L)));
 		}
+		else
+			inactiveCount++;
 
 		Assertions.assertEquals(HTTP_STATUS_OK, request().post(Entity.json(new FacilityValue(i, city, state, 45, 45, active))).getStatus());
 	}
@@ -96,6 +102,28 @@ public class FacilityResourceFacetTest
 	public void check()
 	{
 		sessionDao.clear();
+
+		Assertions.assertEquals(4, CITIES.size(), "Check states size");
+		Assertions.assertEquals(95, activeCount, "Check activeCount");
+		Assertions.assertEquals(5, inactiveCount, "Check inactiveCount");
+		Assertions.assertEquals(95L,
+			CITIES.entrySet().stream().flatMap(v -> v.getValue().stream()).mapToLong(v -> v.total).sum(), "Cities total");
+	}
+
+	public static Stream<Arguments> check_sizes()
+	{
+		return Stream.of(
+			arguments("Alabama", 22),
+			arguments("Connecticut", 4),
+			arguments("Massachusetts", 2),
+			arguments("Washington", 6));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void check_sizes(final String state, final int size)
+	{
+		Assertions.assertEquals(size, CITIES.get(state).size());
 	}
 
 	@Test
