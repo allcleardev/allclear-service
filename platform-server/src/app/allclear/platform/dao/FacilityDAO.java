@@ -246,6 +246,20 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		return findWithException(id).toValue();
 	}
 
+	/** Gets a single Facility value by name.
+	 *
+	 * @param name
+	 * @return never NULL.
+	 * @throws ObjectNotFoundException if the name is valid.
+	 */
+	public FacilityValue getByNameWithException(final String name) throws ObjectNotFoundException
+	{
+		var record = find(name);
+		if ((null == record) || !record.isActive()) throw new ObjectNotFoundException("The Facility '" + name + "' does not exist.");
+
+		return record.toValue();
+	}
+
 	/** Gets a list of active Facility values by wild card name search.
 	 * 
 	 * @param name
@@ -277,6 +291,25 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		if (null == person) return List.of();
 	
 		return namedQuery("getFacilityIdsByPerson", Long.class).setParameter("personId", person.id).list();
+	}
+
+	/** Gets the distinct list of facility cities by state.
+	 * 
+	 * @param state
+	 * @return never NULL
+	 */
+	public List<String> getDistinctCitiesByState(final String state)
+	{
+		return namedQuery("getFacilityCitiesByState", String.class).setParameter("state", state).list();
+	}
+
+	/** Gets the distinct list of facility states.
+	 * 
+	 * @return never NULL
+	 */
+	public List<String> getDistinctStates()
+	{
+		return namedQuery("getFacilityStates", String.class).list();
 	}
 
 	/** Searches the Facility entity based on the supplied filter.

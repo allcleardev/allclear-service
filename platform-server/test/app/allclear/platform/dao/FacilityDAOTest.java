@@ -328,6 +328,19 @@ public class FacilityDAOTest
 		assertThrows(PersistenceException.class, () -> dao.getActiveByNameAndDistance("da", bg("45.5"), bg("-35.7"), 100000L));	// Function "ST_DISTANCE_SPHERE" not found
 	}
 
+	@Test
+	public void getByNameWithException()
+	{
+		Assertions.assertEquals(VALUE, dao.getByNameWithException(VALUE.name));
+	}
+
+	@Test
+	public void getByNameWithException_invalid()
+	{
+		assertThat(assertThrows(ObjectNotFoundException.class, () -> dao.getByNameWithException("invalid")))
+			.hasMessage("The Facility 'invalid' does not exist.");
+	}
+
 	public static Stream<Arguments> getIdsByPerson()
 	{
 		return Stream.of(
@@ -341,6 +354,28 @@ public class FacilityDAOTest
 	public void getIdsByPerson(final PeopleValue person, final Long[] ids)
 	{
 		assertThat(dao.getIdsByPerson(person)).isEqualTo(List.of(ids));
+	}
+
+	public static Stream<Arguments> getDistinctCitiesByState()
+	{
+		return Stream.of(
+			arguments("Florida", List.of()),
+			arguments("FL", List.of("Miami")),
+			arguments("Georgia", List.of()),
+			arguments("GA", List.of()));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void getDistinctCitiesByState(final String state, final List<String> expected)
+	{
+		Assertions.assertEquals(expected, dao.getDistinctCitiesByState(state));
+	}
+
+	@Test
+	public void getDistinctStates()
+	{
+		assertThat(dao.getDistinctStates()).containsExactly("FL");
 	}
 
 	@Test
@@ -839,7 +874,7 @@ public class FacilityDAOTest
 	@Test
 	public void z_00_add()
 	{
-		VALUE = dao.add(createValid(), true);
+		VALUE = dao.add(createValid().withActive(true), true);
 		Assertions.assertNotNull(VALUE, "Exists");
 		Assertions.assertEquals(2L, VALUE.id, "Check ID");
 	}
@@ -854,7 +889,7 @@ public class FacilityDAOTest
 	@Test
 	public void z_00_modify()
 	{
-		VALUE = dao.add(createValid().withId(20L), true);
+		VALUE = dao.add(createValid().withActive(true).withId(20L), true);
 		Assertions.assertNotNull(VALUE, "Exists");
 		Assertions.assertEquals(2L, VALUE.id, "Check ID");
 	}
@@ -868,8 +903,8 @@ public class FacilityDAOTest
 	@Test
 	public void z_01_add_others()
 	{
-		dao.add(createValid().withName("restrictive-0").withTestCriteriaId(null), true);
-		dao.add(createValid().withName("restrictive-1").withTestCriteriaId(CDC_CRITERIA.id), true);
+		dao.add(createValid().withName("restrictive-0").withCity("Dallas").withState("Texas").withTestCriteriaId(null).withActive(true), true);
+		dao.add(createValid().withName("restrictive-1").withCity("Austin").withState("Texas").withTestCriteriaId(CDC_CRITERIA.id).withActive(true), true);
 
 		peopleDao.addFacilities(PERSON.id, List.of(3L));
 		peopleDao.addFacilities(PERSON_1.id, List.of(2L, 4L));
@@ -910,6 +945,29 @@ public class FacilityDAOTest
 
 		ids = dao.search(new FacilityFilter().withNotTestCriteriaId(OTHER.id)).records.stream().map(v -> v.testCriteriaId).collect(toList());
 		assertThat(ids).hasSize(2).containsOnly(CDC_CRITERIA.id, null);
+	}
+
+	public static Stream<Arguments> z_02_getDistinctCitiesByState()
+	{
+		return Stream.of(
+			arguments("Florida", List.of()),
+			arguments("FL", List.of()),
+			arguments("Texas", List.of("Austin", "Dallas")),
+			arguments("Georgia", List.of()),
+			arguments("GA", List.of("Atlanta")));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_02_getDistinctCitiesByState(final String state, final List<String> expected)
+	{
+		assertThat(dao.getDistinctCitiesByState(state)).isEqualTo(expected);
+	}
+
+	@Test
+	public void z_02_getDistinctStates()
+	{
+		assertThat(dao.getDistinctStates()).containsExactly("GA", "Texas");
 	}
 
 	@Test

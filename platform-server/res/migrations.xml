@@ -447,4 +447,15 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.1.26_facility_state_city_index" author="smalleyd">
+		<createIndex tableName="facility" indexName="idx_facility_state_city">
+			<column name="state" />
+			<column name="city" />
+		</createIndex>
+
+		<rollback>
+			<dropIndex tableName="facility" indexName="idx_facility_state_city" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

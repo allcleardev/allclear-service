@@ -15,6 +15,7 @@ import io.swagger.annotations.*;
 
 import com.codahale.metrics.annotation.Timed;
 import app.allclear.common.dao.QueryResults;
+import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.resources.Headers;
@@ -65,7 +66,7 @@ public class FacilityResource
 	@Path("/{id}") @Timed @UnitOfWork(readOnly=true, transactional=false)
 	@ApiOperation(value="get", notes="Gets a single Facility by its primary key.", response=FacilityValue.class)
 	public FacilityValue get(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
-		@PathParam("id") final Long id) throws ValidationException
+		@PathParam("id") final Long id) throws ObjectNotFoundException
 	{
 		return dao.getByIdWithException(id);
 	}
@@ -96,6 +97,27 @@ public class FacilityResource
 
 		return dao.getActiveByName(name);
 	}
+
+	@GET
+	@Path("/cities") @Timed @UnitOfWork(readOnly=true, transactional=false)
+	@ApiOperation(value="getDistinctStates", notes="Gets the distinct list of facility cities by state.", response=String.class, responseContainer="List")
+	public List<String> getDistinctCitiesByState(@QueryParam("state") final String state)
+	{
+		return dao.getDistinctCitiesByState(state);
+	}
+
+	@GET
+	@Path("/name") @Timed @UnitOfWork(readOnly=true, transactional=false)
+	@ApiOperation(value="get", notes="Gets a single Facility by its name.", response=FacilityValue.class)
+	public FacilityValue get(@QueryParam("name") final String name) throws ObjectNotFoundException
+	{
+		return dao.getByNameWithException(name);
+	}
+
+	@GET
+	@Path("/states") @Timed @UnitOfWork(readOnly=true, transactional=false)
+	@ApiOperation(value="getDistinctStates", notes="Gets the distinct list of facility states.", response=String.class, responseContainer="List")
+	public List<String> getDistinctStates() { return dao.getDistinctStates(); }
 
 	@POST
 	@Timed @UnitOfWork

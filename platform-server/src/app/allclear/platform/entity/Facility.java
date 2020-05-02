@@ -31,7 +31,9 @@ import app.allclear.platform.value.FacilityValue;
 @Table(name="facility", uniqueConstraints=@UniqueConstraint(name="unq_facility", columnNames="name"))
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE, region="facility")
 @NamedQueries({@NamedQuery(name="findActiveFacilitiesByName", query="SELECT OBJECT(o) FROM Facility o WHERE o.name LIKE :name AND o.active = TRUE ORDER BY o.name"),
-	@NamedQuery(name="findFacility", query="SELECT OBJECT(o) FROM Facility o WHERE o.name = :name")})
+	@NamedQuery(name="findFacility", query="SELECT OBJECT(o) FROM Facility o WHERE o.name = :name"),
+	@NamedQuery(name="getFacilityCitiesByState", query="SELECT DISTINCT o.city FROM Facility o WHERE o.state = :state AND o.active = TRUE ORDER BY o.city"),
+	@NamedQuery(name="getFacilityStates", query="SELECT DISTINCT o.state FROM Facility o WHERE o.active = TRUE ORDER BY o.state")})
 public class Facility implements Serializable
 {
 	private final static long serialVersionUID = 1L;
