@@ -298,18 +298,18 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	 * @param state
 	 * @return never NULL
 	 */
-	public List<String> getDistinctCitiesByState(final String state)
+	public List<CountByName> getDistinctCitiesByState(final String state)
 	{
-		return namedQuery("getFacilityCitiesByState", String.class).setParameter("state", state).list();
+		return namedQuery("getFacilityCitiesByState", CountByName.class).setParameter("state", state).list();
 	}
 
 	/** Gets the distinct list of facility states.
 	 * 
 	 * @return never NULL
 	 */
-	public List<String> getDistinctStates()
+	public List<CountByName> getDistinctStates()
 	{
-		return namedQuery("getFacilityStates", String.class).list();
+		return namedQuery("getFacilityStates", CountByName.class).list();
 	}
 
 	/** Searches the Facility entity based on the supplied filter.

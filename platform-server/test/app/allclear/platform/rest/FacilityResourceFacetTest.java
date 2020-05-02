@@ -1,5 +1,6 @@
 package app.allclear.platform.rest;
 
+import static java.util.stream.Collectors.toList;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.*;
@@ -8,6 +9,7 @@ import static app.allclear.testing.TestingUtils.*;
 import java.util.*;
 import java.util.stream.Stream;
 import javax.ws.rs.client.*;
+import javax.ws.rs.core.GenericType;
 
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +29,7 @@ import app.allclear.google.client.MapClient;
 import app.allclear.platform.App;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.dao.*;
+import app.allclear.platform.entity.CountByName;
 import app.allclear.platform.value.*;
 
 /**********************************************************************************
@@ -50,6 +53,7 @@ public class FacilityResourceFacetTest
 	private static SessionDAO sessionDao = new SessionDAO(new FakeRedisClient(), ConfigTest.loadTest());
 	private static MapClient map = mock(MapClient.class);
 	private static final SessionValue ADMIN = new SessionValue(false, new AdminValue("admin"));
+	private static final Map<String, List<CountByName>> CITIES = new HashMap<>();
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
 		.addResource(new AuthorizationExceptionMapper())
@@ -59,6 +63,8 @@ public class FacilityResourceFacetTest
 
 	/** Primary URI to test. */
 	private static final String TARGET = "/facilities";
+
+	private static final GenericType<List<CountByName>> TYPE_LIST_COUNT = new GenericType<List<CountByName>>() {};
 
 	@BeforeAll
 	public static void up() throws Exception
@@ -77,6 +83,12 @@ public class FacilityResourceFacetTest
 	@CsvFileSource(resources="/feeds/facility_facets.csv", numLinesToSkip=1)
 	public void add_all(final int i, final String city, final String state, final boolean active)
 	{
+		if (active)
+		{
+			var o = CITIES.computeIfAbsent(state, k -> new LinkedList<CountByName>());
+			o.stream().filter(v -> v.name.equalsIgnoreCase(city)).findFirst().ifPresentOrElse(v -> v.total++, () -> o.add(new CountByName(city, 1L)));
+		}
+
 		Assertions.assertEquals(HTTP_STATUS_OK, request().post(Entity.json(new FacilityValue(i, city, state, 45, 45, active))).getStatus());
 	}
 
@@ -141,18 +153,18 @@ public class FacilityResourceFacetTest
 	public static Stream<Arguments> getDistinctCities()
 	{
 		return Stream.of(
-			arguments("Alabama", List.of("bessemer", "Birmingham", "butler", "Centreville", "Columbiana", "dora", "Fultondale", "Hoover", "Jasper", "midfield", "mountain", "Mountain Brook", "Pell City", "south", "Springville", "Trussville", "Tuscaloosa", "vestavia", "Vestavia Hills", "winfield", "woodlawn", "Woodstock")),
-			arguments("Connecticut", List.of("new haven", "orange", "Southbury", "stamford")),
-			arguments("Massachusetts", List.of("Cambridge", "Jamaica Plain")),
-			arguments("Washington", List.of("burien", "Lake Forest Park", "New York", "Seattle", "shoreline", "Washington")),
+			arguments("Alabama", CITIES.get("Alabama").stream().sorted((a, b) -> a.name.compareToIgnoreCase(b.name)).collect(toList())),
+			arguments("Connecticut", CITIES.get("Connecticut").stream().sorted((a, b) -> a.name.compareToIgnoreCase(b.name)).collect(toList())),
+			arguments("Massachusetts", CITIES.get("Massachusetts").stream().sorted((a, b) -> a.name.compareToIgnoreCase(b.name)).collect(toList())),
+			arguments("Washington", CITIES.get("Washington").stream().sorted((a, b) -> a.name.compareToIgnoreCase(b.name)).collect(toList())),
 			arguments("Washington DC", List.of()));	// Washington DC facilities are deactivated for test.
 	}
 
 	@ParameterizedTest
 	@MethodSource
-	public void getDistinctCities(final String state, final List<String> expected)
+	public void getDistinctCities(final String state, final List<CountByName> expected)
 	{
-		assertThat(request(target().path("cities").queryParam("state", state)).get(String[].class)).containsAll(expected);
+		assertThat(request(target().path("cities").queryParam("state", state)).get(TYPE_LIST_COUNT)).isEqualTo(expected);
 	}
 
 	@Test
@@ -191,7 +203,11 @@ public class FacilityResourceFacetTest
 	@Test
 	public void getDistinctStates()
 	{
-		assertThat(request("states").get(String[].class)).containsExactly("Alabama", "Connecticut", "Massachusetts", "Washington");
+		assertThat(request("states").get(CountByName[].class))
+			.containsExactly(new CountByName("Alabama", 50L),
+				new CountByName("Connecticut", 8L),
+				new CountByName("Massachusetts", 2L),
+				new CountByName("Washington", 35L));
 	}
 
 	/** Helper method - creates the base WebTarget. */

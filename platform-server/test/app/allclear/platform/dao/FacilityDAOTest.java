@@ -26,6 +26,7 @@ import app.allclear.junit.hibernate.*;
 import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.platform.App;
+import app.allclear.platform.entity.CountByName;
 import app.allclear.platform.entity.Facility;
 import app.allclear.platform.filter.FacilityFilter;
 import app.allclear.platform.filter.GeoFilter;
@@ -360,7 +361,7 @@ public class FacilityDAOTest
 	{
 		return Stream.of(
 			arguments("Florida", List.of()),
-			arguments("FL", List.of("Miami")),
+			arguments("FL", List.of(new CountByName("Miami", 1L))),
 			arguments("Georgia", List.of()),
 			arguments("GA", List.of()));
 	}
@@ -375,7 +376,7 @@ public class FacilityDAOTest
 	@Test
 	public void getDistinctStates()
 	{
-		assertThat(dao.getDistinctStates()).containsExactly("FL");
+		assertThat(dao.getDistinctStates()).containsExactly(new CountByName("FL", 1L));
 	}
 
 	@Test
@@ -952,14 +953,14 @@ public class FacilityDAOTest
 		return Stream.of(
 			arguments("Florida", List.of()),
 			arguments("FL", List.of()),
-			arguments("Texas", List.of("Austin", "Dallas")),
+			arguments("Texas", List.of(new CountByName("Austin", 1L), new CountByName("Dallas", 1L))),
 			arguments("Georgia", List.of()),
-			arguments("GA", List.of("Atlanta")));
+			arguments("GA", List.of(new CountByName("Atlanta", 1L))));
 	}
 
 	@ParameterizedTest
 	@MethodSource
-	public void z_02_getDistinctCitiesByState(final String state, final List<String> expected)
+	public void z_02_getDistinctCitiesByState(final String state, final List<CountByName> expected)
 	{
 		assertThat(dao.getDistinctCitiesByState(state)).isEqualTo(expected);
 	}
@@ -967,7 +968,7 @@ public class FacilityDAOTest
 	@Test
 	public void z_02_getDistinctStates()
 	{
-		assertThat(dao.getDistinctStates()).containsExactly("GA", "Texas");
+		assertThat(dao.getDistinctStates()).containsExactly(new CountByName("GA", 1L), new CountByName("Texas", 2L));
 	}
 
 	@Test

@@ -27,6 +27,7 @@ import app.allclear.google.client.MapClient;
 import app.allclear.google.model.GeocodeResult;
 import app.allclear.platform.dao.FacilityDAO;
 import app.allclear.platform.dao.SessionDAO;
+import app.allclear.platform.entity.CountByName;
 import app.allclear.platform.filter.FacilityFilter;
 import app.allclear.platform.type.TestCriteria;
 import app.allclear.platform.value.FacilityValue;
@@ -102,8 +103,8 @@ public class FacilityResource
 
 	@GET
 	@Path("/cities") @Timed @UnitOfWork(readOnly=true, transactional=false)
-	@ApiOperation(value="getDistinctStates", notes="Gets the distinct list of facility cities by state.", response=String.class, responseContainer="List")
-	public List<String> getDistinctCitiesByState(@QueryParam("state") final String state)
+	@ApiOperation(value="getDistinctStates", notes="Gets the distinct list of facility cities by state.", response=CountByName.class, responseContainer="List")
+	public List<CountByName> getDistinctCitiesByState(@QueryParam("state") final String state)
 	{
 		if (StringUtils.isBlank(state))
 			throw new ValidationException("state", "Please provide a 'state' parameter.");
@@ -124,8 +125,8 @@ public class FacilityResource
 
 	@GET
 	@Path("/states") @Timed @UnitOfWork(readOnly=true, transactional=false)
-	@ApiOperation(value="getDistinctStates", notes="Gets the distinct list of facility states.", response=String.class, responseContainer="List")
-	public List<String> getDistinctStates() { return dao.getDistinctStates(); }
+	@ApiOperation(value="getDistinctStates", notes="Gets the distinct list of facility states.", response=CountByName.class, responseContainer="List")
+	public List<CountByName> getDistinctStates() { return dao.getDistinctStates(); }
 
 	@POST
 	@Timed @UnitOfWork
