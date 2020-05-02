@@ -8,12 +8,14 @@ import java.util.List;
 import javax.ws.rs.*;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.*;
 
 import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 
 import com.codahale.metrics.annotation.Timed;
+
 import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
@@ -103,6 +105,9 @@ public class FacilityResource
 	@ApiOperation(value="getDistinctStates", notes="Gets the distinct list of facility cities by state.", response=String.class, responseContainer="List")
 	public List<String> getDistinctCitiesByState(@QueryParam("state") final String state)
 	{
+		if (StringUtils.isBlank(state))
+			throw new ValidationException("state", "Please provide a 'state' parameter.");
+
 		return dao.getDistinctCitiesByState(state);
 	}
 
@@ -111,6 +116,9 @@ public class FacilityResource
 	@ApiOperation(value="get", notes="Gets a single Facility by its name.", response=FacilityValue.class)
 	public FacilityValue get(@QueryParam("name") final String name) throws ObjectNotFoundException
 	{
+		if (StringUtils.isBlank(name))
+			throw new ValidationException("name", "Please provide a 'name' parameter.");
+
 		return dao.getByNameWithException(name);
 	}
 

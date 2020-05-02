@@ -99,10 +99,43 @@ public class FacilityResourceFacetTest
 	}
 
 	@Test
+	public void getByName_blank()
+	{
+		var response = request(target().path("name").queryParam("name", "    ")).get();
+		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, response.getStatus(), "Status");
+
+		var info = response.readEntity(ErrorInfo.class);
+		Assertions.assertNotNull(info, "Exists");
+		Assertions.assertEquals("Please provide a 'name' parameter.", info.message, "Check message");
+	}
+
+	@Test
+	public void getByName_empty()
+	{
+		var response = request(target().path("name").queryParam("name", "")).get();
+		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, response.getStatus(), "Status");
+
+		var info = response.readEntity(ErrorInfo.class);
+		Assertions.assertNotNull(info, "Exists");
+		Assertions.assertEquals("Please provide a 'name' parameter.", info.message, "Check message");
+	}
+
+	@Test
 	public void getByName_invalid()
 	{
 		var response = request(target().path("name").queryParam("name", "Test Center 15231")).get();
 		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, response.getStatus(), "Status");
+	}
+
+	@Test
+	public void getByName_missing()
+	{
+		var response = request("name").get();
+		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, response.getStatus(), "Status");
+
+		var info = response.readEntity(ErrorInfo.class);
+		Assertions.assertNotNull(info, "Exists");
+		Assertions.assertEquals("Please provide a 'name' parameter.", info.message, "Check message");
 	}
 
 	public static Stream<Arguments> getDistinctCities()
@@ -120,6 +153,39 @@ public class FacilityResourceFacetTest
 	public void getDistinctCities(final String state, final List<String> expected)
 	{
 		assertThat(request(target().path("cities").queryParam("state", state)).get(String[].class)).containsAll(expected);
+	}
+
+	@Test
+	public void getDistinctCities_blank()
+	{
+		var response = request(target().path("cities").queryParam("state", "    ")).get();
+		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, response.getStatus(), "Status");
+
+		var info = response.readEntity(ErrorInfo.class);
+		Assertions.assertNotNull(info, "Exists");
+		Assertions.assertEquals("Please provide a 'state' parameter.", info.message, "Check message");
+	}
+
+	@Test
+	public void getDistinctCities_empty()
+	{
+		var response = request(target().path("cities").queryParam("state", "")).get();
+		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, response.getStatus(), "Status");
+
+		var info = response.readEntity(ErrorInfo.class);
+		Assertions.assertNotNull(info, "Exists");
+		Assertions.assertEquals("Please provide a 'state' parameter.", info.message, "Check message");
+	}
+
+	@Test
+	public void getDistinctCities_missing()
+	{
+		var response = request("cities").get();
+		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, response.getStatus(), "Status");
+
+		var info = response.readEntity(ErrorInfo.class);
+		Assertions.assertNotNull(info, "Exists");
+		Assertions.assertEquals("Please provide a 'state' parameter.", info.message, "Check message");
 	}
 
 	@Test
