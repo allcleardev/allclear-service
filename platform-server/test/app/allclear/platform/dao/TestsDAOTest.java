@@ -24,6 +24,7 @@ import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.platform.App;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.entity.Tests;
+import app.allclear.platform.filter.PeopleFilter;
 import app.allclear.platform.filter.TestsFilter;
 import app.allclear.platform.value.*;
 
@@ -156,6 +157,25 @@ public class TestsDAOTest
 	public void add_longNotes()
 	{
 		assertThrows(ValidationException.class, () -> dao.add(createValid().withNotes(StringUtils.repeat("A", TestsValue.MAX_LEN_NOTES + 1))));
+	}
+
+	public static Stream<Arguments> count()
+	{
+		return Stream.of(
+			arguments(new PeopleFilter(), List.of(PERSON, PERSON_1)),
+			arguments(new PeopleFilter().withHasTakenTest(true), List.of(PERSON)),
+			arguments(new PeopleFilter().withHasTakenTest(false), List.of(PERSON_1)),
+			arguments(new PeopleFilter().withHasPositiveTest(true), null),
+			arguments(new PeopleFilter().withHasPositiveTest(false), List.of(PERSON, PERSON_1)));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void count(final PeopleFilter filter, final List<PeopleValue> records)
+	{
+		var results = peopleDao.search(filter);
+		Assertions.assertEquals(null != records ? (long) records.size() : 0L, results.total);
+		assertThat(results.records).isEqualTo(records);
 	}
 
 	@Test
@@ -300,6 +320,25 @@ public class TestsDAOTest
 		Assertions.assertEquals(v.positive, record.isPositive(), "Check positive");
 		Assertions.assertEquals(v.notes, record.getNotes(), "Check notes");
 		check(VALUE, record);
+	}
+
+	public static Stream<Arguments> modify_search()
+	{
+		return Stream.of(
+			arguments(new PeopleFilter(), List.of(PERSON, PERSON_1)),
+			arguments(new PeopleFilter().withHasTakenTest(true), List.of(PERSON_1)),
+			arguments(new PeopleFilter().withHasTakenTest(false), List.of(PERSON)),
+			arguments(new PeopleFilter().withHasPositiveTest(true), List.of(PERSON_1)),
+			arguments(new PeopleFilter().withHasPositiveTest(false), List.of(PERSON)));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_search(final PeopleFilter filter, final List<PeopleValue> records)
+	{
+		var results = peopleDao.search(filter);
+		Assertions.assertEquals(null != records ? (long) records.size() : 0L, results.total);
+		assertThat(results.records).isEqualTo(records);
 	}
 
 	public static Stream<Arguments> search()

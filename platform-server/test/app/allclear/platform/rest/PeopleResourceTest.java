@@ -392,6 +392,7 @@ public class PeopleResourceTest
 		return Stream.of(
 			arguments(new PeopleFilter(1, 20).withId(VALUE.id), 1L),
 			arguments(new PeopleFilter(1, 20).withName(VALUE.name), 1L),
+			arguments(new PeopleFilter(1, 20).withNameX("nim"), 1L),
 			arguments(new PeopleFilter(1, 20).withPhone(VALUE.phone), 1L),
 			arguments(new PeopleFilter(1, 20).withHasEmail(true), 1L),
 			arguments(new PeopleFilter(1, 20).withHasFirstName(false), 1L),
@@ -431,10 +432,13 @@ public class PeopleResourceTest
 			arguments(new PeopleFilter(1, 20).withUpdatedAtFrom(hourAgo), 1L),
 			arguments(new PeopleFilter(1, 20).withUpdatedAtTo(hourAhead), 1L),
 			arguments(new PeopleFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 1L),
+			arguments(new PeopleFilter(1, 20).withHasTakenTest(false), 1L),
+			arguments(new PeopleFilter(1, 20).withHasPositiveTest(false), 1L),
 
 			// Negative tests
 			arguments(new PeopleFilter(1, 20).withId("invalid"), 0L),
 			arguments(new PeopleFilter(1, 20).withName("invalid"), 0L),
+			arguments(new PeopleFilter(1, 20).withNameX("ryc"), 0L),
 			arguments(new PeopleFilter(1, 20).withPhone("invalid"), 0L),
 			arguments(new PeopleFilter(1, 20).withHasEmail(false), 0L),
 			arguments(new PeopleFilter(1, 20).withHasFirstName(true), 0L),
@@ -473,7 +477,9 @@ public class PeopleResourceTest
 			arguments(new PeopleFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
 			arguments(new PeopleFilter(1, 20).withUpdatedAtFrom(hourAhead), 0L),
 			arguments(new PeopleFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
-			arguments(new PeopleFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L));
+			arguments(new PeopleFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L),
+			arguments(new PeopleFilter(1, 20).withHasTakenTest(true), 0L),
+			arguments(new PeopleFilter(1, 20).withHasPositiveTest(true), 0L));
 	}
 
 	@ParameterizedTest
