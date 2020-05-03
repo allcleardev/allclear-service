@@ -587,6 +587,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		return createQueryBuilder(select)
 			.addStarts("id", "o.id LIKE :id", filter.id)
 			.addStarts("name", "o.name LIKE :name", filter.name)
+			.addContains("nameX", "o.name LIKE :nameX", filter.nameX)
 			.addStarts("phone", "o.phone LIKE :phone", filter.phone)
 			.addStarts("email", "o.email LIKE :email", filter.email)
 			.addNotNull("o.email", filter.hasEmail)
@@ -646,6 +647,8 @@ public class PeopleDAO extends AbstractDAO<People>
 			.addIn("excludeExposures", "NOT EXISTS (SELECT 1 FROM Exposures c WHERE c.personId = o.id AND c.exposureId IN {})", filter.excludeExposures)
 			.addIn("includeSymptoms", "EXISTS (SELECT 1 FROM Symptoms c WHERE c.personId = o.id AND c.symptomId IN {})", filter.includeSymptoms)
 			.addIn("excludeSymptoms", "NOT EXISTS (SELECT 1 FROM Symptoms c WHERE c.personId = o.id AND c.symptomId IN {})", filter.excludeSymptoms)
+			.addExists("SELECT 1 FROM Tests t WHERE t.personId = o.id", filter.hasTakenTest)
+			.addExists("SELECT 1 FROM Tests t WHERE t.personId = o.id AND t.positive = TRUE", filter.hasPositiveTest)
 			.addExists("SELECT 1 FROM PeopleFacility c WHERE c.personId = o.id", filter.hasFacilities)
 			.addIn("includeFacilities", "EXISTS (SELECT 1 FROM PeopleFacility c WHERE c.personId = o.id AND c.facilityId IN {})", filter.includeFacilities)
 			.addIn("excludeFacilities", "NOT EXISTS (SELECT 1 FROM PeopleFacility c WHERE c.personId = o.id AND c.facilityId IN {})", filter.excludeFacilities);

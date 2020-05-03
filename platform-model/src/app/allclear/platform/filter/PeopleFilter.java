@@ -25,6 +25,7 @@ public class PeopleFilter extends QueryFilter
 	// Members
 	public String id = null;
 	public String name = null;
+	public String nameX = null;	// ALLCLEAR-358: fuzzy user name search. DLS on 5/2/2020.
 	public String phone = null;
 	public String email = null;
 	public Boolean hasEmail = null;
@@ -85,6 +86,8 @@ public class PeopleFilter extends QueryFilter
 	public List<String> excludeExposures = null;
 	public List<String> includeSymptoms = null;
 	public List<String> excludeSymptoms = null;
+	public Boolean hasTakenTest = null;	// ALLCLEAR-359: DLS on 5/2/2020.
+	public Boolean hasPositiveTest = null;	// ALLCLEAR-359: DLS on 5/2/2020.
 	public Boolean hasFacilities = null;
 	public List<Long> includeFacilities = null;
 	public List<Long> excludeFacilities = null;
@@ -92,6 +95,7 @@ public class PeopleFilter extends QueryFilter
 	// Mutators
 	public PeopleFilter withId(final String newValue) { id = newValue; return this; }
 	public PeopleFilter withName(final String newValue) { name = newValue; return this; }
+	public PeopleFilter withNameX(final String newValue) { nameX = newValue; return this; }
 	public PeopleFilter withPhone(final String newValue) { phone = newValue; return this; }
 	public PeopleFilter withEmail(final String newValue) { email = newValue; return this; }
 	public PeopleFilter withHasEmail(final Boolean newValue) { hasEmail = newValue; return this; }
@@ -158,6 +162,8 @@ public class PeopleFilter extends QueryFilter
 	public PeopleFilter withIncludeSymptoms(final String... newValues) { return withIncludeSymptoms(Arrays.asList(newValues)); }
 	public PeopleFilter withExcludeSymptoms(final List<String> newValues) { excludeSymptoms = newValues; return this; }
 	public PeopleFilter withExcludeSymptoms(final String... newValues) { return withExcludeSymptoms(Arrays.asList(newValues)); }
+	public PeopleFilter withHasTakenTest(final Boolean newValue) { hasTakenTest = newValue; return this; }
+	public PeopleFilter withHasPositiveTest(final Boolean newValue) { hasPositiveTest = newValue; return this; }
 	public PeopleFilter withHasFacilities(final Boolean newValue) { hasFacilities = newValue; return this; }
 	public PeopleFilter withIncludeFacilities(final List<Long> newValues) { includeFacilities = newValues; return this; }
 	public PeopleFilter withIncludeFacilities(final Long... newValues) { return withIncludeFacilities(Arrays.asList(newValues)); }
@@ -320,6 +326,7 @@ public class PeopleFilter extends QueryFilter
 	{
 		id = StringUtils.trimToNull(id);
 		name = StringUtils.trimToNull(name);
+		nameX = StringUtils.trimToNull(nameX);
 		phone = StringUtils.trimToNull(phone);
 		email = StringUtils.trimToNull(email);
 		firstName = StringUtils.trimToNull(firstName);
@@ -355,6 +362,7 @@ public class PeopleFilter extends QueryFilter
 	{
 		return new StringBuilder("{ id: ").append(id)
 			.append(", name: ").append(name)
+			.append(", nameX: ").append(nameX)
 			.append(", phone: ").append(phone)
 			.append(", email: ").append(email)
 			.append(", hasEmail: ").append(hasEmail)
@@ -415,6 +423,8 @@ public class PeopleFilter extends QueryFilter
 			.append(", excludeExposures: ").append(excludeExposures)
 			.append(", includeSymptoms: ").append(includeSymptoms)
 			.append(", excludeSymptoms: ").append(excludeSymptoms)
+			.append(", hasTakenTest: ").append(hasTakenTest)
+			.append(", hasPositiveTest: ").append(hasPositiveTest)
 			.append(", hasFacilities: ").append(hasFacilities)
 			.append(", includeFacilities: ").append(includeFacilities)
 			.append(", excludeFacilities: ").append(excludeFacilities)
