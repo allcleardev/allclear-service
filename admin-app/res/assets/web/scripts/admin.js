@@ -414,7 +414,7 @@ var PeopleHandler = new ListTemplate({
 		          new TagField('includeSymptoms', 'Include Symptoms', false, 'types/symptoms'),
 		          new TagField('excludeSymptoms', 'Exclude Symptoms', false, 'types/symptoms'),
 		          new ListField('hasTakenTest', 'Has Taken Test?', false, 'yesNoOptions', undefined, 'No Search'),
-		          new ListField('hasTakenTest', 'Has Positive Test?', false, 'yesNoOptions', undefined, 'No Search'),
+		          new ListField('hasPositiveTest', 'Has Positive Test?', false, 'yesNoOptions', undefined, 'No Search'),
 		          new TagField('includeFacilities', 'Include Facilities', false, 'facilities'),
 		          new TagField('excludeFacilities', 'Exclude Facilities', false, 'facilities'),
 		          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ]
