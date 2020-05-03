@@ -374,7 +374,8 @@ var PeopleHandler = new ListTemplate({
 		RESOURCE: 'people',
 
 		FIELDS: [ new TextField('id', 'ID'),
-		          new EditField('name', 'Name', false, false, 64, 50),
+		          new EditField('name', 'Name', false, false, 64, 50, 'Starts-with search on user name'),
+		          new EditField('nameX', 'Name - fuzzy', false, false, 64, 50, 'Fuzzy search on user name'),
 		          new EditField('phone', 'Phone', false, false, 32, 15),
 		          new EditField('email', 'Email', false, false, 128, 50),
 		          new EditField('firstName', 'First Name', false, false, 32, 15),
@@ -412,6 +413,8 @@ var PeopleHandler = new ListTemplate({
 		          new TagField('excludeExposures', 'Exclude Exposures', false, 'types/exposures'),
 		          new TagField('includeSymptoms', 'Include Symptoms', false, 'types/symptoms'),
 		          new TagField('excludeSymptoms', 'Exclude Symptoms', false, 'types/symptoms'),
+		          new ListField('hasTakenTest', 'Has Taken Test?', false, 'yesNoOptions', undefined, 'No Search'),
+		          new ListField('hasTakenTest', 'Has Positive Test?', false, 'yesNoOptions', undefined, 'No Search'),
 		          new TagField('includeFacilities', 'Include Facilities', false, 'facilities'),
 		          new TagField('excludeFacilities', 'Exclude Facilities', false, 'facilities'),
 		          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ]
