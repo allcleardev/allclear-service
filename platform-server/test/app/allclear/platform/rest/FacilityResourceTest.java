@@ -349,6 +349,14 @@ public class FacilityResourceTest
 		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request(VALUE.id.toString()).delete().getStatus(), "Status");
 	}
 
+	@Test
+	public void remove_noAuth_as_editor()
+	{
+		sessionDao.current(EDITOR);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request(VALUE.id.toString()).delete().getStatus(), "Status");
+	}
+
 	public static Stream<Arguments> search()
 	{
 		var hourAgo = hourAgo();

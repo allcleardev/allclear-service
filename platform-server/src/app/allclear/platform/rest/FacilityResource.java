@@ -71,7 +71,10 @@ public class FacilityResource
 	public FacilityValue get(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@PathParam("id") final Long id) throws ObjectNotFoundException
 	{
-		return dao.getByIdWithException(id);
+		var o = dao.getByIdWithException(id);
+		if (!sessionDao.current().admin() && !o.active) throw new ObjectNotFoundException("The ID '" + id + "' is unavailable.");
+
+		return o;
 	}
 
 	@GET

@@ -24,11 +24,12 @@ public class AuthFilter implements ContainerRequestFilter
 	public static final String PATH_ADMINS = "admins";
 	public static final List<String> PATHS_ADMINS = List.of("customers", "logs", "queues", "registrations");
 	public static final List<String> PATHS_EDITORS = List.of("maps");	// Editors need the maps/geocode operation when managing facilities. DLS on 5/1/2020.
+	public static final String PATH_FACILITIES = "facilities";
 	public static final String PATH_INFO_CONFIG = "info/config";
 	public static final String PATH_SELF = "/self";
 	public static final String PATH_TWILIO = "twilio/";	// Uses Digest Auth
 	public static final String PATH_TYPES = "types/";
-	public static final List<String> PATHS_NO_AUTH = List.of("admins/auth", "facilities/cities", "facilities/name", "facilities/search", "facilities/states", "info/health", "info/ping", "info/version", "peoples/auth", "peoples/confirm", "peoples/start", "swagger.json");
+	public static final List<String> PATHS_NO_AUTH = List.of("admins/auth", "info/health", "info/ping", "info/version", "peoples/auth", "peoples/confirm", "peoples/start", "swagger.json");
 	public static final String PATH_REGISTER = "peoples/register";
 
 	private final SessionDAO dao;
@@ -86,7 +87,7 @@ public class AuthFilter implements ContainerRequestFilter
 
 	boolean requiresAuth(final String path)
 	{
-		return ((null == path) || !(path.startsWith(PATH_TWILIO) || path.startsWith(PATH_TYPES) || PATHS_NO_AUTH.contains(path)));
+		return ((null == path) || !(path.startsWith(PATH_FACILITIES) || path.startsWith(PATH_TWILIO) || path.startsWith(PATH_TYPES) || PATHS_NO_AUTH.contains(path)));
 	}
 
 	boolean self(final String path)
