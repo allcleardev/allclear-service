@@ -72,7 +72,7 @@ public class FacilityResource
 		@PathParam("id") final Long id) throws ObjectNotFoundException
 	{
 		var o = dao.getByIdWithException(id);
-		if (!sessionDao.current().admin() && !o.active) throw new ObjectNotFoundException("The ID '" + id + "' is unavailable.");
+		if (!sessionDao.currentOrAnon().admin() && !o.active) throw new ObjectNotFoundException("The ID '" + id + "' is unavailable.");
 
 		return o;
 	}

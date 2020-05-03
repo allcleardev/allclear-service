@@ -141,6 +141,30 @@ public class FacilityResourceTest
 	}
 
 	@Test
+	public void check_as_anonymous()	// Perform GET while the facility is inactive.
+	{
+		sessionDao.clear();
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, get(VALUE.id).getStatus(), "Status");
+	}
+
+	@Test
+	public void check_as_editor()	// Perform GET while the facility is inactive.
+	{
+		sessionDao.current(EDITOR);
+
+		check(VALUE, getX(VALUE.id));
+	}
+
+	@Test
+	public void check_as_person()	// Perform GET while the facility is inactive.
+	{
+		sessionDao.current(PERSON);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, get(VALUE.id).getStatus(), "Status");
+	}
+
+	@Test
 	public void find()
 	{
 		var response = request(target().queryParam("name", "ul")).get();
@@ -247,6 +271,19 @@ public class FacilityResourceTest
 	public void getWithException()
 	{
 		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, get(VALUE.id + 1000L).getStatus(), "Status");
+	}
+
+	@Test
+	public void get_as_anonymous()
+	{
+		sessionDao.clear();
+
+		var response = get(VALUE.id);
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var value = response.readEntity(FacilityValue.class);
+		Assertions.assertNotNull(value, "Exists");
+		check(VALUE, value);
 	}
 
 	@Test

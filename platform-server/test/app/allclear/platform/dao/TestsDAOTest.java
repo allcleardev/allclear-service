@@ -162,11 +162,11 @@ public class TestsDAOTest
 	public static Stream<Arguments> count()
 	{
 		return Stream.of(
-			arguments(new PeopleFilter(), List.of(PERSON, PERSON_1)),
-			arguments(new PeopleFilter().withHasTakenTest(true), List.of(PERSON)),
-			arguments(new PeopleFilter().withHasTakenTest(false), List.of(PERSON_1)),
-			arguments(new PeopleFilter().withHasPositiveTest(true), null),
-			arguments(new PeopleFilter().withHasPositiveTest(false), List.of(PERSON, PERSON_1)));
+			arguments(new PeopleFilter("createdAt", "ASC"), List.of(PERSON, PERSON_1)),
+			arguments(new PeopleFilter("createdAt", "ASC").withHasTakenTest(true), List.of(PERSON)),
+			arguments(new PeopleFilter("createdAt", "ASC").withHasTakenTest(false), List.of(PERSON_1)),
+			arguments(new PeopleFilter("createdAt", "ASC").withHasPositiveTest(true), null),
+			arguments(new PeopleFilter("createdAt", "ASC").withHasPositiveTest(false), List.of(PERSON, PERSON_1)));
 	}
 
 	@ParameterizedTest
@@ -325,11 +325,11 @@ public class TestsDAOTest
 	public static Stream<Arguments> modify_search()
 	{
 		return Stream.of(
-			arguments(new PeopleFilter(), List.of(PERSON, PERSON_1)),
-			arguments(new PeopleFilter().withHasTakenTest(true), List.of(PERSON_1)),
-			arguments(new PeopleFilter().withHasTakenTest(false), List.of(PERSON)),
-			arguments(new PeopleFilter().withHasPositiveTest(true), List.of(PERSON_1)),
-			arguments(new PeopleFilter().withHasPositiveTest(false), List.of(PERSON)));
+			arguments(new PeopleFilter("createdAt", "ASC"), List.of(PERSON, PERSON_1)),
+			arguments(new PeopleFilter("createdAt", "ASC").withHasTakenTest(true), List.of(PERSON_1)),
+			arguments(new PeopleFilter("createdAt", "ASC").withHasTakenTest(false), List.of(PERSON)),
+			arguments(new PeopleFilter("createdAt", "ASC").withHasPositiveTest(true), List.of(PERSON_1)),
+			arguments(new PeopleFilter("createdAt", "ASC").withHasPositiveTest(false), List.of(PERSON)));
 	}
 
 	@ParameterizedTest
