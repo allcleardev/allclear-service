@@ -126,7 +126,22 @@ public class FacilityResourceTest
 	}
 
 	@Test
-	public void add_noAuth()
+	public void add_noAuth_as_anonymous()
+	{
+		count(new FacilityFilter(), 1L);
+
+		sessionDao.clear();
+
+		var response = request()
+			.post(Entity.entity(new FacilityValue("Julius + 1", "56 First Street", "Louisville", "KY", bg("-35"), bg("52.607"),
+				true, false, true, false, true, false, true, false), UTF8MediaType.APPLICATION_JSON_TYPE));
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, response.getStatus(), "Status");
+
+		count(new FacilityFilter(), 1L);
+	}
+
+	@Test
+	public void add_noAuth_as_persoon()
 	{
 		count(new FacilityFilter(), 1L);
 
@@ -322,7 +337,18 @@ public class FacilityResourceTest
 	}
 
 	@Test
-	public void modify_noAuth()
+	public void modify_noAuth_as_anonymous()
+	{
+		sessionDao.clear();
+
+		var response = request()
+			.put(Entity.entity(new FacilityValue("Julius + 1", "56 First Street", "Louisville", "KY", bg("-35"), bg("52.607"),
+				true, false, true, false, true, false, true, false).withId(VALUE.id), UTF8MediaType.APPLICATION_JSON_TYPE));
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, response.getStatus(), "Status");
+	}
+
+	@Test
+	public void modify_noAuth_as_person()
 	{
 		sessionDao.current(PERSON);
 
@@ -379,9 +405,9 @@ public class FacilityResourceTest
 	}
 
 	@Test
-	public void remove_noAuth()
+	public void remove_noAuth_as_anonymous()
 	{
-		sessionDao.current(PERSON);
+		sessionDao.clear();
 
 		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request(VALUE.id.toString()).delete().getStatus(), "Status");
 	}
@@ -390,6 +416,14 @@ public class FacilityResourceTest
 	public void remove_noAuth_as_editor()
 	{
 		sessionDao.current(EDITOR);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request(VALUE.id.toString()).delete().getStatus(), "Status");
+	}
+
+	@Test
+	public void remove_noAuth_as_person()
+	{
+		sessionDao.current(PERSON);
 
 		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request(VALUE.id.toString()).delete().getStatus(), "Status");
 	}

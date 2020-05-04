@@ -232,6 +232,7 @@ public class SessionDAOTest
 	public static Stream<Arguments> checkAdmin()
 	{
 		return Stream.of(
+			arguments(null, false),
 			arguments(ADMIN, true),
 			arguments(EDITOR, false),
 			arguments(PERSON, false),
@@ -255,6 +256,7 @@ public class SessionDAOTest
 	public static Stream<Arguments> checkAdminOrPerson()
 	{
 		return Stream.of(
+			arguments(null, false),
 			arguments(ADMIN, true),
 			arguments(EDITOR, false),
 			arguments(PERSON, true),
@@ -278,6 +280,7 @@ public class SessionDAOTest
 	public static Stream<Arguments> checkEditor()
 	{
 		return Stream.of(
+			arguments(null, false),
 			arguments(ADMIN, true),	// All administrators can perform the Editor actions. DLS on 4/30/2020.
 			arguments(EDITOR, true),
 			arguments(PERSON, false),
@@ -301,6 +304,7 @@ public class SessionDAOTest
 	public static Stream<Arguments> checkPerson()
 	{
 		return Stream.of(
+			arguments(null, false),
 			arguments(ADMIN, false),
 			arguments(EDITOR, false),
 			arguments(PERSON, true),
@@ -324,6 +328,7 @@ public class SessionDAOTest
 	public static Stream<Arguments> checkSuper()
 	{
 		return Stream.of(
+			arguments(null, false),
 			arguments(ADMIN, false),
 			arguments(EDITOR, false),
 			arguments(PERSON, false),

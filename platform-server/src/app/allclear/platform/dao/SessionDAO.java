@@ -225,7 +225,7 @@ public class SessionDAO
 	public AdminValue checkAdmin() throws NotAuthorizedException
 	{
 		var o = current();
-		if (!o.canAdmin()) throw new NotAuthorizedException("Must be an Admin session.");
+		if ((null == o) || !o.canAdmin()) throw new NotAuthorizedException("Must be an Admin session.");
 
 		return o.admin;
 	}
@@ -238,7 +238,7 @@ public class SessionDAO
 	public SessionValue checkAdminOrPerson() throws NotAuthorizedException
 	{
 		var o = current();
-		if (o.person() || o.canAdmin()) return o;
+		if ((null != o) && (o.person() || o.canAdmin())) return o;
 
 		throw new NotAuthorizedException("Must be an Admin session.");
 	}
@@ -251,7 +251,7 @@ public class SessionDAO
 	public AdminValue checkEditor() throws NotAuthorizedException
 	{
 		var o = current();
-		if (!o.admin()) throw new NotAuthorizedException("Must be an Editor session.");	// All Admins account can act as Editor.
+		if ((null == o) || !o.admin()) throw new NotAuthorizedException("Must be an Editor session.");	// All Admins account can act as Editor.
 
 		return o.admin;
 	}
@@ -264,7 +264,7 @@ public class SessionDAO
 	public PeopleValue checkPerson() throws NotAuthorizedException
 	{
 		var o = current();
-		if (!o.person()) throw new NotAuthorizedException("Must be a Person session.");
+		if ((null == o) || !o.person()) throw new NotAuthorizedException("Must be a Person session.");
 
 		return o.person;
 	}
@@ -276,10 +276,10 @@ public class SessionDAO
 	 */
 	public AdminValue checkSuper() throws NotAuthorizedException
 	{
-		var v = checkAdmin();
-		if (!v.supers) throw new NotAuthorizedException("Must be a Super-Admin session.");
+		var o = checkAdmin();
+		if ((null == o) || !o.supers) throw new NotAuthorizedException("Must be a Super-Admin session.");
 
-		return v;
+		return o;
 	}
 
 	/** Clears the current session. */
