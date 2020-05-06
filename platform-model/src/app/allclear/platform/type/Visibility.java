@@ -14,13 +14,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  */
 
-public class Visibility implements Serializable
+public class Visibility implements Serializable, Comparable<Visibility>
 {
 	private static final long serialVersionUID = 1L;
 
-	public static final Visibility ALL = new Visibility("a", "All");
-	public static final Visibility FRIENDS = new Visibility("f", "Friends");
-	public static final Visibility ME = new Visibility("m", "Me");
+	public static final Visibility ALL = new Visibility("a", "All", 100);
+	public static final Visibility FRIENDS = new Visibility("f", "Friends", 200);
+	public static final Visibility ME = new Visibility("m", "Me", 300);
 
 	public static final Visibility DEFAULT = FRIENDS;
 
@@ -31,12 +31,23 @@ public class Visibility implements Serializable
 
 	public final String id;
 	public final String name;
+	public final int rank;
+
+	public boolean available(final Visibility who)
+	{
+		return (0 >= compareTo(who));
+	}
+
+	@Override
+	public int compareTo(final Visibility other) { return rank - other.rank; }
 
 	public Visibility(@JsonProperty("id") final String id,
-		@JsonProperty("name") final String name)
+		@JsonProperty("name") final String name,
+		@JsonProperty("rank") final int rank)
 	{
 		this.id = id;
 		this.name = name;
+		this.rank = rank;
 	}
 
 	@Override
@@ -44,6 +55,7 @@ public class Visibility implements Serializable
 	{
 		return new StringBuilder("{ id: ").append(id)
 			.append(", name: ").append(name)
+			.append(", rank: ").append(rank)
 			.append(" }").toString();
 	}
 
@@ -53,7 +65,7 @@ public class Visibility implements Serializable
 		if (!(o instanceof Visibility)) return false;
 
 		var v = (Visibility) o;
-		return Objects.equals(id, v.id) && Objects.equals(name, v.name); 
+		return Objects.equals(id, v.id) && Objects.equals(name, v.name) && (rank == v.rank); 
 	}
 
 	@Override
