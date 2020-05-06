@@ -63,7 +63,7 @@ public class SessionResource
 	@DELETE
 	@Timed
 	@ApiOperation(value="remove", notes="Removes the current user's session - logout.")
-	public Response remove()
+	public Response remove(@HeaderParam(Headers.HEADER_SESSION) final String sessionId)
 	{
 		dao.remove();
 
