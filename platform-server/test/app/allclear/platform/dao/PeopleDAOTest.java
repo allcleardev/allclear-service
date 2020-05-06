@@ -1089,6 +1089,7 @@ public class PeopleDAOTest
 	public void testRemove_find()
 	{
 		assertThrows(ObjectNotFoundException.class, () -> dao.findWithException(VALUE.id));
+		assertThrows(ObjectNotFoundException.class, () -> dao.findFieldWithException(VALUE.id));
 	}
 
 	/** Test removal after the search. */
@@ -1107,6 +1108,10 @@ public class PeopleDAOTest
 		count(new PeopleFilter().withStatusId(v.statusId), 0L);
 		count(new PeopleFilter().withStatureId(v.statureId), 0L);
 		count(new PeopleFilter().withActive(v.active), 0L);
+		count(new PeopleFilter().withVisibilityHealthWorkerStatusId(Visibility.ME.id), 0L);
+		count(new PeopleFilter().withVisibilityConditions(Visibility.ALL.id), 0L);
+		count(new PeopleFilter().withVisibilityExposures(Visibility.ME.id), 0L);
+		count(new PeopleFilter().withVisibilitySymptoms(Visibility.ALL.id), 0L);
 	}
 
 	@Test
