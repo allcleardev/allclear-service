@@ -436,7 +436,7 @@ var PeopleHandler = new ListTemplate({
 
 		open: function(id) {
 			var me = this;
-			this.get(`peoples/{id}/fields`, null, data => me.doValue(data));
+			this.get(`peoples/${id}/fields`, null, data => me.doValue(data));
 		},
 
 		FIELDS: [ new TextField('id', 'ID'),
