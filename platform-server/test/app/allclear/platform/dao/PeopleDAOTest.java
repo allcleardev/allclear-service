@@ -37,6 +37,7 @@ import app.allclear.platform.filter.PeopleFilter;
 import app.allclear.platform.model.PeopleFindRequest;
 import app.allclear.platform.type.*;
 import app.allclear.platform.value.PeopleValue;
+import app.allclear.platform.value.PeopleFieldValue;
 
 /**********************************************************************************
 *
@@ -59,6 +60,7 @@ public class PeopleDAOTest
 	private static final Date DOB = utc(1950, 7, 1);
 	private static final Date DOB_1 = utc(1990, 7, 15);
 	private static PeopleValue VALUE = null;
+	private static PeopleFieldValue FIELD = null;
 
 	private static BigDecimal bg(final String value) { return new BigDecimal(value); }
 
@@ -444,6 +446,42 @@ public class PeopleDAOTest
 	}
 
 	@Test
+	public void findField()
+	{
+		var o = dao.findField(VALUE.id);
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals(Visibility.FRIENDS.id, o.visibilityHealthWorkerStatusId, "Check visibilityHealthWorkerStatusId");
+		Assertions.assertEquals(Visibility.FRIENDS.id, o.visibilityConditions, "Check visibilityConditions");
+		Assertions.assertEquals(Visibility.FRIENDS.id, o.visibilityExposures, "Check visibilityExposures");
+		Assertions.assertEquals(Visibility.FRIENDS.id, o.visibilitySymptoms, "Check visibilitySymptoms");
+		Assertions.assertEquals(VALUE.createdAt, o.updatedAt, "Check updatedAt");
+	}
+
+	@Test
+	public void findField_invalid()
+	{
+		Assertions.assertNull(dao.findField("INVALID"), "Exists");
+	}
+
+	@Test
+	public void findFieldWithException()
+	{
+		var o = dao.findFieldWithException(VALUE.id);
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals(Visibility.FRIENDS.id, o.visibilityHealthWorkerStatusId, "Check visibilityHealthWorkerStatusId");
+		Assertions.assertEquals(Visibility.FRIENDS.id, o.visibilityConditions, "Check visibilityConditions");
+		Assertions.assertEquals(Visibility.FRIENDS.id, o.visibilityExposures, "Check visibilityExposures");
+		Assertions.assertEquals(Visibility.FRIENDS.id, o.visibilitySymptoms, "Check visibilitySymptoms");
+		Assertions.assertEquals(VALUE.createdAt, o.updatedAt, "Check updatedAt");
+	}
+
+	@Test
+	public void findFieldWithException_invalid()
+	{
+		assertThrows(ObjectNotFoundException.class, () -> dao.findFieldWithException("INVALID"));
+	}
+
+	@Test
 	public void get()
 	{
 		var value = dao.getByIdWithException(VALUE.id);
@@ -463,6 +501,24 @@ public class PeopleDAOTest
 		assertThat(dao.getActiveByIdOrName("invalid")).as("Invalid").isEmpty();
 		assertThat(dao.getActiveByIdOrName(VALUE.id.substring(0, 3))).as("By partial ID").containsExactly(VALUE);
 		assertThat(dao.getActiveByIdOrName(VALUE.name.substring(0, 3))).as("By partial name").containsExactly(VALUE);
+	}
+
+	@Test
+	public void getFieldWithException()
+	{
+		var o = FIELD = dao.getFieldWithException(VALUE.id);
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals(Visibility.FRIENDS.id, o.visibilityHealthWorkerStatusId, "Check visibilityHealthWorkerStatusId");
+		Assertions.assertEquals(Visibility.FRIENDS.id, o.visibilityConditions, "Check visibilityConditions");
+		Assertions.assertEquals(Visibility.FRIENDS.id, o.visibilityExposures, "Check visibilityExposures");
+		Assertions.assertEquals(Visibility.FRIENDS.id, o.visibilitySymptoms, "Check visibilitySymptoms");
+		Assertions.assertEquals(VALUE.createdAt, o.updatedAt, "Check updatedAt");
+	}
+
+	@Test
+	public void getFieldWithException_invalid()
+	{
+		assertThrows(ObjectNotFoundException.class, () -> dao.getFieldWithException("INVALID"));
 	}
 
 	@Test
@@ -573,6 +629,96 @@ public class PeopleDAOTest
 		check(VALUE, record);
 	}
 
+	@Test
+	public void modify_field()
+	{
+		count(new PeopleFilter().withVisibilityHealthWorkerStatusId(Visibility.FRIENDS.id), 1L);
+		count(new PeopleFilter().withVisibilityConditions(Visibility.FRIENDS.id), 1L);
+		count(new PeopleFilter().withVisibilityExposures(Visibility.FRIENDS.id), 1L);
+		count(new PeopleFilter().withVisibilitySymptoms(Visibility.FRIENDS.id), 1L);
+		count(new PeopleFilter().withVisibilityHealthWorkerStatusId(Visibility.ME.id), 0L);
+		count(new PeopleFilter().withVisibilityConditions(Visibility.ALL.id), 0L);
+		count(new PeopleFilter().withVisibilityExposures(Visibility.ME.id), 0L);
+		count(new PeopleFilter().withVisibilitySymptoms(Visibility.ALL.id), 0L);
+
+		var v = dao.update(new PeopleFieldValue(VALUE.id, Visibility.ME.id, Visibility.ALL.id, Visibility.ME.id, Visibility.ALL.id));
+		assertThat(v.updatedAt).as("Check updatedAt").isAfter(FIELD.updatedAt).isCloseTo(new Date(), 500L);
+	}
+
+	@Test
+	public void modify_field_count()
+	{
+		count(new PeopleFilter().withVisibilityHealthWorkerStatusId(Visibility.FRIENDS.id), 0L);
+		count(new PeopleFilter().withVisibilityConditions(Visibility.FRIENDS.id), 0L);
+		count(new PeopleFilter().withVisibilityExposures(Visibility.FRIENDS.id), 0L);
+		count(new PeopleFilter().withVisibilitySymptoms(Visibility.FRIENDS.id), 0L);
+		count(new PeopleFilter().withVisibilityHealthWorkerStatusId(Visibility.ME.id), 1L);
+		count(new PeopleFilter().withVisibilityConditions(Visibility.ALL.id), 1L);
+		count(new PeopleFilter().withVisibilityExposures(Visibility.ME.id), 1L);
+		count(new PeopleFilter().withVisibilitySymptoms(Visibility.ALL.id), 1L);
+	}
+
+	@Test
+	public void modify_field_get()
+	{
+		var v = dao.getFieldWithException(VALUE.id);
+		Assertions.assertNotNull(v, "Exists");
+		Assertions.assertEquals(VALUE.id, v.id, "Check id");
+		Assertions.assertEquals(VALUE.name, v.name, "Check name");
+		Assertions.assertEquals(Visibility.ME.id, v.visibilityHealthWorkerStatusId, "Check visibilityHealthWorkerStatusId");
+		Assertions.assertEquals(Visibility.ME, v.visibilityHealthWorkerStatus, "Check visibilityHealthWorkerStatus");
+		Assertions.assertEquals(Visibility.ALL.id, v.visibilityConditions, "Check visibilityConditions");
+		Assertions.assertEquals(Visibility.ALL, v.visibilityCondition, "Check visibilityCondition");
+		Assertions.assertEquals(Visibility.ME.id, v.visibilityExposures, "Check visibilityExposures");
+		Assertions.assertEquals(Visibility.ME, v.visibilityExposure, "Check visibilityExposure");
+		Assertions.assertEquals(Visibility.ALL.id, v.visibilitySymptoms, "Check visibilitySymptoms");
+		Assertions.assertEquals(Visibility.ALL, v.visibilitySymptom, "Check visibilitySymptom");
+		assertThat(v.updatedAt).as("Check updatedAt").isAfter(VALUE.updatedAt);
+
+		FIELD = v;
+	}
+
+	public static Stream<Arguments> modify_field_errors()
+	{
+		return Stream.of(
+				arguments("", Visibility.ME.id, Visibility.ME.id, Visibility.ME.id, Visibility.ME.id, "ID is not set."),
+				arguments(null, Visibility.ME.id, Visibility.ME.id, Visibility.ME.id, Visibility.ME.id, "ID is not set."),
+				arguments(VALUE.id, "", Visibility.ME.id, Visibility.ME.id, Visibility.ME.id, "Visibility Health Worker Status is not set."),
+				arguments(VALUE.id, null, Visibility.ME.id, Visibility.ME.id, Visibility.ME.id, "Visibility Health Worker Status is not set."),
+				arguments(VALUE.id, "#", Visibility.ME.id, Visibility.ME.id, Visibility.ME.id, "'#' is not a valid Visibility Health Worker Status."),
+				arguments(VALUE.id, Visibility.ME.id, "", Visibility.ME.id, Visibility.ME.id, "Visibility Conditions is not set."),
+				arguments(VALUE.id, Visibility.ME.id, null, Visibility.ME.id, Visibility.ME.id, "Visibility Conditions is not set."),
+				arguments(VALUE.id, Visibility.ME.id, "#", Visibility.ME.id, Visibility.ME.id, "'#' is not a valid Visibility Conditions."),
+				arguments(VALUE.id, Visibility.ME.id, Visibility.ME.id, "", Visibility.ME.id, "Visibility Exposures is not set."),
+				arguments(VALUE.id, Visibility.ME.id, Visibility.ME.id, null, Visibility.ME.id, "Visibility Exposures is not set."),
+				arguments(VALUE.id, Visibility.ME.id, Visibility.ME.id, "#", Visibility.ME.id, "'#' is not a valid Visibility Exposures."),
+				arguments(VALUE.id, Visibility.ME.id, Visibility.ME.id, Visibility.ME.id, "", "Visibility Symptoms is not set."),
+				arguments(VALUE.id, Visibility.ME.id, Visibility.ME.id, Visibility.ME.id, null, "Visibility Symptoms is not set."),
+				arguments(VALUE.id, Visibility.ME.id, Visibility.ME.id, Visibility.ME.id, "#", "'#' is not a valid Visibility Symptoms."));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_field_errors(final String id,
+		final String visibilityHealthWorkerStatusId,
+		final String visibilityConditions,
+		final String visibilityExposures,
+		final String visibilitySymptoms,
+		final String message)
+	{
+		assertThat(assertThrows(ValidationException.class,
+			() -> dao.update(new PeopleFieldValue(id, visibilityHealthWorkerStatusId, visibilityConditions, visibilityExposures, visibilitySymptoms))))
+				.hasMessage(message);
+	}
+
+	@Test
+	public void modify_field_not_found()
+	{
+		assertThat(assertThrows(ObjectNotFoundException.class,
+			() -> dao.update(new PeopleFieldValue("INVALID", Visibility.ME.id, Visibility.ALL.id, Visibility.ME.id, Visibility.ALL.id))))
+				.hasMessage("The People Field 'INVALID' is invalid.");
+	}
+
 	public static Stream<Arguments> search()
 	{
 		var hourAgo = hourAgo();
@@ -643,6 +789,10 @@ public class PeopleDAOTest
 			arguments(new PeopleFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 1L),
 			arguments(new PeopleFilter(1, 20).withHasTakenTest(false), 1L),
 			arguments(new PeopleFilter(1, 20).withHasPositiveTest(false), 1L),
+			arguments(new PeopleFilter(1, 20).withVisibilityHealthWorkerStatusId(Visibility.ME.id), 1L),
+			arguments(new PeopleFilter(1, 20).withVisibilityConditions(Visibility.ALL.id), 1L),
+			arguments(new PeopleFilter(1, 20).withVisibilityExposures(Visibility.ME.id), 1L),
+			arguments(new PeopleFilter(1, 20).withVisibilitySymptoms(Visibility.ALL.id), 1L),
 
 			// Negative tests
 			arguments(new PeopleFilter(1, 20).withId("invalid"), 0L),
@@ -707,7 +857,15 @@ public class PeopleDAOTest
 			arguments(new PeopleFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
 			arguments(new PeopleFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L),
 			arguments(new PeopleFilter(1, 20).withHasTakenTest(true), 0L),
-			arguments(new PeopleFilter(1, 20).withHasPositiveTest(true), 0L));
+			arguments(new PeopleFilter(1, 20).withHasPositiveTest(true), 0L),
+			arguments(new PeopleFilter(1, 20).withVisibilityHealthWorkerStatusId(Visibility.ALL.id), 0L),
+			arguments(new PeopleFilter(1, 20).withVisibilityHealthWorkerStatusId(Visibility.FRIENDS.id), 0L),
+			arguments(new PeopleFilter(1, 20).withVisibilityConditions(Visibility.FRIENDS.id), 0L),
+			arguments(new PeopleFilter(1, 20).withVisibilityConditions(Visibility.ME.id), 0L),
+			arguments(new PeopleFilter(1, 20).withVisibilityExposures(Visibility.ALL.id), 0L),
+			arguments(new PeopleFilter(1, 20).withVisibilityExposures(Visibility.FRIENDS.id), 0L),
+			arguments(new PeopleFilter(1, 20).withVisibilitySymptoms(Visibility.ME.id), 0L),
+			arguments(new PeopleFilter(1, 20).withVisibilitySymptoms(Visibility.FRIENDS.id), 0L));
 	}
 
 	@ParameterizedTest

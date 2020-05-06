@@ -164,6 +164,11 @@ public class People implements Serializable
 	public Date updatedAt;
 	public void setUpdatedAt(final Date newValue) { updatedAt = newValue; }
 
+	@OneToOne(cascade={CascadeType.REMOVE}, fetch=FetchType.LAZY, mappedBy="person")
+	public PeopleField getField() { return field; }
+	public PeopleField field;
+	public void setField(final PeopleField newValue) { field = newValue; }
+
 	@OneToMany(cascade={CascadeType.REMOVE}, fetch=FetchType.LAZY, mappedBy="person")
 	public List<Conditions> getConditions() { return conditions; }
 	public List<Conditions> conditions;

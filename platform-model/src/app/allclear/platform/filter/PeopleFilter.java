@@ -91,6 +91,10 @@ public class PeopleFilter extends QueryFilter
 	public Boolean hasFacilities = null;
 	public List<Long> includeFacilities = null;
 	public List<Long> excludeFacilities = null;
+	public String visibilityHealthWorkerStatusId = null;
+	public String visibilityConditions = null;
+	public String visibilityExposures = null;
+	public String visibilitySymptoms = null;
 
 	// Mutators
 	public PeopleFilter withId(final String newValue) { id = newValue; return this; }
@@ -169,6 +173,10 @@ public class PeopleFilter extends QueryFilter
 	public PeopleFilter withIncludeFacilities(final Long... newValues) { return withIncludeFacilities(Arrays.asList(newValues)); }
 	public PeopleFilter withExcludeFacilities(final List<Long> newValues) { excludeFacilities = newValues; return this; }
 	public PeopleFilter withExcludeFacilities(final Long... newValues) { return withExcludeFacilities(Arrays.asList(newValues)); }
+	public PeopleFilter withVisibilityHealthWorkerStatusId(final String newValue) { visibilityHealthWorkerStatusId = newValue; return this; }
+	public PeopleFilter withVisibilityConditions(final String newValue) { visibilityConditions = newValue; return this; }
+	public PeopleFilter withVisibilityExposures(final String newValue) { visibilityExposures = newValue; return this; }
+	public PeopleFilter withVisibilitySymptoms(final String newValue) { visibilitySymptoms = newValue; return this; }
 
 	/**************************************************************************
 	*
@@ -348,6 +356,11 @@ public class PeopleFilter extends QueryFilter
 		inviteeId = StringUtils.trimToNull(inviteeId);
 		friendshipId = StringUtils.trimToNull(friendshipId);
 
+		visibilityHealthWorkerStatusId = StringUtils.trimToNull(visibilityHealthWorkerStatusId);
+		visibilityConditions = StringUtils.trimToNull(visibilityConditions);
+		visibilityExposures = StringUtils.trimToNull(visibilityExposures);
+		visibilitySymptoms = StringUtils.trimToNull(visibilitySymptoms);
+
 		return this;
 	}
 
@@ -428,6 +441,10 @@ public class PeopleFilter extends QueryFilter
 			.append(", hasFacilities: ").append(hasFacilities)
 			.append(", includeFacilities: ").append(includeFacilities)
 			.append(", excludeFacilities: ").append(excludeFacilities)
+			.append(", visibilityHealthWorkerStatusId: ").append(visibilityHealthWorkerStatusId)
+			.append(", visibilityConditions: ").append(visibilityConditions)
+			.append(", visibilityExposures: ").append(visibilityExposures)
+			.append(", visibilitySymptoms: ").append(visibilitySymptoms)
 			.append(" }").toString();
 	}
 }

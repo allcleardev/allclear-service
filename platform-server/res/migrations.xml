@@ -458,4 +458,32 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.1.36_ALLCLEAR-426" author="smalleyd">
+		<createTable tableName="people_field" remarks="Represents visibility to the fields of the people profile.">
+			<column name="id" type="VARCHAR(10)" remarks="Refers to a person.">
+				<constraints nullable="false" primaryKey="true" primaryKeyName="pk_people_field" referencedTableName="people" referencedColumnNames="id" foreignKeyName="fk_people_field_1" />
+			</column>
+			<column name="visibility_health_worker_status_id" type="CHAR(1)" defaultValue="f" remarks="Represents the visibility of a person's health worker status.">
+				<constraints nullable="false" />
+			</column>
+			<column name="visibility_conditions" type="CHAR(1)" defaultValue="f" remarks="Represents the visibility of a person's conditions.">
+				<constraints nullable="false" />
+			</column>
+			<column name="visibility_exposures" type="CHAR(1)" defaultValue="f" remarks="Represents the visibility of a person's exposures.">
+				<constraints nullable="false" />
+			</column>
+			<column name="visibility_symptoms" type="CHAR(1)" defaultValue="f" remarks="Represents the visibility of a person's symptoms.">
+				<constraints nullable="false" />
+			</column>
+			<column name="updated_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was last modified.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<sql><![CDATA[INSERT INTO people_field (id, updated_at) SELECT id, created_at FROM people]]></sql>
+
+		<rollback>
+			<dropTable tableName="people_field" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

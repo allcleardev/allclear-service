@@ -38,8 +38,8 @@ import app.allclear.platform.dao.*;
 import app.allclear.platform.entity.Friendship;
 import app.allclear.platform.filter.*;
 import app.allclear.platform.model.*;
+import app.allclear.platform.type.Visibility;
 import app.allclear.platform.value.*;
-import app.allclear.platform.value.SessionValue;
 import app.allclear.twilio.client.TwilioClient;
 import app.allclear.twilio.model.*;
 
@@ -329,6 +329,60 @@ public class PeopleResourceTest
 	}
 
 	@Test
+	public void get_field_as_admin()
+	{
+		sessionDao.current(ADMIN);
+
+		get_field(request(VALUE.id + "/fields").get());
+	}
+
+	@Test
+	public void get_field_as_admin_no_auth()
+	{
+		sessionDao.current(ADMIN);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request("fields").get().getStatus());
+	}
+
+	@Test
+	public void get_field_as_editor()
+	{
+		sessionDao.current(EDITOR);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request("fields").get().getStatus());
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request(VALUE.id + "/fields").get().getStatus());
+	}
+
+	@Test
+	public void get_field_as_person()
+	{
+		sessionDao.current(SESSION);
+
+		get_field(request("fields").get());
+	}
+
+	@Test
+	public void get_field_as_person_no_auth()
+	{
+		sessionDao.current(SESSION);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request(VALUE.id + "/fields").get().getStatus());
+	}
+
+	private void get_field(final Response response)
+	{
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var o = response.readEntity(PeopleFieldValue.class);
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals(Visibility.FRIENDS.id, o.visibilityHealthWorkerStatusId, "Check visibilityHealthWorkerStatusId");
+		Assertions.assertEquals(Visibility.FRIENDS.id, o.visibilityConditions, "Check visibilityConditions");
+		Assertions.assertEquals(Visibility.FRIENDS.id, o.visibilityExposures, "Check visibilityExposures");
+		Assertions.assertEquals(Visibility.FRIENDS.id, o.visibilitySymptoms, "Check visibilitySymptoms");
+		Assertions.assertEquals(VALUE.createdAt, o.updatedAt, "Check updatedAt");
+	}
+
+	@Test
 	public void modify()
 	{
 		count(new PeopleFilter().withHasEmail(false), 1L);
@@ -367,11 +421,98 @@ public class PeopleResourceTest
 	@Test
 	public void modify_get()
 	{
+		sessionDao.current(ADMIN);
+
 		var value = get(VALUE.id).readEntity(PeopleValue.class);
 		Assertions.assertNotNull(value, "Exists");
 		Assertions.assertEquals(value.email, "min@allclear.app", "Check email");
 		assertThat(value.updatedAt).as("Check updatedAt").isAfter(value.createdAt);
 		check(VALUE, value);
+	}
+
+	@Test
+	public void modify_field_00()
+	{
+		count(new PeopleFilter().withVisibilityHealthWorkerStatusId(Visibility.FRIENDS.id), 1L);
+		count(new PeopleFilter().withVisibilityConditions(Visibility.FRIENDS.id), 1L);
+		count(new PeopleFilter().withVisibilityExposures(Visibility.FRIENDS.id), 1L);
+		count(new PeopleFilter().withVisibilitySymptoms(Visibility.FRIENDS.id), 1L);
+		count(new PeopleFilter().withVisibilityHealthWorkerStatusId(Visibility.ALL.id), 0L);
+		count(new PeopleFilter().withVisibilityConditions(Visibility.ME.id), 0L);
+		count(new PeopleFilter().withVisibilityExposures(Visibility.ALL.id), 0L);
+		count(new PeopleFilter().withVisibilitySymptoms(Visibility.ME.id), 0L);
+
+		sessionDao.current(ADMIN);
+		var response = request("fields")
+			.put(Entity.json(new PeopleFieldValue(VALUE.id, Visibility.ALL.id, Visibility.ME.id, Visibility.ALL.id, Visibility.ME.id)));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var v = response.readEntity(PeopleFieldValue.class);
+		Assertions.assertNotNull(v, "Exists");
+		assertThat(v.updatedAt).as("Check updatedAt").isAfter(VALUE.createdAt);
+	}
+
+	@Test
+	public void modify_field_00_count()
+	{
+		count(new PeopleFilter().withVisibilityHealthWorkerStatusId(Visibility.FRIENDS.id), 0L);
+		count(new PeopleFilter().withVisibilityConditions(Visibility.FRIENDS.id), 0L);
+		count(new PeopleFilter().withVisibilityExposures(Visibility.FRIENDS.id), 0L);
+		count(new PeopleFilter().withVisibilitySymptoms(Visibility.FRIENDS.id), 0L);
+		count(new PeopleFilter().withVisibilityHealthWorkerStatusId(Visibility.ALL.id), 1L);
+		count(new PeopleFilter().withVisibilityConditions(Visibility.ME.id), 1L);
+		count(new PeopleFilter().withVisibilityExposures(Visibility.ALL.id), 1L);
+		count(new PeopleFilter().withVisibilitySymptoms(Visibility.ME.id), 1L);
+	}
+
+	@Test
+	public void modify_field_01()
+	{
+		count(new PeopleFilter().withVisibilityHealthWorkerStatusId(Visibility.ALL.id), 1L);
+		count(new PeopleFilter().withVisibilityConditions(Visibility.ME.id), 1L);
+		count(new PeopleFilter().withVisibilityExposures(Visibility.ALL.id), 1L);
+		count(new PeopleFilter().withVisibilitySymptoms(Visibility.ME.id), 1L);
+		count(new PeopleFilter().withVisibilityHealthWorkerStatusId(Visibility.ME.id), 0L);
+		count(new PeopleFilter().withVisibilityConditions(Visibility.ALL.id), 0L);
+		count(new PeopleFilter().withVisibilityExposures(Visibility.ME.id), 0L);
+		count(new PeopleFilter().withVisibilitySymptoms(Visibility.ALL.id), 0L);
+
+		sessionDao.current(SESSION);
+		var response = request("fields")
+			.put(Entity.json(new PeopleFieldValue("INVALID", Visibility.ME.id, Visibility.ALL.id, Visibility.ME.id, Visibility.ALL.id)));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var v = response.readEntity(PeopleFieldValue.class);
+		Assertions.assertNotNull(v, "Exists");
+		assertThat(v.updatedAt).as("Check updatedAt").isAfter(VALUE.createdAt);
+	}
+
+	@Test
+	public void modify_field_01_count()
+	{
+		count(new PeopleFilter().withVisibilityHealthWorkerStatusId(Visibility.ALL.id), 0L);
+		count(new PeopleFilter().withVisibilityConditions(Visibility.ME.id), 0L);
+		count(new PeopleFilter().withVisibilityExposures(Visibility.ALL.id), 0L);
+		count(new PeopleFilter().withVisibilitySymptoms(Visibility.ME.id), 0L);
+		count(new PeopleFilter().withVisibilityHealthWorkerStatusId(Visibility.ME.id), 1L);
+		count(new PeopleFilter().withVisibilityConditions(Visibility.ALL.id), 1L);
+		count(new PeopleFilter().withVisibilityExposures(Visibility.ME.id), 1L);
+		count(new PeopleFilter().withVisibilitySymptoms(Visibility.ALL.id), 1L);
+	}
+
+	@Test
+	public void modify_field_02_no_auth()
+	{
+		sessionDao.current(EDITOR);
+		var response = request("fields")
+			.put(Entity.json(new PeopleFieldValue(VALUE.id, Visibility.ME.id, Visibility.ALL.id, Visibility.ME.id, Visibility.ALL.id)));
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, response.getStatus(), "Status");
+	}
+
+	@Test
+	public void modify_field_02_no_auth_count()
+	{
+		modify_field_01_count();
 	}
 
 	@Test
@@ -434,6 +575,10 @@ public class PeopleResourceTest
 			arguments(new PeopleFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 1L),
 			arguments(new PeopleFilter(1, 20).withHasTakenTest(false), 1L),
 			arguments(new PeopleFilter(1, 20).withHasPositiveTest(false), 1L),
+			arguments(new PeopleFilter(1, 20).withVisibilityHealthWorkerStatusId(Visibility.ME.id), 1L),
+			arguments(new PeopleFilter(1, 20).withVisibilityConditions(Visibility.ALL.id), 1L),
+			arguments(new PeopleFilter(1, 20).withVisibilityExposures(Visibility.ME.id), 1L),
+			arguments(new PeopleFilter(1, 20).withVisibilitySymptoms(Visibility.ALL.id), 1L),
 
 			// Negative tests
 			arguments(new PeopleFilter(1, 20).withId("invalid"), 0L),
@@ -479,7 +624,15 @@ public class PeopleResourceTest
 			arguments(new PeopleFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
 			arguments(new PeopleFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L),
 			arguments(new PeopleFilter(1, 20).withHasTakenTest(true), 0L),
-			arguments(new PeopleFilter(1, 20).withHasPositiveTest(true), 0L));
+			arguments(new PeopleFilter(1, 20).withHasPositiveTest(true), 0L),
+			arguments(new PeopleFilter(1, 20).withVisibilityHealthWorkerStatusId(Visibility.ALL.id), 0L),
+			arguments(new PeopleFilter(1, 20).withVisibilityHealthWorkerStatusId(Visibility.FRIENDS.id), 0L),
+			arguments(new PeopleFilter(1, 20).withVisibilityConditions(Visibility.FRIENDS.id), 0L),
+			arguments(new PeopleFilter(1, 20).withVisibilityConditions(Visibility.ME.id), 0L),
+			arguments(new PeopleFilter(1, 20).withVisibilityExposures(Visibility.ALL.id), 0L),
+			arguments(new PeopleFilter(1, 20).withVisibilityExposures(Visibility.FRIENDS.id), 0L),
+			arguments(new PeopleFilter(1, 20).withVisibilitySymptoms(Visibility.ME.id), 0L),
+			arguments(new PeopleFilter(1, 20).withVisibilitySymptoms(Visibility.FRIENDS.id), 0L));
 	}
 
 	@ParameterizedTest

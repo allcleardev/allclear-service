@@ -21,7 +21,7 @@ import app.allclear.platform.entity.*;
 import app.allclear.platform.filter.PeopleFilter;
 import app.allclear.platform.model.PeopleFindRequest;
 import app.allclear.platform.type.*;
-import app.allclear.platform.value.PeopleValue;
+import app.allclear.platform.value.*;
 
 /**********************************************************************************
 *
@@ -98,6 +98,7 @@ public class PeopleDAO extends AbstractDAO<People>
 
 		// Save children.
 		var s = currentSession();
+		s.persist(new PeopleField(record, value.createdAt));	// Create the default Field access record when added.
 		add(s, value.conditions, v -> new Conditions(record, v));
 		add(s, value.exposures, v -> new Exposures(record, v));
 		add(s, value.symptoms, v -> new Symptoms(record, v));
@@ -242,6 +243,28 @@ public class PeopleDAO extends AbstractDAO<People>
 				s.delete(e);
 			})
 			.count());
+	}
+
+	/** Updates the specified user's field access settings.
+	 * 
+	 * @param value
+	 * @return the supplied value.
+	 * @throws ValidationException
+	 */
+	public PeopleFieldValue update(final PeopleFieldValue value) throws ObjectNotFoundException, ValidationException
+	{
+		value.clean();
+		var validator = new Validator();
+
+		// Throw exception after field existence checks and before FK checks.
+		validator.ensureExistsAndLength("id", "ID", value.id, PeopleFieldValue.MAX_LEN_ID)
+			.ensureExistsAndContains("visibilityHealthWorkerStatusId", "Visibility Health Worker Status", value.visibilityHealthWorkerStatusId, Visibility.VALUES)
+			.ensureExistsAndContains("visibilityConditions", "Visibility Conditions", value.visibilityConditions, Visibility.VALUES)
+			.ensureExistsAndContains("visibilityExposures", "Visibility Exposures", value.visibilityExposures, Visibility.VALUES)
+			.ensureExistsAndContains("visibilitySymptoms", "Visibility Symptoms", value.visibilitySymptoms, Visibility.VALUES)
+			.check();
+
+		return findFieldWithException(value.id).update(value);
 	}
 
 	/** Based on the phone number, the Person is retrieved and marked authenticated.
@@ -444,6 +467,15 @@ public class PeopleDAO extends AbstractDAO<People>
 
 	List<People> findActiveByIdOrName(final String name) { return namedQuery("findActivePeopleByIdOrName").setParameter("name", name + "%").list(); }
 
+	PeopleField findField(final String id) { return currentSession().get(PeopleField.class, id); }
+	PeopleField findFieldWithException(final String id) throws ObjectNotFoundException
+	{
+		var o = findField(id);
+		if (null != o) return o;
+
+		throw new ObjectNotFoundException("The People Field '" + id + "' is invalid.");
+	}
+
 	/** Checks for the existence of an account. Used to ensure account validity before attempting to authenticate.
 	 *  Allow for authentication of inactive accounts which can be used to reactivate an account.
 	 *
@@ -507,6 +539,17 @@ public class PeopleDAO extends AbstractDAO<People>
 		if (null == o) throw new ObjectNotFoundException("Could not find friend '" + friendId + "'.");
 
 		return o.toValueX();
+	}
+
+	/** Gets a single Person Field Access value for the specified Person.
+	 * 
+	 * @param id
+	 * @return never NULL.
+	 * @throws ObjectNotFoundException
+	 */
+	public PeopleFieldValue getFieldWithException(final String id) throws ObjectNotFoundException
+	{
+		return findFieldWithException(id).toValue();
 	}
 
 	/** Gets a list of People IDs that are active, alertable, and within a specific timezone.
@@ -651,6 +694,10 @@ public class PeopleDAO extends AbstractDAO<People>
 			.addExists("SELECT 1 FROM Tests t WHERE t.personId = o.id AND t.positive = TRUE", filter.hasPositiveTest)
 			.addExists("SELECT 1 FROM PeopleFacility c WHERE c.personId = o.id", filter.hasFacilities)
 			.addIn("includeFacilities", "EXISTS (SELECT 1 FROM PeopleFacility c WHERE c.personId = o.id AND c.facilityId IN {})", filter.includeFacilities)
-			.addIn("excludeFacilities", "NOT EXISTS (SELECT 1 FROM PeopleFacility c WHERE c.personId = o.id AND c.facilityId IN {})", filter.excludeFacilities);
+			.addIn("excludeFacilities", "NOT EXISTS (SELECT 1 FROM PeopleFacility c WHERE c.personId = o.id AND c.facilityId IN {})", filter.excludeFacilities)
+			.addContains("visibilityHealthWorkerStatusId", "fa.visibilityHealthWorkerStatusId LIKE :visibilityHealthWorkerStatusId", filter.visibilityHealthWorkerStatusId, "INNER JOIN o.field fa")
+			.addContains("visibilityConditions", "fa.visibilityConditions LIKE :visibilityConditions", filter.visibilityConditions, "INNER JOIN o.field fa")
+			.addContains("visibilityExposures", "fa.visibilityExposures LIKE :visibilityExposures", filter.visibilityExposures, "INNER JOIN o.field fa")
+			.addContains("visibilitySymptoms", "fa.visibilitySymptoms LIKE :visibilitySymptoms", filter.visibilitySymptoms, "INNER JOIN o.field fa");
 	}
 }

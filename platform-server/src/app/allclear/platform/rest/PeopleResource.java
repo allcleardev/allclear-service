@@ -26,8 +26,7 @@ import app.allclear.platform.dao.*;
 import app.allclear.platform.entity.Named;
 import app.allclear.platform.filter.PeopleFilter;
 import app.allclear.platform.model.*;
-import app.allclear.platform.value.PeopleValue;
-import app.allclear.platform.value.SessionValue;
+import app.allclear.platform.value.*;
 
 /**********************************************************************************
 *
@@ -85,6 +84,24 @@ public class PeopleResource
 		if (o.person()) return List.of(dao.getByIdWithException(o.person.id));
 
 		return dao.getActiveByIdOrName(name);
+	}
+
+	@GET
+	@Path("/{id}/fields") @Timed @UnitOfWork(readOnly=true, transactional=false)
+	@ApiOperation(value="getField", notes="Gets a single Person Field Access by its primary key.", response=PeopleFieldValue.class)
+	public PeopleFieldValue getField(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@PathParam("id") final String id) throws ObjectNotFoundException
+	{
+		sessionDao.checkAdmin();	// Only admins can see other application user's field access.
+		return dao.getFieldWithException(id);
+	}
+
+	@GET
+	@Path("/fields") @Timed @UnitOfWork(readOnly=true, transactional=false)
+	@ApiOperation(value="getField", notes="Gets the current user's Field Access.", response=PeopleFieldValue.class)
+	public PeopleFieldValue getField(@HeaderParam(Headers.HEADER_SESSION) final String sessionId) throws ObjectNotFoundException
+	{
+		return dao.getFieldWithException(sessionDao.checkPerson().id);
 	}
 
 	@POST
@@ -200,6 +217,18 @@ public class PeopleResource
 		}
 
 		return dao.update(value, true);
+	}
+
+	@PUT
+	@Path("/fields") @Timed @UnitOfWork
+	@ApiOperation(value="setField", notes="Updates an existing single People. Returns the supplied People value with the auto generated identifier populated.", response=PeopleValue.class)
+	public PeopleFieldValue setField(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final PeopleFieldValue value) throws ObjectNotFoundException, ValidationException
+	{
+		var o = sessionDao.checkAdminOrPerson();
+		if (o.person())	value.id = o.person.id;
+
+		return dao.update(value);
 	}
 
 	@PUT

@@ -78,4 +78,9 @@ public class TypeResource
 	@Path("/timezones") @Timed
 	@ApiOperation(value="getTimezones", notes="Gets a list of test types.", response=Timezone.class, responseContainer="List")
 	public List<Timezone> getTimezones() { return Timezone.LIST; }
+
+	@GET
+	@Path("/visibilities") @Timed
+	@ApiOperation(value="getVisibilities", notes="Gets a list of visibility options.", response=Visibility.class, responseContainer="List")
+	public List<Visibility> getVisibilities() { return Visibility.LIST; }
 }
