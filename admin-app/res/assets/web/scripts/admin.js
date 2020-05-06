@@ -28,7 +28,7 @@ AdminApp.doHeapDump = function(body) { HeapDumpHandler.init(body); }
 AdminApp.doQueueStats = function(body) { QueuesHandler.init(body); }
 
 AdminApp.onPostInit = EditorApp.onPostInit = function(c) {
-	this.loadLists([ 'conditions', 'exposures', 'facilityTypes', 'healthWorkerStatuses', 'peopleStatuses', 'sexes', 'statures', 'symptoms', 'testCriteria', 'testTypes', 'timezones' ]);
+	this.loadLists([ 'conditions', 'exposures', 'facilityTypes', 'healthWorkerStatuses', 'peopleStatuses', 'sexes', 'statures', 'symptoms', 'testCriteria', 'testTypes', 'timezones', 'visibilities' ]);
 }
 
 var UPLOAD_SOURCES_INSTRUCTIONS = 'Add comma separated text that is split by type, name, and code in that order.<br /><br />Types:<blockquote>';
@@ -308,7 +308,8 @@ var PeopleHandler = new ListTemplate({
 	               new RowAction('alert', 'Alert'),
 	               new RowAction('openFriendRequests', 'Friend Requests'),
 	               new RowAction('openInvitees', 'Invitees'),
-	               new RowAction('openFriendships', 'Friendships') ],
+	               new RowAction('openFriendships', 'Friendships'),
+	               new RowAction('openFields', 'Fields') ],
 
 	alert: function(c, e) {
 		var r = e.myRecord;
@@ -324,6 +325,7 @@ var PeopleHandler = new ListTemplate({
 			else SessionsHandler.EDITOR.doValue(data);
 		});
 	},
+	openFields: function(c, e) { this.FIELDS_.open(e.myRecord.id); },
 	openInvitees: function(c, e) { this.FRIENDS.filter({ inviteeId: e.myRecord.id }); },
 	openFriendRequests: function(c, e) { this.FRIENDS.filter({ personId: e.myRecord.id }); },
 	openFriendships: function(c, e) { PeopleHandler.filter({ friendshipId: e.myRecord.id, pageSize: 100 }); },
@@ -371,7 +373,7 @@ var PeopleHandler = new ListTemplate({
 		NAME: 'people',
 		SINGULAR: 'Person',
 		PLURAL: 'People',
-		RESOURCE: 'people',
+		RESOURCE: 'peoples',
 
 		FIELDS: [ new TextField('id', 'ID'),
 		          new EditField('name', 'Name', false, false, 64, 50, 'Starts-with search on user name'),
@@ -417,8 +419,33 @@ var PeopleHandler = new ListTemplate({
 		          new ListField('hasPositiveTest', 'Has Positive Test?', false, 'yesNoOptions', undefined, 'No Search'),
 		          new TagField('includeFacilities', 'Include Facilities', false, 'facilities'),
 		          new TagField('excludeFacilities', 'Exclude Facilities', false, 'facilities'),
+		          new ListField('visibilityHealthWorkerStatusId', 'Visibility Health Worker Status', false, 'visibilities', undefined, 'No Search'),
+		          new ListField('visibilityConditions', 'Visibility Conditions', false, 'visibilities', undefined, 'No Search'),
+		          new ListField('visibilityExposures', 'Visibility Exposures', false, 'visibilities', undefined, 'No Search'),
+		          new ListField('visibilitySymptoms', 'Visibility Symptoms', false, 'visibilities', undefined, 'No Search'),
 		          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ]
 	},
+
+	FIELDS_: new EditTemplate({
+		NAME: 'people',
+		SINGULAR: 'Person Field',
+		PLURAL: 'Person Fields',
+		RESOURCE: 'peoples/fields',
+
+		EDIT_METHOD: 'put',
+
+		open: function(id) {
+			var me = this;
+			this.get(`peoples/{id}/fields`, null, data => me.doValue(data));
+		},
+
+		FIELDS: [ new TextField('id', 'ID'),
+		          new TextField('name', 'Name'),
+		          new ListField('visibilityHealthWorkerStatusId', 'Visibility Health Worker Status', true, 'visibilities'),
+		          new ListField('visibilityConditions', 'Visibility Conditions', true, 'visibilities'),
+		          new ListField('visibilityExposures', 'Visibility Exposures', true, 'visibilities'),
+		          new ListField('visibilitySymptoms', 'Visibility Symptoms', true, 'visibilities') ]
+	}),
 
 	FRIENDS: new ListTemplate({
 		NAME: 'friend',
