@@ -70,6 +70,8 @@ public class Symptoms implements PeopleChild
 		if (null == value.name) value.name = Symptom.VALUES.get(value.id).name; 
 	}
 
+	Symptoms(final String symptomId) { this.symptomId = symptomId; }	// For tests
+
 	@Override
 	public boolean equals(final Object o)
 	{

@@ -1,14 +1,28 @@
 package app.allclear.platform.entity;
 
+import static java.util.stream.Collectors.*;
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static app.allclear.platform.type.Condition.*;
+import static app.allclear.platform.type.Exposure.*;
+import static app.allclear.platform.type.HealthWorkerStatus.*;
 import static app.allclear.platform.type.Stature.*;
+import static app.allclear.platform.type.Symptom.*;
+import static app.allclear.platform.type.Visibility.*;
 import static app.allclear.testing.TestingUtils.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
+import app.allclear.common.value.CreatedValue;
+import app.allclear.platform.type.*;
 import app.allclear.platform.value.PeopleValue;
 
 /** Unit test class that verifies the People entity.
@@ -40,11 +54,225 @@ public class PeopleTest
 	private static final Date CREATED_AT = new Date();
 	private static final Date CREATED_AT_1 = new Date(CREATED_AT.getTime() + 2000L);
 
+	private static final List<Condition> CONDITIONS = List.of(CARDIO_RESPIRATORY_DISEASE, KIDNEY_CIRRHOSIS, PREGNANT);
+	private static final List<Exposure> EXPOSURES = List.of(CLOSE_CONTACT, UNSURE);
+	private static final List<Symptom> SYMPTOMS = List.of(DRY_COUGH, MUSCLE_ACHE, RUNNY_NOSE);
+
+	private static final List<CreatedValue> CONDITIONS_ = CONDITIONS.stream().map(o -> new CreatedValue(o.id, o.name, null)).collect(toList());
+	private static final List<CreatedValue> EXPOSURES_ = EXPOSURES.stream().map(o -> new CreatedValue(o.id, o.name, null)).collect(toList());
+	private static final List<CreatedValue> SYMPTOMS_ = SYMPTOMS.stream().map(o -> new CreatedValue(o.id, o.name, null)).collect(toList());
+
 	private static People create()
 	{
 		return new People("123", "max", "888-555-1000", "max@gmail.com", "Max", "Power", DOB,
-			"1", INFLUENCER.id, "0", "3", LAT, LNG, "Omaha, NE", true, true, AUTH_AT, PHONE_VERIFIED_AT, EMAIL_VERIFIED_AT,
+			"1", INFLUENCER.id, "0", NEITHER.id, LAT, LNG, "Omaha, NE", true, true, AUTH_AT, PHONE_VERIFIED_AT, EMAIL_VERIFIED_AT,
 			ALERTED_OF, ALERTED_AT, CREATED_AT);
+	}
+
+	private static People createX()
+	{
+		var o = create();
+		o.setConditions(CONDITIONS.stream().map(t -> new Conditions(t.id)).collect(toList()));
+		o.setExposures(EXPOSURES.stream().map(t -> new Exposures(t.id)).collect(toList()));
+		o.setSymptoms(SYMPTOMS.stream().map(t -> new Symptoms(t.id)).collect(toList()));
+
+		return o;
+	}
+
+	public static Stream<Arguments> toValue()
+	{
+		return Stream.of(
+			arguments(ALL, ALL.id, true),
+			arguments(ALL, FRIENDS.id, false),
+			arguments(ALL, ME.id, false),
+			arguments(FRIENDS, ALL.id, true),
+			arguments(FRIENDS, FRIENDS.id, true),
+			arguments(FRIENDS, ME.id, false),
+			arguments(ME, ALL.id, true),
+			arguments(ME, FRIENDS.id, true),
+			arguments(ME, ME.id, true));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void toValue(final Visibility who,
+		final String visibilityId,
+		final boolean available)
+	{
+		var o = create();
+		o.setField(new PeopleField(o.id, visibilityId, null, null, null));
+
+		var v = o.toValue(who);
+		Assertions.assertEquals("123", v.id, "Check id");
+		Assertions.assertEquals("max", v.name, "Check name");
+		Assertions.assertEquals("888-555-1000", v.phone, "Check phone");
+		Assertions.assertEquals("max@gmail.com", v.email, "Check email");
+		Assertions.assertEquals("Max", v.firstName, "Check firstName");
+		Assertions.assertEquals("Power", v.lastName, "Check lastName");
+		Assertions.assertEquals(DOB, v.dob, "Check dob");
+		Assertions.assertEquals("1", v.statusId, "Check statusId");
+		Assertions.assertEquals(INFLUENCER.id, v.statureId, "Check statureId");
+		Assertions.assertEquals("0", v.sexId, "Check sexId");
+		Assertions.assertEquals(LAT, v.latitude, "Check latitude");
+		Assertions.assertEquals(LNG, v.longitude, "Check longitude");
+		Assertions.assertEquals("Omaha, NE", v.locationName, "Check locationName");
+		Assertions.assertTrue(v.alertable, "Check alertable");
+		Assertions.assertTrue(v.active, "Check active");
+		Assertions.assertEquals(AUTH_AT, v.authAt, "Check authAt");
+		Assertions.assertEquals(PHONE_VERIFIED_AT, v.phoneVerifiedAt, "Check phoneVerifiedAt");
+		Assertions.assertEquals(EMAIL_VERIFIED_AT, v.emailVerifiedAt, "Check emailVerifiedAt");
+		Assertions.assertEquals(ALERTED_OF, v.alertedOf, "Check alertedOf");
+		Assertions.assertEquals(ALERTED_AT, v.alertedAt, "Check alertedAt");
+		Assertions.assertEquals(CREATED_AT, v.createdAt, "Check createdAt");
+		Assertions.assertEquals(CREATED_AT, v.updatedAt, "Check updatedAt");
+
+		if (available)
+		{
+			Assertions.assertEquals(NEITHER.id, v.healthWorkerStatusId, "Check healthWorkerStatusId");
+			Assertions.assertEquals(NEITHER, v.healthWorkerStatus, "Check healthWorkerStatus");
+		}
+		else
+		{
+			Assertions.assertNull(v.healthWorkerStatusId, "Check healthWorkerStatusId");
+			Assertions.assertNull(v.healthWorkerStatus, "Check healthWorkerStatus");
+		}
+	}
+
+	public static Stream<Arguments> toValueX()
+	{
+		return Stream.of(
+			arguments(ALL, ALL.id, ALL.id, ALL.id, ALL.id, true, true, true, true),
+			arguments(FRIENDS, ALL.id, ALL.id, ALL.id, ALL.id, true, true, true, true),
+			arguments(ME, ALL.id, ALL.id, ALL.id, ALL.id, true, true, true, true),
+			arguments(ALL, ALL.id, FRIENDS.id, ME.id, ALL.id, true, false, false, true),
+			arguments(FRIENDS, ALL.id, FRIENDS.id, ME.id, ALL.id, true, true, false, true),
+			arguments(ME, ALL.id, FRIENDS.id, ME.id, ALL.id, true, true, true, true),
+			arguments(ALL, FRIENDS.id, FRIENDS.id, FRIENDS.id, FRIENDS.id, false, false, false, false),
+			arguments(FRIENDS, FRIENDS.id, FRIENDS.id, FRIENDS.id, FRIENDS.id, true, true, true, true),
+			arguments(ME, FRIENDS.id, FRIENDS.id, FRIENDS.id, FRIENDS.id, true, true, true, true),
+			arguments(ALL, ME.id, FRIENDS.id, FRIENDS.id, ALL.id, false, false, false, true),
+			arguments(FRIENDS, ME.id, FRIENDS.id, FRIENDS.id, ALL.id, false, true, true, true),
+			arguments(ME, ME.id, FRIENDS.id, FRIENDS.id, ALL.id, true, true, true, true),
+			arguments(ALL, ME.id, ME.id, ME.id, ME.id, false, false, false, false),
+			arguments(FRIENDS, ME.id, ME.id, ME.id, ME.id, false, false, false, false),
+			arguments(ME, ME.id, ME.id, ME.id, ME.id, true, true, true, true),
+			arguments(ALL, FRIENDS.id, ME.id, ALL.id, ME.id, false, false, true, false),
+			arguments(FRIENDS, FRIENDS.id, ME.id, ALL.id, ME.id, true, false, true, false),
+			arguments(ME, ME.id, FRIENDS.id, ME.id, ALL.id, true, true, true, true));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void toValueX(final Visibility who,
+		final String visibilityHealthWorkerStatusId,
+		final String visibilityConditions,
+		final String visibilityExposures,
+		final String visibilitySymptoms,
+		final boolean hasHealthWorkerStatus,
+		final boolean hasConditions,
+		final boolean hasExposures,
+		final boolean hasSymptoms)
+	{
+		var o = createX();
+		o.setField(new PeopleField(o.id, visibilityHealthWorkerStatusId, visibilityConditions, visibilityExposures, visibilitySymptoms));
+
+		var v = o.toValueX(who);
+		Assertions.assertEquals("123", v.id, "Check id");
+		Assertions.assertEquals("max", v.name, "Check name");
+		Assertions.assertEquals("888-555-1000", v.phone, "Check phone");
+		Assertions.assertEquals("max@gmail.com", v.email, "Check email");
+		Assertions.assertEquals("Max", v.firstName, "Check firstName");
+		Assertions.assertEquals("Power", v.lastName, "Check lastName");
+		Assertions.assertEquals(DOB, v.dob, "Check dob");
+		Assertions.assertEquals("1", v.statusId, "Check statusId");
+		Assertions.assertEquals(INFLUENCER.id, v.statureId, "Check statureId");
+		Assertions.assertEquals("0", v.sexId, "Check sexId");
+		Assertions.assertEquals(LAT, v.latitude, "Check latitude");
+		Assertions.assertEquals(LNG, v.longitude, "Check longitude");
+		Assertions.assertEquals("Omaha, NE", v.locationName, "Check locationName");
+		Assertions.assertTrue(v.alertable, "Check alertable");
+		Assertions.assertTrue(v.active, "Check active");
+		Assertions.assertEquals(AUTH_AT, v.authAt, "Check authAt");
+		Assertions.assertEquals(PHONE_VERIFIED_AT, v.phoneVerifiedAt, "Check phoneVerifiedAt");
+		Assertions.assertEquals(EMAIL_VERIFIED_AT, v.emailVerifiedAt, "Check emailVerifiedAt");
+		Assertions.assertEquals(ALERTED_OF, v.alertedOf, "Check alertedOf");
+		Assertions.assertEquals(ALERTED_AT, v.alertedAt, "Check alertedAt");
+		Assertions.assertEquals(CREATED_AT, v.createdAt, "Check createdAt");
+		Assertions.assertEquals(CREATED_AT, v.updatedAt, "Check updatedAt");
+
+		if (hasHealthWorkerStatus)
+		{
+			Assertions.assertEquals(NEITHER.id, v.healthWorkerStatusId, "Check healthWorkerStatusId");
+			Assertions.assertEquals(NEITHER, v.healthWorkerStatus, "Check healthWorkerStatus");
+		}
+		else
+		{
+			Assertions.assertNull(v.healthWorkerStatusId, "Check healthWorkerStatusId");
+			Assertions.assertNull(v.healthWorkerStatus, "Check healthWorkerStatus");
+		}
+
+		if (hasConditions)
+			Assertions.assertEquals(CONDITIONS_, v.conditions, "Check conditions");
+		else
+			Assertions.assertNull(v.conditions, "Check conditions");
+
+		if (hasExposures)
+			Assertions.assertEquals(EXPOSURES_, v.exposures, "Check exposures");
+		else
+			Assertions.assertNull(v.exposures, "Check exposures");
+
+		if (hasSymptoms)
+			Assertions.assertEquals(SYMPTOMS_, v.symptoms, "Check symptoms");
+		else
+			Assertions.assertNull(v.symptoms, "Check symptoms");
+	}
+
+	@ParameterizedTest
+	@MethodSource("toValue")
+	public void toValueX_conditions(final Visibility who,
+		final String visibilityId,
+		final boolean available)
+	{
+		var o = createX();
+		o.setField(new PeopleField(o.id, visibilityId, visibilityId, visibilityId, visibilityId));
+
+		var v = o.toValueX(who);
+		if (available)
+			Assertions.assertEquals(CONDITIONS_, v.conditions, "Check conditions");
+		else
+			Assertions.assertNull(v.conditions, "Check conditions");
+	}
+
+	@ParameterizedTest
+	@MethodSource("toValue")
+	public void toValueX_exposures(final Visibility who,
+		final String visibilityId,
+		final boolean available)
+	{
+		var o = createX();
+		o.setField(new PeopleField(o.id, visibilityId, visibilityId, visibilityId, visibilityId));
+
+		var v = o.toValueX(who);
+		if (available)
+			Assertions.assertEquals(EXPOSURES_, v.exposures, "Check exposures");
+		else
+			Assertions.assertNull(v.exposures, "Check exposures");
+	}
+
+	@ParameterizedTest
+	@MethodSource("toValue")
+	public void toValueX_symptoms(final Visibility who,
+		final String visibilityId,
+		final boolean available)
+	{
+		var o = createX();
+		o.setField(new PeopleField(o.id, visibilityId, visibilityId, visibilityId, visibilityId));
+
+		var v = o.toValueX(who);
+		if (available)
+			Assertions.assertEquals(SYMPTOMS_, v.symptoms, "Check symptoms");
+		else
+			Assertions.assertNull(v.symptoms, "Check symptoms");
 	}
 
 	@Test

@@ -101,7 +101,7 @@ public class PeopleResourceTest
 	private static final GenericType<QueryResults<PeopleValue, PeopleFilter>> TYPE_QUERY_RESULTS =
 		new GenericType<QueryResults<PeopleValue, PeopleFilter>>() {};
 	private static final GenericType<QueryResults<RegistrationValue, RegistrationFilter>> TYPE_QUERY_RESULTS_ =
-			new GenericType<QueryResults<RegistrationValue, RegistrationFilter>>() {};
+		new GenericType<QueryResults<RegistrationValue, RegistrationFilter>>() {};
 
 	@BeforeAll
 	public static void up() throws Exception

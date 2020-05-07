@@ -70,6 +70,8 @@ public class Exposures implements PeopleChild
 		if (null == value.name) value.name = Exposure.VALUES.get(value.id).name;
 	}
 
+	Exposures(final String exposureId) { this.exposureId = exposureId; }	// For tests
+
 	@Override
 	public boolean equals(final Object o)
 	{

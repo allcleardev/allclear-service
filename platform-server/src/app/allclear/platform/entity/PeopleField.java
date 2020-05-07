@@ -86,6 +86,19 @@ public class PeopleField implements Serializable
 		this.updatedAt = updatedAt;
 	}
 
+	PeopleField(final String id,	// For unit tests
+		final String visibilityHealthWorkerStatusId,
+		final String visibilityConditions,
+		final String visibilityExposures,
+		final String visibilitySymptoms)
+	{
+		this.id = id;
+		this.visibilityHealthWorkerStatusId = visibilityHealthWorkerStatusId;
+		this.visibilityConditions = visibilityConditions;
+		this.visibilityExposures = visibilityExposures;
+		this.visibilitySymptoms = visibilitySymptoms;
+	}
+
 	public PeopleFieldValue update(final PeopleFieldValue value)
 	{
 		this.visibilityHealthWorkerStatusId = value.visibilityHealthWorkerStatusId;

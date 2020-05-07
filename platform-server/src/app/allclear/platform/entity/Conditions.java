@@ -70,6 +70,8 @@ public class Conditions implements PeopleChild
 		if (null == value.name) value.name = Condition.VALUES.get(value.id).name;
 	}
 
+	Conditions(final String conditionId) { this.conditionId = conditionId; }	// For tests
+
 	@Override
 	public boolean equals(final Object o)
 	{
