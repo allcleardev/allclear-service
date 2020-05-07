@@ -278,7 +278,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		var record = findByPhone(phone);
 		if (null == record) throw new ObjectNotFoundException("Could not find the account with phone number '" + phone + "'.");
 
-		return record.auth().toValueX();	// MUST get the full profile. Needed for Facility restrictions. DLS on 4/12/2020.
+		return record.auth().toValueX(Visibility.ME);	// MUST get the full profile. Needed for Facility restrictions. DLS on 4/12/2020.
 	}
 
 	/** Validates a single People value.
@@ -512,7 +512,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		var record = get(id);
 		if (null == record) return null;
 
-		return record.toValueX();
+		return record.toValueX(Visibility.ME);
 	}
 
 	/** Gets a single People value by identifier.
@@ -523,7 +523,7 @@ public class PeopleDAO extends AbstractDAO<People>
 	 */
 	public PeopleValue getByIdWithException(final String id) throws ValidationException
 	{
-		return findWithException(id).toValueX();
+		return findWithException(id).toValueX(Visibility.ME);
 	}
 
 	/** Gets a single Friend of the specified Person.
@@ -538,7 +538,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		var o = findFriend(personId, friendId);
 		if (null == o) throw new ObjectNotFoundException("Could not find friend '" + friendId + "'.");
 
-		return o.toValueX();
+		return o.toValueX(Visibility.FRIENDS);
 	}
 
 	/** Gets a single Person Field Access value for the specified Person.
@@ -576,7 +576,7 @@ public class PeopleDAO extends AbstractDAO<People>
 	 */
 	public List<PeopleValue> getActiveByIdOrName(final String name)
 	{
-		return findActiveByIdOrName(name).stream().map(o -> o.toValue()).collect(Collectors.toList());
+		return findActiveByIdOrName(name).stream().map(o -> o.toValue(Visibility.ME)).collect(Collectors.toList());
 	}
 
 	/** Finds a list of People names by name or phone number.
@@ -609,7 +609,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		var v = new QueryResults<PeopleValue, PeopleFilter>(builder.aggregate(COUNT), filter);
 		if (v.isEmpty()) return v;
 
-		return v.withRecords(builder.orderBy(ORDER.normalize(v)).run(v).stream().map(o -> o.toValue()).collect(Collectors.toList()));
+		return v.withRecords(builder.orderBy(ORDER.normalize(v)).run(v).stream().map(o -> o.toValue(filter.who())).collect(Collectors.toList()));
 	}
 
 	/** Counts the number of People entities based on the supplied filter.

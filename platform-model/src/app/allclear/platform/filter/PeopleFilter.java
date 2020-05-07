@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import app.allclear.common.dao.QueryFilter;
 import app.allclear.platform.type.Timezone;
+import app.allclear.platform.type.Visibility;
 
 /********************************************************************************************************************
 *
@@ -177,6 +178,11 @@ public class PeopleFilter extends QueryFilter
 	public PeopleFilter withVisibilityConditions(final String newValue) { visibilityConditions = newValue; return this; }
 	public PeopleFilter withVisibilityExposures(final String newValue) { visibilityExposures = newValue; return this; }
 	public PeopleFilter withVisibilitySymptoms(final String newValue) { visibilitySymptoms = newValue; return this; }
+
+	// Internal usage
+	private Visibility who = Visibility.ME;
+	public Visibility who() { return who; }
+	public PeopleFilter who(final Visibility newValue) { who = newValue; return this; }
 
 	/**************************************************************************
 	*

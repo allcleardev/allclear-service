@@ -26,6 +26,7 @@ import app.allclear.platform.dao.*;
 import app.allclear.platform.entity.Named;
 import app.allclear.platform.filter.PeopleFilter;
 import app.allclear.platform.model.*;
+import app.allclear.platform.type.Visibility;
 import app.allclear.platform.value.*;
 
 /**********************************************************************************
@@ -328,7 +329,7 @@ public class PeopleResource
 		final PeopleFilter filter) throws ValidationException
 	{
 		var s = sessionDao.checkAdminOrPerson();
-		if (s.person()) filter.withActive(true).withFriendshipId(s.person.id);	// Non-admins can only see their friends.
+		if (s.person()) filter.who(Visibility.FRIENDS).withActive(true).withFriendshipId(s.person.id);	// Non-admins can only see their friends.
 
 		return dao.search(filter);
 	}

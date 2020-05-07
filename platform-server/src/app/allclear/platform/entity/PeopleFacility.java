@@ -9,6 +9,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 
+import app.allclear.platform.type.Visibility;
 import app.allclear.platform.value.FacilityValue;
 import app.allclear.platform.value.PeopleValue;
 
@@ -88,7 +89,7 @@ public class PeopleFacility implements Serializable
 	public int hashCode() { return Objects.hash(personId, facilityId); }
 
 	@Transient
-	public PeopleValue toPerson() { return getPerson().toValue(); }
+	public PeopleValue toPerson(final Visibility who) { return getPerson().toValue(who); }
 
 	@Transient
 	public FacilityValue toFacility() { return getFacility().toValue(); }

@@ -373,8 +373,16 @@ public class People implements Serializable
 	}
 
 	@Transient
-	public PeopleValue toValue()
+	public PeopleValue toValue(final Visibility who)
 	{
+		return toValue(who, getField());
+	}
+
+	@Transient
+	private PeopleValue toValue(final Visibility who, final PeopleField fields)
+	{
+		var available = fields.visibilityHealthWorkerStatusId().available(who);
+
 		return new PeopleValue(
 			getId(),
 			getName(),
@@ -389,8 +397,8 @@ public class People implements Serializable
 			(null != getStatureId()) ? Stature.get(getStatureId()) : null,
 			getSexId(),
 			(null != getSexId()) ? Sex.get(getSexId()) : null,
-			getHealthWorkerStatusId(),
-			HealthWorkerStatus.get(getHealthWorkerStatusId()),
+			available ? getHealthWorkerStatusId() : null,
+			available? HealthWorkerStatus.get(getHealthWorkerStatusId()) : null,
 			getLatitude(),
 			getLongitude(),
 			getLocationName(),
@@ -406,14 +414,17 @@ public class People implements Serializable
 	}
 
 	@Transient
-	public PeopleValue toValueX()
+	public PeopleValue toValueX(final Visibility who)
 	{
+		var fields = getField();
 		var facilities_ = CollectionUtils.isEmpty(getFacilities()) ? null : getFacilities().stream().map(o -> o.toValue().withFavorite(true)).collect(toList());
 
-		return toValue().withConditions(toCreatedValues(getConditions()))
-			.withExposures(toCreatedValues(getExposures()))
-			.withSymptoms(toCreatedValues(getSymptoms()))
-			.withFacilities(facilities_);
+		var v = toValue(who, fields);
+		if (fields.visibilityConditions().available(who)) v.withConditions(toCreatedValues(getConditions()));
+		if (fields.visibilityExposures().available(who)) v.withExposures(toCreatedValues(getExposures()));
+		if (fields.visibilitySymptoms().available(who)) v.withSymptoms(toCreatedValues(getSymptoms()));
+
+		return v.withFacilities(facilities_);
 	}
 
 	@Transient

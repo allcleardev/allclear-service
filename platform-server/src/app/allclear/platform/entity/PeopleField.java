@@ -42,21 +42,25 @@ public class PeopleField implements Serializable
 	public String getVisibilityHealthWorkerStatusId() { return visibilityHealthWorkerStatusId; }
 	public String visibilityHealthWorkerStatusId;
 	public void setVisibilityHealthWorkerStatusId(final String newValue) { visibilityHealthWorkerStatusId = newValue; }
+	@Transient public Visibility visibilityHealthWorkerStatusId() { return Visibility.get(visibilityHealthWorkerStatusId); }
 
 	@Column(name="visibility_conditions", columnDefinition="CHAR(1)", nullable=false)
 	public String getVisibilityConditions() { return visibilityConditions; }
 	public String visibilityConditions;
 	public void setVisibilityConditions(final String newValue) { visibilityConditions = newValue; }
+	@Transient public Visibility visibilityConditions() { return Visibility.get(visibilityConditions); }
 
 	@Column(name="visibility_exposures", columnDefinition="CHAR(1)", nullable=false)
 	public String getVisibilityExposures() { return visibilityExposures; }
 	public String visibilityExposures;
 	public void setVisibilityExposures(final String newValue) { visibilityExposures = newValue; }
+	@Transient public Visibility visibilityExposures() { return Visibility.get(visibilityExposures); }
 
 	@Column(name="visibility_symptoms", columnDefinition="CHAR(1)", nullable=false)
 	public String getVisibilitySymptoms() { return visibilitySymptoms; }
 	public String visibilitySymptoms;
 	public void setVisibilitySymptoms(final String newValue) { visibilitySymptoms = newValue; }
+	@Transient public Visibility visibilitySymptoms() { return Visibility.get(visibilitySymptoms); }
 
 	@Column(name="updated_at", columnDefinition="DATETIME", nullable=false)
 	public Date getUpdatedAt() { return updatedAt; }
