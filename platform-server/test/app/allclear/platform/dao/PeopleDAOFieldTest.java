@@ -31,7 +31,6 @@ import app.allclear.junit.hibernate.*;
 import app.allclear.platform.App;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.filter.PeopleFilter;
-import app.allclear.platform.filter.RegistrationFilter;
 import app.allclear.platform.rest.PeopleResource;
 import app.allclear.platform.type.*;
 import app.allclear.platform.value.*;
@@ -246,7 +245,6 @@ public class PeopleDAOFieldTest
 	}
 
 	private WebTarget target() { return RULE.client().target(TARGET); }
-	private Invocation.Builder request() { return request(target()); }
 	private Invocation.Builder request(final String path) { return request(target().path(path)); }
 	private Invocation.Builder request(final WebTarget target) { return target.request(UTF8MediaType.APPLICATION_JSON_TYPE); }
 }
