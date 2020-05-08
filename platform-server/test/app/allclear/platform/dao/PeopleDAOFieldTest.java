@@ -244,6 +244,59 @@ public class PeopleDAOFieldTest
 		*/
 	}
 
+	@Test
+	public void z()
+	{
+		dao.update(new PeopleFieldValue(FIRST.id, ME.id, ME.id, ME.id, ME.id));
+		dao.update(new PeopleFieldValue(SECOND.id, FRIENDS.id, FRIENDS.id, FRIENDS.id, FRIENDS.id));
+	}
+
+	public static Stream<Arguments> z_search()
+	{
+		return Stream.of(
+			arguments(ADMIN, new PeopleFilter().withHealthWorkerStatusId(FIRST.healthWorkerStatusId), 1L),
+			arguments(ADMIN, new PeopleFilter().withHealthWorkerStatusId(SECOND.healthWorkerStatusId), 1L),
+			arguments(ADMIN, new PeopleFilter().withIncludeConditions(DIABETIC.id), 1L),
+			arguments(ADMIN, new PeopleFilter().withIncludeConditions(WEAKENED_IMMUNE_SYSTEM.id), 1L),
+			arguments(ADMIN, new PeopleFilter().withExcludeConditions(DIABETIC.id), 1L),
+			arguments(ADMIN, new PeopleFilter().withExcludeConditions(WEAKENED_IMMUNE_SYSTEM.id), 1L),
+			arguments(ADMIN, new PeopleFilter().withIncludeExposures(CLOSE_CONTACT.id), 1L),
+			arguments(ADMIN, new PeopleFilter().withIncludeExposures(NO_EXPOSURE.id), 1L),
+			arguments(ADMIN, new PeopleFilter().withExcludeExposures(CLOSE_CONTACT.id), 1L),
+			arguments(ADMIN, new PeopleFilter().withExcludeExposures(NO_EXPOSURE.id), 1L),
+			arguments(ADMIN, new PeopleFilter().withIncludeSymptoms(SHORTNESS_OF_BREATH.id), 1L),
+			arguments(ADMIN, new PeopleFilter().withIncludeSymptoms(DRY_COUGH.id), 1L),
+			arguments(ADMIN, new PeopleFilter().withExcludeSymptoms(SHORTNESS_OF_BREATH.id), 1L),
+			arguments(ADMIN, new PeopleFilter().withExcludeSymptoms(DRY_COUGH.id), 1L),
+
+			arguments(FIRST_, new PeopleFilter().withHealthWorkerStatusId(SECOND.healthWorkerStatusId), 1L),
+			arguments(FIRST_, new PeopleFilter().withIncludeConditions(WEAKENED_IMMUNE_SYSTEM.id), 1L),
+			arguments(FIRST_, new PeopleFilter().withExcludeConditions(DIABETIC.id), 1L),
+			arguments(FIRST_, new PeopleFilter().withIncludeExposures(NO_EXPOSURE.id), 1L),
+			arguments(FIRST_, new PeopleFilter().withExcludeExposures(CLOSE_CONTACT.id), 1L),
+			arguments(FIRST_, new PeopleFilter().withIncludeSymptoms(DRY_COUGH.id), 1L),
+			arguments(FIRST_, new PeopleFilter().withExcludeSymptoms(SHORTNESS_OF_BREATH.id), 1L),
+
+			arguments(SECOND_, new PeopleFilter().withHealthWorkerStatusId(FIRST.healthWorkerStatusId), 0L),
+			arguments(SECOND_, new PeopleFilter().withIncludeConditions(DIABETIC.id), 0L),
+			arguments(SECOND_, new PeopleFilter().withExcludeConditions(WEAKENED_IMMUNE_SYSTEM.id), 0L),
+			arguments(SECOND_, new PeopleFilter().withIncludeExposures(CLOSE_CONTACT.id), 0L),
+			arguments(SECOND_, new PeopleFilter().withExcludeExposures(NO_EXPOSURE.id), 0L),
+			arguments(SECOND_, new PeopleFilter().withIncludeSymptoms(SHORTNESS_OF_BREATH.id), 0L),
+			arguments(SECOND_, new PeopleFilter().withExcludeSymptoms(DRY_COUGH.id), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_search(final SessionValue session, final PeopleFilter filter, long total)
+	{
+		sessionDao.current(session);
+
+		var results = request("search").post(Entity.json(filter), TYPE_QUERY_RESULTS);
+		Assertions.assertNotNull(results, "Exists");
+		Assertions.assertEquals(total, results.total, "Check total");
+	}
+
 	private WebTarget target() { return RULE.client().target(TARGET); }
 	private Invocation.Builder request(final String path) { return request(target().path(path)); }
 	private Invocation.Builder request(final WebTarget target) { return target.request(UTF8MediaType.APPLICATION_JSON_TYPE); }

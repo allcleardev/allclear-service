@@ -66,6 +66,23 @@ public class PeopleDAO extends AbstractDAO<People>
 		"createdAt", DESC,
 		"updatedAt", DESC);
 
+	private static final String WHERE_HEALTH_WORKER_STATUS = "o.healthWorkerStatusId = :healthWorkerStatusId";
+	private static final String WHERE_INCLUDE_CONDITIONS = "EXISTS (SELECT 1 FROM Conditions c WHERE c.personId = o.id AND c.conditionId IN {})";
+	private static final String WHERE_EXCLUDE_CONDITIONS = "NOT EXISTS (SELECT 1 FROM Conditions c WHERE c.personId = o.id AND c.conditionId IN {})";
+	private static final String WHERE_INCLUDE_EXPOSURES = "EXISTS (SELECT 1 FROM Exposures c WHERE c.personId = o.id AND c.exposureId IN {})";
+	private static final String WHERE_EXCLUDE_EXPOSURES = "NOT EXISTS (SELECT 1 FROM Exposures c WHERE c.personId = o.id AND c.exposureId IN {})";
+	private static final String WHERE_INCLUDE_SYMPTOMS = "EXISTS (SELECT 1 FROM Symptoms c WHERE c.personId = o.id AND c.symptomId IN {})";
+	private static final String WHERE_EXCLUDE_SYMPTOMS = "NOT EXISTS (SELECT 1 FROM Symptoms c WHERE c.personId = o.id AND c.symptomId IN {})";
+
+	private static final String NOT_ME = "<> '" + Visibility.ME.id + "'";
+	private static final String FRIEND_HEALTH_WORKER_STATUS = WHERE_HEALTH_WORKER_STATUS + " AND fa.visibilityHealthWorkerStatusId " + NOT_ME;
+	private static final String FRIEND_INCLUDE_CONDITIONS = WHERE_INCLUDE_CONDITIONS + " AND fa.visibilityConditions " + NOT_ME;
+	private static final String FRIEND_EXCLUDE_CONDITIONS = WHERE_EXCLUDE_CONDITIONS + " AND fa.visibilityConditions " + NOT_ME;
+	private static final String FRIEND_INCLUDE_EXPOSURES = WHERE_INCLUDE_EXPOSURES + " AND fa.visibilityExposures " + NOT_ME;
+	private static final String FRIEND_EXCLUDE_EXPOSURES = WHERE_EXCLUDE_EXPOSURES + " AND fa.visibilityExposures " + NOT_ME;
+	private static final String FRIEND_INCLUDE_SYMPTOMS = WHERE_INCLUDE_SYMPTOMS + " AND fa.visibilitySymptoms " + NOT_ME;
+	private static final String FRIEND_EXCLUDE_SYMPTOMS = WHERE_EXCLUDE_SYMPTOMS + " AND fa.visibilitySymptoms " + NOT_ME;
+
 	public PeopleDAO(final SessionFactory factory)
 	{
 		super(factory);
@@ -627,7 +644,27 @@ public class PeopleDAO extends AbstractDAO<People>
 	private QueryBuilder<People> createQueryBuilder(final PeopleFilter filter, final String select)
 		throws ValidationException
 	{
-		return createQueryBuilder(select)
+		var friends = Visibility.FRIENDS.equals(filter.who());
+		var whereHealthWorkerStatus = WHERE_HEALTH_WORKER_STATUS;
+		var whereIncludeConditions = WHERE_INCLUDE_CONDITIONS;
+		var whereExcludeConditions = WHERE_EXCLUDE_CONDITIONS;
+		var whereIncludeExposures = WHERE_INCLUDE_EXPOSURES;
+		var whereExcludeExposures = WHERE_EXCLUDE_EXPOSURES;
+		var whereIncludeSymptoms = WHERE_INCLUDE_SYMPTOMS;
+		var whereExcludeSymptoms = WHERE_EXCLUDE_SYMPTOMS;
+	
+		if (friends)
+		{
+			whereHealthWorkerStatus = FRIEND_HEALTH_WORKER_STATUS;
+			whereIncludeConditions = FRIEND_INCLUDE_CONDITIONS;
+			whereExcludeConditions = FRIEND_EXCLUDE_CONDITIONS;
+			whereIncludeExposures = FRIEND_INCLUDE_EXPOSURES;
+			whereExcludeExposures = FRIEND_EXCLUDE_EXPOSURES;
+			whereIncludeSymptoms = FRIEND_INCLUDE_SYMPTOMS;
+			whereExcludeSymptoms = FRIEND_EXCLUDE_SYMPTOMS;
+		}
+		
+		var o = createQueryBuilder(select)
 			.addStarts("id", "o.id LIKE :id", filter.id)
 			.addStarts("name", "o.name LIKE :name", filter.name)
 			.addContains("nameX", "o.name LIKE :nameX", filter.nameX)
@@ -648,7 +685,7 @@ public class PeopleDAO extends AbstractDAO<People>
 			.addNotNull("o.statureId", filter.hasStatureId)
 			.add("sexId", "o.sexId = :sexId", filter.sexId)
 			.addNotNull("o.sexId", filter.hasSexId)
-			.add("healthWorkerStatusId", "o.healthWorkerStatusId = :healthWorkerStatusId", filter.healthWorkerStatusId)
+			.add("healthWorkerStatusId", whereHealthWorkerStatus, filter.healthWorkerStatusId)
 			.add("latitude", "o.latitude = :latitude", filter.latitude)
 			.addNotNull("o.latitude", filter.hasLatitude)
 			.add("latitudeFrom", "o.latitude >= :latitudeFrom", filter.latitudeFrom)
@@ -684,12 +721,12 @@ public class PeopleDAO extends AbstractDAO<People>
 			.add("friendId", "iv.personId = :friendId", filter.friendId, "INNER JOIN o.invitees iv")	// Do NOT need to filter out rejected invitation as only admins can call.
 			.add("inviteeId", "fr.inviteeId = :inviteeId", filter.inviteeId, "INNER JOIN o.friends fr")
 			.add("friendshipId", "fs.friendId = :friendshipId", filter.friendshipId, "INNER JOIN o.friendships fs")
-			.addIn("includeConditions", "EXISTS (SELECT 1 FROM Conditions c WHERE c.personId = o.id AND c.conditionId IN {})", filter.includeConditions)
-			.addIn("excludeConditions", "NOT EXISTS (SELECT 1 FROM Conditions c WHERE c.personId = o.id AND c.conditionId IN {})", filter.excludeConditions)
-			.addIn("includeExposures", "EXISTS (SELECT 1 FROM Exposures c WHERE c.personId = o.id AND c.exposureId IN {})", filter.includeExposures)
-			.addIn("excludeExposures", "NOT EXISTS (SELECT 1 FROM Exposures c WHERE c.personId = o.id AND c.exposureId IN {})", filter.excludeExposures)
-			.addIn("includeSymptoms", "EXISTS (SELECT 1 FROM Symptoms c WHERE c.personId = o.id AND c.symptomId IN {})", filter.includeSymptoms)
-			.addIn("excludeSymptoms", "NOT EXISTS (SELECT 1 FROM Symptoms c WHERE c.personId = o.id AND c.symptomId IN {})", filter.excludeSymptoms)
+			.addIn("includeConditions", whereIncludeConditions, filter.includeConditions)
+			.addIn("excludeConditions", whereExcludeConditions, filter.excludeConditions)
+			.addIn("includeExposures", whereIncludeExposures, filter.includeExposures)
+			.addIn("excludeExposures", whereExcludeExposures, filter.excludeExposures)
+			.addIn("includeSymptoms", whereIncludeSymptoms, filter.includeSymptoms)
+			.addIn("excludeSymptoms", whereExcludeSymptoms, filter.excludeSymptoms)
 			.addExists("SELECT 1 FROM Tests t WHERE t.personId = o.id", filter.hasTakenTest)
 			.addExists("SELECT 1 FROM Tests t WHERE t.personId = o.id AND t.positive = TRUE", filter.hasPositiveTest)
 			.addExists("SELECT 1 FROM PeopleFacility c WHERE c.personId = o.id", filter.hasFacilities)
@@ -699,5 +736,9 @@ public class PeopleDAO extends AbstractDAO<People>
 			.addContains("visibilityConditions", "fa.visibilityConditions LIKE :visibilityConditions", filter.visibilityConditions, "INNER JOIN o.field fa")
 			.addContains("visibilityExposures", "fa.visibilityExposures LIKE :visibilityExposures", filter.visibilityExposures, "INNER JOIN o.field fa")
 			.addContains("visibilitySymptoms", "fa.visibilitySymptoms LIKE :visibilitySymptoms", filter.visibilitySymptoms, "INNER JOIN o.field fa");
+
+		if (friends || (null != select)) o.joins("INNER JOIN o.field fa");
+
+		return o;
 	}
 }
