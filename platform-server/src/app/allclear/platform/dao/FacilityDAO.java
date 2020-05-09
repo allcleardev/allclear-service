@@ -539,6 +539,8 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.add("createdAtTo", "o.created_at <= :createdAtTo", filter.createdAtTo)
 			.add("updatedAtFrom", "o.updated_at >= :updatedAtFrom", filter.updatedAtFrom)
 			.add("updatedAtTo", "o.updated_at <= :updatedAtTo", filter.updatedAtTo)
+			.addIn("includeTestTypes", "EXISTS (SELECT 1 FROM facility_test_type tt WHERE tt.facility_id = o.id AND tt.test_type_id IN {})", filter.includeTestTypes)
+			.addIn("excludeTestTypes", "NOT EXISTS (SELECT 1 FROM facility_test_type tt WHERE tt.facility_id = o.id AND tt.test_type_id IN {})", filter.excludeTestTypes)
 			.add("fromMeters", "ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:fromLongitude, :fromLatitude)) <= :fromMeters", filter.from.meters());
 
 		o.parameters.put("fromLatitude", filter.from.latitude);
