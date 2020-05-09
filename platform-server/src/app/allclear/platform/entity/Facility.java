@@ -1,16 +1,20 @@
 package app.allclear.platform.entity;
 
+import static java.util.stream.Collectors.toList;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
 
 import javax.persistence.*;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 
+import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.type.FacilityType;
 import app.allclear.platform.type.TestCriteria;
 import app.allclear.platform.value.FacilityValue;
@@ -203,6 +207,12 @@ public class Facility implements Serializable
 	public Date getUpdatedAt() { return updatedAt; }
 	public Date updatedAt;
 	public void setUpdatedAt(final Date newValue) { updatedAt = newValue; }
+
+	@OneToMany(cascade={CascadeType.REMOVE}, fetch=FetchType.LAZY, mappedBy="facility")
+	@OrderBy("testTypeId")
+	public List<FacilityTestType> getTestTypes() { return testTypes; }
+	public List<FacilityTestType> testTypes;
+	public void setTestTypes(final List<FacilityTestType> newValues) { testTypes = newValues; }
 
 	public Facility() {}
 
@@ -435,5 +445,14 @@ public class Facility implements Serializable
 			isActive(),
 			getCreatedAt(),
 			getUpdatedAt());
+	}
+
+	@Transient
+	public FacilityValue toValueX() { return toValue().withTestTypes(toCreatedValues(getTestTypes())); }
+
+	@Transient
+	public List<CreatedValue> toCreatedValues(final List<? extends FacilityChild> values)
+	{
+		return (CollectionUtils.isEmpty(values)) ? null : values.stream().map(o -> o.toValue()).collect(toList());
 	}
 }

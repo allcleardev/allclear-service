@@ -4,6 +4,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.*;
 import static app.allclear.platform.type.TestCriteria.*;
+import static app.allclear.platform.type.TestType.*;
 import static app.allclear.testing.TestingUtils.*;
 
 import java.math.BigDecimal;
@@ -112,7 +113,7 @@ public class FacilityResourceTest
 		var now = new Date();
 		var response = request()
 			.post(Entity.entity(VALUE = new FacilityValue("Julius", "56 First Street", "Louisville", "KY", bg("-35"), bg("52.607"),
-				true, false, true, false, true, false, true, false), UTF8MediaType.APPLICATION_JSON_TYPE));
+				true, false, true, false, true, false, true, false).withTestTypes(ANTIBODY, DONT_KNOW), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var value = response.readEntity(FacilityValue.class);
@@ -123,6 +124,9 @@ public class FacilityResourceTest
 		PERSON_UNRESTRICTED = sessionDao.add(peopleDao.add(new PeopleValue("secondPerson", "888-555-1001", true).withSymptoms(Symptom.FEVER)), false);
 
 		peopleDao.addFacilities(PERSON.person.id, List.of(VALUE.id));
+
+		// For later checks
+		VALUE.withTestTypes(DONT_KNOW, ANTIBODY);	// Retrieved in alphabetical order of the test type ID.
 	}
 
 	@Test
@@ -268,6 +272,7 @@ public class FacilityResourceTest
 
 		var value = response.readEntity(FacilityValue.class);
 		Assertions.assertNotNull(value, "Exists");
+		assertThat(value.testTypes).as("Check testTypes").containsExactly(DONT_KNOW.created(), ANTIBODY.created());
 		check(VALUE, value);
 	}
 
@@ -298,6 +303,7 @@ public class FacilityResourceTest
 
 		var value = response.readEntity(FacilityValue.class);
 		Assertions.assertNotNull(value, "Exists");
+		assertThat(value.testTypes).as("Check testTypes").containsExactly(DONT_KNOW.created(), ANTIBODY.created());
 		check(VALUE, value);
 	}
 
@@ -306,10 +312,18 @@ public class FacilityResourceTest
 	{
 		count(new FacilityFilter().withCity("Louisville"), 1L);
 		count(new FacilityFilter().withState("KY"), 1L);
+		count(new FacilityFilter().include(DONT_KNOW), 1L);
+		count(new FacilityFilter().include(ANTIBODY), 1L);
+		count(new FacilityFilter().include(ANTIBODY, DONT_KNOW), 1L);
+		count(new FacilityFilter().exclude(NASAL_SWAB), 1L);
 		count(new FacilityFilter().withCity("New Orleans"), 0L);
 		count(new FacilityFilter().withState("LA"), 0L);
+		count(new FacilityFilter().exclude(DONT_KNOW), 0L);
+		count(new FacilityFilter().exclude(ANTIBODY), 0L);
+		count(new FacilityFilter().exclude(ANTIBODY, DONT_KNOW), 0L);
+		count(new FacilityFilter().include(NASAL_SWAB), 0L);
 
-		var response = request().put(Entity.entity(VALUE.withCity("New Orleans").withState("LA"), UTF8MediaType.APPLICATION_JSON_TYPE));
+		var response = request().put(Entity.entity(VALUE.withCity("New Orleans").withState("LA").withTestTypes(NASAL_SWAB), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var value = response.readEntity(FacilityValue.class);
@@ -322,8 +336,16 @@ public class FacilityResourceTest
 	{
 		count(new FacilityFilter().withCity("Louisville"), 0L);
 		count(new FacilityFilter().withState("KY"), 0L);
+		count(new FacilityFilter().include(DONT_KNOW), 0L);
+		count(new FacilityFilter().include(ANTIBODY), 0L);
+		count(new FacilityFilter().include(ANTIBODY, DONT_KNOW), 0L);
+		count(new FacilityFilter().exclude(NASAL_SWAB), 0L);
 		count(new FacilityFilter().withCity("New Orleans"), 1L);
 		count(new FacilityFilter().withState("LA"), 1L);
+		count(new FacilityFilter().exclude(DONT_KNOW), 1L);
+		count(new FacilityFilter().exclude(ANTIBODY), 1L);
+		count(new FacilityFilter().exclude(ANTIBODY, DONT_KNOW), 1L);
+		count(new FacilityFilter().include(NASAL_SWAB), 1L);
 	}
 
 	@Test
@@ -333,6 +355,7 @@ public class FacilityResourceTest
 		Assertions.assertNotNull(value, "Exists");
 		Assertions.assertEquals("New Orleans", value.city, "Check city");
 		Assertions.assertEquals("LA", value.state, "Check state");
+		assertThat(value.testTypes).as("Check testTypes").containsExactly(NASAL_SWAB.created());
 		check(VALUE, value);
 	}
 
@@ -484,6 +507,10 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter(1, 20).withUpdatedAtFrom(hourAgo), 1L),
 			arguments(new FacilityFilter(1, 20).withUpdatedAtTo(hourAhead), 1L),
 			arguments(new FacilityFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 1L),
+			arguments(new FacilityFilter(1, 20).include(NASAL_SWAB), 1L),
+			arguments(new FacilityFilter(1, 20).exclude(ANTIBODY), 1L),
+			arguments(new FacilityFilter(1, 20).exclude(ANTIBODY, DONT_KNOW), 1L),
+			arguments(new FacilityFilter(1, 20).exclude(DONT_KNOW), 1L),
 
 			// Negative tests
 			arguments(new FacilityFilter(1, 20).withId(VALUE.id + 1000L), 0L),
@@ -529,7 +556,11 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
 			arguments(new FacilityFilter(1, 20).withUpdatedAtFrom(hourAhead), 0L),
 			arguments(new FacilityFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
-			arguments(new FacilityFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L));
+			arguments(new FacilityFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L),
+			arguments(new FacilityFilter(1, 20).exclude(NASAL_SWAB), 0L),
+			arguments(new FacilityFilter(1, 20).include(ANTIBODY), 0L),
+			arguments(new FacilityFilter(1, 20).include(ANTIBODY, DONT_KNOW), 0L),
+			arguments(new FacilityFilter(1, 20).include(DONT_KNOW), 0L));
 	}
 
 	@ParameterizedTest
@@ -560,6 +591,10 @@ public class FacilityResourceTest
 			}
 			Assertions.assertEquals(total, results.records.size(), assertId + "Check records.size");
 			results.records.forEach(v -> Assertions.assertFalse(v.restricted, "Check restricted: " + v.name));
+			results.records.forEach(v -> {
+				if (v.id.equals(1L)) assertThat(v.testTypes).as("Check testTypes").containsExactly(NASAL_SWAB.created());
+				else assertThat(v.testTypes).as("Check testTypes").isNull();
+			});
 		}
 
 		return results;
@@ -965,5 +1000,6 @@ public class FacilityResourceTest
 			Assertions.assertNull(value.updatedAt, assertId + "Check updatedAt");
 		else
 			assertThat(value.updatedAt).as(assertId + "Check updatedAt").isCloseTo(expected.updatedAt, 1000L);
+		Assertions.assertEquals(expected.testTypes, value.testTypes, assertId + "Check testTypes");
 	}
 }

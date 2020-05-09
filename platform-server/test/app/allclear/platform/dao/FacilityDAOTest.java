@@ -7,6 +7,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static app.allclear.testing.TestingUtils.*;
 import static app.allclear.platform.type.FacilityType.*;
 import static app.allclear.platform.type.TestCriteria.*;
+import static app.allclear.platform.type.TestType.*;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -25,6 +26,7 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import app.allclear.junit.hibernate.*;
 import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
+import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.App;
 import app.allclear.platform.entity.CountByName;
 import app.allclear.platform.entity.Facility;
@@ -257,6 +259,20 @@ public class FacilityDAOTest
 	}
 
 	@Test
+	public void add_invalidTestType()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.add(createValid().withTestTypes(List.of(new CreatedValue("$$"))), true)))
+			.hasMessage("'$$' is not a valid Test Type.");
+	}
+
+	@Test
+	public void add_missingTestType()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.add(createValid().withTestTypes(List.of(new CreatedValue(null))), true)))
+			.hasMessage("Test Type is not set.");
+	}
+
+	@Test
 	public void favorite()
 	{
 		Assertions.assertNull(VALUE.favorite);
@@ -302,6 +318,7 @@ public class FacilityDAOTest
 		var value = dao.getByIdWithException(VALUE.id);
 		Assertions.assertNotNull(value, "Exists");
 		Assertions.assertTrue(value.active, "Check active");
+		Assertions.assertNull(value.testTypes, "Check testTypes");
 		check(VALUE, value);
 	}
 
@@ -385,10 +402,14 @@ public class FacilityDAOTest
 		var v = createValid();
 		count(new FacilityFilter().withName(VALUE.name), 1L);
 		count(new FacilityFilter().withActive(VALUE.active), 1L);
+		count(new FacilityFilter().exclude(NASAL_SWAB), 1L);
+		count(new FacilityFilter().exclude(ANTIBODY), 1L);
 		count(new FacilityFilter().withName(v.name), 0L);
 		count(new FacilityFilter().withActive(v.active), 0L);
+		count(new FacilityFilter().include(NASAL_SWAB), 0L);
+		count(new FacilityFilter().include(ANTIBODY), 0L);
 
-		var value = dao.update(v.withId(VALUE.id), true);
+		var value = dao.update(v.withId(VALUE.id).withTestTypes(NASAL_SWAB), true);
 		Assertions.assertNotNull(value, "Exists");
 		check(v, value);
 
@@ -402,8 +423,12 @@ public class FacilityDAOTest
 		var v = createValid();
 		count(new FacilityFilter().withName(VALUE_1.name), 0L);
 		count(new FacilityFilter().withActive(VALUE_1.active), 0L);
+		count(new FacilityFilter().exclude(NASAL_SWAB), 0L);
+		count(new FacilityFilter().exclude(ANTIBODY), 1L);
 		count(new FacilityFilter().withName(v.name), 1L);
 		count(new FacilityFilter().withActive(v.active), 1L);
+		count(new FacilityFilter().include(NASAL_SWAB), 1L);
+		count(new FacilityFilter().include(ANTIBODY), 0L);
 	}
 
 	@Test
@@ -414,6 +439,12 @@ public class FacilityDAOTest
 		Assertions.assertEquals("Eve", record.getName(), "Check name");
 		Assertions.assertFalse(record.isActive(), "Check active");
 		check(VALUE, record);
+	}
+
+	@Test
+	public void modify_get()
+	{
+		assertThat(dao.getById(VALUE.id).testTypes).containsExactly(NASAL_SWAB.created());
 	}
 
 	@Test
@@ -492,6 +523,8 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter(1, 20).withUpdatedAtFrom(hourAgo), 1L),
 			arguments(new FacilityFilter(1, 20).withUpdatedAtTo(hourAhead), 1L),
 			arguments(new FacilityFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 1L),
+			arguments(new FacilityFilter(1, 20).include(NASAL_SWAB), 1L),
+			arguments(new FacilityFilter(1, 20).exclude(ANTIBODY), 1L),
 
 			// Negative tests
 			arguments(new FacilityFilter(1, 20).withId(VALUE.id + 1000L), 0L),
@@ -553,7 +586,9 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
 			arguments(new FacilityFilter(1, 20).withUpdatedAtFrom(hourAhead), 0L),
 			arguments(new FacilityFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
-			arguments(new FacilityFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L));
+			arguments(new FacilityFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L),
+			arguments(new FacilityFilter(1, 20).exclude(NASAL_SWAB), 0L),
+			arguments(new FacilityFilter(1, 20).include(ANTIBODY), 0L));
 	}
 
 	@ParameterizedTest
@@ -578,6 +613,7 @@ public class FacilityDAOTest
 			}
 			Assertions.assertEquals(total, results.records.size(), "Check records.size");
 			results.records.forEach(v -> Assertions.assertNull(v.restricted, "Check restricted: " + v.name));
+			results.records.forEach(v -> assertThat(v.testTypes).as("Check testTypes").containsExactly(NASAL_SWAB.created()));
 		}
 	}
 
@@ -870,12 +906,13 @@ public class FacilityDAOTest
 		count(new FacilityFilter().withId(VALUE.id), 0L);
 		count(new FacilityFilter().withName(VALUE.name), 0L);
 		count(new FacilityFilter().withActive(VALUE.active), 0L);
+		count(new FacilityFilter().include(NASAL_SWAB), 0L);
 	}
 
 	@Test
 	public void z_00_add()
 	{
-		VALUE = dao.add(createValid().withActive(true), true);
+		VALUE = dao.add(createValid().withActive(true).withTestTypes(NASAL_SWAB, ANTIBODY), true);
 		Assertions.assertNotNull(VALUE, "Exists");
 		Assertions.assertEquals(2L, VALUE.id, "Check ID");
 	}
@@ -884,13 +921,20 @@ public class FacilityDAOTest
 	public void z_00_add_check()
 	{
 		count(new FacilityFilter(), 1L);
+
+		var v = dao.getById(2L);
 		Assertions.assertNotNull(dao.getById(2L), "Exists");
+		Assertions.assertTrue(v.active, "Check active");
+		assertThat(v.testTypes).as("Check testTypes").containsExactly(ANTIBODY.created(), NASAL_SWAB.created());
+
+		v = dao.search(new FacilityFilter()).records.get(0);
+		assertThat(v.testTypes).as("Check testTypes").containsExactly(ANTIBODY.created(), NASAL_SWAB.created());
 	}
 
 	@Test
 	public void z_00_modify()
 	{
-		VALUE = dao.add(createValid().withActive(true).withId(20L), true);
+		VALUE = dao.add(createValid().withActive(true).withId(20L).nullTestTypes(), true);
 		Assertions.assertNotNull(VALUE, "Exists");
 		Assertions.assertEquals(2L, VALUE.id, "Check ID");
 	}
@@ -898,7 +942,7 @@ public class FacilityDAOTest
 	@Test
 	public void z_00_modify_check()
 	{
-		z_00_add_check();
+		z_00_add_check();	// No change
 	}
 
 	@Test
@@ -975,7 +1019,7 @@ public class FacilityDAOTest
 	public void z_10_add_as_editor()
 	{
 		VALUE = dao.add(createValid().withName("byEditor").withActive(true), false);
-		Assertions.assertNotNull(VALUE.id, "Check ID");
+		Assertions.assertEquals(5L, VALUE.id, "Check ID");
 		Assertions.assertFalse(VALUE.active, "Check active");
 	}
 
@@ -985,15 +1029,20 @@ public class FacilityDAOTest
 		var v = dao.getById(VALUE.id);
 		Assertions.assertEquals("byEditor", v.name, "Check name");
 		Assertions.assertFalse(v.active, "Check active");
+		Assertions.assertNull(v.testTypes, "Check testTypes");
+
+		v = dao.search(new FacilityFilter().withId(5L)).records.get(0);
+		Assertions.assertNull(v.testTypes, "Check testTypes");
 	}
 
 	@Test
 	public void z_10_modify_as_editor()
 	{
-		var v = dao.update(VALUE.withActive(true), false);
+		var v = dao.update(VALUE.withActive(true).withTestTypes(NASAL_SWAB), false);
 		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
 		Assertions.assertFalse(v.active, "Check active");
 		Assertions.assertFalse(VALUE.active, "Check active");
+		assertThat(v.testTypes).as("Check testTypes").containsExactly(NASAL_SWAB.created());
 	}
 
 	@Test
@@ -1002,15 +1051,20 @@ public class FacilityDAOTest
 		var v = dao.getById(VALUE.id);
 		Assertions.assertEquals("byEditor", v.name, "Check name");
 		Assertions.assertFalse(v.active, "Check active");
+		assertThat(v.testTypes).as("Check testTypes").containsExactly(NASAL_SWAB.created());
+
+		v = dao.search(new FacilityFilter().withId(5L)).records.get(0);
+		assertThat(v.testTypes).as("Check testTypes").containsExactly(NASAL_SWAB.created());
 	}
 
 	@Test
 	public void z_11_modify_as_admin()
 	{
-		var v = dao.update(VALUE.withActive(true), true);
+		var v = dao.update(VALUE.withActive(true).withTestTypes(DONT_KNOW), true);
 		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
 		Assertions.assertTrue(v.active, "Check active");
 		Assertions.assertTrue(VALUE.active, "Check active");
+		assertThat(v.testTypes).as("Check testTypes").containsExactly(DONT_KNOW.created());
 	}
 
 	@Test
@@ -1019,15 +1073,20 @@ public class FacilityDAOTest
 		var v = dao.getById(VALUE.id);
 		Assertions.assertEquals("byEditor", v.name, "Check name");
 		Assertions.assertTrue(v.active, "Check active");
+		assertThat(v.testTypes).as("Check testTypes").containsExactly(DONT_KNOW.created());
+
+		v = dao.search(new FacilityFilter().withId(5L)).records.get(0);
+		assertThat(v.testTypes).as("Check testTypes").containsExactly(DONT_KNOW.created());
 	}
 
 	@Test
 	public void z_12_modify_as_editor()
 	{
-		var v = dao.update(VALUE.withActive(false), false);
+		var v = dao.update(VALUE.withActive(false).emptyTestTypes(), false);
 		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
 		Assertions.assertTrue(v.active, "Check active");
 		Assertions.assertTrue(VALUE.active, "Check active");
+		assertThat(v.testTypes).as("Check testTypes").isEmpty();
 	}
 
 	@Test
@@ -1036,6 +1095,10 @@ public class FacilityDAOTest
 		var v = dao.getById(VALUE.id);
 		Assertions.assertEquals("byEditor", v.name, "Check name");
 		Assertions.assertTrue(v.active, "Check active");
+		Assertions.assertNull(v.testTypes, "Check testTypes");
+
+		v = dao.search(new FacilityFilter().withId(5L)).records.get(0);
+		Assertions.assertNull(v.testTypes, "Check testTypes");
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.
@@ -1126,5 +1189,6 @@ public class FacilityDAOTest
 		Assertions.assertEquals(expected.active, value.active, assertId + "Check active");
 		Assertions.assertEquals(expected.createdAt, value.createdAt, assertId + "Check createdAt");
 		Assertions.assertEquals(expected.updatedAt, value.updatedAt, assertId + "Check updatedAt");
+		Assertions.assertEquals(expected.testTypes, value.testTypes, assertId + "Check testTypes");
 	}
 }

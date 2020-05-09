@@ -1,11 +1,14 @@
 package app.allclear.platform.dao;
 
+import static java.util.stream.Collectors.*;
 import static app.allclear.common.dao.OrderByBuilder.*;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.slf4j.*;
 
@@ -14,10 +17,10 @@ import app.allclear.common.errors.*;
 import app.allclear.common.hibernate.AbstractDAO;
 import app.allclear.common.hibernate.NativeQueryBuilder;
 import app.allclear.common.time.StopWatch;
+import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.filter.FacilityFilter;
-import app.allclear.platform.type.FacilityType;
-import app.allclear.platform.type.TestCriteria;
+import app.allclear.platform.type.*;
 import app.allclear.platform.value.FacilityValue;
 import app.allclear.platform.value.PeopleValue;
 
@@ -108,14 +111,51 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		if ((null == record) && (null != value.id))
 			record = findWithException(value.id);
 
-		if (null != record) record.update(value, admin);
+		var s = currentSession();
+		if (null != record)
+		{
+			record.update(value, admin);
+
+			var rec = record;	// Needs to be effectively final to be used in lambdas below.
+			update(s, record, record.getTestTypes(), value.testTypes, v -> new FacilityTestType(rec, v), "deleteFacilityTestTypes");
+		}
 		else
 		{
 			if (!admin) value.withActive(false);	// Editors can only add inactive facilities.
 			record = persist(new Facility(value));
+
+			var rec = record;	// Needs to be effectively final to be used in lambdas below.
+			add(s, value.testTypes, v -> new FacilityTestType(rec, v));
 		}
 
 		return value.withId(record.getId());
+	}
+
+	private void add(final Session s, final List<CreatedValue> values, final Function<CreatedValue, ? extends FacilityChild> toEntity)
+	{
+		if (CollectionUtils.isEmpty(values)) return;
+		values.stream().filter(v -> null != v).forEach(v -> s.persist(toEntity.apply(v)));
+	}
+
+	private int update(final Session s,
+		final Facility record,
+		final List<? extends FacilityChild> records,
+		final List<CreatedValue> values,
+		final Function<CreatedValue, ? extends FacilityChild> toEntity,
+		final String deleteQuery)
+	{
+		if (null == values) return 0;
+		if (values.isEmpty()) return namedQueryX(deleteQuery).setParameter("facilityId", record.getId()).executeUpdate();
+
+		return (int) (values.stream()	// Add new values.
+			.filter(v -> null != v)
+			.filter(v -> !records.stream().anyMatch(o -> o.getChildId().equals(v.id)))
+			.peek(v -> s.persist(toEntity.apply(v)))
+			.count() +
+			records.stream()	// Remove missing values.
+				.filter(o -> !values.stream().anyMatch(v -> o.getChildId().equals(v.id)))
+				.peek(o -> s.delete(o))
+				.count());
 	}
 
 	/** Validates a single Facility value.
@@ -165,6 +205,10 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			validator.add("typeId", "The Type ID '%s' is invalid.", value.typeId);
 		if ((null != value.testCriteriaId) && (null == (value.testCriteria = TestCriteria.get(value.testCriteriaId))))
 			validator.add("testCriteriaId", "The Test Criteria ID '%s' is invalid.", value.testCriteriaId);
+
+		// Check children.
+		if (CollectionUtils.isNotEmpty(value.testTypes))
+			value.testTypes.stream().filter(v -> null != v).forEach(v -> validator.ensureExistsAndContains("testTypes", "Test Type", v.clean().id, TestType.VALUES));
 
 		validator.check();
 
@@ -232,7 +276,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	public FacilityValue getById(final Long id)
 	{
 		var record = get(id);
-		return (null != record) ? record.toValue() : null;
+		return (null != record) ? record.toValueX() : null;
 	}
 
 	/** Gets a single Facility value by identifier.
@@ -243,7 +287,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	 */
 	public FacilityValue getByIdWithException(final Long id) throws ObjectNotFoundException
 	{
-		return findWithException(id).toValue();
+		return findWithException(id).toValueX();
 	}
 
 	/** Gets a single Facility value by name.
@@ -257,7 +301,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		var record = find(name);
 		if ((null == record) || !record.isActive()) throw new ObjectNotFoundException("The Facility '" + name + "' does not exist.");
 
-		return record.toValue();
+		return record.toValueX();
 	}
 
 	/** Gets a list of active Facility values by wild card name search.
@@ -267,7 +311,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	 */
 	public List<FacilityValue> getActiveByName(final String name)
 	{
-		return findActiveByName(name).stream().map(o -> o.toValue()).collect(Collectors.toList());
+		return findActiveByName(name).stream().map(o -> o.toValue()).collect(toList());
 	}
 
 	/** Gets a list of active Facility values by wild card name search and distance search.
@@ -277,7 +321,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	 */
 	public List<FacilityValue> getActiveByNameAndDistance(final String name, final BigDecimal latitude, final BigDecimal longitude, final long meters)
 	{
-		return findActiveByNameAndDistance(name, latitude, longitude, meters).stream().map(o -> o.toValue()).collect(Collectors.toList());
+		return findActiveByNameAndDistance(name, latitude, longitude, meters).stream().map(o -> o.toValue()).collect(toList());
 	}
 
 	/** Gets a person's favorite facility IDs. Returns an empty list if the user is an admin.
@@ -334,10 +378,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			var records = builder.orderBy(ORDER.normalize(v)).run(v);
 			log.info("QUERIED: {}", timer.split());
 
-			var values = records.stream().map(o -> o.toValue()).collect(Collectors.toList());
-			log.info("VALUED: {}", timer.split());
-
-			return v.withRecords(values);
+			return v.withRecords(cmr(records.stream().map(o -> o.toValue()).collect(toList())));
 		}
 		else
 		{
@@ -350,10 +391,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			var records = builder.orderBy(ORDER.normalize(v)).run(v);
 			log.info("QUERIED: {}", timer.split());
 
-			var values = records.stream().map(o -> o.toValue()).collect(Collectors.toList());
-			log.info("VALUED: {}", timer.split());
-
-			return v.withRecords(values);
+			return v.withRecords(cmr(records.stream().map(o -> o.toValue()).collect(toList())));
 		}
 	}
 
@@ -433,7 +471,9 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.add("createdAtFrom", "o.createdAt >= :createdAtFrom", filter.createdAtFrom)
 			.add("createdAtTo", "o.createdAt <= :createdAtTo", filter.createdAtTo)
 			.add("updatedAtFrom", "o.updatedAt >= :updatedAtFrom", filter.updatedAtFrom)
-			.add("updatedAtTo", "o.updatedAt <= :updatedAtTo", filter.updatedAtTo);
+			.add("updatedAtTo", "o.updatedAt <= :updatedAtTo", filter.updatedAtTo)
+			.addIn("includeTestTypes", "EXISTS (SELECT 1 FROM FacilityTestType tt WHERE tt.facilityId = o.id AND tt.testTypeId IN {})", filter.includeTestTypes)
+			.addIn("excludeTestTypes", "NOT EXISTS (SELECT 1 FROM FacilityTestType tt WHERE tt.facilityId = o.id AND tt.testTypeId IN {})", filter.excludeTestTypes);
 	}
 
 	/** Helper method - creates the a native SQL query. */
@@ -505,5 +545,18 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		o.parameters.put("fromLongitude", filter.from.longitude);
 
 		return o;
+	}
+
+	private List<FacilityValue> cmr(final List<FacilityValue> values)	// Populate children entities.
+	{
+		if (values.isEmpty()) return values;
+
+		var ids = values.stream().map(v -> v.id).collect(toList());
+		var testTypes = namedQuery("findFacilityTestTypes", FacilityTestType.class).setParameterList("facilityIds", ids).stream()
+		 		.collect(groupingBy(o -> o.getFacilityId(), mapping(o -> o.toValue(), toList())));
+
+		values.forEach(v -> v.withTestTypes(testTypes.get(v.id)));
+
+		return values;
 	}
 }

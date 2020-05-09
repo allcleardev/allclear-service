@@ -3,12 +3,13 @@ package app.allclear.platform.value;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
-import app.allclear.platform.type.FacilityType;
-import app.allclear.platform.type.TestCriteria;
+import app.allclear.common.value.CreatedValue;
+import app.allclear.platform.type.*;
 
 /**********************************************************************************
 *
@@ -81,6 +82,7 @@ public class FacilityValue implements Serializable
 	public Long meters = null;	// A result included on distance searches. DLS on 4/3/2020
 	public Boolean restricted = null;	// Is the current user restricted from accessing this site. Populated in FacilityResource.search. DLS on 4/8/2020.
 	public Boolean favorite = null;	// ALLCLEAR-259: Has this facility been bookmarked/favorited by the current user? DLS on 4/15/2020.
+	public List<CreatedValue> testTypes = null;	// ALLCLEAR-463: DLS on 5/9/2020.
 
 	// Accessors
 	public boolean restricted() { return (null != testCriteria) && testCriteria.restricted; }
@@ -125,6 +127,10 @@ public class FacilityValue implements Serializable
 	public FacilityValue withRestricted(final Boolean newValue) { restricted = newValue; return this; }
 	public FacilityValue withFavorite(final Boolean newValue) { favorite = newValue; return this; }
 	public FacilityValue favorite(final List<Long> ids) { favorite = ids.contains(id); return this; }
+	public FacilityValue nullTestTypes() { testTypes = null; return this; }
+	public FacilityValue emptyTestTypes() { testTypes = List.of(); return this; }
+	public FacilityValue withTestTypes(final List<CreatedValue> newValues) { testTypes = newValues; return this; }
+	public FacilityValue withTestTypes(final TestType... newValues) { return withTestTypes(Arrays.stream(newValues).map(o -> o.created()).collect(Collectors.toList())); }
 
 	public FacilityValue() {}
 
@@ -396,6 +402,7 @@ public class FacilityValue implements Serializable
 			.append(", meters: ").append(meters)
 			.append(", restricted: ").append(restricted)
 			.append(", favorite: ").append(favorite)
+			.append(", testTypes: ").append(testTypes)
 			.append(" }").toString();
 	}
 }

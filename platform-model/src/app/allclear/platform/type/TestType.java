@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.common.value.CreatedValue;
+
 /** Represents the statuses that be associated with People.
  * 
  * @author smalleyd
@@ -18,11 +20,11 @@ public class TestType implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
-	public static final TestType RT_PCR = new TestType("rp", "rt-PCR", "Nasal Swab Test");
-	public static final TestType IGM_IGR_RAPID_TEST = new TestType("ii", "igM/igG Rapid Test", "Antibody Test");
+	public static final TestType ANTIBODY = new TestType("ii", "igM/igG Rapid Test", "Antibody Test");
+	public static final TestType NASAL_SWAB = new TestType("rp", "rt-PCR", "Nasal Swab Test");
 	public static final TestType DONT_KNOW = new TestType("dk", "Don't Know", "Don't Know");
 
-	public static final List<TestType> LIST = List.of(RT_PCR, IGM_IGR_RAPID_TEST, DONT_KNOW);
+	public static final List<TestType> LIST = List.of(ANTIBODY, NASAL_SWAB, DONT_KNOW);
 	public static final Map<String, TestType> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
 	public static TestType get(final String id) { return VALUES.get(id); }
 	public static boolean exists(final String id) { return VALUES.containsKey(id); }
@@ -39,6 +41,8 @@ public class TestType implements Serializable
 		this.code = code;
 		this.name = name;
 	}
+
+	public CreatedValue created() { return new CreatedValue(id, name, null); }
 
 	@Override
 	public String toString()

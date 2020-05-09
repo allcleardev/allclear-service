@@ -85,7 +85,7 @@ public class TestsDAOTest
 		PERSON = peopleDao.add(PeopleDAOTest.createValid());
 		PERSON_1 = peopleDao.add(PeopleDAOTest.createValid().withName("second").withPhone("+18885552000").withEmail(null));
 
-		var value = dao.add(VALUE = new TestsValue(PERSON.id, RT_PCR.id, TAKEN_ON, FACILITY.id, false, "All the other details"));
+		var value = dao.add(VALUE = new TestsValue(PERSON.id, NASAL_SWAB.id, TAKEN_ON, FACILITY.id, false, "All the other details"));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
@@ -95,7 +95,7 @@ public class TestsDAOTest
 	*/
 	private TestsValue createValid()
 	{
-		return new TestsValue(PERSON_1.id, IGM_IGR_RAPID_TEST.id, TAKEN_ON_1, FACILITY_1.id, true, "Some more information");
+		return new TestsValue(PERSON_1.id, ANTIBODY.id, TAKEN_ON_1, FACILITY_1.id, true, "Some more information");
 	}
 
 	@Test

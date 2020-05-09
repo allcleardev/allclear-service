@@ -1,11 +1,15 @@
 package app.allclear.platform.filter;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
 import app.allclear.common.dao.QueryFilter;
+import app.allclear.platform.type.TestType;
 
 /********************************************************************************************************************
 *
@@ -82,6 +86,8 @@ public class FacilityFilter extends QueryFilter
 	public Date updatedAtTo = null;
 	public GeoFilter from = null;
 	public boolean restrictive = false;	// Indicate to restrict the facility search based on the current user profile. DLS on 4/6/2020.
+	public List<String> includeTestTypes;	// ALLCLEAR-463: DLS on 5/9/2020.
+	public List<String> excludeTestTypes;	// ALLCLEAR-463: DLS on 5/9/2020.
 
 	// Mutators
 	public FacilityFilter withId(final Long newValue) { id = newValue; return this; }
@@ -144,6 +150,10 @@ public class FacilityFilter extends QueryFilter
 	public FacilityFilter withUpdatedAtTo(final Date newValue) { updatedAtTo = newValue; return this; }
 	public FacilityFilter withFrom(final GeoFilter newValue) { from = newValue; return this; }
 	public FacilityFilter withRestrictive(final boolean newValue) { restrictive = newValue; return this; }
+	public FacilityFilter withIncludeTestTypes(final List<String> newValues) { includeTestTypes = newValues; return this; }
+	public FacilityFilter include(final TestType... newValues) { return withIncludeTestTypes(Arrays.stream(newValues).map(o -> o.id).collect(Collectors.toList())); }
+	public FacilityFilter withExcludeTestTypes(final List<String> newValues) { excludeTestTypes = newValues; return this; }
+	public FacilityFilter exclude(final TestType... newValues) { return withExcludeTestTypes(Arrays.stream(newValues).map(o -> o.id).collect(Collectors.toList())); }
 
 	/**************************************************************************
 	*
@@ -403,6 +413,8 @@ public class FacilityFilter extends QueryFilter
 			.append(", updatedAtTo: ").append(updatedAtTo)
 			.append(", from: ").append(from)
 			.append(", restrictive: ").append(restrictive)
+			.append(", includeTestTypes: ").append(includeTestTypes)
+			.append(", excludeTestTypes: ").append(excludeTestTypes)
 			.append(" }").toString();
 	}
 }

@@ -5,8 +5,8 @@ import java.text.NumberFormat;
 /** Simple stop watch component that performs splits and overall time.
  * 
  * @author smalleyd
- * @version 2.0.0
- * @since 1/11/2016
+ * @version 1.0.0
+ * @since 4/1/2020
  *
  */
 
@@ -43,8 +43,8 @@ public class StopWatch
 	 */
 	public String split()
 	{
-		long now = System.currentTimeMillis();
-		String results = seconds(split, now);
+		var now = System.currentTimeMillis();
+		var results = seconds(split, now);
 		split = now;
 
 		return results;

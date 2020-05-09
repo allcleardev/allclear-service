@@ -106,12 +106,12 @@ public class TestsResourceTest
 
 		var now = new Date();
 		var response = request()
-			.post(Entity.entity(VALUE = new TestsValue(PERSON.id, RT_PCR.id, TAKEN_ON, FACILITY.id, true, "All the other details"), UTF8MediaType.APPLICATION_JSON_TYPE));
+			.post(Entity.entity(VALUE = new TestsValue(PERSON.id, NASAL_SWAB.id, TAKEN_ON, FACILITY.id, true, "All the other details"), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var value = response.readEntity(TestsValue.class);
 		Assertions.assertNotNull(value, "Exists");
-		check(VALUE.withId(1L).withPersonName(PERSON.name).withType(RT_PCR).withFacilityName(FACILITY.name).withCreatedAt(now).withUpdatedAt(now), value);
+		check(VALUE.withId(1L).withPersonName(PERSON.name).withType(NASAL_SWAB).withFacilityName(FACILITY.name).withCreatedAt(now).withUpdatedAt(now), value);
 	}
 
 	@Test

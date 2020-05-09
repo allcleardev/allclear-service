@@ -486,4 +486,24 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.1.45_ALLCLEAR-463" author="smalleyd">
+		<createTable tableName="facility_test_type" remarks="Represents the test types associated with a facility.">
+			<column name="facility_id" type="BIGINT" remarks="Refers to the Facility.">
+				<constraints nullable="false" />
+			</column>
+			<column name="test_type_id" type="CHAR(2)" remarks="Refers to the Test Type.">
+				<constraints nullable="false" />
+			</column>
+			<column name="created_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was created.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey tableName="facility_test_type" columnNames="facility_id, test_type_id" constraintName="pk_facility_test_type" />
+		<addForeignKeyConstraint baseTableName="facility_test_type" baseColumnNames="facility_id" referencedTableName="facility" referencedColumnNames="id" constraintName="fk_facility_test_type_1" onDelete="CASCADE" />
+
+		<rollback>
+			<dropTable tableName="facility_test_type" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>
