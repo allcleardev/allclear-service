@@ -531,6 +531,7 @@ var RegistrationsHandler = new ListTemplate({
 	CAN_ADD: false,
 	CAN_EDIT: false,
 	CAN_REMOVE: true,
+	IDENTIFIER: 'key',
 
 	COLUMNS: [ new TextColumn('key', 'Key'),
 	          new TextColumn('phone', 'Phone'),
