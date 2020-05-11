@@ -22,7 +22,7 @@ import app.allclear.platform.dao.SessionDAO;
 public class AuthFilter implements ContainerRequestFilter
 {
 	public static final String PATH_ADMINS = "admins";
-	public static final List<String> PATHS_ADMINS = List.of("customers", "logs", "queues", "registrations");
+	public static final List<String> PATHS_ADMINS = List.of("auditLogs", "customers", "logs", "queues", "registrations");
 	public static final List<String> PATHS_EDITORS = List.of("maps");	// Editors need the maps/geocode operation when managing facilities. DLS on 5/1/2020.
 	public static final String PATH_FACILITIES = "facilities";
 	public static final String PATH_INFO_CONFIG = "info/config";
