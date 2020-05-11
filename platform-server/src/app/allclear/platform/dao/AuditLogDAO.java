@@ -40,7 +40,7 @@ import app.allclear.platform.value.AuditLogValue;
 *
 **********************************************************************************/
 
-public class AuditLogDAO extends AbstractDAO<AuditLog>
+public class AuditLogDAO extends AbstractDAO<AuditLog> implements Auditor
 {
 	@SuppressWarnings("unused")
 	private static final OrderByBuilder ORDER = new OrderByBuilder('o', 
@@ -80,9 +80,9 @@ public class AuditLogDAO extends AbstractDAO<AuditLog>
 		catch (final StorageException | URISyntaxException ex) { throw new RuntimeException(ex); }
 	}
 	private CloudTable table(final String name) { return tables.computeIfAbsent(name, k -> table_(k)); }
-	public AuditLogValue add(final Auditable value) { return insert(value, "add"); }
-	public AuditLogValue update(final Auditable value) { return insert(value, "update"); }
-	public AuditLogValue remove(final Auditable value) { return insert(value, "remove"); }
+	@Override public AuditLogValue add(final Auditable value) { return insert(value, "add"); }
+	@Override public AuditLogValue update(final Auditable value) { return insert(value, "update"); }
+	@Override public AuditLogValue remove(final Auditable value) { return insert(value, "remove"); }
 	public AuditLogValue insert(final Auditable value, final String action)
 	{
 		var s = sessionDao.current();

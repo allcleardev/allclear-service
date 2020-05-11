@@ -83,7 +83,7 @@ public class PeopleFacilityResourceTest
 	{
 		var factory = DAO_RULE.getSessionFactory();
 		dao = new PeopleDAO(factory);
-		facilityDao = new FacilityDAO(factory);
+		facilityDao = new FacilityDAO(factory, new TestAuditor());
 	}
 
 	@Test

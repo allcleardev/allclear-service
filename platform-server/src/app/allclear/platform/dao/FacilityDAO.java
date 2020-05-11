@@ -81,9 +81,13 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	/** Native SQL clauses. */
 	public static final String FROM_ALIAS = "o";
 
-	public FacilityDAO(final SessionFactory factory)
+	private final Auditor auditor;
+
+	public FacilityDAO(final SessionFactory factory, final Auditor auditor)
 	{
 		super(factory);
+
+		this.auditor = auditor;
 	}
 
 	/** Adds a single Facility value.
@@ -118,6 +122,8 @@ public class FacilityDAO extends AbstractDAO<Facility>
 
 			var rec = record;	// Needs to be effectively final to be used in lambdas below.
 			update(s, record, record.getTestTypes(), value.testTypes, v -> new FacilityTestType(rec, v), "deleteFacilityTestTypes");
+
+			auditor.update(value);
 		}
 		else
 		{
@@ -126,6 +132,8 @@ public class FacilityDAO extends AbstractDAO<Facility>
 
 			var rec = record;	// Needs to be effectively final to be used in lambdas below.
 			add(s, value.testTypes, v -> new FacilityTestType(rec, v));
+
+			auditor.add(value);
 		}
 
 		return value.withId(record.getId());
@@ -226,7 +234,10 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		var record = get(id);
 		if (null == record) return false;
 
+		var value = record.toValueX();
 		currentSession().delete(record);
+
+		auditor.remove(value);
 
 		return true;
 	}

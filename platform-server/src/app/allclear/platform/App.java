@@ -105,10 +105,11 @@ public class App extends Application<Config>
 
 		var factory = transHibernateBundle.getSessionFactory();
 		var adminDao = new AdminDAO(conf.admins);
-		var customerDao = new CustomerDAO(conf.env, conf.admins, session);
-		var facilityDao = new FacilityDAO(factory);
-		var peopleDao = new PeopleDAO(factory);
 		var sessionDao = new SessionDAO(session, twilio, conf);
+		var auditLog = new AuditLogDAO(factory, sessionDao, conf.auditLog);
+		var customerDao = new CustomerDAO(conf.env, conf.admins, session);
+		var facilityDao = new FacilityDAO(factory, auditLog);
+		var peopleDao = new PeopleDAO(factory);
 		var registrationDao = new RegistrationDAO(session, twilio, conf);
 		var task = new QueueManager(conf.queue, 2,
 				new TaskOperator<>(QUEUE_ALERT, new AlertTask(factory, peopleDao, facilityDao, sessionDao), AlertRequest.class, 10, 5, 60, 3600));

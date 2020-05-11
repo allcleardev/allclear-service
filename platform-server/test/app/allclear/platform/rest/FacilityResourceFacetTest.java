@@ -73,7 +73,7 @@ public class FacilityResourceFacetTest
 	public static void up() throws Exception
 	{
 		var factory = DAO_RULE.getSessionFactory();
-		dao = new FacilityDAO(factory);
+		dao = new FacilityDAO(factory, new TestAuditor());
 	}
 
 	@Test

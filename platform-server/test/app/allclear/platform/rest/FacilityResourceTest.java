@@ -59,6 +59,7 @@ public class FacilityResourceTest
 	private static FacilityDAO dao = null;
 	private static PeopleDAO peopleDao = null;
 	private static SessionDAO sessionDao = new SessionDAO(new FakeRedisClient(), ConfigTest.loadTest());
+	private static TestAuditor auditor = new TestAuditor();
 	private static MapClient map = mock(MapClient.class);
 	private static FacilityResource resource = null;
 	private static FacilityValue VALUE = null;
@@ -89,7 +90,7 @@ public class FacilityResourceTest
 	public static void up() throws Exception
 	{
 		var factory = DAO_RULE.getSessionFactory();
-		dao = new FacilityDAO(factory);
+		dao = new FacilityDAO(factory, auditor);
 		peopleDao = new PeopleDAO(factory);
 
 		when(map.geocode(contains("Street"))).thenReturn(loadObject("/google/map/geocode.json", GeocodeResponse.class));
@@ -97,10 +98,18 @@ public class FacilityResourceTest
 		when(map.geocode(contains("Lane"))).thenReturn(loadObject("/google/map/geocode-zeroResults.json", GeocodeResponse.class));
 	}
 
+	private static int auditorAdds = 0;
+	private static int auditorUpdates = 0;
+	private static int auditorRemoves = 0;
+
 	@BeforeEach
 	public void beforeEach()
 	{
 		if (null != ADMIN) sessionDao.current(ADMIN);
+
+		Assertions.assertEquals(auditorAdds, auditor.adds, "Check auditorAdds");
+		Assertions.assertEquals(auditorUpdates, auditor.updates, "Check auditorUpdates");
+		Assertions.assertEquals(auditorRemoves, auditor.removes, "Check auditorRemoves");
 	}
 
 	@Test
@@ -127,6 +136,8 @@ public class FacilityResourceTest
 
 		// For later checks
 		VALUE.withTestTypes(DONT_KNOW, ANTIBODY);	// Retrieved in alphabetical order of the test type ID.
+
+		auditorAdds++;
 	}
 
 	@Test
@@ -192,6 +203,8 @@ public class FacilityResourceTest
 
 		dao.update(VALUE.withActive(true), true);
 		VALUE.withUpdatedAt(new Date());
+
+		auditorUpdates++;
 	}
 
 	@Test
@@ -329,6 +342,8 @@ public class FacilityResourceTest
 		var value = response.readEntity(FacilityValue.class);
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE.withUpdatedAt(new Date()), value);
+
+		auditorUpdates++;
 	}
 
 	@Test
@@ -645,6 +660,8 @@ public class FacilityResourceTest
 		Assertions.assertEquals(bg("40.7487855"), v.latitude, "Check latitude");
 		Assertions.assertEquals(bg("-74.0315385"), v.longitude, "Check longitude");
 		Assertions.assertTrue(v.active, "Check active");
+
+		auditorAdds++;
 	}
 
 	@Test
@@ -737,6 +754,8 @@ public class FacilityResourceTest
 	public void set_01()	// Deactivate the new facility
 	{
 		Assertions.assertEquals(HTTP_STATUS_OK, request().put(Entity.json(VALUE_1.withActive(false))).getStatus());
+
+		auditorUpdates++;
 	}
 
 	@Test
@@ -792,6 +811,8 @@ public class FacilityResourceTest
 		remove(VALUE.id + 1000L, false);
 		remove(VALUE.id, true);
 		remove(VALUE.id, false);
+
+		auditorRemoves++;
 	}
 
 	/** Helper method - call the DELETE endpoint. */
@@ -828,6 +849,8 @@ public class FacilityResourceTest
 		VALUE = request().post(Entity.json(FacilityDAOTest.createValid().withName("byEditor").withActive(true)), FacilityValue.class);
 		Assertions.assertNotNull(VALUE.id, "Check ID");
 		Assertions.assertFalse(VALUE.active, "Check active");
+
+		auditorAdds++;
 	}
 
 	@Test
@@ -859,6 +882,8 @@ public class FacilityResourceTest
 		Assertions.assertTrue(VALUE.active, "Check active");	// Sent in as TRUE.
 
 		VALUE.withActive(false);
+
+		auditorUpdates++;
 	}
 
 	@Test
@@ -888,6 +913,8 @@ public class FacilityResourceTest
 		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
 		Assertions.assertTrue(v.active, "Check active");
 		Assertions.assertTrue(VALUE.active, "Check active");
+
+		auditorUpdates++;
 	}
 
 	@Test
@@ -919,6 +946,8 @@ public class FacilityResourceTest
 		Assertions.assertFalse(VALUE.active, "Check active");	// Sent int as FALSE.
 
 		VALUE.withActive(true);
+
+		auditorUpdates++;
 	}
 
 	@Test

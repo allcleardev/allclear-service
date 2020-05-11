@@ -54,6 +54,7 @@ public class FacilityDAOTest
 
 	private static FacilityDAO dao = null;
 	private static PeopleDAO peopleDao = null;
+	private static final TestAuditor auditor = new TestAuditor();
 	private static FacilityValue VALUE = null;
 	private static FacilityValue VALUE_1 = null;
 	private static PeopleValue PERSON = null;
@@ -65,8 +66,20 @@ public class FacilityDAOTest
 	public static void up()
 	{
 		var factory = DAO_RULE.getSessionFactory();
-		dao = new FacilityDAO(factory);
+		dao = new FacilityDAO(factory, auditor);
 		peopleDao = new PeopleDAO(factory);
+	}
+
+	private static int auditorAdds = 0;
+	private static int auditorUpdates = 0;
+	private static int auditorRemoves = 0;
+
+	@BeforeEach
+	public void beforeEach()
+	{
+		Assertions.assertEquals(auditorAdds, auditor.adds, "Check auditorAdds");
+		Assertions.assertEquals(auditorUpdates, auditor.updates, "Check auditorUpdates");
+		Assertions.assertEquals(auditorRemoves, auditor.removes, "Check auditorRemoves");
 	}
 
 	@Test
@@ -83,6 +96,8 @@ public class FacilityDAOTest
 		PERSON = peopleDao.add(new PeopleValue("first", "8885551000", true));
 		PERSON_1 = peopleDao.add(new PeopleValue("second", "8885551001", true));
 		peopleDao.addFacilities(PERSON.id, List.of(value.id));
+
+		auditorAdds++;
 	}
 
 	/** Creates a valid Facility value for the validation tests.
@@ -415,6 +430,8 @@ public class FacilityDAOTest
 
 		VALUE_1 = VALUE;
 		VALUE = v;
+
+		auditorUpdates++;
 	}
 
 	@Test
@@ -890,6 +907,8 @@ public class FacilityDAOTest
 		Assertions.assertFalse(dao.remove(VALUE.id + 1000L), "Invalid");
 		Assertions.assertTrue(dao.remove(VALUE.id), "Removed");
 		Assertions.assertFalse(dao.remove(VALUE.id), "Already removed");
+
+		auditorRemoves++;
 	}
 
 	/** Test removal after the search. */
@@ -915,6 +934,8 @@ public class FacilityDAOTest
 		VALUE = dao.add(createValid().withActive(true).withTestTypes(NASAL_SWAB, ANTIBODY), true);
 		Assertions.assertNotNull(VALUE, "Exists");
 		Assertions.assertEquals(2L, VALUE.id, "Check ID");
+
+		auditorAdds++;
 	}
 
 	@Test
@@ -937,6 +958,8 @@ public class FacilityDAOTest
 		VALUE = dao.add(createValid().withActive(true).withId(20L).nullTestTypes(), true);
 		Assertions.assertNotNull(VALUE, "Exists");
 		Assertions.assertEquals(2L, VALUE.id, "Check ID");
+
+		auditorUpdates++;
 	}
 
 	@Test
@@ -953,6 +976,8 @@ public class FacilityDAOTest
 
 		peopleDao.addFacilities(PERSON.id, List.of(3L));
 		peopleDao.addFacilities(PERSON_1.id, List.of(2L, 4L));
+
+		auditorAdds+= 2;
 	}
 
 	@Test
@@ -1021,6 +1046,8 @@ public class FacilityDAOTest
 		VALUE = dao.add(createValid().withName("byEditor").withActive(true), false);
 		Assertions.assertEquals(5L, VALUE.id, "Check ID");
 		Assertions.assertFalse(VALUE.active, "Check active");
+
+		auditorAdds++;
 	}
 
 	@Test
@@ -1043,6 +1070,8 @@ public class FacilityDAOTest
 		Assertions.assertFalse(v.active, "Check active");
 		Assertions.assertFalse(VALUE.active, "Check active");
 		assertThat(v.testTypes).as("Check testTypes").containsExactly(NASAL_SWAB.created());
+
+		auditorUpdates++;
 	}
 
 	@Test
@@ -1065,6 +1094,8 @@ public class FacilityDAOTest
 		Assertions.assertTrue(v.active, "Check active");
 		Assertions.assertTrue(VALUE.active, "Check active");
 		assertThat(v.testTypes).as("Check testTypes").containsExactly(DONT_KNOW.created());
+
+		auditorUpdates++;
 	}
 
 	@Test
@@ -1087,6 +1118,8 @@ public class FacilityDAOTest
 		Assertions.assertTrue(v.active, "Check active");
 		Assertions.assertTrue(VALUE.active, "Check active");
 		assertThat(v.testTypes).as("Check testTypes").isEmpty();
+
+		auditorUpdates++;
 	}
 
 	@Test

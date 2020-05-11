@@ -6,6 +6,7 @@
   "authPhone": "+16466321488",
 
   "admins": "DefaultEndpointsProtocol=https;AccountName=allclear-admins;AccountKey=${COSMOS_ACCOUNT_KEY:-accountKey};TableEndpoint=https://allclear-admins.table.cosmos.azure.com:443/;",
+  "auditLog": "DefaultEndpointsProtocol=https;AccountName=allclear-audit-dev;AccountKey=${AUDIT_LOG_ACCOUNT_KEY:-accountKey};TableEndpoint=https://allclear-audit-dev.table.cosmos.azure.com:443/;",
   "geocode": { "host": "localhost", "timeout": 200, "poolSize": 10, "testWhileIdle": true },
   "queue": "DefaultEndpointsProtocol=https;AccountName=allcleardevqueues;AccountKey=${QUEUE_ACCOUNT_KEY:-accountKey};EndpointSuffix=core.windows.net",
   "session": { "host": "localhost", "timeout": 200, "poolSize": 10, "testWhileIdle": true },

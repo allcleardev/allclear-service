@@ -29,18 +29,9 @@ import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.common.value.OperationResponse;
 import app.allclear.platform.App;
 import app.allclear.platform.ConfigTest;
-import app.allclear.platform.dao.FacilityDAO;
-import app.allclear.platform.dao.FacilityDAOTest;
-import app.allclear.platform.dao.PeopleDAO;
-import app.allclear.platform.dao.PeopleDAOTest;
-import app.allclear.platform.dao.SessionDAO;
-import app.allclear.platform.dao.TestsDAO;
+import app.allclear.platform.dao.*;
 import app.allclear.platform.filter.TestsFilter;
-import app.allclear.platform.value.AdminValue;
-import app.allclear.platform.value.FacilityValue;
-import app.allclear.platform.value.PeopleValue;
-import app.allclear.platform.value.SessionValue;
-import app.allclear.platform.value.TestsValue;
+import app.allclear.platform.value.*;
 
 /**********************************************************************************
 *
@@ -87,7 +78,7 @@ public class TestsResourceTest
 	{
 		var factory = DAO_RULE.getSessionFactory();
 		dao = new TestsDAO(factory, sessionDao);
-		facilityDao = new FacilityDAO(factory);
+		facilityDao = new FacilityDAO(factory, new TestAuditor());
 		peopleDao = new PeopleDAO(factory);
 	}
 

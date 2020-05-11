@@ -65,7 +65,7 @@ public class TestsDAOTest
 	{
 		var factory = DAO_RULE.getSessionFactory();
 		dao = new TestsDAO(factory, sessionDao);
-		facilityDao = new FacilityDAO(factory);
+		facilityDao = new FacilityDAO(factory, new TestAuditor());
 		peopleDao = new PeopleDAO(factory);
 	}
 
