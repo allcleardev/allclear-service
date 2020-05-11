@@ -292,6 +292,13 @@ var FacilitiesHandler = new ListTemplate({
 		      new DatesField('createdAt', 'Created At'),
 		      new DatesField('updatedAt', 'Updated At'),
 	          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ],
+	},
+
+	HISTORY: {
+		NAME: 'facility',
+		SINGULAR: 'Facility',
+		PLURAL: 'Facilities',
+		RESOURCE: 'facilities'
 	}
 });
 

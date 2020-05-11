@@ -20,14 +20,14 @@ HistoryTemplate.prototype.generate = function(criteria)
 
 	var val, entries = [];
 	for (var i = 0; i < v.length; i++)
-		entries[i] = { id: i, name: (val = v[i]).actionType + ' at ' + this.toDateTime(val.actionDate) + ' by ' + val.userId };
+		entries[i] = { id: i, name: (val = v[i]).action + ' at ' + this.toDateTime(val.timestamp) + ' by ' + val.actorType + ' / ' + val.actionBy };
 
 	o.appendChild(criteria.entries = e = this.genList('entries', 20, entries));
 	e.selectedIndex = 0;
 	e.className = this.CSS_MAIN;
 	e.onchange = function(ev) { me.handleChange(criteria, this); };
 
-	(criteria.tree = $(this.addSpan(o, undefined, this.CSS_MAIN))).jsontree(v[0].entity);
+	(criteria.tree = $(this.addSpan(o, undefined, this.CSS_MAIN))).jsontree(eval(v[0].payload));
 
 	// Wrap viewer in form to display buttons at bottom.
 	var f = criteria.form = this.createElement('form', undefined, this.CSS_MAIN);
@@ -55,14 +55,14 @@ HistoryTemplate.prototype.handleChange = function(criteria, elem)
 {
 	var i = elem.selectedIndex;
 	if (-1 < 0)
-		criteria.tree.jsontree(criteria.value[i].entity);
+		criteria.tree.jsontree(eval(criteria.value[i].payload));
 }
 
 HistoryTemplate.prototype.handleCopy = function(criteria, elem)
 {
 	var i = elem.selectedIndex;
 	if (-1 < 0)
-		this.VIEWER.open(this.toJSON(criteria.value[i].entity));
+		this.VIEWER.open(criteria.value[i].payload);
 }
 
 HistoryTemplate.prototype.createNoRecordsFoundMessage = function()
