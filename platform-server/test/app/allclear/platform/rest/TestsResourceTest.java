@@ -298,7 +298,7 @@ public class TestsResourceTest
 	 * @param filter
 	 * @param expectedTotal
 	 */
-	private void count(final TestsFilter filter, long expectedTotal)
+	private void count(final TestsFilter filter, final long expectedTotal)
 	{
 		Assertions.assertEquals(expectedTotal, dao.count(filter), "COUNT " + filter + ": Check total");
 	}

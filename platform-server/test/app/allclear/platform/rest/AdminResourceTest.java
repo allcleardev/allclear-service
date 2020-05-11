@@ -289,7 +289,7 @@ public class AdminResourceTest
 	 * @param filter
 	 * @param expectedTotal
 	 */
-	private void count(final AdminFilter filter, long expectedTotal)
+	private void count(final AdminFilter filter, final long expectedTotal)
 	{
 		Assertions.assertEquals(expectedTotal, dao.count(filter), "COUNT " + filter + ": Check total");
 	}

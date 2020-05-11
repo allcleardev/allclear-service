@@ -952,7 +952,7 @@ public class FacilityResourceTest
 	 * @param filter
 	 * @param expectedTotal
 	 */
-	private void count(final FacilityFilter filter, long expectedTotal)
+	private void count(final FacilityFilter filter, final long expectedTotal)
 	{
 		Assertions.assertEquals(expectedTotal, dao.count(filter), "COUNT " + filter + ": Check total");
 	}

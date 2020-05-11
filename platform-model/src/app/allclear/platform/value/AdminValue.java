@@ -41,6 +41,7 @@ public class AdminValue implements Serializable
 
 	// Accessors
 	public boolean canAdmin() { return !editor || supers; }	// Admin accounts marked as Editors lose standard 'admin' access UNLESS also marked as Supers. DLS on 4/30/2020.
+	public String type() { return (supers ? "Super" : (editor ? "Editor" : "Admin")); }
 
 	// Mutators
 	public AdminValue withId(final String newValue) { id = newValue; return this; }

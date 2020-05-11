@@ -34,4 +34,20 @@ public class AdminValueTest
 	{
 		Assertions.assertEquals(expected, new AdminValue().withSupers(supers).withEditor(editor).canAdmin());
 	}
+
+	public static Stream<Arguments> type()
+	{
+		return Stream.of(
+			arguments(false, false, "Admin"),
+			arguments(false, true, "Editor"),
+			arguments(true, false, "Super"),
+			arguments(true, true, "Super"));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void type(final boolean supers, final boolean editor, final String expected)
+	{
+		Assertions.assertEquals(expected, new AdminValue("first", supers, editor).type());
+	}
 }

@@ -45,7 +45,8 @@ public class SessionValue implements Serializable
 	public boolean person() { return (null != person); }
 	public boolean customer() { return (null != customer); }
 	public boolean registration() { return (null != registration); }
-	public String name() { return (admin()) ? admin.id : (person() ? person.name : registration.phone); }
+	public String name() { return (admin()) ? admin.id : (person() ? person.name : (registration() ? registration.phone : (customer() ? customer.name : "Anonymous"))); }
+	public String type() { return (admin()) ? admin.type() : (person() ? "Person" : (registration() ? "Registration" : (customer() ? "Customer" : "Anonymous"))); }
 
 	// Mutators
 	public SessionValue accessed()

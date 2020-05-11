@@ -1138,7 +1138,7 @@ public class PeopleResourceTest
 	 * @param filter
 	 * @param expectedTotal
 	 */
-	private void count(final PeopleFilter filter, long expectedTotal)
+	private void count(final PeopleFilter filter, final long expectedTotal)
 	{
 		Assertions.assertEquals(expectedTotal, dao.count(filter), "COUNT " + filter + ": Check total");
 	}

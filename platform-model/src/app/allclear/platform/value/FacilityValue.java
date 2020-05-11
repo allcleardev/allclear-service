@@ -21,7 +21,7 @@ import app.allclear.platform.type.*;
 *
 **********************************************************************************/
 
-public class FacilityValue implements Serializable
+public class FacilityValue implements Auditable, Serializable
 {
 	private static final long serialVersionUID = 1L;
 
@@ -86,6 +86,11 @@ public class FacilityValue implements Serializable
 
 	// Accessors
 	public boolean restricted() { return (null != testCriteria) && testCriteria.restricted; }
+
+	// Auditable methods
+	public String id() { return id.toString(); }
+	public String tableName() { return TABLE; }
+	public Date updatedAt() { return updatedAt; }
 
 	// Mutators
 	public FacilityValue withId(final Long newValue) { id = newValue; return this; }

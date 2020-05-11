@@ -610,7 +610,7 @@ public class FriendResourceTest
 	 * @param filter
 	 * @param expectedTotal
 	 */
-	private void count(final FriendFilter filter, long expectedTotal)
+	private void count(final FriendFilter filter, final long expectedTotal)
 	{
 		Assertions.assertEquals(expectedTotal, dao.count(filter), "COUNT " + filter + ": Check total");
 	}

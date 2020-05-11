@@ -283,7 +283,7 @@ public class CustomerResourceTest
 	 * @param filter
 	 * @param expectedTotal
 	 */
-	private void count(final CustomerFilter filter, long expectedTotal)
+	private void count(final CustomerFilter filter, final long expectedTotal)
 	{
 		Assertions.assertEquals(expectedTotal, dao.count(filter), "COUNT " + filter + ": Check total");
 	}

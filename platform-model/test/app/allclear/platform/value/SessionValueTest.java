@@ -42,6 +42,7 @@ public class SessionValueTest
 		Assertions.assertFalse(o.person(), "Check person()");
 		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(o.registration(), "Check registration()");
+		Assertions.assertEquals("Admin", o.type(), "Check type()");
 
 		ThreadUtils.sleep(2000L);
 
@@ -72,6 +73,7 @@ public class SessionValueTest
 		Assertions.assertFalse(o.person(), "Check person()");
 		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(o.registration(), "Check registration()");
+		Assertions.assertEquals("Anonymous", o.type(), "Check type()");
 
 		ThreadUtils.sleep(2000L);
 
@@ -103,6 +105,7 @@ public class SessionValueTest
 		Assertions.assertFalse(o.person(), "Check person()");
 		Assertions.assertTrue(o.customer(), "Check customer()");
 		Assertions.assertFalse(o.registration(), "Check registration()");
+		Assertions.assertEquals("Customer", o.type(), "Check type()");
 
 		ThreadUtils.sleep(2000L);
 
@@ -135,6 +138,7 @@ public class SessionValueTest
 		Assertions.assertFalse(o.person(), "Check person()");
 		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(o.registration(), "Check registration()");
+		Assertions.assertEquals("Editor", o.type(), "Check type()");
 
 		ThreadUtils.sleep(2000L);
 
@@ -170,6 +174,7 @@ public class SessionValueTest
 		Assertions.assertTrue(o.person(), "Check person()");
 		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(o.registration(), "Check registration()");
+		Assertions.assertEquals("Person", o.type(), "Check type()");
 
 		ThreadUtils.sleep(2000L);
 
@@ -203,6 +208,7 @@ public class SessionValueTest
 		Assertions.assertTrue(o.person(), "Check person()");
 		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(o.registration(), "Check registration()");
+		Assertions.assertEquals("Person", o.type(), "Check type()");
 
 		ThreadUtils.sleep(2000L);
 
@@ -236,6 +242,7 @@ public class SessionValueTest
 		Assertions.assertFalse(o.person(), "Check person()");
 		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertTrue(o.registration(), "Check registration()");
+		Assertions.assertEquals("Registration", o.type(), "Check type()");
 
 		ThreadUtils.sleep(2000L);
 
@@ -267,6 +274,7 @@ public class SessionValueTest
 		Assertions.assertTrue(s.person(), "Check person()");
 		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(s.registration(), "Check registration()");
+		Assertions.assertEquals("Person", s.type(), "Check type()");
 
 		ThreadUtils.sleep(2000L);
 
@@ -291,6 +299,7 @@ public class SessionValueTest
 		Assertions.assertTrue(ss.person(), "Check person()");
 		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(ss.registration(), "Check registration()");
+		Assertions.assertEquals("Person", ss.type(), "Check type()");
 	}
 
 	@Test
@@ -316,6 +325,7 @@ public class SessionValueTest
 		Assertions.assertFalse(o.person(), "Check person()");
 		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(o.registration(), "Check registration()");
+		Assertions.assertEquals("Super", o.type(), "Check type()");
 
 		ThreadUtils.sleep(2000L);
 
