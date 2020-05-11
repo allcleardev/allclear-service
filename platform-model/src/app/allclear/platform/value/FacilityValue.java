@@ -88,9 +88,9 @@ public class FacilityValue implements Auditable, Serializable
 	public boolean restricted() { return (null != testCriteria) && testCriteria.restricted; }
 
 	// Auditable methods
-	public String id() { return id.toString(); }
-	public String tableName() { return TABLE; }
-	public Date updatedAt() { return updatedAt; }
+	@Override public String id() { return id.toString(); }
+	@Override public String tableName() { return TABLE; }
+	@Override public Date updatedAt() { return updatedAt; }
 
 	// Mutators
 	public FacilityValue withId(final Long newValue) { id = newValue; return this; }

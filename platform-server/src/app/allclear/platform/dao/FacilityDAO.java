@@ -123,7 +123,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			var rec = record;	// Needs to be effectively final to be used in lambdas below.
 			update(s, record, record.getTestTypes(), value.testTypes, v -> new FacilityTestType(rec, v), "deleteFacilityTestTypes");
 
-			auditor.update(value);
+			auditor.update(value.withId(record.getId()));
 		}
 		else
 		{
@@ -133,10 +133,10 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			var rec = record;	// Needs to be effectively final to be used in lambdas below.
 			add(s, value.testTypes, v -> new FacilityTestType(rec, v));
 
-			auditor.add(value);
+			auditor.add(value.withId(record.getId()));
 		}
 
-		return value.withId(record.getId());
+		return value;
 	}
 
 	private void add(final Session s, final List<CreatedValue> values, final Function<CreatedValue, ? extends FacilityChild> toEntity)
