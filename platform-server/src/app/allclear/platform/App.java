@@ -106,9 +106,9 @@ public class App extends Application<Config>
 		var factory = transHibernateBundle.getSessionFactory();
 		var adminDao = new AdminDAO(conf.admins);
 		var sessionDao = new SessionDAO(session, twilio, conf);
-		var auditLog = new AuditLogDAO(factory, sessionDao, conf.auditLog);
+		var auditor = new AuditLogDAO(factory, sessionDao, conf.auditLog);
 		var customerDao = new CustomerDAO(conf.env, conf.admins, session);
-		var facilityDao = new FacilityDAO(factory, auditLog);
+		var facilityDao = new FacilityDAO(factory, auditor);
 		var peopleDao = new PeopleDAO(factory);
 		var registrationDao = new RegistrationDAO(session, twilio, conf);
 		var task = new QueueManager(conf.queue, 2,
@@ -137,6 +137,7 @@ public class App extends Application<Config>
         jersey.register(new LogResource());
         jersey.register(new AuthFilter(sessionDao));
         jersey.register(new AdminResource(adminDao, sessionDao));
+        jersey.register(new AuditLogResource(auditor));
         jersey.register(new CustomerResource(customerDao));
         jersey.register(new FacilityResource(facilityDao, sessionDao, map));
         jersey.register(new FriendResource(new FriendDAO(factory), sessionDao));
