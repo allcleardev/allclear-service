@@ -35,6 +35,8 @@ public class SessionValue implements Serializable
 	public final Date expiresAt;
 	public final Date lastAccessedAt;
 	public final Date createdAt;
+	public final String type;	// Calculated.
+	public final String name;	// Calculated.
 
 	// Accessors
 	public int seconds() { return (int) (duration / 1000L); }
@@ -45,8 +47,6 @@ public class SessionValue implements Serializable
 	public boolean person() { return (null != person); }
 	public boolean customer() { return (null != customer); }
 	public boolean registration() { return (null != registration); }
-	public String name() { return (admin()) ? admin.id : (person() ? person.name : (registration() ? registration.phone : (customer() ? customer.name : "Anonymous"))); }
-	public String type() { return (admin()) ? admin.type() : (person() ? "Person" : (registration() ? "Registration" : (customer() ? "Customer" : "Anonymous"))); }
 
 	// Mutators
 	public SessionValue accessed()
@@ -174,6 +174,32 @@ public class SessionValue implements Serializable
 		this.expiresAt = expiresAt;
 		this.lastAccessedAt = lastAccessedAt;
 		this.createdAt = createdAt;
+
+		// Calculated fields
+		if (admin())
+		{
+			type = admin.type();
+			name = admin.id;
+		}
+		else if (person())
+		{
+			type = "Person";
+			name = person.name;
+		}
+		else if (registration())
+		{
+			type = "Registration";
+			name = registration.phone;
+		}
+		else if (customer())
+		{
+			type = "Customer";
+			name = customer.name;
+		}
+		else
+		{
+			type = name = "Anonymous";
+		}
 	}
 
 	@Override

@@ -86,7 +86,7 @@ public class AuditLogDAO extends AbstractDAO<AuditLog> implements Auditor
 	public AuditLogValue insert(final Auditable value, final String action)
 	{
 		var s = sessionDao.current();
-		var o = new AuditLogValue(value.id(), System.currentTimeMillis(), s.type(), s.name(), action,
+		var o = new AuditLogValue(value.id(), System.currentTimeMillis(), s.type, s.name, action,
 			json(value),
 			value.updatedAt());
 

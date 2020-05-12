@@ -42,7 +42,8 @@ public class SessionValueTest
 		Assertions.assertFalse(o.person(), "Check person()");
 		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(o.registration(), "Check registration()");
-		Assertions.assertEquals("Admin", o.type(), "Check type()");
+		Assertions.assertEquals("Admin", o.type, "Check type");
+		Assertions.assertEquals("andy", o.name, "Check name");
 
 		ThreadUtils.sleep(2000L);
 
@@ -73,7 +74,8 @@ public class SessionValueTest
 		Assertions.assertFalse(o.person(), "Check person()");
 		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(o.registration(), "Check registration()");
-		Assertions.assertEquals("Anonymous", o.type(), "Check type()");
+		Assertions.assertEquals("Anonymous", o.type, "Check type");
+		Assertions.assertEquals("Anonymous", o.name, "Check name");
 
 		ThreadUtils.sleep(2000L);
 
@@ -105,7 +107,8 @@ public class SessionValueTest
 		Assertions.assertFalse(o.person(), "Check person()");
 		Assertions.assertTrue(o.customer(), "Check customer()");
 		Assertions.assertFalse(o.registration(), "Check registration()");
-		Assertions.assertEquals("Customer", o.type(), "Check type()");
+		Assertions.assertEquals("Customer", o.type, "Check type");
+		Assertions.assertEquals("Techmo", o.name, "Check name");
 
 		ThreadUtils.sleep(2000L);
 
@@ -118,13 +121,13 @@ public class SessionValueTest
 	@Test
 	public void create_editor()
 	{
-		var o = new SessionValue(false, new AdminValue("andy", false, true));
+		var o = new SessionValue(false, new AdminValue("randy", false, true));
 		assertThat(o.id).as("Check ID").hasSize(36);
 		Assertions.assertFalse(o.rememberMe, "Check rememberMe");
 		Assertions.assertEquals(SessionValue.DURATION_SHORT, o.duration, "Check duration");
 		Assertions.assertEquals(30 * 60, o.seconds(), "Check seconds");
 		Assertions.assertNotNull(o.admin, "Check admin");
-		Assertions.assertEquals("andy", o.admin.id, "Check admin.id");
+		Assertions.assertEquals("randy", o.admin.id, "Check admin.id");
 		Assertions.assertFalse(o.admin.supers, "Check admin.supers");
 		Assertions.assertNull(o.person, "Check person");
 		Assertions.assertNull(o.customer, "Check customer");
@@ -138,7 +141,8 @@ public class SessionValueTest
 		Assertions.assertFalse(o.person(), "Check person()");
 		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(o.registration(), "Check registration()");
-		Assertions.assertEquals("Editor", o.type(), "Check type()");
+		Assertions.assertEquals("Editor", o.type, "Check type");
+		Assertions.assertEquals("randy", o.name, "Check name");
 
 		ThreadUtils.sleep(2000L);
 
@@ -174,7 +178,8 @@ public class SessionValueTest
 		Assertions.assertTrue(o.person(), "Check person()");
 		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(o.registration(), "Check registration()");
-		Assertions.assertEquals("Person", o.type(), "Check type()");
+		Assertions.assertEquals("Person", o.type, "Check type");
+		Assertions.assertEquals("stevie", o.name, "Check name");
 
 		ThreadUtils.sleep(2000L);
 
@@ -208,7 +213,8 @@ public class SessionValueTest
 		Assertions.assertTrue(o.person(), "Check person()");
 		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(o.registration(), "Check registration()");
-		Assertions.assertEquals("Person", o.type(), "Check type()");
+		Assertions.assertEquals("Person", o.type, "Check type");
+		Assertions.assertEquals("moira", o.name, "Check name");
 
 		ThreadUtils.sleep(2000L);
 
@@ -242,7 +248,8 @@ public class SessionValueTest
 		Assertions.assertFalse(o.person(), "Check person()");
 		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertTrue(o.registration(), "Check registration()");
-		Assertions.assertEquals("Registration", o.type(), "Check type()");
+		Assertions.assertEquals("Registration", o.type, "Check type");
+		Assertions.assertEquals("+18885550003", o.name, "Check name");
 
 		ThreadUtils.sleep(2000L);
 
@@ -274,7 +281,8 @@ public class SessionValueTest
 		Assertions.assertTrue(s.person(), "Check person()");
 		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(s.registration(), "Check registration()");
-		Assertions.assertEquals("Person", s.type(), "Check type()");
+		Assertions.assertEquals("Person", s.type, "Check type");
+		Assertions.assertEquals("johnny", s.name, "Check name");
 
 		ThreadUtils.sleep(2000L);
 
@@ -299,7 +307,8 @@ public class SessionValueTest
 		Assertions.assertTrue(ss.person(), "Check person()");
 		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(ss.registration(), "Check registration()");
-		Assertions.assertEquals("Person", ss.type(), "Check type()");
+		Assertions.assertEquals("Person", ss.type, "Check type");
+		Assertions.assertEquals("barbara", ss.name, "Check name");
 	}
 
 	@Test
@@ -325,7 +334,8 @@ public class SessionValueTest
 		Assertions.assertFalse(o.person(), "Check person()");
 		Assertions.assertFalse(o.customer(), "Check customer()");
 		Assertions.assertFalse(o.registration(), "Check registration()");
-		Assertions.assertEquals("Super", o.type(), "Check type()");
+		Assertions.assertEquals("Super", o.type, "Check type");
+		Assertions.assertEquals("mandy", o.name, "Check name");
 
 		ThreadUtils.sleep(2000L);
 

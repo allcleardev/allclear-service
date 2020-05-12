@@ -582,14 +582,13 @@ var SessionsHandler = new ListTemplate({
 		else if (v.person) PeopleHandler.EDITOR.doEdit(v.person.id);
 		else RegistrationsHandler.EDITOR.doValue(v.registration);
 	},
-	toSessionType: (p, v) => (v.admin ? 'Admin' : ((v.person) ? 'Person' : 'Registration')),
 	toSessionName: (p, v) => (v.admin ? v.admin.id : ((v.person) ? v.person.name : v.registration.phone)),
 
 	COLUMNS: [ new TextColumn('id', 'ID'),
 	           new TextColumn('rememberMe', 'Remember Me?'),
 	           new TextColumn('duration', 'Duration', 'fromMilliseconds'),
-	           new TextColumn('admin', 'Type', 'toSessionType'),
-	           new TextColumn('name', 'Name', 'toSessionName', false, false, 'openSession'),
+	           new TextColumn('type', 'Type'),
+	           new TextColumn('name', 'Name', undefined, false, false, 'openSession'),
 	           new TextColumn('expiresAt', 'Exipres At', 'toDateTime'),
 	           new TextColumn('lastAccessedAt', 'Last Accessed At', 'toDateTime'),
 	           new TextColumn('createdAt', 'Created At', 'toDateTime') ],
@@ -597,8 +596,8 @@ var SessionsHandler = new ListTemplate({
 	FIELDS: [ new TextField('id', 'ID'),
 	          new TextField('rememberMe', 'Remember Me?'),
 	          new TextField('duration', 'Duration', 'fromMilliseconds'),
-	          new TextField('admin', 'Type', (v, p) => SessionsHandler.toSessionType(p, v)),
-	          new TextField('name', 'Name', (v, p) => SessionsHandler.toSessionName(p, v), false, false, 'openSession'),
+	          new TextField('type', 'Type'),
+	          new TextField('name', 'Name'),
 	          new TextField('expiresAt', 'Exipres At', 'toDateTime'),
 	          new TextField('lastAccessedAt', 'Last Accessed At', 'toDateTime'),
 	          new TextField('createdAt', 'Created At', 'toDateTime') ],
