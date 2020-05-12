@@ -217,6 +217,7 @@ var FacilitiesHandler = new ListTemplate({
 	          new BoolField('freeOrLowCost', 'Free or Low-Cost?', true),
 	          new EditField('notes', 'Notes', false, true, 60, 5),
 	          new BoolField('active', 'Active?', true),
+	          new TextField('activatedAt', 'Activated At', 'toDateTime'),
 	          new TextField('createdAt', 'Created At', 'toDateTime'),
 	          new TextField('updatedAt', 'Updated At', 'toDateTime') ],
 	SEARCH: {
@@ -289,6 +290,8 @@ var FacilitiesHandler = new ListTemplate({
 		      new EditField('notes', 'Notes', false, false, 128, 50),
 		      new ListField('hasNotes', 'Has Notes', false, 'yesNoOptions', undefined, 'No Search'),
 		      new ListField('active', 'Active?', false, 'yesNoOptions', undefined, 'No Search'),
+		      new ListField('hasActivatedAt', 'Has Activated At', false, 'yesNoOptions', undefined, 'No Search'),
+		      new DatesField('activatedAt', 'Activated At'),
 		      new DatesField('createdAt', 'Created At'),
 		      new DatesField('updatedAt', 'Updated At'),
 	          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ],
