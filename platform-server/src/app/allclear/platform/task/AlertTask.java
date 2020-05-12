@@ -46,7 +46,7 @@ public class AlertTask extends AbstractHibernateTask<AlertRequest>
 			@Override public boolean transactional() { return false; }
 			@Override public Long run(final FacilityFilter filter, final Session s) {
 				var f = filter.from;
-				return facilityDao.countActivatedAtByDistance(filter.activatedAtFrom, f.latitude, f.longitude, f.miles, PAGE_SIZE);
+				return facilityDao.countActivatedAtByDistance(filter.activatedAtFrom, f.latitude, f.longitude, f.meters(), PAGE_SIZE);
 			}
 		};
 
