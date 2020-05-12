@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.*;
 import static app.allclear.common.dao.OrderByBuilder.*;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Function;
 
@@ -334,6 +335,30 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	public List<FacilityValue> getActiveByNameAndDistance(final String name, final BigDecimal latitude, final BigDecimal longitude, final long meters)
 	{
 		return findActiveByNameAndDistance(name, latitude, longitude, meters).stream().map(o -> o.toValue()).collect(toList());
+	}
+
+	/** Gets the Activated timestamps for facilities within the specified range. Used by the AlertTask to determine if a user has new facilities in their area.
+	 * 
+	 * @param latitude
+	 * @param longitude
+	 * @param meters
+	 * @param size
+	 * @return never NULL
+	 */
+	public Long countActivatedAtByDistance(
+		final Date activatedAtFrom,
+		final BigDecimal latitude,
+		final BigDecimal longitude,
+		final long meters,
+		final int pageSize)
+	{
+		return namedQuery("countFacilitiesActivatedAtByDistance", Total.class)
+			.setParameter("activatedAtFrom", activatedAtFrom)
+			.setParameter("latitude", latitude)
+			.setParameter("longitude", longitude)
+			.setParameter("meters", meters)
+			.setParameter("pageSize", pageSize)
+			.uniqueResultOptional().orElse(Total.ZERO).total;
 	}
 
 	/** Gets a person's favorite facility IDs. Returns an empty list if the user is an admin.

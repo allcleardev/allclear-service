@@ -25,7 +25,8 @@ import app.allclear.platform.model.AlertRequest;
 public class AlertTask extends AbstractHibernateTask<AlertRequest>
 {
 	private static final Logger log = LoggerFactory.getLogger(AlertTask.class);
-	public static final int MILES_DEFAULT = 20;
+	public static final int MILES_DEFAULT = 100;
+	public static final int PAGE_SIZE = 20;
 
 	private final PeopleDAO dao;
 	private final SessionDAO sessionDao;
@@ -43,7 +44,10 @@ public class AlertTask extends AbstractHibernateTask<AlertRequest>
 		this.facilitySearch = new AbstractHibernateRunner<FacilityFilter, Long>(factory) {
 			@Override public boolean readOnly() { return true; }
 			@Override public boolean transactional() { return false; }
-			@Override public Long run(final FacilityFilter filter, final Session s) { return facilityDao.count(filter); }
+			@Override public Long run(final FacilityFilter filter, final Session s) {
+				var f = filter.from;
+				return facilityDao.countActivatedAtByDistance(filter.activatedAtFrom, f.latitude, f.longitude, f.miles, PAGE_SIZE);
+			}
 		};
 
 		log.info("INITIALIZED");
@@ -55,7 +59,8 @@ public class AlertTask extends AbstractHibernateTask<AlertRequest>
 		var record = dao.findWithException(request.personId);
 		var lastAlertedAt = record.alertedAt();
 
-		final long count = facilitySearch.run(new FacilityFilter().withActivatedAtFrom(lastAlertedAt).withFrom(new GeoFilter(record.getLatitude(), record.getLongitude(), MILES_DEFAULT)));
+		var count = facilitySearch.run(new FacilityFilter().withActivatedAtFrom(lastAlertedAt).withFrom(new GeoFilter(record.getLatitude(), record.getLongitude(), MILES_DEFAULT)));
+
 		if (0L < count)
 		{
 			log.info("FOUND ({}): {} new facilities.", request.personId, count);
@@ -67,7 +72,7 @@ public class AlertTask extends AbstractHibernateTask<AlertRequest>
 		}
 
 		var now = new Date();	// Get date right after checking facility search.
-		record.setAlertedOf((int) count);
+		record.setAlertedOf(count.intValue());
 		record.setAlertedAt(now);	// Always mark that the user was checked for a possible facility alert.
 		record.setUpdatedAt(now);
 

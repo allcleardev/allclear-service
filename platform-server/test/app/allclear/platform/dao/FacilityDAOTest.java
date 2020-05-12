@@ -290,6 +290,13 @@ public class FacilityDAOTest
 	}
 
 	@Test
+	public void countActivatedAtByDistance()
+	{
+		assertThat(assertThrows(PersistenceException.class, () -> dao.countActivatedAtByDistance(new Date(), bg("45.5"), bg("-35.7"), 100000L, 20)))	// Function "ST_DISTANCE_SPHERE" not found
+			.hasMessage("org.hibernate.exception.SQLGrammarException: could not prepare statement");
+	}
+
+	@Test
 	public void favorite()
 	{
 		Assertions.assertNull(VALUE.favorite);

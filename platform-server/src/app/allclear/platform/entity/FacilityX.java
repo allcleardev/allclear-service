@@ -19,9 +19,12 @@ import app.allclear.platform.value.FacilityValue;
  */
 
 @Entity
-@NamedNativeQueries(@NamedNativeQuery(name="findActiveFacilitiesByNameAndDistance",
-	query="SELECT o.*, ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:longitude, :latitude)) AS meters FROM facility o WHERE o.name LIKE :name AND o.active = TRUE AND ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:longitude, :latitude)) <= :meters ORDER BY meters",
-	resultClass=FacilityX.class))
+@NamedNativeQueries({@NamedNativeQuery(name="countFacilitiesActivatedAtByDistance",
+		query="SELECT COUNT(*) FROM (SELECT o.activated_at FROM facility o WHERE o.activated_at IS NOT NULL AND ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:longitude, :latitude)) <= :meters ORDER BY ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:longitude, :latitude)) LIMIT :pageSize) a WHERE a.activated_at >= :activatedAtFrom",
+		resultClass=Total.class),
+	@NamedNativeQuery(name="findActiveFacilitiesByNameAndDistance",
+		query="SELECT o.*, ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:longitude, :latitude)) AS meters FROM facility o WHERE o.name LIKE :name AND o.active = TRUE AND ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:longitude, :latitude)) <= :meters ORDER BY meters",
+		resultClass=FacilityX.class)})
 public class FacilityX implements Serializable
 {
 	private static final long serialVersionUID = 1L;

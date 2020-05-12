@@ -19,7 +19,6 @@ import app.allclear.junit.hibernate.HibernateRule;
 import app.allclear.platform.App;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.dao.*;
-import app.allclear.platform.filter.FacilityFilter;
 import app.allclear.platform.model.AlertRequest;
 import app.allclear.platform.value.*;
 import app.allclear.twilio.client.TwilioClient;
@@ -51,7 +50,10 @@ public class AlertTaskTest
 	private static Date LAST_ALERTED_AT = null;
 	private static SMSResponse LAST_SMS_RESPONSE = null;
 
-	private void changeCount(final long value) { when(facilityDao.count(any(FacilityFilter.class))).thenReturn(value); }
+	private void changeCount(final long value)
+	{
+		when(facilityDao.countActivatedAtByDistance(any(Date.class), any(BigDecimal.class), any(BigDecimal.class), any(Long.class), any(Integer.class))).thenReturn(value);
+	}
 
 	@BeforeAll
 	public static void up()
