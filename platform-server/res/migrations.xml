@@ -506,7 +506,7 @@
 		</rollback>
 	</changeSet>
 
-	<changeSet id="v1.1.51_ALLCLEAR-533" author="smalleyd">
+	<changeSet id="v1.1.52_ALLCLEAR-533" author="smalleyd">
 		<addColumn tableName="facility">
 			<column name="activated_at" type="DATETIME" remarks="Represents the date-time when the facility is first marked active." />
 		</addColumn>
