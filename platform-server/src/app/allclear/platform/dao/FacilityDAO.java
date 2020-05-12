@@ -41,7 +41,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	private static final String SELECT = "SELECT OBJECT(o) FROM Facility o";
 	private static final String COUNT = "SELECT COUNT(o.id) FROM Facility o";
 	private static final String COUNT_ = "SELECT COUNT(o.id) FROM facility o";
-	private static final String SELECT_ = "SELECT o.id, o.name, o.address, o.city, o.state, o.latitude, o.longitude, o.phone, o.appointment_phone, o.email, o.url, o.appointment_url, o.hours, o.type_id, o.drive_thru, o.appointment_required, o.accepts_third_party, o.referral_required, o.test_criteria_id, o.other_test_criteria, o.tests_per_day, o.government_id_required, o.minimum_age, o.doctor_referral_criteria, o.first_responder_friendly, o.telescreening_available, o.accepts_insurance, o.insurance_providers_accepted, o.free_or_low_cost, o.notes, o.active, o.created_at, o.updated_at, ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:fromLongitude, :fromLatitude)) AS meters FROM facility o";
+	private static final String SELECT_ = "SELECT o.id, o.name, o.address, o.city, o.state, o.latitude, o.longitude, o.phone, o.appointment_phone, o.email, o.url, o.appointment_url, o.hours, o.type_id, o.drive_thru, o.appointment_required, o.accepts_third_party, o.referral_required, o.test_criteria_id, o.other_test_criteria, o.tests_per_day, o.government_id_required, o.minimum_age, o.doctor_referral_criteria, o.first_responder_friendly, o.telescreening_available, o.accepts_insurance, o.insurance_providers_accepted, o.free_or_low_cost, o.notes, o.active, o.activated_at, o.created_at, o.updated_at, ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:fromLongitude, :fromLatitude)) AS meters FROM facility o";
 	private static final OrderByBuilder ORDER = new OrderByBuilder('o', 
 		"id", DESC,
 		"name", ASC,
@@ -74,6 +74,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		"freeOrLowCost", DESC,
 		"notes", ASC,
 		"active", DESC,
+		"activatedAt", DESC,
 		"createdAt", DESC,
 		"updatedAt", DESC,
 		"meters", ASC + ",meters");	// Need to leave off the "o." alias.
@@ -479,6 +480,9 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.addContains("notes", "o.notes LIKE :notes", filter.notes)
 			.addNotNull("o.notes", filter.hasNotes)
 			.add("active", "o.active = :active", filter.active)
+			.addNotNull("o.activatedAt", filter.hasActivatedAt)
+			.add("activatedAtFrom", "o.activatedAt >= :activatedAtFrom", filter.activatedAtFrom)
+			.add("activatedAtTo", "o.activatedAt <= :activatedAtTo", filter.activatedAtTo)
 			.add("createdAtFrom", "o.createdAt >= :createdAtFrom", filter.createdAtFrom)
 			.add("createdAtTo", "o.createdAt <= :createdAtTo", filter.createdAtTo)
 			.add("updatedAtFrom", "o.updatedAt >= :updatedAtFrom", filter.updatedAtFrom)
@@ -546,6 +550,9 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.addContains("notes", "o.notes LIKE :notes", filter.notes)
 			.addNotNull("o.notes", filter.hasNotes)
 			.add("active", "o.active = :active", filter.active)
+			.addNotNull("o.activated_at", filter.hasActivatedAt)
+			.add("activatedAtFrom", "o.activated_at >= :activatedAtFrom", filter.activatedAtFrom)
+			.add("activatedAtTo", "o.activated_at <= :activatedAtTo", filter.activatedAtTo)
 			.add("createdAtFrom", "o.created_at >= :createdAtFrom", filter.createdAtFrom)
 			.add("createdAtTo", "o.created_at <= :createdAtTo", filter.createdAtTo)
 			.add("updatedAtFrom", "o.updated_at >= :updatedAtFrom", filter.updatedAtFrom)

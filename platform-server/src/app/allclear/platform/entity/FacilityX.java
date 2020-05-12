@@ -57,6 +57,7 @@ public class FacilityX implements Serializable
 	@Column(name="free_or_low_cost", columnDefinition="BIT", nullable=false) public boolean freeOrLowCost;
 	@Column(name="notes", columnDefinition="TEXT", nullable=true) public String notes;
 	@Column(name="active", columnDefinition="BIT", nullable=false) public boolean active;
+	@Column(name="activated_at", columnDefinition="DATETIME", nullable=true) public Date activatedAt;
 	@Column(name="created_at", columnDefinition="DATETIME", nullable=false) public Date createdAt;
 	@Column(name="updated_at", columnDefinition="DATETIME", nullable=false) public Date updatedAt;
 	@Column(name="meters", columnDefinition="BIGINT", nullable=false) public long meters;
@@ -98,6 +99,7 @@ public class FacilityX implements Serializable
 			freeOrLowCost,
 			notes,
 			active,
+			activatedAt,
 			createdAt,
 			updatedAt).withMeters(meters);
 	}

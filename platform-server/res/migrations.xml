@@ -506,4 +506,15 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.1.51_ALLCLEAR-533" author="smalleyd">
+		<addColumn tableName="facility">
+			<column name="activated_at" type="DATETIME" remarks="Represents the date-time when the facility is first marked active." />
+		</addColumn>
+		<sql><![CDATA[UPDATE facility SET activated_at = updated_at WHERE active = TRUE]]></sql>
+
+		<rollback>
+			<dropColumn tableName="facility" columnName="activated_at" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

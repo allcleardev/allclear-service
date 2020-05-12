@@ -10,6 +10,7 @@ import static app.allclear.platform.type.TestCriteria.*;
 import static app.allclear.platform.type.TestType.*;
 
 import java.math.BigDecimal;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 import javax.persistence.PersistenceException;
@@ -91,6 +92,7 @@ public class FacilityDAOTest
 			false, true, false, "These providers are accepted: One", true, "Quick notations", true), true);
 		Assertions.assertNotNull(value, "Exists");
 		Assertions.assertTrue(value.active, "Check active");
+		assertThat(value.activatedAt).as("Check activatedAt").isNotNull().isCloseTo(new Date(), 500L);
 		check(VALUE, value);
 
 		PERSON = peopleDao.add(new PeopleValue("first", "8885551000", true));
@@ -333,6 +335,7 @@ public class FacilityDAOTest
 		var value = dao.getByIdWithException(VALUE.id);
 		Assertions.assertNotNull(value, "Exists");
 		Assertions.assertTrue(value.active, "Check active");
+		assertThat(value.activatedAt).as("Check activatedAt").isNotNull().isEqualTo(value.createdAt);
 		Assertions.assertNull(value.testTypes, "Check testTypes");
 		check(VALUE, value);
 	}
@@ -534,6 +537,10 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter(1, 20).withNotes(VALUE.notes), 1L),
 			arguments(new FacilityFilter(1, 20).withHasNotes(true), 1L),
 			arguments(new FacilityFilter(1, 20).withActive(VALUE.active), 1L),
+			arguments(new FacilityFilter(1, 20).withHasActivatedAt(true), 1L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAgo), 1L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtTo(hourAhead), 1L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAgo).withActivatedAtTo(hourAhead), 1L),
 			arguments(new FacilityFilter(1, 20).withCreatedAtFrom(hourAgo), 1L),
 			arguments(new FacilityFilter(1, 20).withCreatedAtTo(hourAhead), 1L),
 			arguments(new FacilityFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
@@ -598,6 +605,10 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter(1, 20).withNotes("invalid"), 0L),
 			arguments(new FacilityFilter(1, 20).withHasNotes(false), 0L),
 			arguments(new FacilityFilter(1, 20).withActive(!VALUE.active), 0L),
+			arguments(new FacilityFilter(1, 20).withHasActivatedAt(false), 0L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAhead), 0L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtTo(hourAgo), 0L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAhead).withActivatedAtTo(hourAgo), 0L),
 			arguments(new FacilityFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
 			arguments(new FacilityFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
 			arguments(new FacilityFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
@@ -874,6 +885,13 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter("active", "DESC"), "active", "DESC"),
 			arguments(new FacilityFilter("active", "desc"), "active", "DESC"),
 
+			arguments(new FacilityFilter("activatedAt", null), "activatedAt", "DESC"), // Missing sort direction is converted to the default.
+			arguments(new FacilityFilter("activatedAt", "ASC"), "activatedAt", "ASC"),
+			arguments(new FacilityFilter("activatedAt", "asc"), "activatedAt", "ASC"),
+			arguments(new FacilityFilter("activatedAt", "invalid"), "activatedAt", "DESC"),	// Invalid sort direction is converted to the default.
+			arguments(new FacilityFilter("activatedAt", "DESC"), "activatedAt", "DESC"),
+			arguments(new FacilityFilter("activatedAt", "desc"), "activatedAt", "DESC"),
+
 			arguments(new FacilityFilter("createdAt", null), "createdAt", "DESC"), // Missing sort direction is converted to the default.
 			arguments(new FacilityFilter("createdAt", "ASC"), "createdAt", "ASC"),
 			arguments(new FacilityFilter("createdAt", "asc"), "createdAt", "ASC"),
@@ -934,6 +952,8 @@ public class FacilityDAOTest
 		VALUE = dao.add(createValid().withActive(true).withTestTypes(NASAL_SWAB, ANTIBODY), true);
 		Assertions.assertNotNull(VALUE, "Exists");
 		Assertions.assertEquals(2L, VALUE.id, "Check ID");
+		Assertions.assertTrue(VALUE.active, "Check active");
+		assertThat(VALUE.activatedAt).as("Check activatedAt").isNotNull().isEqualTo(VALUE.createdAt);
 
 		auditorAdds++;
 	}
@@ -946,6 +966,7 @@ public class FacilityDAOTest
 		var v = dao.getById(2L);
 		Assertions.assertNotNull(dao.getById(2L), "Exists");
 		Assertions.assertTrue(v.active, "Check active");
+		assertThat(v.activatedAt).as("Check activatedAt").isNotNull().isEqualTo(v.createdAt);
 		assertThat(v.testTypes).as("Check testTypes").containsExactly(ANTIBODY.created(), NASAL_SWAB.created());
 
 		v = dao.search(new FacilityFilter()).records.get(0);
@@ -958,6 +979,8 @@ public class FacilityDAOTest
 		VALUE = dao.add(createValid().withActive(true).withId(20L).nullTestTypes(), true);
 		Assertions.assertNotNull(VALUE, "Exists");
 		Assertions.assertEquals(2L, VALUE.id, "Check ID");
+		Assertions.assertTrue(VALUE.active, "Check active");
+		assertThat(VALUE.activatedAt).as("Check activatedAt").isNotNull().isEqualTo(VALUE.createdAt).isBefore(VALUE.updatedAt);
 
 		auditorUpdates++;
 	}
@@ -1046,6 +1069,7 @@ public class FacilityDAOTest
 		VALUE = dao.add(createValid().withName("byEditor").withActive(true), false);
 		Assertions.assertEquals(5L, VALUE.id, "Check ID");
 		Assertions.assertFalse(VALUE.active, "Check active");
+		Assertions.assertNull(VALUE.activatedAt, "Check activatedAt");
 
 		auditorAdds++;
 	}
@@ -1056,6 +1080,7 @@ public class FacilityDAOTest
 		var v = dao.getById(VALUE.id);
 		Assertions.assertEquals("byEditor", v.name, "Check name");
 		Assertions.assertFalse(v.active, "Check active");
+		Assertions.assertNull(v.activatedAt, "Check activatedAt");
 		Assertions.assertNull(v.testTypes, "Check testTypes");
 
 		v = dao.search(new FacilityFilter().withId(5L)).records.get(0);
@@ -1069,6 +1094,7 @@ public class FacilityDAOTest
 		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
 		Assertions.assertFalse(v.active, "Check active");
 		Assertions.assertFalse(VALUE.active, "Check active");
+		Assertions.assertNull(v.activatedAt, "Check activatedAt");
 		assertThat(v.testTypes).as("Check testTypes").containsExactly(NASAL_SWAB.created());
 
 		auditorUpdates++;
@@ -1080,6 +1106,7 @@ public class FacilityDAOTest
 		var v = dao.getById(VALUE.id);
 		Assertions.assertEquals("byEditor", v.name, "Check name");
 		Assertions.assertFalse(v.active, "Check active");
+		Assertions.assertNull(v.activatedAt, "Check activatedAt");
 		assertThat(v.testTypes).as("Check testTypes").containsExactly(NASAL_SWAB.created());
 
 		v = dao.search(new FacilityFilter().withId(5L)).records.get(0);
@@ -1093,6 +1120,7 @@ public class FacilityDAOTest
 		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
 		Assertions.assertTrue(v.active, "Check active");
 		Assertions.assertTrue(VALUE.active, "Check active");
+		assertThat(v.activatedAt).as("Check activatedAt").isNotNull().isAfter(v.createdAt).isEqualTo(v.updatedAt).isCloseTo(new Date(), 500L);
 		assertThat(v.testTypes).as("Check testTypes").containsExactly(DONT_KNOW.created());
 
 		auditorUpdates++;
@@ -1104,6 +1132,7 @@ public class FacilityDAOTest
 		var v = dao.getById(VALUE.id);
 		Assertions.assertEquals("byEditor", v.name, "Check name");
 		Assertions.assertTrue(v.active, "Check active");
+		assertThat(v.activatedAt).as("Check activatedAt").isNotNull().isAfter(v.createdAt).isEqualTo(v.updatedAt).isCloseTo(new Date(), 1000L);
 		assertThat(v.testTypes).as("Check testTypes").containsExactly(DONT_KNOW.created());
 
 		v = dao.search(new FacilityFilter().withId(5L)).records.get(0);
@@ -1117,6 +1146,7 @@ public class FacilityDAOTest
 		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
 		Assertions.assertTrue(v.active, "Check active");
 		Assertions.assertTrue(VALUE.active, "Check active");
+		assertThat(v.activatedAt).as("Check activatedAt").isNotNull().isAfter(v.createdAt).isBefore(v.updatedAt).isCloseTo(new Date(), 500L);
 		assertThat(v.testTypes).as("Check testTypes").isEmpty();
 
 		auditorUpdates++;
@@ -1128,6 +1158,7 @@ public class FacilityDAOTest
 		var v = dao.getById(VALUE.id);
 		Assertions.assertEquals("byEditor", v.name, "Check name");
 		Assertions.assertTrue(v.active, "Check active");
+		assertThat(v.activatedAt).as("Check activatedAt").isNotNull().isAfter(v.createdAt).isBefore(v.updatedAt).isCloseTo(new Date(), 1000L);
 		Assertions.assertNull(v.testTypes, "Check testTypes");
 
 		v = dao.search(new FacilityFilter().withId(5L)).records.get(0);
@@ -1179,6 +1210,7 @@ public class FacilityDAOTest
 		Assertions.assertEquals(expected.freeOrLowCost, record.isFreeOrLowCost(), assertId + "Check freeOrLowCost");
 		Assertions.assertEquals(expected.notes, record.getNotes(), assertId + "Check notes");
 		Assertions.assertEquals(expected.active, record.isActive(), assertId + "Check active");
+		Assertions.assertEquals(expected.activatedAt, record.getActivatedAt(), assertId + "Check activatedAt");
 		Assertions.assertEquals(expected.createdAt, record.getCreatedAt(), assertId + "Check createdAt");
 		Assertions.assertEquals(expected.updatedAt, record.getUpdatedAt(), assertId + "Check updatedAt");
 	}
@@ -1220,6 +1252,7 @@ public class FacilityDAOTest
 		Assertions.assertEquals(expected.freeOrLowCost, value.freeOrLowCost, assertId + "Check freeOrLowCost");
 		Assertions.assertEquals(expected.notes, value.notes, assertId + "Check notes");
 		Assertions.assertEquals(expected.active, value.active, assertId + "Check active");
+		Assertions.assertEquals(expected.activatedAt, value.activatedAt, assertId + "Check activatedAt");
 		Assertions.assertEquals(expected.createdAt, value.createdAt, assertId + "Check createdAt");
 		Assertions.assertEquals(expected.updatedAt, value.updatedAt, assertId + "Check updatedAt");
 		Assertions.assertEquals(expected.testTypes, value.testTypes, assertId + "Check testTypes");

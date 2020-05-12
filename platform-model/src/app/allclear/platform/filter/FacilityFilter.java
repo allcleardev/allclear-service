@@ -80,6 +80,9 @@ public class FacilityFilter extends QueryFilter
 	public String notes = null;
 	public Boolean hasNotes = null;
 	public Boolean active = null;
+	public Boolean hasActivatedAt = null;
+	public Date activatedAtFrom = null;
+	public Date activatedAtTo = null;
 	public Date createdAtFrom = null;
 	public Date createdAtTo = null;
 	public Date updatedAtFrom = null;
@@ -144,6 +147,9 @@ public class FacilityFilter extends QueryFilter
 	public FacilityFilter withNotes(final String newValue) { notes = newValue; return this; }
 	public FacilityFilter withHasNotes(final Boolean newValue) { hasNotes = newValue; return this; }
 	public FacilityFilter withActive(final Boolean newValue) { active = newValue; return this; }
+	public FacilityFilter withHasActivatedAt(final Boolean newValue) { hasActivatedAt = newValue; return this; }
+	public FacilityFilter withActivatedAtFrom(final Date newValue) { activatedAtFrom = newValue; return this; }
+	public FacilityFilter withActivatedAtTo(final Date newValue) { activatedAtTo = newValue; return this; }
 	public FacilityFilter withCreatedAtFrom(final Date newValue) { createdAtFrom = newValue; return this; }
 	public FacilityFilter withCreatedAtTo(final Date newValue) { createdAtTo = newValue; return this; }
 	public FacilityFilter withUpdatedAtFrom(final Date newValue) { updatedAtFrom = newValue; return this; }
@@ -222,6 +228,8 @@ public class FacilityFilter extends QueryFilter
 		@param freeOrLowCost represents the "free_or_low_cost" field.
 		@param notes represents the "notes" field.
 		@param active represents the "active" field.
+		@param activatedAtFrom represents the "activated_at" field - lower boundary.
+		@param activatedAtTo represents the "activated_at" field - upper boundary.
 		@param createdAt represents the "created_at" field.
 		@param createdAtFrom represents the "created_at" field - lower boundary.
 		@param createdAtTo represents the "created_at" field - upper boundary.
@@ -266,6 +274,8 @@ public class FacilityFilter extends QueryFilter
 		final Boolean freeOrLowCost,
 		final String notes,
 		final Boolean active,
+		final Date activatedAtFrom,
+		final Date activatedAtTo,
 		final Date createdAtFrom,
 		final Date createdAtTo,
 		final Date updatedAtFrom,
@@ -308,6 +318,8 @@ public class FacilityFilter extends QueryFilter
 		this.freeOrLowCost = freeOrLowCost;
 		this.notes = notes;
 		this.active = active;
+		this.activatedAtFrom = activatedAtFrom;
+		this.activatedAtTo = activatedAtTo;
 		this.createdAtFrom = createdAtFrom;
 		this.createdAtTo = createdAtTo;
 		this.updatedAtFrom = updatedAtFrom;
@@ -407,6 +419,9 @@ public class FacilityFilter extends QueryFilter
 			.append(", notes: ").append(notes)
 			.append(", hasNotes: ").append(hasNotes)
 			.append(", active: ").append(active)
+			.append(", hasActivatedAt: ").append(hasActivatedAt)
+			.append(", activatedAtFrom: ").append(activatedAtFrom)
+			.append(", activatedAtTo: ").append(activatedAtTo)
 			.append(", createdAtFrom: ").append(createdAtFrom)
 			.append(", createdAtTo: ").append(createdAtTo)
 			.append(", updatedAtFrom: ").append(updatedAtFrom)

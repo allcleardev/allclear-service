@@ -198,6 +198,11 @@ public class Facility implements Serializable
 	public boolean active;
 	public void setActive(final boolean newValue) { active = newValue; }
 
+	@Column(name="activated_at", columnDefinition="DATETIME", nullable=true)
+	public Date getActivatedAt() { return activatedAt; }
+	public Date activatedAt;
+	public void setActivatedAt(final Date newValue) { activatedAt = newValue; }
+
 	@Column(name="created_at", columnDefinition="DATETIME", nullable=false)
 	public Date getCreatedAt() { return createdAt; }
 	public Date createdAt;
@@ -215,72 +220,6 @@ public class Facility implements Serializable
 	public void setTestTypes(final List<FacilityTestType> newValues) { testTypes = newValues; }
 
 	public Facility() {}
-
-	public Facility(
-		final String name,
-		final String address,
-		final String city,
-		final String state,
-		final BigDecimal latitude,
-		final BigDecimal longitude,
-		final String phone,
-		final String appointmentPhone,
-		final String email,
-		final String url,
-		final String appointmentUrl,
-		final String hours,
-		final String typeId,
-		final boolean driveThru,
-		final Boolean appointmentRequired,
-		final Boolean acceptsThirdParty,
-		final boolean referralRequired,
-		final String testCriteriaId,
-		final String otherTestCriteria,
-		final Integer testsPerDay,
-		final boolean governmentIdRequired,
-		final Integer minimumAge,
-		final String doctorReferralCriteria,
-		final boolean firstResponderFriendly,
-		final boolean telescreeningAvailable,
-		final boolean acceptsInsurance,
-		final String insuranceProvidersAccepted,
-		final boolean freeOrLowCost,
-		final String notes,
-		final boolean active,
-		final Date createdAt)
-	{
-		this.name = name;
-		this.address = address;
-		this.city = city;
-		this.state = state;
-		this.latitude = latitude;
-		this.longitude = longitude;
-		this.phone = phone;
-		this.appointmentPhone = appointmentPhone;
-		this.email = email;
-		this.url = url;
-		this.appointmentUrl = appointmentUrl;
-		this.hours = hours;
-		this.typeId = typeId;
-		this.driveThru = driveThru;
-		this.appointmentRequired = appointmentRequired;
-		this.acceptsThirdParty = acceptsThirdParty;
-		this.referralRequired = referralRequired;
-		this.testCriteriaId = testCriteriaId;
-		this.otherTestCriteria = otherTestCriteria;
-		this.testsPerDay = testsPerDay;
-		this.governmentIdRequired = governmentIdRequired;
-		this.minimumAge = minimumAge;
-		this.doctorReferralCriteria = doctorReferralCriteria;
-		this.firstResponderFriendly = firstResponderFriendly;
-		this.telescreeningAvailable = telescreeningAvailable;
-		this.acceptsInsurance = acceptsInsurance;
-		this.insuranceProvidersAccepted = insuranceProvidersAccepted;
-		this.freeOrLowCost = freeOrLowCost;
-		this.notes = notes;
-		this.active = active;
-		this.createdAt = this.updatedAt = createdAt;
-	}
 
 	public Facility(final FacilityValue value)
 	{
@@ -315,6 +254,7 @@ public class Facility implements Serializable
 		this.notes = value.notes;
 		this.active = value.active;
 		this.createdAt = this.updatedAt = value.createdAt = value.updatedAt = new Date();
+		this.activatedAt = value.activatedAt = (value.active ? value.createdAt : null);
 	}
 
 	@Override
@@ -354,6 +294,7 @@ public class Facility implements Serializable
 			(freeOrLowCost == v.freeOrLowCost) &&
 			Objects.equals(notes, v.notes) &&
 			(active == v.active) &&
+			((activatedAt == v.activatedAt) || DateUtils.truncatedEquals(activatedAt, v.activatedAt, Calendar.SECOND)) &&
 			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND) &&
 			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
 	}
@@ -397,10 +338,13 @@ public class Facility implements Serializable
 		if (admin)
 		{
 			setActive(value.active);
+			if (value.active && (null == activatedAt)) setActivatedAt(value.activatedAt = value.updatedAt);
+			else value.activatedAt = getActivatedAt();
 		}
 		else
 		{
 			value.active = isActive();
+			value.activatedAt = getActivatedAt();
 		}
 
 		return this;
@@ -443,6 +387,7 @@ public class Facility implements Serializable
 			isFreeOrLowCost(),
 			getNotes(),
 			isActive(),
+			getActivatedAt(),
 			getCreatedAt(),
 			getUpdatedAt());
 	}

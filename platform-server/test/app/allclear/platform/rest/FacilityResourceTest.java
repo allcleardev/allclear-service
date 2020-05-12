@@ -127,6 +127,8 @@ public class FacilityResourceTest
 
 		var value = response.readEntity(FacilityValue.class);
 		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertFalse(value.active, "Check active");
+		Assertions.assertNull(value.activatedAt, "Check activatedAt");
 		check(VALUE.withId(1L).withCreatedAt(now).withUpdatedAt(now), value);
 
 		PERSON = sessionDao.add(peopleDao.add(new PeopleValue("firstPerson", "888-555-1000", true)), false);
@@ -170,6 +172,28 @@ public class FacilityResourceTest
 		count(new FacilityFilter(), 1L);
 	}
 
+	public static Stream<Arguments> check()
+	{
+		var hourAgo = hourAgo();
+		var hourAhead = hourAhead();
+
+		return Stream.of(
+			arguments(new FacilityFilter(1, 20).withHasActivatedAt(true), 0L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAgo), 0L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtTo(hourAhead), 0L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAgo).withActivatedAtTo(hourAhead), 0L),
+
+			// Negative tests
+			arguments(new FacilityFilter(1, 20).withHasActivatedAt(false), 1L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAhead), 0L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtTo(hourAgo), 0L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAhead).withActivatedAtTo(hourAgo), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void check(final FacilityFilter filter, final long expectedTotal) { search_(filter, expectedTotal); }
+
 	@Test
 	public void check_as_anonymous()	// Perform GET while the facility is inactive.
 	{
@@ -183,7 +207,10 @@ public class FacilityResourceTest
 	{
 		sessionDao.current(EDITOR);
 
-		check(VALUE, getX(VALUE.id));
+		var value = getX(VALUE.id);
+		check(VALUE, value);
+
+		Assertions.assertNull(value.activatedAt, "Check activatedAt");
 	}
 
 	@Test
@@ -212,8 +239,33 @@ public class FacilityResourceTest
 	{
 		var response = request(target().queryParam("name", "ul")).get();
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
-		assertThat(response.readEntity(TYPE_LIST_VALUE)).as("Check values").containsExactly(VALUE);
+
+		var values = response.readEntity(TYPE_LIST_VALUE);
+		assertThat(values).as("Check values").containsExactly(VALUE);
+		assertThat(values.get(0).activatedAt).as("Check activatedAt").isNotNull().isCloseTo(new Date(), 1000L);
 	}
+
+	public static Stream<Arguments> find_afterActive_search()
+	{
+		var hourAgo = hourAgo();
+		var hourAhead = hourAhead();
+
+		return Stream.of(
+			arguments(new FacilityFilter(1, 20).withHasActivatedAt(true), 1L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAgo), 1L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtTo(hourAhead), 1L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAgo).withActivatedAtTo(hourAhead), 1L),
+
+			// Negative tests
+			arguments(new FacilityFilter(1, 20).withHasActivatedAt(false), 0L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAhead), 0L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtTo(hourAgo), 0L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAhead).withActivatedAtTo(hourAgo), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void find_afterActive_search(final FacilityFilter filter, final long expectedTotal) { search_(filter, expectedTotal); }
 
 	@Test
 	public void find_afterActive_withKm()
@@ -516,6 +568,10 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter(1, 20).withFreeOrLowCost(VALUE.freeOrLowCost), 1L),
 			arguments(new FacilityFilter(1, 20).withNotes(VALUE.notes), 1L),
 			arguments(new FacilityFilter(1, 20).withActive(VALUE.active), 1L),
+			arguments(new FacilityFilter(1, 20).withHasActivatedAt(true), 1L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAgo), 1L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtTo(hourAhead), 1L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAgo).withActivatedAtTo(hourAhead), 1L),
 			arguments(new FacilityFilter(1, 20).withCreatedAtFrom(hourAgo), 1L),
 			arguments(new FacilityFilter(1, 20).withCreatedAtTo(hourAhead), 1L),
 			arguments(new FacilityFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
@@ -566,6 +622,10 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter(1, 20).withFreeOrLowCost(!VALUE.freeOrLowCost), 0L),
 			arguments(new FacilityFilter(1, 20).withNotes("invalid"), 0L),
 			arguments(new FacilityFilter(1, 20).withActive(!VALUE.active), 0L),
+			arguments(new FacilityFilter(1, 20).withHasActivatedAt(false), 0L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAhead), 0L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtTo(hourAgo), 0L),
+			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAhead).withActivatedAtTo(hourAgo), 0L),
 			arguments(new FacilityFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
 			arguments(new FacilityFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
 			arguments(new FacilityFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
@@ -581,7 +641,7 @@ public class FacilityResourceTest
 	@ParameterizedTest
 	@MethodSource
 	public void search(final FacilityFilter filter, final long expectedTotal) { search_(filter, expectedTotal); }
-	public QueryResults<FacilityValue, FacilityFilter> search_(final FacilityFilter filter, final long expectedTotal)
+	private QueryResults<FacilityValue, FacilityFilter> search_(final FacilityFilter filter, final long expectedTotal)
 	{
 		var response = request("search")
 			.post(Entity.entity(filter, UTF8MediaType.APPLICATION_JSON_TYPE));
@@ -607,7 +667,7 @@ public class FacilityResourceTest
 			Assertions.assertEquals(total, results.records.size(), assertId + "Check records.size");
 			results.records.forEach(v -> Assertions.assertFalse(v.restricted, "Check restricted: " + v.name));
 			results.records.forEach(v -> {
-				if (v.id.equals(1L)) assertThat(v.testTypes).as("Check testTypes").containsExactly(NASAL_SWAB.created());
+				if (v.id.equals(1L)) assertThat(v.testTypes).as("Check testTypes").isEqualTo(VALUE.testTypes);
 				else assertThat(v.testTypes).as("Check testTypes").isNull();
 			});
 		}
@@ -849,6 +909,7 @@ public class FacilityResourceTest
 		VALUE = request().post(Entity.json(FacilityDAOTest.createValid().withName("byEditor").withActive(true)), FacilityValue.class);
 		Assertions.assertNotNull(VALUE.id, "Check ID");
 		Assertions.assertFalse(VALUE.active, "Check active");
+		Assertions.assertNull(VALUE.activatedAt, "Check activatedAt");
 
 		auditorAdds++;
 	}
@@ -861,6 +922,7 @@ public class FacilityResourceTest
 		var v = getX(VALUE.id);
 		Assertions.assertEquals("byEditor", v.name, "Check name");
 		Assertions.assertFalse(v.active, "Check active");
+		Assertions.assertNull(v.activatedAt, "Check activatedAt");
 	}
 
 	@Test
@@ -880,6 +942,7 @@ public class FacilityResourceTest
 		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
 		Assertions.assertFalse(v.active, "Check active");
 		Assertions.assertTrue(VALUE.active, "Check active");	// Sent in as TRUE.
+		Assertions.assertNull(v.activatedAt, "Check activatedAt");
 
 		VALUE.withActive(false);
 
@@ -894,6 +957,7 @@ public class FacilityResourceTest
 		var v = getX(VALUE.id);
 		Assertions.assertEquals("byEditor", v.name, "Check name");
 		Assertions.assertFalse(v.active, "Check active");
+		Assertions.assertNull(v.activatedAt, "Check activatedAt");
 	}
 
 	@Test
@@ -913,6 +977,7 @@ public class FacilityResourceTest
 		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
 		Assertions.assertTrue(v.active, "Check active");
 		Assertions.assertTrue(VALUE.active, "Check active");
+		assertThat(v.activatedAt).as("Check activatedAt").isNotNull().isEqualTo(v.updatedAt).isAfter(v.createdAt).isCloseTo(new Date(), 500L);
 
 		auditorUpdates++;
 	}
@@ -925,6 +990,7 @@ public class FacilityResourceTest
 		var v = getX(VALUE.id);
 		Assertions.assertEquals("byEditor", v.name, "Check name");
 		Assertions.assertTrue(v.active, "Check active");
+		assertThat(v.activatedAt).as("Check activatedAt").isNotNull().isEqualTo(v.updatedAt).isAfter(v.createdAt).isCloseTo(new Date(), 1000L);
 	}
 
 	@Test
@@ -943,7 +1009,8 @@ public class FacilityResourceTest
 		var v = request().put(Entity.json(VALUE.withActive(false)), FacilityValue.class);
 		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
 		Assertions.assertTrue(v.active, "Check active");
-		Assertions.assertFalse(VALUE.active, "Check active");	// Sent int as FALSE.
+		Assertions.assertFalse(VALUE.active, "Check active");	// Sent in as FALSE.
+		assertThat(v.activatedAt).as("Check activatedAt").isNotNull().isBefore(v.updatedAt).isAfter(v.createdAt);
 
 		VALUE.withActive(true);
 
@@ -958,6 +1025,7 @@ public class FacilityResourceTest
 		var v = getX(VALUE.id);
 		Assertions.assertEquals("byEditor", v.name, "Check name");
 		Assertions.assertTrue(v.active, "Check active");
+		assertThat(v.activatedAt).as("Check activatedAt").isNotNull().isBefore(v.updatedAt).isAfter(v.createdAt);
 	}
 
 	@Test
@@ -1021,6 +1089,10 @@ public class FacilityResourceTest
 		Assertions.assertEquals(expected.freeOrLowCost, value.freeOrLowCost, assertId + "Check freeOrLowCost");
 		Assertions.assertEquals(expected.notes, value.notes, assertId + "Check notes");
 		Assertions.assertEquals(expected.active, value.active, assertId + "Check active");
+		if (null == expected.activatedAt)
+			Assertions.assertNull(value.activatedAt, assertId + "Check activatedAt");
+		else
+			assertThat(value.activatedAt).as(assertId + "Check activatedAt").isCloseTo(expected.activatedAt, 500L);
 		if (null == expected.createdAt)
 			Assertions.assertNull(value.createdAt, assertId + "Check createdAt");
 		else

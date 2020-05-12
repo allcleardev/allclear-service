@@ -77,6 +77,7 @@ public class FacilityValue implements Auditable, Serializable
 	public boolean freeOrLowCost;
 	public String notes = null;
 	public boolean active;
+	public Date activatedAt = null;	// ALLCLEAR-533: DLS on 5/12/2020.
 	public Date createdAt = null;
 	public Date updatedAt = null;
 	public Long meters = null;	// A result included on distance searches. DLS on 4/3/2020
@@ -126,6 +127,7 @@ public class FacilityValue implements Auditable, Serializable
 	public FacilityValue withFreeOrLowCost(final boolean newValue) { freeOrLowCost = newValue; return this; }
 	public FacilityValue withNotes(final String newValue) { notes = newValue; return this; }
 	public FacilityValue withActive(final boolean newValue) { active = newValue; return this; }
+	public FacilityValue withActivatedAt(final Date newValue) { activatedAt = newValue; return this; }
 	public FacilityValue withCreatedAt(final Date newValue) { createdAt = newValue; return this; }
 	public FacilityValue withUpdatedAt(final Date newValue) { updatedAt = newValue; return this; }
 	public FacilityValue withMeters(final Long newValue) { meters = newValue; return this; }
@@ -222,7 +224,7 @@ public class FacilityValue implements Auditable, Serializable
 		this(null, name, address, city, state, latitude, longitude, phone, appointmentPhone, email, url, appointmentUrl, hours, typeId, null,
 			driveThru, appointmentRequired, acceptsThirdParty, referralRequired, testCriteriaId, null, otherTestCriteria, testsPerDay,
 			governmentIdRequired, minimumAge, doctorReferralCriteria, firstResponderFriendly, telescreeningAvailable, acceptsInsurance,
-			insuranceProvidersAccepted, freeOrLowCost, notes, active, null, null);
+			insuranceProvidersAccepted, freeOrLowCost, notes, active, null, null, null);
 	}
 
 	public FacilityValue(final Long id,
@@ -258,6 +260,7 @@ public class FacilityValue implements Auditable, Serializable
 		final boolean freeOrLowCost,
 		final String notes,
 		final boolean active,
+		final Date activatedAt,
 		final Date createdAt,
 		final Date updatedAt)
 	{
@@ -294,6 +297,7 @@ public class FacilityValue implements Auditable, Serializable
 		this.freeOrLowCost = freeOrLowCost;
 		this.notes = notes;
 		this.active = active;
+		this.activatedAt = activatedAt;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 	}
@@ -356,6 +360,7 @@ public class FacilityValue implements Auditable, Serializable
 			(freeOrLowCost == v.freeOrLowCost) &&
 			Objects.equals(notes, v.notes) &&
 			(active == v.active) &&
+			((activatedAt == v.activatedAt) || DateUtils.truncatedEquals(activatedAt, v.activatedAt, Calendar.SECOND)) &&
 			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND) &&
 			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
 	}
@@ -402,6 +407,7 @@ public class FacilityValue implements Auditable, Serializable
 			.append(", freeOrLowCost: ").append(freeOrLowCost)
 			.append(", notes: ").append(notes)
 			.append(", active: ").append(active)
+			.append(", activatedAt: ").append(activatedAt)
 			.append(", createdAt: ").append(createdAt)
 			.append(", updatedAt: ").append(updatedAt)
 			.append(", meters: ").append(meters)
