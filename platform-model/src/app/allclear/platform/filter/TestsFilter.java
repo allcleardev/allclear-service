@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 
+import app.allclear.common.ObjectUtils;
 import app.allclear.common.dao.QueryFilter;
 
 /********************************************************************************************************************
@@ -148,22 +149,5 @@ public class TestsFilter extends QueryFilter
 	**************************************************************************/
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ id: ").append(id)
-			.append(", personId: ").append(personId)
-			.append(", typeId: ").append(typeId)
-			.append(", takenOn: ").append(takenOn)
-			.append(", takenOnFrom: ").append(takenOnFrom)
-			.append(", takenOnTo: ").append(takenOnTo)
-			.append(", facilityId: ").append(facilityId)
-			.append(", positive: ").append(positive)
-			.append(", notes: ").append(notes)
-			.append(", hasNotes: ").append(hasNotes)
-			.append(", createdAtFrom: ").append(createdAtFrom)
-			.append(", createdAtTo: ").append(createdAtTo)
-			.append(", updatedAtFrom: ").append(updatedAtFrom)
-			.append(", updatedAtTo: ").append(updatedAtTo)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

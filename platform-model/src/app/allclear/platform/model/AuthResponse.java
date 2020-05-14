@@ -6,6 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.common.ObjectUtils;
+
 /** Value object that represents the user response after clicking on the magic link to complete the authentication process.
  * 
  * @author smalleyd
@@ -33,4 +35,7 @@ public class AuthResponse implements Serializable
 		this.token = StringUtils.trimToNull(token);
 		this.rememberMe = Boolean.TRUE.equals(rememberMe);
 	}
+
+	@Override
+	public String toString() { return ObjectUtils.toString(this); }
 }

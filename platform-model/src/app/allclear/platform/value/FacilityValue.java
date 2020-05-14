@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
+import app.allclear.common.ObjectUtils;
 import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.type.*;
 
@@ -372,48 +373,5 @@ public class FacilityValue implements Auditable, Serializable
 	}
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ id: ").append(id)
-			.append(", name: ").append(name)
-			.append(", address: ").append(address)
-			.append(", city: ").append(city)
-			.append(", state: ").append(state)
-			.append(", latitude: ").append(latitude)
-			.append(", longitude: ").append(longitude)
-			.append(", phone: ").append(phone)
-			.append(", appointmentPhone: ").append(appointmentPhone)
-			.append(", email: ").append(email)
-			.append(", url: ").append(url)
-			.append(", appointmentUrl: ").append(appointmentUrl)
-			.append(", hours: ").append(hours)
-			.append(", typeId: ").append(typeId)
-			.append(", type: ").append(type)
-			.append(", driveThru: ").append(driveThru)
-			.append(", appointmentRequired: ").append(appointmentRequired)
-			.append(", acceptsThirdParty: ").append(acceptsThirdParty)
-			.append(", referralRequired: ").append(referralRequired)
-			.append(", testCriteriaId: ").append(testCriteriaId)
-			.append(", testCriteria: ").append(testCriteria)
-			.append(", otherTestCriteria: ").append(otherTestCriteria)
-			.append(", testsPerDay: ").append(testsPerDay)
-			.append(", governmentIdRequired: ").append(governmentIdRequired)
-			.append(", minimumAge: ").append(minimumAge)
-			.append(", doctorReferralCriteria: ").append(doctorReferralCriteria)
-			.append(", firstResponderFriendly: ").append(firstResponderFriendly)
-			.append(", telescreeningAvailable: ").append(telescreeningAvailable)
-			.append(", acceptsInsurance: ").append(acceptsInsurance)
-			.append(", insuranceProvidersAccepted: ").append(insuranceProvidersAccepted)
-			.append(", freeOrLowCost: ").append(freeOrLowCost)
-			.append(", notes: ").append(notes)
-			.append(", active: ").append(active)
-			.append(", activatedAt: ").append(activatedAt)
-			.append(", createdAt: ").append(createdAt)
-			.append(", updatedAt: ").append(updatedAt)
-			.append(", meters: ").append(meters)
-			.append(", restricted: ").append(restricted)
-			.append(", favorite: ").append(favorite)
-			.append(", testTypes: ").append(testTypes)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

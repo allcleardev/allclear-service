@@ -6,6 +6,8 @@ import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
+import app.allclear.common.ObjectUtils;
+
 /**********************************************************************************
 *
 *	Value object class that represents the customer table.
@@ -108,14 +110,5 @@ public class CustomerValue implements Serializable
 	}
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ id: ").append(id)
-			.append(", name: ").append(name)
-			.append(", limit: ").append(limit)
-			.append(", active: ").append(active)
-			.append(", createdAt: ").append(createdAt)
-			.append(", updatedAt: ").append(updatedAt)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

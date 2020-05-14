@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.common.ObjectUtils;
+
 /** Represents the support timezones and their longitudinal constraints.
  * 
  * 	@author smalleyd
@@ -66,12 +68,5 @@ public class Timezone implements Serializable
 	public int hashCode() { return id.hashCode(); }
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ id: ").append(id)
-			.append(", name: ").append(name)
-			.append(", longitudeFrom: ").append(longitudeFrom)
-			.append(", longitudeTo: ").append(longitudeTo)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

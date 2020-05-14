@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.common.ObjectUtils;
 import app.allclear.google.model.LatLng;
 
 /** Value object that represents GEO radius search filter.
@@ -57,4 +58,7 @@ public class GeoFilter implements Serializable
 	{
 		return new GeoFilter(coord.lat, coord.lng, location, miles, km);
 	}
+
+	@Override
+	public String toString() { return ObjectUtils.toString(this); }
 }

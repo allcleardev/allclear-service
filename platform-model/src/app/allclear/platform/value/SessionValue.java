@@ -7,6 +7,7 @@ import org.apache.commons.lang3.time.DateUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.common.ObjectUtils;
 import app.allclear.platform.model.StartRequest;
 
 /** Value object that represents an authenticated session to interact
@@ -226,17 +227,5 @@ public class SessionValue implements Serializable
 	}
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ id: ").append(id)
-			.append(", rememberMe: ").append(rememberMe)
-			.append(", duration: ").append(duration)
-			.append(", admin: ").append(admin)
-			.append(", person: ").append(person)
-			.append(", registration: ").append(registration)
-			.append(", expiresAt: ").append(expiresAt)
-			.append(", lastAccessedAt: ").append(lastAccessedAt)
-			.append(", createdAt: ").append(createdAt)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

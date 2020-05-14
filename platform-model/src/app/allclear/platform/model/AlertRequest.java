@@ -5,6 +5,8 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.common.ObjectUtils;
+
 /** Value object that represents a request to run the Facility Alert task for the specific user.
  * 
  * @author smalleyd
@@ -37,9 +39,5 @@ public class AlertRequest implements Serializable
 	public int hashCode() { return Objects.hashCode(personId); }
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ personId: ").append(personId)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 
+import app.allclear.common.ObjectUtils;
 import app.allclear.common.dao.QueryFilter;
 
 /********************************************************************************************************************
@@ -117,16 +118,5 @@ public class AuditLogFilter extends QueryFilter
 	**************************************************************************/
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ id: ").append(id)
-			.append(", actionAt: ").append(actionAt)
-			.append(", actorType: ").append(actorType)
-			.append(", actionBy: ").append(actionBy)
-			.append(", action: ").append(action)
-			.append(", payload: ").append(payload)
-			.append(", timestampFrom: ").append(timestampFrom)
-			.append(", timestampTo: ").append(timestampTo)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

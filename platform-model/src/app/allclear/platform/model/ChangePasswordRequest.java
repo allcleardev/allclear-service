@@ -6,6 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.common.ObjectUtils;
+
 /** Value object that represents a request to the current user's password.
  * 
  * @author smalleyd
@@ -30,4 +32,7 @@ public class ChangePasswordRequest implements Serializable
 		this.newPassword = StringUtils.trimToNull(newPassword);
 		this.confirmPassword = StringUtils.trimToNull(confirmPassword);
 	}
+
+	@Override
+	public String toString() { return ObjectUtils.toString(this); }
 }

@@ -10,6 +10,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
+import app.allclear.common.ObjectUtils;
 import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.type.*;
 import app.allclear.twilio.model.TwilioUtils;
@@ -289,39 +290,5 @@ public class PeopleValue implements Serializable
 	}
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ id: ").append(id)
-			.append(", name: ").append(name)
-			.append(", phone: ").append(phone)
-			.append(", email: ").append(email)
-			.append(", firstName: ").append(firstName)
-			.append(", lastName: ").append(lastName)
-			.append(", dob: ").append(dob)
-			.append(", statusId: ").append(statusId)
-			.append(", status: ").append(status)
-			.append(", statureId: ").append(statureId)
-			.append(", stature: ").append(stature)
-			.append(", sexId: ").append(sexId)
-			.append(", sex: ").append(sex)
-			.append(", healthWorkerStatusId: ").append(healthWorkerStatusId)
-			.append(", healthWorkerStatus: ").append(healthWorkerStatus)
-			.append(", latitude: ").append(latitude)
-			.append(", longitude: ").append(longitude)
-			.append(", locationName: ").append(locationName)
-			.append(", alertable: ").append(alertable)
-			.append(", active: ").append(active)
-			.append(", authAt: ").append(authAt)
-			.append(", phoneVerifiedAt: ").append(phoneVerifiedAt)
-			.append(", emailVerifiedAt: ").append(emailVerifiedAt)
-			.append(", alertedOf: ").append(alertedOf)
-			.append(", alertedAt: ").append(alertedAt)
-			.append(", createdAt: ").append(createdAt)
-			.append(", updatedAt: ").append(updatedAt)
-			.append(", conditions: ").append(conditions)
-			.append(", exposures: ").append(exposures)
-			.append(", symptoms: ").append(symptoms)
-			.append(", facilities: ").append(facilities)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

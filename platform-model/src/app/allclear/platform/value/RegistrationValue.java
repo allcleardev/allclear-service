@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.common.ObjectUtils;
 import app.allclear.platform.model.StartRequest;
 
 /** Value object that represents a registration request.
@@ -67,12 +68,5 @@ public class RegistrationValue implements Serializable
 	}
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ key: ").append(key)
-			.append(", phone: ").append(phone)
-			.append(", person: ").append(person)
-			.append(", ttl: ").append(ttl)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

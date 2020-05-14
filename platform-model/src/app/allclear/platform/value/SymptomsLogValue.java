@@ -6,6 +6,7 @@ import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
+import app.allclear.common.ObjectUtils;
 import app.allclear.platform.type.Symptom;
 
 /**********************************************************************************
@@ -100,15 +101,5 @@ public class SymptomsLogValue implements Serializable
 	}
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ id: ").append(id)
-			.append(", personId: ").append(personId)
-			.append(", personName: ").append(personName)
-			.append(", symptomId: ").append(symptomId)
-			.append(", symptom: ").append(symptom)
-			.append(", startedAt: ").append(startedAt)
-			.append(", endedAt: ").append(endedAt)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

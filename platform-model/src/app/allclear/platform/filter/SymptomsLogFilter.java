@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 
+import app.allclear.common.ObjectUtils;
 import app.allclear.common.dao.QueryFilter;
 
 /********************************************************************************************************************
@@ -117,16 +118,5 @@ public class SymptomsLogFilter extends QueryFilter
 	**************************************************************************/
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ id: ").append(id)
-			.append(", personId: ").append(personId)
-			.append(", symptomId: ").append(symptomId)
-			.append(", startedAtFrom: ").append(startedAtFrom)
-			.append(", startedAtTo: ").append(startedAtTo)
-			.append(", hasEndedAt: ").append(hasEndedAt)
-			.append(", endedAtFrom: ").append(endedAtFrom)
-			.append(", endedAtTo: ").append(endedAtTo)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

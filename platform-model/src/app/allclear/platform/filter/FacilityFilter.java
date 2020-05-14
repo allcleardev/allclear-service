@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 
+import app.allclear.common.ObjectUtils;
 import app.allclear.common.dao.QueryFilter;
 import app.allclear.platform.type.TestType;
 
@@ -363,73 +364,5 @@ public class FacilityFilter extends QueryFilter
 	**************************************************************************/
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ id: ").append(id)
-			.append(", name: ").append(name)
-			.append(", address: ").append(address)
-			.append(", city: ").append(city)
-			.append(", state: ").append(state)
-			.append(", latitudeFrom: ").append(latitudeFrom)
-			.append(", latitudeTo: ").append(latitudeTo)
-			.append(", longitudeFrom: ").append(longitudeFrom)
-			.append(", longitudeTo: ").append(longitudeTo)
-			.append(", phone: ").append(phone)
-			.append(", hasPhone: ").append(hasPhone)
-			.append(", appointmentPhone: ").append(appointmentPhone)
-			.append(", hasAppointmentPhone: ").append(hasAppointmentPhone)
-			.append(", email: ").append(email)
-			.append(", hasEmail: ").append(hasEmail)
-			.append(", url: ").append(url)
-			.append(", hasUrl: ").append(hasUrl)
-			.append(", appointmentUrl: ").append(appointmentUrl)
-			.append(", hasAppointmentUrl: ").append(hasAppointmentUrl)
-			.append(", hours: ").append(hours)
-			.append(", hasHours: ").append(hasHours)
-			.append(", typeId: ").append(typeId)
-			.append(", hasTypeId: ").append(hasTypeId)
-			.append(", driveThru: ").append(driveThru)
-			.append(", appointmentRequired: ").append(appointmentRequired)
-			.append(", hasAppointmentRequired: ").append(hasAppointmentRequired)
-			.append(", acceptsThirdParty: ").append(acceptsThirdParty)
-			.append(", hasAcceptsThirdParty: ").append(hasAcceptsThirdParty)
-			.append(", referralRequired: ").append(referralRequired)
-			.append(", testCriteriaId: ").append(testCriteriaId)
-			.append(", notTestCriteriaId: ").append(notTestCriteriaId)
-			.append(", hasTestCriteriaId: ").append(hasTestCriteriaId)
-			.append(", otherTestCriteria: ").append(otherTestCriteria)
-			.append(", hasOtherTestCriteria: ").append(hasOtherTestCriteria)
-			.append(", testsPerDay: ").append(testsPerDay)
-			.append(", hasTestsPerDay: ").append(hasTestsPerDay)
-			.append(", testsPerDayFrom: ").append(testsPerDayFrom)
-			.append(", testsPerDayTo: ").append(testsPerDayTo)
-			.append(", governmentIdRequired: ").append(governmentIdRequired)
-			.append(", minimumAge: ").append(minimumAge)
-			.append(", hasMinimumAge: ").append(hasMinimumAge)
-			.append(", minimumAgeFrom: ").append(minimumAgeFrom)
-			.append(", minimumAgeTo: ").append(minimumAgeTo)
-			.append(", doctorReferralCriteria: ").append(doctorReferralCriteria)
-			.append(", hasDoctorReferralCriteria: ").append(hasDoctorReferralCriteria)
-			.append(", firstResponderFriendly: ").append(firstResponderFriendly)
-			.append(", telescreeningAvailable: ").append(telescreeningAvailable)
-			.append(", acceptsInsurance: ").append(acceptsInsurance)
-			.append(", insuranceProvidersAccepted: ").append(insuranceProvidersAccepted)
-			.append(", hasInsuranceProvidersAccepted: ").append(hasInsuranceProvidersAccepted)
-			.append(", freeOrLowCost: ").append(freeOrLowCost)
-			.append(", notes: ").append(notes)
-			.append(", hasNotes: ").append(hasNotes)
-			.append(", active: ").append(active)
-			.append(", hasActivatedAt: ").append(hasActivatedAt)
-			.append(", activatedAtFrom: ").append(activatedAtFrom)
-			.append(", activatedAtTo: ").append(activatedAtTo)
-			.append(", createdAtFrom: ").append(createdAtFrom)
-			.append(", createdAtTo: ").append(createdAtTo)
-			.append(", updatedAtFrom: ").append(updatedAtFrom)
-			.append(", updatedAtTo: ").append(updatedAtTo)
-			.append(", from: ").append(from)
-			.append(", restrictive: ").append(restrictive)
-			.append(", includeTestTypes: ").append(includeTestTypes)
-			.append(", excludeTestTypes: ").append(excludeTestTypes)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

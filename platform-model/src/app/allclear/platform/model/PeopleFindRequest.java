@@ -10,6 +10,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.common.ObjectUtils;
 import app.allclear.twilio.model.TwilioUtils;
 
 /** Value object that represents the request to find People by names or phone numbers.
@@ -47,11 +48,5 @@ public class PeopleFindRequest implements Serializable
 	}
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ names: ").append(names)
-			.append(", phones: ").append(phones)
-			.append(", pageSize: ").append(pageSize)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

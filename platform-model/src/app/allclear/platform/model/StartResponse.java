@@ -6,6 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.common.ObjectUtils;
+
 /** Value object that represents the user response after clicking on the magic link to verify the phone/email during the registration process.
  * 
  * @author smalleyd
@@ -30,4 +32,7 @@ public class StartResponse implements Serializable
 		this.email = StringUtils.trimToNull(email);
 		this.code = StringUtils.trimToNull(code);
 	}
+
+	@Override
+	public String toString() { return ObjectUtils.toString(this); }
 }

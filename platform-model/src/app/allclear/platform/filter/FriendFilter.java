@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 
+import app.allclear.common.ObjectUtils;
 import app.allclear.common.dao.QueryFilter;
 
 /********************************************************************************************************************
@@ -126,19 +127,5 @@ public class FriendFilter extends QueryFilter
 	**************************************************************************/
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ personId: ").append(personId)
-			.append(", inviteeId: ").append(inviteeId)
-			.append(", userId: ").append(userId)
-			.append(", hasAcceptedAt: ").append(hasAcceptedAt)
-			.append(", acceptedAtFrom: ").append(acceptedAtFrom)
-			.append(", acceptedAtTo: ").append(acceptedAtTo)
-			.append(", hasRejectedAt: ").append(hasRejectedAt)
-			.append(", rejectedAtFrom: ").append(rejectedAtFrom)
-			.append(", rejectedAtTo: ").append(rejectedAtTo)
-			.append(", createdAtFrom: ").append(createdAtFrom)
-			.append(", createdAtTo: ").append(createdAtTo)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

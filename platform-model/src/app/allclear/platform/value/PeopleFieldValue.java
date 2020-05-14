@@ -6,6 +6,7 @@ import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
+import app.allclear.common.ObjectUtils;
 import app.allclear.platform.type.Visibility;
 
 /**********************************************************************************
@@ -133,19 +134,5 @@ public class PeopleFieldValue implements Serializable
 	}
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ id: ").append(id)
-			.append(", visibilityHealthWorkerStatusId: ").append(visibilityHealthWorkerStatusId)
-			.append(", visibilityConditions: ").append(visibilityConditions)
-			.append(", visibilityExposures: ").append(visibilityExposures)
-			.append(", visibilitySymptoms: ").append(visibilitySymptoms)
-			.append(", name: ").append(name)
-			.append(", visibilityHealthWorkerStatus: ").append(visibilityHealthWorkerStatus)
-			.append(", visibilityCondition: ").append(visibilityCondition)
-			.append(", visibilityExposure: ").append(visibilityExposure)
-			.append(", visibilitySymptom: ").append(visibilitySymptom)
-			.append(", updatedAt: ").append(updatedAt)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

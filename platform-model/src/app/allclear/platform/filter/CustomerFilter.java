@@ -4,6 +4,7 @@ import java.util.Date;
 
 import org.apache.commons.lang3.StringUtils;
 
+import app.allclear.common.ObjectUtils;
 import app.allclear.common.dao.QueryFilter;
 
 /********************************************************************************************************************
@@ -144,22 +145,5 @@ public class CustomerFilter extends QueryFilter
 	**************************************************************************/
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ id: ").append(id)
-			.append(", name: ").append(name)
-			.append(", limit: ").append(limit)
-			.append(", hasLimit: ").append(hasLimit)
-			.append(", limitFrom: ").append(limitFrom)
-			.append(", limitTo: ").append(limitTo)
-			.append(", active: ").append(active)
-			.append(", hasLastAccessedAt: ").append(hasLastAccessedAt)
-			.append(", lastAccessedAtFrom: ").append(lastAccessedAtFrom)
-			.append(", lastAccessedAtTo: ").append(lastAccessedAtTo)
-			.append(", createdAtFrom: ").append(createdAtFrom)
-			.append(", createdAtTo: ").append(createdAtTo)
-			.append(", updatedAtFrom: ").append(updatedAtFrom)
-			.append(", updatedAtTo: ").append(updatedAtTo)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

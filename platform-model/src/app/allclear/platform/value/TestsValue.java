@@ -6,6 +6,7 @@ import java.util.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
+import app.allclear.common.ObjectUtils;
 import app.allclear.platform.type.TestType;
 
 /**********************************************************************************
@@ -123,20 +124,5 @@ public class TestsValue implements Serializable
 	}
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ id: ").append(id)
-			.append(", personId: ").append(personId)
-			.append(", personName: ").append(personName)
-			.append(", typeId: ").append(typeId)
-			.append(", type: ").append(type)
-			.append(", takenOn: ").append(takenOn)
-			.append(", facilityId: ").append(facilityId)
-			.append(", facilityName: ").append(facilityName)
-			.append(", positive: ").append(positive)
-			.append(", notes: ").append(notes)
-			.append(", createdAt: ").append(createdAt)
-			.append(", updatedAt: ").append(updatedAt)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

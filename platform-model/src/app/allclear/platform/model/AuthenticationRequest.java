@@ -6,6 +6,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.common.ObjectUtils;
+
 /** Value object that represents a credentials authentication request.
  * 
  * @author smalleyd
@@ -30,4 +32,7 @@ public class AuthenticationRequest implements Serializable
 		this.password = StringUtils.trimToNull(password);
 		this.rememberMe = Boolean.TRUE.equals(rememberMe);
 	}
+
+	@Override
+	public String toString() { return ObjectUtils.toString(this); }
 }

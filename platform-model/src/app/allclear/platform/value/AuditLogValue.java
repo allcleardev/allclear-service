@@ -5,6 +5,8 @@ import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 
+import app.allclear.common.ObjectUtils;
+
 /**********************************************************************************
 *
 *	Value object class that represents the audit_log table.
@@ -95,15 +97,5 @@ public class AuditLogValue implements Serializable
 	}
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ id: ").append(id)
-			.append(", actionAt: ").append(actionAt)
-			.append(", actorType: ").append(actorType)
-			.append(", actionBy: ").append(actionBy)
-			.append(", action: ").append(action)
-			.append(", payload: ").append(payload)
-			.append(", timestamp: ").append(timestamp)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

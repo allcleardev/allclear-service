@@ -8,6 +8,8 @@ import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
+import app.allclear.common.ObjectUtils;
+
 /** Value object that represents an internal administrator.
  * 
  * @author smalleyd
@@ -124,16 +126,5 @@ public class AdminValue implements Serializable
 	}
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ id: ").append(id)
-			.append(", email: ").append(email)
-			.append(", firstName: ").append(firstName)
-			.append(", lastName: ").append(lastName)
-			.append(", supers: ").append(supers)
-			.append(", editor: ").append(editor)
-			.append(", createdAt: ").append(createdAt)
-			.append(", updatedAt: ").append(updatedAt)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

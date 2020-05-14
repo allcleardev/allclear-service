@@ -4,6 +4,8 @@ import java.util.Objects;
 
 import javax.persistence.*;
 
+import app.allclear.common.ObjectUtils;
+
 /** Generic entity that represents a character primary key and name field.
  * 
  * @author smalleyd
@@ -38,5 +40,5 @@ public class CountByName
 	@Override public int hashCode() { return Objects.hashCode(name); }
 
 	@Override
-	public String toString() { return new StringBuilder("{ name: ").append(name).append(", total: ").append(total).append(" }").toString(); }
+	public String toString() { return ObjectUtils.toString(this); }
 }

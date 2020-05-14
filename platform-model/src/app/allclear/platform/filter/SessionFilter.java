@@ -2,6 +2,7 @@ package app.allclear.platform.filter;
 
 import org.apache.commons.lang3.StringUtils;
 
+import app.allclear.common.ObjectUtils;
 import app.allclear.common.dao.QueryFilter;
 
 /** Value object that represents a session request search filter.
@@ -49,4 +50,7 @@ public class SessionFilter extends QueryFilter
 		@param sortDir
 	*/
 	public SessionFilter(final int page, final int pageSize, final String sortOn, final String sortDir) { super(page, pageSize, sortOn, sortDir); }
+
+	@Override
+	public String toString() { return ObjectUtils.toString(this); }
 }

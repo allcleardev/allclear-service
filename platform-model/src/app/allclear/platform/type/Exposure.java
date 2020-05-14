@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.common.ObjectUtils;
 import app.allclear.common.value.CreatedValue;
 
 /** Represents the statuses that be associated with People.
@@ -43,12 +44,7 @@ public class Exposure implements Serializable
 	public CreatedValue created() { return new CreatedValue(id, name, null); }
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ id: ").append(id)
-			.append(", name: ").append(name)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 
 	@Override
 	public boolean equals(final Object o)

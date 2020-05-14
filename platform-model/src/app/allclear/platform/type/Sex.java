@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.common.ObjectUtils;
+
 /** Represents the statuses that be associated with People.
  * 
  * @author smalleyd
@@ -38,12 +40,7 @@ public class Sex implements Serializable
 	}
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ id: ").append(id)
-			.append(", name: ").append(name)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 
 	@Override
 	public boolean equals(final Object o)

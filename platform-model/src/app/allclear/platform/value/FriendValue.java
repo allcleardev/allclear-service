@@ -8,6 +8,8 @@ import org.apache.commons.lang3.time.DateUtils;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.common.ObjectUtils;
+
 /**********************************************************************************
 *
 *	Value object class that represents the friend table.
@@ -116,14 +118,5 @@ public class FriendValue implements Serializable
 	}
 
 	@Override
-	public String toString()
-	{
-		return new StringBuilder("{ personId: ").append(personId)
-			.append(", inviteeId: ").append(inviteeId)
-			.append(", inviteeName: ").append(inviteeName)
-			.append(", acceptedAt: ").append(acceptedAt)
-			.append(", rejectedAt: ").append(rejectedAt)
-			.append(", createdAt: ").append(createdAt)
-			.append(" }").toString();
-	}
+	public String toString() { return ObjectUtils.toString(this); }
 }

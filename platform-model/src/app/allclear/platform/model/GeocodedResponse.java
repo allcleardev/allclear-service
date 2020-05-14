@@ -5,6 +5,8 @@ import java.math.BigDecimal;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import app.allclear.common.ObjectUtils;
+
 /** Value object that represents a distilled version of the Google Maps Geocode response.
  * 
  * @author smalleyd
@@ -47,4 +49,7 @@ public class GeocodedResponse implements Serializable
 		this.latitude = latitude;
 		this.longitude = longitude;
 	}
+
+	@Override
+	public String toString() { return ObjectUtils.toString(this); }
 }
