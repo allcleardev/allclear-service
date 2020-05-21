@@ -5,7 +5,7 @@ import java.io.Serializable;
 /** Value object that represents a facility change request.
  * 
  * @author smalleyd
- * @version 1.1.58
+ * @version 1.1.59
  * @since 5/20/2020
  *
  */

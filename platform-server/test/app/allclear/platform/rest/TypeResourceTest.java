@@ -44,6 +44,15 @@ public class TypeResourceTest
 	}
 
 	@Test
+	public void getCrowdsourceStatuses()
+	{
+		var response = request("crowdsourceStatuses").get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		assertThat(response.readEntity(new GenericType<List<CrowdsourceStatus>>() {})).isEqualTo(CrowdsourceStatus.LIST);
+	}
+
+	@Test
 	public void getExposures()
 	{
 		var response = request("exposures").get();
@@ -68,6 +77,15 @@ public class TypeResourceTest
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		assertThat(response.readEntity(new GenericType<List<HealthWorkerStatus>>() {})).isEqualTo(HealthWorkerStatus.LIST);
+	}
+
+	@Test
+	public void getOriginators()
+	{
+		var response = request("originators").get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		assertThat(response.readEntity(new GenericType<List<Originator>>() {})).isEqualTo(Originator.LIST);
 	}
 
 	@Test

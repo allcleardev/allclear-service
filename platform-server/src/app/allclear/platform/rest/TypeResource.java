@@ -30,6 +30,11 @@ public class TypeResource
 	public List<Condition> getConditions() { return Condition.LIST; }
 
 	@GET
+	@Path("/crowdsourceStatuses") @Timed
+	@ApiOperation(value="getCrowdsourceStatuses", notes="Gets a list of Crowdsource Statuses.", response=CrowdsourceStatus.class, responseContainer="List")
+	public List<CrowdsourceStatus> getCrowdsourceStatuses() { return CrowdsourceStatus.LIST; }
+
+	@GET
 	@Path("/exposures") @Timed
 	@ApiOperation(value="getExposures", notes="Gets a list of exposure levels.", response=Exposure.class, responseContainer="List")
 	public List<Exposure> getExposures() { return Exposure.LIST; }
@@ -43,6 +48,11 @@ public class TypeResource
 	@Path("/healthWorkerStatuses") @Timed
 	@ApiOperation(value="getHealthWorkerStatuses", notes="Gets a list of statures that can be associated with a person.", response=HealthWorkerStatus.class, responseContainer="List")
 	public List<HealthWorkerStatus> getHealthWorkerStatuses() { return HealthWorkerStatus.LIST; }
+
+	@GET
+	@Path("/originators") @Timed
+	@ApiOperation(value="getOriginators", notes="Gets a list of originators that can perform an operation.", response=Originator.class, responseContainer="List")
+	public List<Originator> getOriginators() { return Originator.LIST; }
 
 	@GET
 	@Path("/peopleStatuses") @Timed
