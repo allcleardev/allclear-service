@@ -19,20 +19,20 @@ import liquibase.Liquibase;
 import liquibase.database.jvm.JdbcConnection;
 import liquibase.resource.ClassLoaderResourceAccessor;
 import app.allclear.common.AutoCloseableManager;
-// import app.allclear.common.azure.QueueManager;
+import app.allclear.common.azure.QueueManager;
 import app.allclear.common.errors.*;
 import app.allclear.common.hibernate.HibernateBundle;
 import app.allclear.common.jackson.ObjectMapperProvider;
 import app.allclear.common.jersey.CrossDomainHeadersFilter;
 import app.allclear.common.redis.RedisClient;
 import app.allclear.common.resources.*;
-// import app.allclear.common.task.TaskOperator;
+import app.allclear.common.task.TaskOperator;
 import app.allclear.google.client.MapClient;
 import app.allclear.platform.dao.*;
 import app.allclear.platform.entity.*;
-// import app.allclear.platform.model.*;
+import app.allclear.platform.model.*;
 import app.allclear.platform.rest.*;
-// import app.allclear.platform.task.*;
+import app.allclear.platform.task.*;
 import app.allclear.twilio.client.TwilioClient;
 
 /** Represents the Dropwizard application entry point.
@@ -112,12 +112,10 @@ public class App extends Application<Config>
 		var peopleDao = new PeopleDAO(factory);
 		var registrationDao = new RegistrationDAO(session, twilio, conf);
 
-		/* TODO: Disabled until hosting costs are resolved. DLS on 5/20/2020.
-		var task = new QueueManager(conf.queue, 2,
+		var task = new QueueManager(conf.queue, conf.task(), 2,
 				new TaskOperator<>(QUEUE_ALERT, new AlertTask(factory, peopleDao, facilityDao, sessionDao), AlertRequest.class, 10, 5, 60, 3600));
 
 		lifecycle.manage(task.addOperator(new TaskOperator<>(QUEUE_ALERT_INIT, new AlertInitTask(factory, peopleDao, task.queue(QUEUE_ALERT)), AlertInitRequest.class, 10, 120, 60, 3600)));
-		*/
 
 		var hc = env.healthChecks();
 		hc.register(SESSION, session);
@@ -145,8 +143,8 @@ public class App extends Application<Config>
         jersey.register(new FacilityResource(facilityDao, sessionDao, map));
         jersey.register(new FriendResource(new FriendDAO(factory), sessionDao));
         jersey.register(new MapResource(map));
-		jersey.register(new PeopleResource(peopleDao, registrationDao, sessionDao, null));	// TODO: task.queue(QUEUE_ALERT)));
-		// TODO: jersey.register(new app.allclear.common.azure.QueueResource(task));
+		jersey.register(new PeopleResource(peopleDao, registrationDao, sessionDao, task.queue(QUEUE_ALERT)));
+		jersey.register(new app.allclear.common.azure.QueueResource(task));
 		jersey.register(new RegistrationResource(registrationDao));
 		jersey.register(new SessionResource(sessionDao));
 		jersey.register(new SymptomsLogResource(new SymptomsLogDAO(factory), sessionDao));

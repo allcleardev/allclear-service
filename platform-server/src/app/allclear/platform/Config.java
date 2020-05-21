@@ -51,6 +51,7 @@ public class Config extends Configuration implements Serializable
 	public final String alertSMSMessage;
 	public final String authSMSMessage;
 
+	public final int task;	// Number of minutes for the QueueManager to delay between polling checks.
 	public final String queue;	// Connection string to the queue space.
 	public final String admins;
 	public final String auditLog;
@@ -59,6 +60,7 @@ public class Config extends Configuration implements Serializable
 	public final TwilioConfig twilio;
 
 	public String getVersion() { return manifest.version; }
+	public long task() { return 1000L * ((long) task); }	// Convert to milliseconds.
 
 	public Config(@JsonProperty("env") final String env,
 		@JsonProperty("disableSwagger") final Boolean disableSwagger,
@@ -68,6 +70,7 @@ public class Config extends Configuration implements Serializable
 		@JsonProperty("authPhone") final String authPhone,
 		@JsonProperty("alertPhone") final String alertPhone,
 		@JsonProperty("registrationPhone") final String registrationPhone,
+		@JsonProperty("task") final Integer task,
 		@JsonProperty("queue") final String queue,
 		@JsonProperty("admins") final String admins,
 		@JsonProperty("auditLog") final String auditLog,
@@ -100,6 +103,7 @@ public class Config extends Configuration implements Serializable
 		this.alertSMSMessage = baseUrl("/messages/sms/alert.txt", baseUrl);
 		this.registrationSMSMessage = baseUrl("/messages/sms/registration.txt", baseUrl);
 
+		this.task = (null != task) ? task : 0;
 		this.queue = queue;
 		this.admins = admins;
 		this.auditLog = auditLog;

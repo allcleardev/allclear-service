@@ -5,6 +5,7 @@
   "registrationPhone": "MG84db3eef8585f4f32478113f58b6138e",
   "authPhone": "MG84db3eef8585f4f32478113f58b6138e",
 
+  "task": 1,
   "admins": "DefaultEndpointsProtocol=https;AccountName=allclear-admins;AccountKey=${COSMOS_ACCOUNT_KEY:-accountKey};TableEndpoint=https://allclear-admins.table.cosmos.azure.com:443/;",
   "auditLog": "DefaultEndpointsProtocol=https;AccountName=allclear-audit-prod;AccountKey=${AUDIT_LOG_ACCOUNT_KEY:-accountKey};TableEndpoint=https://allclear-audit-prod.table.cosmos.azure.com:443/;",
   "geocode": { "host": "allclear-prod-mapcache.redis.cache.windows.net", "port": 6380, "timeout": 200, "poolSize": 10, "password": "${MAPCACHE_REDIS_PASSWORD:-password}", "ssl": true, "testWhileIdle": true },
