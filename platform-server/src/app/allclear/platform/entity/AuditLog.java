@@ -9,7 +9,7 @@ import app.allclear.platform.value.AuditLogValue;
 
 /**********************************************************************************
 *
-*	Entity Bean CMP class that represents the audit_log table.
+*	Azure Cosmos entity that represents the audit_log table.
 *
 *	@author smalleyd
 *	@version 1.1.46

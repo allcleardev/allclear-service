@@ -13,7 +13,7 @@ import app.allclear.platform.value.AdminValue;
 
 /**********************************************************************************
 *
-*	Entity Bean CMP class that represents the admin table.
+*	Azure Cosmos entity that represents the admin table.
 *
 *	@author smalleyd
 *	@version 1.0.14
