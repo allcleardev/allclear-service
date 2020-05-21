@@ -51,7 +51,7 @@ public class Config extends Configuration implements Serializable
 	public final String alertSMSMessage;
 	public final String authSMSMessage;
 
-	public final int task;	// Number of minutes for the QueueManager to delay between polling checks.
+	public final int task;	// Number of seconds for the QueueManager to delay between polling checks.
 	public final String queue;	// Connection string to the queue space.
 	public final String admins;
 	public final String auditLog;

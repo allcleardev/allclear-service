@@ -74,8 +74,8 @@ public class ConfigTest
 		Assertions.assertTrue(o.geocode.ssl, "Check geocode.ssl");
 		Assertions.assertTrue(o.geocode.testWhileIdle, "Check geocode.testWhileIdle");
 		Assertions.assertFalse(o.geocode.test, "Check geocode.test");
-		Assertions.assertEquals(10, o.task, "Check task");
-		Assertions.assertEquals(10000L, o.task(), "Check task()");
+		Assertions.assertEquals(60, o.task, "Check task");
+		Assertions.assertEquals(60000L, o.task(), "Check task()");
 		assertThat(o.queue).as("Check queue").startsWith("DefaultEndpointsProtocol=https;AccountName=allcleardevqueues;AccountKey=").endsWith(";EndpointSuffix=core.windows.net");
 		Assertions.assertNotNull(o.session, "Check session");
 		Assertions.assertEquals("allclear-dev.redis.cache.windows.net", o.session.host, "Check session.host");
@@ -226,8 +226,8 @@ public class ConfigTest
 		Assertions.assertTrue(o.geocode.ssl, "Check geocode.ssl");
 		Assertions.assertTrue(o.geocode.testWhileIdle, "Check geocode.testWhileIdle");
 		Assertions.assertFalse(o.geocode.test, "Check geocode.test");
-		Assertions.assertEquals(1, o.task, "Check task");
-		Assertions.assertEquals(1000L, o.task(), "Check task()");
+		Assertions.assertEquals(60, o.task, "Check task");
+		Assertions.assertEquals(60000L, o.task(), "Check task()");
 		assertThat(o.queue).as("Check queue").startsWith("DefaultEndpointsProtocol=https;AccountName=allclearprodqueues;AccountKey=").endsWith(";EndpointSuffix=core.windows.net");
 		Assertions.assertNotNull(o.session, "Check session");
 		Assertions.assertEquals("allclear-prod.redis.cache.windows.net", o.session.host, "Check session.host");
@@ -302,8 +302,8 @@ public class ConfigTest
 		Assertions.assertTrue(o.geocode.ssl, "Check geocode.ssl");
 		Assertions.assertTrue(o.geocode.testWhileIdle, "Check geocode.testWhileIdle");
 		Assertions.assertFalse(o.geocode.test, "Check geocode.test");
-		Assertions.assertEquals(5, o.task, "Check task");
-		Assertions.assertEquals(5000L, o.task(), "Check task()");
+		Assertions.assertEquals(60, o.task, "Check task");
+		Assertions.assertEquals(60000L, o.task(), "Check task()");
 		assertThat(o.queue).as("Check queue").startsWith("DefaultEndpointsProtocol=https;AccountName=allclearstagingqueues;AccountKey=").endsWith(";EndpointSuffix=core.windows.net");
 		Assertions.assertNotNull(o.session, "Check session");
 		Assertions.assertEquals("allclear-staging.redis.cache.windows.net", o.session.host, "Check session.host");
