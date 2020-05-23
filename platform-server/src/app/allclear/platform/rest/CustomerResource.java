@@ -8,6 +8,7 @@ import io.swagger.annotations.*;
 
 import com.codahale.metrics.annotation.Timed;
 import app.allclear.common.dao.QueryResults;
+import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.resources.Headers;
@@ -47,7 +48,7 @@ public class CustomerResource
 	@Path("/{id}") @Timed
 	@ApiOperation(value="get", notes="Gets a single Customer by its primary key.", response=CustomerValue.class)
 	public CustomerValue get(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
-		@PathParam("id") final String id) throws ValidationException
+		@PathParam("id") final String id) throws ObjectNotFoundException
 	{
 		return dao.getByIdWithException(id);
 	}
@@ -81,7 +82,7 @@ public class CustomerResource
 
 	@DELETE
 	@Path("/{id}") @Timed
-	@ApiOperation(value="remove", notes="Removes/deactivates a single Customer by its primary key.")
+	@ApiOperation(value="remove", notes="Removes/deactivates a single Customer by its primary key.", response=OperationResponse.class)
 	public OperationResponse remove(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@PathParam("id") final String id) throws ValidationException
 	{

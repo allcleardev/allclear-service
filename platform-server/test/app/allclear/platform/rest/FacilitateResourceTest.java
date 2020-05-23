@@ -1,4 +1,4 @@
-package app.allclear.platform.dao;
+package app.allclear.platform.rest;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -7,9 +7,13 @@ import static app.allclear.platform.type.Originator.*;
 import static app.allclear.testing.TestingUtils.*;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.stream.Stream;
 
-import org.apache.commons.lang3.StringUtils;
+import javax.ws.rs.HttpMethod;
+import javax.ws.rs.client.*;
+import javax.ws.rs.core.GenericType;
+
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,12 +21,17 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
+import io.dropwizard.testing.junit5.ResourceExtension;
 
+import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.*;
+import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.redis.FakeRedisClient;
+import app.allclear.common.value.OperationResponse;
 import app.allclear.junit.hibernate.*;
 import app.allclear.platform.App;
 import app.allclear.platform.ConfigTest;
+import app.allclear.platform.dao.*;
 import app.allclear.platform.filter.FacilitateFilter;
 import app.allclear.platform.value.*;
 
@@ -36,7 +45,7 @@ import app.allclear.platform.value.*;
 
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
 @ExtendWith(DropwizardExtensionsSupport.class)
-public class FacilitateDAOTest
+public class FacilitateResourceTest
 {
 	public static final HibernateRule DAO_RULE = new HibernateRule(App.ENTITIES);
 	public final HibernateTransactionRule transRule = new HibernateTransactionRule(DAO_RULE);
@@ -55,6 +64,18 @@ public class FacilitateDAOTest
 	private static FacilitateValue ADD_PROVIDER;
 	private static FacilitateValue CHANGE_CITIZEN;
 	private static FacilitateValue CHANGE_PROVIDER;
+
+	private static final GenericType<Map<String, Object>> TYPE_MAP = new GenericType<Map<String, Object>>() {};
+	private static final GenericType<QueryResults<FacilitateValue, FacilitateFilter>> TYPE_QUERY_RESULTS = new GenericType<QueryResults<FacilitateValue, FacilitateFilter>>() {};
+
+	private final ResourceExtension RULE = ResourceExtension.builder()
+		.addResource(new AuthorizationExceptionMapper())
+		.addResource(new NotFoundExceptionMapper())
+		.addResource(new ValidationExceptionMapper())
+		.addResource(new FacilitateResource(dao))
+		.build();
+
+	private static final String TARGET = "/facilitates";
 
 	@BeforeAll
 	public static void up() throws Exception
@@ -83,29 +104,13 @@ public class FacilitateDAOTest
 	{
 		count(0L);
 
-		sessionDao.current(PERSON);
+		sessionDao.clear();
 
-		ADD_CITIZEN = dao.addByCitizen(new FacilitateValue(new FacilityValue(3), null, true));
-	}
+		var response = request("citizen").post(Entity.json(new FacilitateValue(new FacilityValue(3), null, true)));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
-	public static Stream<Arguments> add_citizen_failure()
-	{
-		var valid = new FacilitateValue(new FacilityValue(), null, true);
-		return Stream.of(
-			arguments(ADMIN, valid, NotAuthorizedException.class, "Must be a Person or Anonymous."),
-			arguments(CUSTOMER, valid, NotAuthorizedException.class, "Must be a Person or Anonymous."),
-			arguments(EDITOR, valid, NotAuthorizedException.class, "Must be a Person or Anonymous."),
-			arguments(null, new FacilitateValue(null, null, true), ValidationException.class, "Value is not set."),
-			arguments(PERSON, new FacilitateValue(new FacilityValue(), StringUtils.repeat('A', FacilitateValue.MAX_LEN_LOCATION + 1), true), ValidationException.class, "Location 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' is longer than the expected size of 128."));
-	}
-
-	@ParameterizedTest
-	@MethodSource
-	public void add_citizen_failure(final SessionValue session, final FacilitateValue value, final Class<? extends Exception> ex, final String message)
-	{
-		sessionDao.current(session);
-
-		assertThat(Assertions.assertThrows(ex, () -> dao.addByCitizen(value))).hasMessage(message);
+		ADD_CITIZEN = response.readEntity(FacilitateValue.class);
+		Assertions.assertNotNull(ADD_CITIZEN, "Exists");
 	}
 
 	@Test
@@ -113,29 +118,10 @@ public class FacilitateDAOTest
 	{
 		count(1L);
 
-		sessionDao.clear();
+		sessionDao.current(PERSON);
 
-		ADD_PROVIDER = dao.addByProvider(new FacilitateValue(new FacilityValue(), "Around the corner", false));
-	}
-
-	public static Stream<Arguments> add_provider_failure()
-	{
-		var valid = new FacilitateValue(new FacilityValue(), null, true);
-		return Stream.of(
-			arguments(ADMIN, valid, NotAuthorizedException.class, "Must be a Person or Anonymous."),
-			arguments(CUSTOMER, valid, NotAuthorizedException.class, "Must be a Person or Anonymous."),
-			arguments(EDITOR, valid, NotAuthorizedException.class, "Must be a Person or Anonymous."),
-			arguments(null, new FacilitateValue(null, null, true), ValidationException.class, "Value is not set."),
-			arguments(PERSON, new FacilitateValue(new FacilityValue(), StringUtils.repeat('A', FacilitateValue.MAX_LEN_LOCATION + 1), true), ValidationException.class, "Location 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' is longer than the expected size of 128."));
-	}
-
-	@ParameterizedTest
-	@MethodSource
-	public void add_provider_failure(final SessionValue session, final FacilitateValue value, final Class<? extends Exception> ex, final String message)
-	{
-		sessionDao.current(session);
-
-		assertThat(Assertions.assertThrows(ex, () -> dao.addByProvider(value))).hasMessage(message);
+		ADD_PROVIDER = request("provider").post(Entity.json(new FacilitateValue(new FacilityValue(), "Around the corner", false)), FacilitateValue.class);
+		Assertions.assertNotNull(ADD_PROVIDER, "Exists");
 	}
 
 	@Test
@@ -143,31 +129,10 @@ public class FacilitateDAOTest
 	{
 		count(2L);
 
-		sessionDao.current(PERSON);
+		sessionDao.clear();
 
-		CHANGE_CITIZEN = dao.changeByCitizen(new FacilitateValue(FACILITY_1.withState("Nebraska"), "One town over", true));
-	}
-
-	public static Stream<Arguments> change_citizen_failure()
-	{
-		var valid = new FacilitateValue(FACILITY_1, "One town over", true);
-		return Stream.of(
-			arguments(ADMIN, valid, NotAuthorizedException.class, "Must be a Person or Anonymous."),
-			arguments(CUSTOMER, valid, NotAuthorizedException.class, "Must be a Person or Anonymous."),
-			arguments(EDITOR, valid, NotAuthorizedException.class, "Must be a Person or Anonymous."),
-			arguments(null, new FacilitateValue(null, null, true), ValidationException.class, "Value is not set."),
-			arguments(PERSON, new FacilitateValue(FACILITY_1, StringUtils.repeat('A', FacilitateValue.MAX_LEN_LOCATION + 1), true), ValidationException.class, "Location 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' is longer than the expected size of 128."),
-			arguments(null, new FacilitateValue(new FacilityValue(), null, true), ValidationException.class, "Value ID is not set."),
-			arguments(null, new FacilitateValue(new FacilityValue().withId(1000L), null, true), ValidationException.class, "The Facility '1000' does not exist."));
-	}
-
-	@ParameterizedTest
-	@MethodSource
-	public void change_citizen_failure(final SessionValue session, final FacilitateValue value, final Class<? extends Exception> ex, final String message)
-	{
-		sessionDao.current(session);
-
-		assertThat(Assertions.assertThrows(ex, () -> dao.changeByCitizen(value))).hasMessage(message);
+		CHANGE_CITIZEN = request("citizen").put(Entity.json(new FacilitateValue(FACILITY_1.withState("Nebraska"), "One town over", true)), FacilitateValue.class);
+		Assertions.assertNotNull(CHANGE_CITIZEN, "Exists");
 	}
 
 	@Test
@@ -175,31 +140,10 @@ public class FacilitateDAOTest
 	{
 		count(3L);
 
-		sessionDao.clear();
+		sessionDao.current(PERSON);
 
-		CHANGE_PROVIDER = dao.changeByProvider(new FacilitateValue(FACILITY_2.withCity("Albuquerque"), null, false));
-	}
-
-	public static Stream<Arguments> change_provider_failure()
-	{
-		var valid = new FacilitateValue(FACILITY_2, null, false);
-		return Stream.of(
-			arguments(ADMIN, valid, NotAuthorizedException.class, "Must be a Person or Anonymous."),
-			arguments(CUSTOMER, valid, NotAuthorizedException.class, "Must be a Person or Anonymous."),
-			arguments(EDITOR, valid, NotAuthorizedException.class, "Must be a Person or Anonymous."),
-			arguments(null, new FacilitateValue(null, null, true), ValidationException.class, "Value is not set."),
-			arguments(PERSON, new FacilitateValue(FACILITY_2, StringUtils.repeat('A', FacilitateValue.MAX_LEN_LOCATION + 1), true), ValidationException.class, "Location 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' is longer than the expected size of 128."),
-			arguments(null, new FacilitateValue(new FacilityValue(), null, true), ValidationException.class, "Value ID is not set."),
-			arguments(null, new FacilitateValue(new FacilityValue().withId(1000L), null, true), ValidationException.class, "The Facility '1000' does not exist."));
-	}
-
-	@ParameterizedTest
-	@MethodSource
-	public void change_provider_failure(final SessionValue session, final FacilitateValue value, final Class<? extends Exception> ex, final String message)
-	{
-		sessionDao.current(session);
-
-		assertThat(Assertions.assertThrows(ex, () -> dao.changeByProvider(value))).hasMessage(message);
+		CHANGE_PROVIDER = request("provider").put(Entity.json(new FacilitateValue(FACILITY_2.withCity("Albuquerque"), null, false)), FacilitateValue.class);
+		Assertions.assertNotNull(CHANGE_PROVIDER, "Exists");
 	}
 
 	@Test
@@ -208,79 +152,47 @@ public class FacilitateDAOTest
 		count(4L);
 	}
 
-	@Test
-	public void get_add_provider()
+	private FacilitateValue get(final String statusId, final String createdAt)
 	{
-		var v = dao.getById(ADD_PROVIDER.statusId, ADD_PROVIDER.createdAt());
+		return request(statusId + "/" + createdAt).get(FacilitateValue.class);
+	}
+
+	private FacilitateValue get(final FacilitateValue value)
+	{
+		return get(value.statusId, value.createdAt());
+	}
+
+	@Test
+	public void get()
+	{
+		var v = get(ADD_PROVIDER);
 		Assertions.assertNotNull(v, "Exists");
 		Assertions.assertNull(v.entityId, "Check entityId");
 		check(ADD_PROVIDER, v);
 	}
 
-	public static Stream<FacilitateValue> getById()
-	{
-		return Stream.of(ADD_CITIZEN, ADD_PROVIDER, CHANGE_CITIZEN, CHANGE_PROVIDER);
-	}
-
-	@ParameterizedTest
-	@MethodSource
-	public void getById(final FacilitateValue value)
-	{
-		var v = dao.getById(value.statusId, value.createdAt());
-		Assertions.assertNotNull(v, "Exists");
-		check(value, v);
-	}
-
-	public static Stream<Arguments> getById_failure()
+	public static Stream<Arguments> get_failure()
 	{
 		return Stream.of(
-			arguments(null, ADD_PROVIDER.statusId, ADD_PROVIDER.createdAt(), NotAuthorizedException.class, "Must be an Editor session."),
-			arguments(CUSTOMER, ADD_PROVIDER.statusId, ADD_PROVIDER.createdAt(), NotAuthorizedException.class, "Must be an Editor session."),
-			arguments(PERSON, ADD_PROVIDER.statusId, ADD_PROVIDER.createdAt(), NotAuthorizedException.class, "Must be an Editor session."));
+			arguments(null, ADD_PROVIDER.statusId, ADD_PROVIDER.createdAt(), HTTP_STATUS_NOT_AUTHORIZED, "Must be an Editor session."),
+			arguments(CUSTOMER, ADD_PROVIDER.statusId, ADD_PROVIDER.createdAt(), HTTP_STATUS_NOT_AUTHORIZED, "Must be an Editor session."),
+			arguments(PERSON, ADD_PROVIDER.statusId, ADD_PROVIDER.createdAt(), HTTP_STATUS_NOT_AUTHORIZED, "Must be an Editor session."),
+			arguments(ADMIN, PROMOTED.id, ADD_PROVIDER.createdAt(), HTTP_STATUS_NOT_FOUND, "Could not find the Facilitate because id '"),
+			arguments(EDITOR, ADD_PROVIDER.statusId, System.currentTimeMillis() + "", HTTP_STATUS_NOT_FOUND, "Could not find the Facilitate because id '"));
 	}
 
 	@ParameterizedTest
 	@MethodSource
-	public void getById_failure(final SessionValue session, final String statusId, final String createdAt, final Class<? extends Exception> ex, final String message)
+	public void get_failure(final SessionValue session, final String statusId, final String createdAt, final int status, final String message)
 	{
 		sessionDao.current(session);
 
-		assertThat(Assertions.assertThrows(ex, () -> dao.getById(statusId, createdAt))).hasMessage(message);
-	}
+		var response = request(statusId + "/" + createdAt).get();
+		Assertions.assertEquals(status, response.getStatus(), "Status");
 
-	@Test
-	public void getById_invalid()
-	{
-		Assertions.assertNull(dao.getById(PROMOTED.id, ADD_PROVIDER.createdAt()));
-	}
-
-	@ParameterizedTest
-	@MethodSource("getById")
-	public void getByIdWithException(final FacilitateValue value)
-	{
-		var v = dao.getByIdWithException(value.statusId, value.createdAt());
-		Assertions.assertNotNull(v, "Exists");
-		check(value, v);
-	}
-
-	public static Stream<Arguments> getByIdWithException_failure()
-	{
-		return Stream.of(
-			arguments(null, ADD_PROVIDER.statusId, ADD_PROVIDER.createdAt(), NotAuthorizedException.class, "Must be an Editor session."),
-			arguments(CUSTOMER, ADD_PROVIDER.statusId, ADD_PROVIDER.createdAt(), NotAuthorizedException.class, "Must be an Editor session."),
-			arguments(PERSON, ADD_PROVIDER.statusId, ADD_PROVIDER.createdAt(), NotAuthorizedException.class, "Must be an Editor session."),
-			arguments(ADMIN, PROMOTED.id, ADD_PROVIDER.createdAt(), ObjectNotFoundException.class, "Could not find the Facilitate because id '"),
-			arguments(EDITOR, ADD_PROVIDER.statusId, System.currentTimeMillis() + "", ObjectNotFoundException.class, "Could not find the Facilitate because id '"));
-	}
-
-	@ParameterizedTest
-	@MethodSource
-	public void getByIdWithException_failure(final SessionValue session, final String statusId, final String createdAt, final Class<? extends Exception> ex, final String message)
-	{
-		sessionDao.current(session);
-
-		assertThat(Assertions.assertThrows(ex, () -> dao.getByIdWithException(statusId, createdAt)))
-			.hasMessageContaining(message);
+		var ex = response.readEntity(TYPE_MAP);
+		assertThat(ex).containsKey("message");
+		assertThat((String) ex.get("message")).contains(message);
 	}
 
 	@Test
@@ -292,7 +204,7 @@ public class FacilitateDAOTest
 
 		sessionDao.current(EDITOR);
 
-		var v = dao.getByIdWithException(ADD_CITIZEN.statusId, ADD_CITIZEN.createdAt());
+		var v = get(ADD_CITIZEN);
 		Assertions.assertEquals(OPEN.id, v.statusId, "Check statusId");
 		Assertions.assertEquals(OPEN, v.status, "Check status");
 		Assertions.assertNull(v.entityId, "Check entityId");
@@ -301,13 +213,13 @@ public class FacilitateDAOTest
 		Assertions.assertNull(v.rejecterId, "Check rejecterId");
 		Assertions.assertNull(v.rejectedAt, "Check rejectedAt");
 
-		ADD_CITIZEN = dao.promote(ADD_CITIZEN.statusId, ADD_CITIZEN.createdAt());
+		ADD_CITIZEN = request(ADD_CITIZEN.statusId + "/" + ADD_CITIZEN.createdAt() + "/promote").method(HttpMethod.POST, FacilitateValue.class);
 	}
 
 	@Test
 	public void promote_add_citizen_check()
 	{
-		var v = dao.getByIdWithException(ADD_CITIZEN.statusId, ADD_CITIZEN.createdAt());
+		var v = get(ADD_CITIZEN);
 		Assertions.assertEquals(PROMOTED.id, v.statusId, "Check statusId");
 		Assertions.assertEquals(PROMOTED, v.status, "Check status");
 		Assertions.assertEquals(FACILITY_2.id + 1L, v.entityId, "Check entityId");	// Added after FACILITY_2.
@@ -328,7 +240,7 @@ public class FacilitateDAOTest
 	@Test
 	public void promote_change_provider()
 	{
-		var v = dao.getByIdWithException(CHANGE_PROVIDER.statusId, CHANGE_PROVIDER.createdAt());
+		var v = get(CHANGE_PROVIDER);
 		Assertions.assertEquals(OPEN.id, v.statusId, "Check statusId");
 		Assertions.assertEquals(OPEN, v.status, "Check status");
 		Assertions.assertEquals(FACILITY_2.id, v.entityId, "Check entityId");
@@ -337,13 +249,13 @@ public class FacilitateDAOTest
 		Assertions.assertNull(v.rejecterId, "Check rejecterId");
 		Assertions.assertNull(v.rejectedAt, "Check rejectedAt");
 
-		CHANGE_PROVIDER = dao.promote(CHANGE_PROVIDER.statusId, CHANGE_PROVIDER.createdAt());
+		CHANGE_PROVIDER = request(CHANGE_PROVIDER.statusId + "/" + CHANGE_PROVIDER.createdAt() + "/promote").method(HttpMethod.POST, FacilitateValue.class);
 	}
 
 	@Test
 	public void promote_change_provider_check()
 	{
-		var v = dao.getByIdWithException(CHANGE_PROVIDER.statusId, CHANGE_PROVIDER.createdAt());
+		var v = get(CHANGE_PROVIDER);
 		Assertions.assertEquals(PROMOTED.id, v.statusId, "Check statusId");
 		Assertions.assertEquals(PROMOTED, v.status, "Check status");
 		Assertions.assertEquals(FACILITY_2.id, v.entityId, "Check entityId");
@@ -361,16 +273,6 @@ public class FacilitateDAOTest
 		count(new FacilitateFilter().withStatusId(REJECTED.id), 0L);
 	}
 
-	@ParameterizedTest
-	@MethodSource("getByIdWithException_failure")
-	public void promote_failure(final SessionValue session, final String statusId, final String createdAt, final Class<? extends Exception> ex, final String message)
-	{
-		sessionDao.current(session);
-
-		assertThat(Assertions.assertThrows(ex, () -> dao.promote(statusId, createdAt)))
-			.hasMessageContaining(message);
-	}
-
 	@Test
 	public void reject()
 	{
@@ -378,7 +280,7 @@ public class FacilitateDAOTest
 		count(new FacilitateFilter().withStatusId(PROMOTED.id), 2L);
 		count(new FacilitateFilter().withStatusId(REJECTED.id), 0L);
 
-		var v = dao.getByIdWithException(CHANGE_CITIZEN.statusId, CHANGE_CITIZEN.createdAt());
+		var v = get(CHANGE_CITIZEN);
 		Assertions.assertEquals(OPEN.id, v.statusId, "Check statusId");
 		Assertions.assertEquals(OPEN, v.status, "Check status");
 		Assertions.assertEquals(FACILITY_1.id, v.entityId, "Check entityId");
@@ -387,13 +289,13 @@ public class FacilitateDAOTest
 		Assertions.assertNull(v.rejecterId, "Check rejecterId");
 		Assertions.assertNull(v.rejectedAt, "Check rejectedAt");
 
-		CHANGE_CITIZEN = dao.reject(CHANGE_CITIZEN.statusId, CHANGE_CITIZEN.createdAt());
+		CHANGE_CITIZEN = request(CHANGE_CITIZEN.statusId + "/" + CHANGE_CITIZEN.createdAt() + "/reject").delete(FacilitateValue.class);
 	}
 
 	@Test
 	public void reject_check()
 	{
-		var v = dao.getByIdWithException(CHANGE_CITIZEN.statusId, CHANGE_CITIZEN.createdAt());
+		var v = get(CHANGE_CITIZEN);
 		Assertions.assertEquals(REJECTED.id, v.statusId, "Check statusId");
 		Assertions.assertEquals(REJECTED, v.status, "Check status");
 		Assertions.assertEquals(FACILITY_1.id, v.entityId, "Check entityId");
@@ -409,16 +311,6 @@ public class FacilitateDAOTest
 		count(new FacilitateFilter().withStatusId(OPEN.id), 1L);
 		count(new FacilitateFilter().withStatusId(PROMOTED.id), 2L);
 		count(new FacilitateFilter().withStatusId(REJECTED.id), 1L);
-	}
-
-	@ParameterizedTest
-	@MethodSource("getByIdWithException_failure")
-	public void reject_failure(final SessionValue session, final String statusId, final String createdAt, final Class<? extends Exception> ex, final String message)
-	{
-		sessionDao.current(session);
-
-		assertThat(Assertions.assertThrows(ex, () -> dao.reject(statusId, createdAt)))
-			.hasMessageContaining(message);
 	}
 
 	public static Stream<Arguments> search()
@@ -490,7 +382,7 @@ public class FacilitateDAOTest
 	@MethodSource
 	public void search(final FacilitateFilter filter, final long expectedTotal)
 	{
-		var results = dao.search(filter);
+		var results = request("search").post(Entity.json(filter), TYPE_QUERY_RESULTS);
 		Assertions.assertNotNull(results, "Exists");
 		Assertions.assertEquals(expectedTotal, results.total, "Check total");
 		if (0L == expectedTotal)
@@ -521,29 +413,29 @@ public class FacilitateDAOTest
 	{
 		sessionDao.current(session);
 
-		Assertions.assertThrows(NotAuthorizedException.class, () -> dao.remove(ADD_CITIZEN.statusId, ADD_CITIZEN.createdAt()));
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request(ADD_CITIZEN.id).delete().getStatus());
 	}
 
 	@Test
 	public void testRemove_success()
 	{
-		Assertions.assertTrue(dao.remove(ADD_CITIZEN.statusId, ADD_CITIZEN.createdAt()));
+		Assertions.assertTrue(request(ADD_CITIZEN.id).delete(OperationResponse.class).operation);
 		count(3L);
-		Assertions.assertTrue(dao.remove(ADD_PROVIDER.statusId, ADD_PROVIDER.createdAt()));
+		Assertions.assertTrue(request(ADD_PROVIDER.id).delete(OperationResponse.class).operation);
 		count(2L);
-		Assertions.assertTrue(dao.remove(CHANGE_CITIZEN.statusId, CHANGE_CITIZEN.createdAt()));
+		Assertions.assertTrue(request(CHANGE_CITIZEN.id).delete(OperationResponse.class).operation);
 		count(1L);
-		Assertions.assertTrue(dao.remove(CHANGE_PROVIDER.statusId, CHANGE_PROVIDER.createdAt()));
+		Assertions.assertTrue(request(CHANGE_PROVIDER.id).delete(OperationResponse.class).operation);
 		count(0L);
 	}
 
 	@Test
 	public void testRemove_success_again()
 	{
-		Assertions.assertFalse(dao.remove(ADD_CITIZEN.statusId, ADD_CITIZEN.createdAt()));
-		Assertions.assertFalse(dao.remove(ADD_PROVIDER.statusId, ADD_PROVIDER.createdAt()));
-		Assertions.assertFalse(dao.remove(CHANGE_CITIZEN.statusId, CHANGE_CITIZEN.createdAt()));
-		Assertions.assertFalse(dao.remove(CHANGE_PROVIDER.statusId, CHANGE_PROVIDER.createdAt()));
+		Assertions.assertFalse(request(ADD_CITIZEN.id).delete(OperationResponse.class).operation);
+		Assertions.assertFalse(request(ADD_PROVIDER.id).delete(OperationResponse.class).operation);
+		Assertions.assertFalse(request(CHANGE_CITIZEN.id).delete(OperationResponse.class).operation);
+		Assertions.assertFalse(request(CHANGE_PROVIDER.id).delete(OperationResponse.class).operation);
 	}
 
 	private void count(final long expected) { count(new FacilitateFilter(), expected); }
@@ -551,6 +443,13 @@ public class FacilitateDAOTest
 	{
 		Assertions.assertEquals(expected, dao.count(filter), "COUNT: " + filter);
 	}
+
+	/** Helper method - creates the base WebTarget. */
+	private WebTarget target() { return RULE.client().target(TARGET); }
+
+	/** Helper method - creates the request from the WebTarget. */
+	private Invocation.Builder request(final String path) { return request(target().path(path)); }
+	private Invocation.Builder request(final WebTarget target) { return target.request(UTF8MediaType.APPLICATION_JSON_TYPE); }
 
 	private void check(final FacilitateValue expected, final FacilitateValue actual)
 	{

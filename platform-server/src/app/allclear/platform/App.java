@@ -140,6 +140,7 @@ public class App extends Application<Config>
         jersey.register(new AdminResource(adminDao, sessionDao));
         jersey.register(new AuditLogResource(auditor));
         jersey.register(new CustomerResource(customerDao));
+        jersey.register(new FacilitateResource(new FacilitateDAO(conf.auditLog, facilityDao, sessionDao)));
         jersey.register(new FacilityResource(facilityDao, sessionDao, map));
         jersey.register(new FriendResource(new FriendDAO(factory), sessionDao));
         jersey.register(new MapResource(map));

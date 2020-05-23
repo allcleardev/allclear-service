@@ -283,7 +283,7 @@ public class PeopleResource
 
 	@DELETE
 	@Path("/{id}") @Timed @UnitOfWork
-	@ApiOperation(value="remove", notes="Removes/deactivates a single People by its primary key.")
+	@ApiOperation(value="remove", notes="Removes/deactivates a single People by its primary key.", response=OperationResponse.class)
 	public OperationResponse remove(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@PathParam("id") final String id) throws ValidationException
 	{
@@ -294,7 +294,7 @@ public class PeopleResource
 
 	@DELETE
 	@Path("/facilities") @Timed @UnitOfWork
-	@ApiOperation(value="removeFacilities", notes="Removes one or more facility associations from a person.", response=PeopleValue.class)
+	@ApiOperation(value="removeFacilities", notes="Removes one or more facility associations from a person.", response=CountResults.class)
 	public CountResults removeFacilities(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		final List<Long> facilityIds) throws ObjectNotFoundException, ValidationException
 	{
@@ -303,7 +303,7 @@ public class PeopleResource
 
 	@DELETE
 	@Path("/{id}/facilities") @Timed @UnitOfWork
-	@ApiOperation(value="removeFacilities", notes="Removes one or more facility associations from a person. Administrator usage only.", response=PeopleValue.class)
+	@ApiOperation(value="removeFacilities", notes="Removes one or more facility associations from a person. Administrator usage only.", response=CountResults.class)
 	public CountResults removeFacilities(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@PathParam("id") final String id,
 		final List<Long> facilityIds) throws ObjectNotFoundException, ValidationException

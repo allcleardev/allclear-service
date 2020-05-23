@@ -127,7 +127,7 @@ public class FriendResource
 
 	@DELETE
 	@Path("/{personId}/{inviteeId}") @Timed @UnitOfWork
-	@ApiOperation(value="remove", notes="Removes/deactivates a single Friend by its primary key. For Administrators.")
+	@ApiOperation(value="remove", notes="Removes/deactivates a single Friend by its primary key. For Administrators.", response=OperationResponse.class)
 	public OperationResponse remove(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@PathParam("personId") final String personId,
 		@PathParam("inviteeId") final String inviteeId) throws ValidationException

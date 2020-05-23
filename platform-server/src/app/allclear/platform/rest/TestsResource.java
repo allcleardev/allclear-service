@@ -82,7 +82,7 @@ public class TestsResource
 
 	@DELETE
 	@Path("/{id}") @Timed @UnitOfWork
-	@ApiOperation(value="remove", notes="Removes/deactivates a single Tests by its primary key.")
+	@ApiOperation(value="remove", notes="Removes/deactivates a single Tests by its primary key.", response=OperationResponse.class)
 	public OperationResponse remove(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@PathParam("id") final Long id) throws ValidationException
 	{

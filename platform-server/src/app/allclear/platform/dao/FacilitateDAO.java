@@ -26,7 +26,6 @@ import app.allclear.platform.filter.FacilitateFilter;
 import app.allclear.platform.type.CrowdsourceStatus;
 import app.allclear.platform.type.Originator;
 import app.allclear.platform.value.FacilitateValue;
-import app.allclear.platform.value.FacilityValue;
 
 /** Data component that provides access the Azure Cosmos Facilitate table.
  *  A Facilitate entity represents a request for a new/change Facility.

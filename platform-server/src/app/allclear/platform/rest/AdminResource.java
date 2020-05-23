@@ -122,7 +122,7 @@ public class AdminResource
 
 	@DELETE
 	@Path("/{id}") @Timed
-	@ApiOperation(value="remove", notes="Removes/deactivates a single Admin by its primary key.")
+	@ApiOperation(value="remove", notes="Removes/deactivates a single Admin by its primary key.", response=OperationResponse.class)
 	public OperationResponse remove(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@PathParam("id") final String id) throws ValidationException
 	{
@@ -131,7 +131,7 @@ public class AdminResource
 
 	@DELETE
 	@Path("/self") @Timed
-	@ApiOperation(value="logout", notes="Logs out the current Administrator.")
+	@ApiOperation(value="logout", notes="Logs out the current Administrator.", response=OperationResponse.class)
 	public OperationResponse logout(@HeaderParam(Headers.HEADER_SESSION) final String sessionId) throws ValidationException
 	{
 		sessionDao.remove();
