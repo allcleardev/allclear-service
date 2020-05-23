@@ -296,6 +296,22 @@ public class FacilityDAOTest
 			.hasMessage("org.hibernate.exception.SQLGrammarException: could not prepare statement");
 	}
 
+	public static Stream<Arguments> exist()
+	{
+		return Stream.of(
+			arguments(null, false),
+			arguments(0L, false),
+			arguments(VALUE.id, true),
+			arguments(100L, false));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void exist(final Long id, final boolean expected)
+	{
+		Assertions.assertEquals(expected, dao.exists(id));
+	}
+
 	@Test
 	public void favorite()
 	{

@@ -362,8 +362,8 @@ public class FacilityValue implements Auditable, Serializable
 			Objects.equals(notes, v.notes) &&
 			(active == v.active) &&
 			((activatedAt == v.activatedAt) || DateUtils.truncatedEquals(activatedAt, v.activatedAt, Calendar.SECOND)) &&
-			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND) &&
-			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
+			((createdAt == v.createdAt) || DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND)) &&
+			((updatedAt == v.updatedAt) || DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND));
 	}
 
 	@Override

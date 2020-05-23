@@ -34,7 +34,8 @@ import app.allclear.platform.value.FacilityValue;
 @DynamicUpdate
 @Table(name="facility", uniqueConstraints=@UniqueConstraint(name="unq_facility", columnNames="name"))
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE, region="facility")
-@NamedQueries({@NamedQuery(name="findActiveFacilitiesByName", query="SELECT OBJECT(o) FROM Facility o WHERE o.name LIKE :name AND o.active = TRUE ORDER BY o.name"),
+@NamedQueries({@NamedQuery(name="existFacilityById", query="SELECT o.id FROM Facility o WHERE o.id = :id"),
+	@NamedQuery(name="findActiveFacilitiesByName", query="SELECT OBJECT(o) FROM Facility o WHERE o.name LIKE :name AND o.active = TRUE ORDER BY o.name"),
 	@NamedQuery(name="findFacility", query="SELECT OBJECT(o) FROM Facility o WHERE o.name = :name")})
 @NamedNativeQueries({@NamedNativeQuery(name="getFacilityCitiesByState", query="SELECT o.city AS name, COUNT(o.city) AS total FROM facility o WHERE o.state = :state AND o.active = TRUE GROUP BY o.city ORDER BY o.city", resultClass=CountByName.class),
 	@NamedNativeQuery(name="getFacilityStates", query="SELECT o.state AS name, COUNT(o.state) AS total FROM facility o WHERE o.active = TRUE GROUP BY o.state ORDER BY o.state", resultClass=CountByName.class)})

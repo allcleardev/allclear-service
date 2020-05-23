@@ -149,9 +149,7 @@ public class AuditLogDAO extends AbstractDAO<AuditLog> implements Auditor
 		if (null != filter.timestampFrom) filters.add(generateFilterCondition("ActionAt", GREATER_THAN_OR_EQUAL, filter.timestampFrom.getTime()));
 		if (null != filter.timestampTo) filters.add(generateFilterCondition("ActionAt", LESS_THAN_OR_EQUAL, filter.timestampTo.getTime()));
 
-		var query = from(AuditLog.class).where(filters.stream().map(o -> "(" + o + ") ").collect(Collectors.joining(AND)));
-
-		return query;
+		return from(AuditLog.class).where(filters.stream().map(o -> "(" + o + ") ").collect(Collectors.joining(AND)));
 	}
 
 	/** Removes all the audit log entries for the specified entity. Used to clean up after TESTS.

@@ -27,6 +27,7 @@ public class Facilitate extends TableServiceEntity implements Serializable
 	private static final String FORMAT_ID = "%s/%s";
 	private static final ObjectMapper mapper = JacksonUtils.createMapperMS();
 
+	public String id() { return String.format(FORMAT_ID, getPartitionKey(), getRowKey()); }
 	public String statusId() { return getPartitionKey(); }
 	public void status(final CrowdsourceStatus newValue) { setPartitionKey(newValue.id); }
 
@@ -60,18 +61,18 @@ public class Facilitate extends TableServiceEntity implements Serializable
 	public boolean change = false;
 	public void setChange(final boolean newValue) { change = newValue; }
 
-	public Long getPromotedId() { return promotedId; }
-	public Long promotedId;
-	public void setPromotedId(final Long newValue) { promotedId = newValue; }
+	public Long getEntityId() { return entityId; }
+	public Long entityId;	// Represents the Facility ID with which change request is associated.
+	public void setEntityId(final Long newValue) { entityId = newValue; }
 
 	public String getPromoterId() { return promoterId; }
 	public String promoterId = null;
 	public void setPromoterId(final String newValue) { promoterId = newValue; }
-	public Facilitate promote(final String userId, final Long promotedId)
+	public Facilitate promote(final String userId, final Long entityId)
 	{
-		this.promotedId = promotedId;
+		this.entityId = entityId;
 		this.promoterId = userId;
-		this.promotedAt = new Date();
+		this.updatedAt = this.promotedAt = new Date();
 		status(CrowdsourceStatus.PROMOTED);
 
 		return this;
@@ -87,7 +88,7 @@ public class Facilitate extends TableServiceEntity implements Serializable
 	public Facilitate reject(final String userId)
 	{
 		this.rejecterId = userId;
-		this.rejectedAt = new Date();
+		this.updatedAt = this.rejectedAt = new Date();
 		status(CrowdsourceStatus.REJECTED);
 
 		return this;
@@ -101,46 +102,49 @@ public class Facilitate extends TableServiceEntity implements Serializable
 	public String creatorId = null;
 	public void setCreatorId(final String newValue) { creatorId = newValue; }
 
-	public long getCreatedAt() { return createdAt; }
-	public long createdAt;	// Needed for searches.
-	public void setCreatedAt(final long newValue) { createdAt = newValue; }
-	public Date createdAt() { return new Date(createdAt); }
+	public Date getCreatedAt() { return createdAt; }
+	public Date createdAt;	// Needed for searches.
+	public void setCreatedAt(final Date newValue) { createdAt = newValue; }
 
-	public long getUpdatedAt() { return updatedAt; }
-	public long updatedAt;	// Needed for searches.
-	public void setUpdatedAt(final long newValue) { updatedAt = newValue; }
+	public Date getUpdatedAt() { return updatedAt; }
+	public Date updatedAt;	// Needed for searches.
+	public void setUpdatedAt(final Date newValue) { updatedAt = newValue; }
+
+	public Facilitate() {}
 
 	public Facilitate(final FacilitateValue value)
 	{
 		super(value.statusId, (value.createdAt = value.updatedAt = new Date()).getTime() + "");
 
+		value.id = id();
 		this.payload(value.value);
 		this.location = value.location;
 		this.gotTested = value.gotTested;
 		this.originatorId = value.originatorId;
 		this.change = value.change;
+		this.entityId = value.entityId;
 		this.creatorId = value.creatorId;
-		this.createdAt = value.createdAt.getTime();
-		this.updatedAt = value.updatedAt.getTime();
+		this.createdAt = value.createdAt;
+		this.updatedAt = value.updatedAt;
 	}
 
 	public FacilitateValue toValue()
 	{
 		return new FacilitateValue(
-			String.format(FORMAT_ID, getPartitionKey(), getRowKey()),
+			id(),
 			payload(),
 			location,
 			gotTested,
 			Originator.get(originatorId),
 			CrowdsourceStatus.get(statusId()),
 			change,
-			promotedId,
+			entityId,
 			promoterId,
 			promotedAt,
 			rejecterId,
 			rejectedAt,
 			creatorId,
-			createdAt(),
-			getTimestamp());
+			createdAt,
+			updatedAt);
 	}
 }

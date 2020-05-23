@@ -1,9 +1,17 @@
 package app.allclear.platform.dao;
 
 import static com.microsoft.azure.storage.table.TableOperation.*;
+import static com.microsoft.azure.storage.table.TableQuery.from;
+import static com.microsoft.azure.storage.table.TableQuery.generateFilterCondition;
+import static com.microsoft.azure.storage.table.TableQuery.Operators.AND;
+import static com.microsoft.azure.storage.table.TableQuery.QueryComparisons.EQUAL;
+import static com.microsoft.azure.storage.table.TableQuery.QueryComparisons.GREATER_THAN_OR_EQUAL;
+import static com.microsoft.azure.storage.table.TableQuery.QueryComparisons.LESS_THAN_OR_EQUAL;
 
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
+import java.util.LinkedList;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +19,10 @@ import org.slf4j.LoggerFactory;
 import com.microsoft.azure.storage.*;
 import com.microsoft.azure.storage.table.*;
 
+import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.*;
 import app.allclear.platform.entity.Facilitate;
+import app.allclear.platform.filter.FacilitateFilter;
 import app.allclear.platform.type.CrowdsourceStatus;
 import app.allclear.platform.type.Originator;
 import app.allclear.platform.value.FacilitateValue;
@@ -58,7 +68,7 @@ public class FacilitateDAO
 
 	FacilitateValue add(final FacilitateValue value) throws ValidationException
 	{
-		return insert(value.withChange(false));
+		return insertIt(value.withChange(false));
 	}
 
 	public FacilitateValue changeByCitizen(final FacilitateValue value) throws ValidationException
@@ -73,14 +83,14 @@ public class FacilitateDAO
 
 	FacilitateValue change(final FacilitateValue value) throws ValidationException
 	{
-		return insert(value.withChange(true));
+		return insertIt(value.withChange(true));
 	}
 
-	FacilitateValue insert(final FacilitateValue value) throws ValidationException
+	FacilitateValue insertIt(final FacilitateValue value) throws ValidationException
 	{
 		validate(value);
 
-		try { table.execute(TableOperation.insert(new Facilitate(value.withStatus(CrowdsourceStatus.OPEN)))); }
+		try { table.execute(insert(new Facilitate(value.withStatus(CrowdsourceStatus.OPEN)))); }
 		catch (final StorageException ex) { throw new RuntimeException(ex); }
 
 		return value;
@@ -102,23 +112,30 @@ public class FacilitateDAO
 
 		value.clean();
 
-		new Validator()
-			.ensureExists("value", "Value", value.value)
+		var validator = new Validator();
+		validator.ensureExists("value", "Value", value.value)
 			.ensureLength("location", "Location", value.location, FacilitateValue.MAX_LEN_LOCATION)
 			.check();
 
-		facilityDao.validate(value.value);	// Make sure that a minimum of information is provided. DLS on 5/21/2020.
+		if (value.change)	// Make sure the facility exists for changes.
+		{
+			validator.ensureExists("value", "Value ID", value.value.id).check();
+			if (!facilityDao.exists(value.value.id))
+				validator.add("value", "The Facility '%d' does not exist.", value.value.id).check();
+
+			value.entityId = value.value.id;
+		}
 	}
 
 	/** Promotes a single Facilitate value.
 	 *
 	 * @param statusId
 	 * @param createdAt
-	 * @return the promoted Facility
+	 * @return the promoted Facilitate
 	 * @throws ObjectNotFoundException
 	 * @throws ValidationException
 	 */
-	public FacilityValue promote(final String statusId, final String createdAt) throws ObjectNotFoundException, ValidationException
+	public FacilitateValue promote(final String statusId, final String createdAt) throws ObjectNotFoundException, ValidationException
 	{
 		var auth = sessionDao.checkEditor();
 
@@ -130,9 +147,10 @@ public class FacilitateDAO
 			if (record.change) facilityDao.update(v, auth.canAdmin());
 			else facilityDao.add(v, auth.canAdmin());
 
-			table.execute(merge(record.promote(auth.id, v.id)));
+			table.execute(delete(record));	// MUST remove the existing value. When the status changes, the partition key will change too making this a remove and insert operation. DLS on 5/22/2020.
+			table.execute(insert(record.promote(auth.id, v.id)));
 
-			return v;
+			return record.toValue().withValue(v);	// Perform toValue after promoted.
 		}
 		catch (final StorageException ex) { throw new RuntimeException(ex); }
 	}
@@ -141,16 +159,21 @@ public class FacilitateDAO
 	 *
 	 * @param statusId
 	 * @param createdAt
+	 * @return the rejected Facilitate
 	 * @throws ObjectNotFoundException
 	 * @throws ValidationException
 	 */
-	public void reject(final String statusId, final String createdAt) throws ObjectNotFoundException, ValidationException
+	public FacilitateValue reject(final String statusId, final String createdAt) throws ObjectNotFoundException, ValidationException
 	{
 		var auth = sessionDao.checkEditor();
 
 		try
 		{
-			table.execute(merge(findWithException(statusId, createdAt).reject(auth.id)));
+			var record = findWithException(statusId, createdAt);
+			table.execute(delete(record));	// MUST remove the existing value. When the status changes, the partition key will change too making this a remove and insert operation. DLS on 5/22/2020.
+			table.execute(insert(record.reject(auth.id)));
+
+			return record.toValue();
 		}
 		catch (final StorageException ex) { throw new RuntimeException(ex); }
 	}
@@ -233,5 +256,66 @@ public class FacilitateDAO
 		sessionDao.checkEditor();
 
 		return findWithException(statusId, createdAt).toValue();
+	}
+
+	/** Searches the Facilitate entity based on the supplied filter.
+	 *
+	 * @param filter
+	 * @return never NULL.
+	 * @throws ValidationException
+	 */
+	public QueryResults<FacilitateValue, FacilitateFilter> search(final FacilitateFilter filter) throws ValidationException
+	{
+		var values = new LinkedList<FacilitateValue>();
+		for (var o : table.execute(createQueryBuilder(filter))) values.add(o.toValue());
+
+		return values.isEmpty() ? new QueryResults<>(0L, filter) : new QueryResults<>(values, filter);
+	}
+
+	/** Counts the number of Facilitate entities based on the supplied filter.
+	 *
+	 * @param value
+	 * @return zero if none found.
+	 * @throws ValidationException
+	 */
+	@SuppressWarnings("unused")
+	public long count(final FacilitateFilter filter) throws ValidationException
+	{
+		long i = 0;
+		for (var o : table.execute(createQueryBuilder(filter))) i++;
+
+		return i;
+	}
+
+	/** Helper method - creates the a standard Hibernate query builder. */
+	private TableQuery<Facilitate> createQueryBuilder(final FacilitateFilter filter)
+		throws ValidationException
+	{
+		var auth = sessionDao.checkEditorOrPerson();
+		if (auth.person()) filter.creatorId = auth.person.id;
+
+		var filters = new LinkedList<String>();
+		if (null != filter.statusId) filters.add(generateFilterCondition("PartitionKey", EQUAL, filter.statusId));
+		if (null != filter.location) filters.add(generateFilterCondition("Location", EQUAL, filter.location));
+		if (null != filter.gotTested) filters.add(generateFilterCondition("GotTested", EQUAL, filter.gotTested));
+		if (null != filter.originatorId) filters.add(generateFilterCondition("OriginatorId", EQUAL, filter.originatorId));
+		if (null != filter.change) filters.add(generateFilterCondition("Change", EQUAL, filter.change));
+		if (null != filter.entityId) filters.add(generateFilterCondition("EntityId", EQUAL, filter.entityId));
+		if (null != filter.promoterId) filters.add(generateFilterCondition("PromoterId", EQUAL, filter.promoterId));
+		if (null != filter.promotedAtFrom) filters.add(generateFilterCondition("PromotedAt", GREATER_THAN_OR_EQUAL, filter.promotedAtFrom));
+		if (null != filter.promotedAtTo) filters.add(generateFilterCondition("PromotedAt", LESS_THAN_OR_EQUAL, filter.promotedAtTo));
+		if (null != filter.rejecterId) filters.add(generateFilterCondition("RejecterId", EQUAL, filter.rejecterId));
+		if (null != filter.rejectedAtFrom) filters.add(generateFilterCondition("RejectedAt", GREATER_THAN_OR_EQUAL, filter.rejectedAtFrom));
+		if (null != filter.rejectedAtTo) filters.add(generateFilterCondition("RejectedAt", LESS_THAN_OR_EQUAL, filter.rejectedAtTo));
+		if (null != filter.creatorId) filters.add(generateFilterCondition("CreatorId", EQUAL, filter.creatorId));
+		if (null != filter.createdAtFrom) filters.add(generateFilterCondition("CreatedAt", GREATER_THAN_OR_EQUAL, filter.createdAtFrom));
+		if (null != filter.createdAtTo) filters.add(generateFilterCondition("CreatedAt", LESS_THAN_OR_EQUAL, filter.createdAtTo));
+		if (null != filter.updatedAtFrom) filters.add(generateFilterCondition("UpdatedAt", GREATER_THAN_OR_EQUAL, filter.updatedAtFrom));
+		if (null != filter.updatedAtTo) filters.add(generateFilterCondition("UpdatedAt", LESS_THAN_OR_EQUAL, filter.updatedAtTo));
+
+		var query = from(Facilitate.class);
+		if (!filters.isEmpty()) query.where(filters.stream().map(o -> "(" + o + ") ").collect(Collectors.joining(AND)));
+
+		return query;
 	}
 }

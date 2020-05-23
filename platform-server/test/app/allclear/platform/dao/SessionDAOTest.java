@@ -46,6 +46,7 @@ public class SessionDAOTest
 	private static final SessionDAO dao = new SessionDAO(redis, twilio, ConfigTest.loadTest());
 
 	private static SessionValue ADMIN;
+	private static SessionValue CUSTOMER = new SessionValue(new CustomerValue("customer1"));
 	private static SessionValue EDITOR;
 	private static SessionValue PERSON;
 	private static SessionValue PERSON_1;
@@ -234,6 +235,7 @@ public class SessionDAOTest
 		return Stream.of(
 			arguments(null, false),
 			arguments(ADMIN, true),
+			arguments(CUSTOMER, false),
 			arguments(EDITOR, false),
 			arguments(PERSON, false),
 			arguments(PERSON_1, false),
@@ -258,6 +260,7 @@ public class SessionDAOTest
 		return Stream.of(
 			arguments(null, false),
 			arguments(ADMIN, true),
+			arguments(CUSTOMER, false),
 			arguments(EDITOR, false),
 			arguments(PERSON, true),
 			arguments(PERSON_1, true),
@@ -282,6 +285,7 @@ public class SessionDAOTest
 		return Stream.of(
 			arguments(null, false),
 			arguments(ADMIN, true),	// All administrators can perform the Editor actions. DLS on 4/30/2020.
+			arguments(CUSTOMER, false),
 			arguments(EDITOR, true),
 			arguments(PERSON, false),
 			arguments(PERSON_1, false),
@@ -301,11 +305,37 @@ public class SessionDAOTest
 			Assertions.assertThrows(NotAuthorizedException.class, () -> dao.checkEditor());
 	}
 
+	public static Stream<Arguments> checkEditorOrPerson()
+	{
+		return Stream.of(
+			arguments(null, false),
+			arguments(ADMIN, true),
+			arguments(CUSTOMER, false),
+			arguments(EDITOR, true),
+			arguments(PERSON, true),
+			arguments(PERSON_1, true),
+			arguments(START, false),
+			arguments(START_1, false),
+			arguments(SUPER, true));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void checkEditorOrPerson(final SessionValue value, final boolean success)
+	{
+		dao.current(value);
+		if (success)
+			assertThat(dao.checkEditorOrPerson()).isNotNull().isInstanceOf(SessionValue.class);
+		else
+			Assertions.assertThrows(NotAuthorizedException.class, () -> dao.checkEditorOrPerson());
+	}
+
 	public static Stream<Arguments> checkPerson()
 	{
 		return Stream.of(
 			arguments(null, false),
 			arguments(ADMIN, false),
+			arguments(CUSTOMER, false),
 			arguments(EDITOR, false),
 			arguments(PERSON, true),
 			arguments(PERSON_1, true),
@@ -330,6 +360,7 @@ public class SessionDAOTest
 		return Stream.of(
 			arguments(null, false),
 			arguments(ADMIN, false),
+			arguments(CUSTOMER, false),
 			arguments(EDITOR, false),
 			arguments(PERSON, false),
 			arguments(PERSON_1, false),

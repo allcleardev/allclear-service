@@ -280,8 +280,6 @@ public class AdminDAO
 		if (null != filter.updatedAtFrom) filters.add(generateFilterCondition("UpdatedAt", GREATER_THAN_OR_EQUAL, filter.updatedAtFrom));
 		if (null != filter.updatedAtTo) filters.add(generateFilterCondition("UpdatedAt", LESS_THAN_OR_EQUAL, filter.updatedAtTo));
 
-		var query = from(Admin.class).where(filters.stream().map(o -> "(" + o + ") ").collect(Collectors.joining(AND)));
-
-		return query;
+		return from(Admin.class).where(filters.stream().map(o -> "(" + o + ") ").collect(Collectors.joining(AND)));
 	}
 }

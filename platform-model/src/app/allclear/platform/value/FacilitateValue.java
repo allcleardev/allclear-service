@@ -35,7 +35,7 @@ public class FacilitateValue implements Serializable
 	public String statusId = null;
 	public CrowdsourceStatus status = null;
 	public boolean change = false;	// Is this a change request or a request to add a new facility?
-	public Long promotedId = null;	// If promoted, represents the associated Facility ID.
+	public Long entityId = null;	// Represents the Facility ID with which change request is associated.
 	public String promoterId = null;
 	public Date promotedAt = null;
 	public String rejecterId = null;
@@ -43,6 +43,9 @@ public class FacilitateValue implements Serializable
 	public String creatorId = null;
 	public Date createdAt = null;
 	public Date updatedAt = null;
+
+	// Accessors
+	public String createdAt() { return createdAt.getTime() + ""; }
 
 	// Mutators
 	public FacilitateValue withId(final String newValue) { this.id = newValue; return this; }
@@ -54,7 +57,7 @@ public class FacilitateValue implements Serializable
 	public FacilitateValue withStatusId(final String newValue) { this.statusId = newValue; return this; }
 	public FacilitateValue withStatus(final CrowdsourceStatus newValue) { this.statusId = (this.status = newValue).id; return this; }
 	public FacilitateValue withChange(final boolean newValue) { this.change = newValue; return this; }
-	public FacilitateValue withPromotedId(final Long newValue) { this.promotedId = newValue; return this; }
+	public FacilitateValue withEntityId(final Long newValue) { this.entityId = newValue; return this; }
 	public FacilitateValue withPromoterId(final String newValue) { this.promoterId = newValue; return this; }
 	public FacilitateValue withPromotedAt(final Date newValue) { this.promotedAt = newValue; return this; }
 	public FacilitateValue withRejecterId(final String newValue) { this.rejecterId = newValue; return this; }
@@ -65,6 +68,16 @@ public class FacilitateValue implements Serializable
 
 	public FacilitateValue() {}
 
+	public FacilitateValue(
+		final FacilityValue value,
+		final String location,
+		final boolean gotTested)
+	{
+		this.value = value;
+		this.location = location;
+		this.gotTested = gotTested;
+	}
+
 	public FacilitateValue(final String id,
 		final FacilityValue value,
 		final String location,
@@ -72,7 +85,7 @@ public class FacilitateValue implements Serializable
 		final Originator originator,
 		final CrowdsourceStatus status,
 		final boolean change,
-		final Long promotedId,
+		final Long entityId,
 		final String promoterId,
 		final Date promotedAt,
 		final String rejecterId,
@@ -88,7 +101,7 @@ public class FacilitateValue implements Serializable
 		this.originatorId = (this.originator = originator).id;
 		this.statusId = (this.status = status).id;
 		this.change = change;
-		this.promotedId = promotedId;
+		this.entityId = entityId;
 		this.promoterId = promoterId;
 		this.promotedAt = promotedAt;
 		this.rejecterId = rejecterId;
@@ -119,7 +132,7 @@ public class FacilitateValue implements Serializable
 			Objects.equals(originatorId, v.originatorId) &&
 			Objects.equals(statusId, v.statusId) &&
 			(change == v.change) &&
-			Objects.equals(promotedId, v.promotedId) &&
+			Objects.equals(entityId, v.entityId) &&
 			Objects.equals(promoterId, v.promoterId) &&
 			((promotedAt == v.promotedAt) || DateUtils.truncatedEquals(promotedAt, v.promotedAt, Calendar.SECOND)) &&
 			Objects.equals(rejecterId, v.rejecterId) &&

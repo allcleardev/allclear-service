@@ -244,6 +244,16 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		return true;
 	}
 
+	/** Verifies that a facility with the specified ID exists.
+	 * 
+	 * @param id
+	 * @return TRUE if the facility is found.
+	 */
+	public boolean exists(final Long id)
+	{
+		return (null != namedQuery("existFacilityById", Long.class).setParameter("id", id).uniqueResult());
+	}
+
 	/** Finds a single Facility entity by identifier.
 	 *
 	 * @param id
