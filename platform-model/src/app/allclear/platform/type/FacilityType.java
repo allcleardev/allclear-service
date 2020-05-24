@@ -24,10 +24,11 @@ public class FacilityType implements Serializable
 	public static final FacilityType HOSPITAL = new FacilityType("ho", "Hospital");
 	public static final FacilityType MEDICAL_CENTER = new FacilityType("mc", "Medical Center");
 	public static final FacilityType POP_UP_MOBILE_SITE = new FacilityType("pu", "Pop-up/Mobile Site");
+	public static final FacilityType PRIVATE_DOCTORS_OFFICE = new FacilityType("pv", "Private Doctor's Office");	// ALLCLEAR-574: DLS on 5/24/2020.
 	public static final FacilityType PUBLIC_HEALTH_DEPT = new FacilityType("pd", "Public Health Department");
 	public static final FacilityType URGENT_CARE = new FacilityType("uc", "Urgent Care");
 
-	public static final List<FacilityType> LIST = List.of(COMMUNITY_HEALTH_CLINIC, HOSPITAL, MEDICAL_CENTER, POP_UP_MOBILE_SITE, PUBLIC_HEALTH_DEPT, URGENT_CARE);
+	public static final List<FacilityType> LIST = List.of(COMMUNITY_HEALTH_CLINIC, HOSPITAL, MEDICAL_CENTER, POP_UP_MOBILE_SITE, PRIVATE_DOCTORS_OFFICE, PUBLIC_HEALTH_DEPT, URGENT_CARE);
 	public static final Map<String, FacilityType> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
 	public static FacilityType get(final String id) { return VALUES.get(id); }
 	public static boolean exists(final String id) { return VALUES.containsKey(id); }
