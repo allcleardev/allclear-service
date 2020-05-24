@@ -36,6 +36,7 @@ import app.allclear.platform.value.*;
 
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)
 @ExtendWith(DropwizardExtensionsSupport.class)
+@Disabled
 public class FacilitateDAOTest
 {
 	public static final HibernateRule DAO_RULE = new HibernateRule(App.ENTITIES);
