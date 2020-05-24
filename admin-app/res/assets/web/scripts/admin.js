@@ -18,7 +18,7 @@ AdminApp.doPeople = function(body) { PeopleHandler.filter({ pageSize: 100 }, bod
 AdminApp.doRegistrations = function(body) { RegistrationsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doTests = function(body) { TestsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doFacilities = EditorApp.doFacilities = function(body) { FacilitiesHandler.filter({ pageSize: 100 }, body); }
-AdminApp.doFacilitate = EditorApp.doFacilitate = function(body) { FacilitateHandler.filter({ statusId: 'o', createdAtFrom: Template.weekAgo() }, body); }
+AdminApp.doFacilitate = EditorApp.doFacilitate = function(body) { FacilitateHandler.filter({ statusId: 'o', createdAtFrom: Template.weekAgo(), pageSize: 100 }, body); }
 AdminApp.doLogs = function(body) { LogsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doSessions = function(body) { SessionsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doAdmins = function(body) { AdminsHandler.init(body); }
@@ -380,7 +380,8 @@ var FacilitateHandler = new ListTemplate({
 		          new DropField('creatorId', 'Creator', false, fillPeopleDropdownList, 'creatorName'),
 		          new TextField('creatorName', '', undefined, undefined, true),
 		          new DatesField('createdAt', 'Created At'),
-		          new DatesField('updatedAt', 'Updated At') ]
+		          new DatesField('updatedAt', 'Updated At'),
+		          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ]
 	}
 });
 

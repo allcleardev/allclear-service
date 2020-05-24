@@ -432,6 +432,8 @@ public class FacilitateDAOTest
 
 		return Stream.of(
 			arguments(new FacilitateFilter(), 4L),
+			arguments(new FacilitateFilter(1, 1), 1L),
+			arguments(new FacilitateFilter(1, 2), 2L),
 			arguments(new FacilitateFilter().withLocation("Around the corner"), 1L),
 			arguments(new FacilitateFilter().withLocation("One town over"), 1L),
 			arguments(new FacilitateFilter().withGotTested(true), 2L),

@@ -268,8 +268,13 @@ public class FacilitateDAO
 	 */
 	public QueryResults<FacilitateValue, FacilitateFilter> search(final FacilitateFilter filter) throws ValidationException
 	{
+		var pageSize = filter.pageSize(100);
 		var values = new LinkedList<FacilitateValue>();
-		for (var o : table.execute(createQueryBuilder(filter))) values.add(o.toValue());
+		for (var o : table.execute(createQueryBuilder(filter)))
+		{
+			if (1 > pageSize--) break;
+			values.add(o.toValue());
+		}
 
 		return values.isEmpty() ? new QueryResults<>(0L, filter) : new QueryResults<>(values, filter);
 	}
