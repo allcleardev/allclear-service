@@ -319,9 +319,12 @@ var FacilitateHandler = ListTemplate({
 
 	EDIT_METHOD: 'post',
 
+	CAPTION_SUBMIT: 'Promote',
+
 	ROW_ACTIONS: [ new RowAction('promote', 'Promote', undefined, 'promotedAt'),
 	               new RowAction('reject', 'Reject', undefined, 'rejectedAt') ],
 
+	onEditorPostLoad: function(c) { c.submitUrl = this.RESOURCE + '/' + c.value.id + '/promote'; }, 
 	openEntity: function(c, e) { FacilitiesHandler.EDITOR.doEdit(e.myRecord.entityId); },
 	openCreator: function(c, e) { PeopleHandler.EDITOR.doEdit(e.myRecord.creatorId); },
 	promote: function(c, e) {
