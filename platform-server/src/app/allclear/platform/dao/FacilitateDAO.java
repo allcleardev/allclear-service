@@ -26,6 +26,7 @@ import app.allclear.platform.filter.FacilitateFilter;
 import app.allclear.platform.type.CrowdsourceStatus;
 import app.allclear.platform.type.Originator;
 import app.allclear.platform.value.FacilitateValue;
+import app.allclear.platform.value.FacilityValue;
 
 /** Data component that provides access the Azure Cosmos Facilitate table.
  *  A Facilitate entity represents a request for a new/change Facility.
@@ -130,11 +131,13 @@ public class FacilitateDAO
 	 *
 	 * @param statusId
 	 * @param createdAt
+	 * @param value a modified facility value to be added or updated instead of the facility value associated with the request.
 	 * @return the promoted Facilitate
 	 * @throws ObjectNotFoundException
 	 * @throws ValidationException
 	 */
-	public FacilitateValue promote(final String statusId, final String createdAt) throws ObjectNotFoundException, ValidationException
+	public FacilitateValue promote(final String statusId, final String createdAt, final FacilityValue value)
+		throws ObjectNotFoundException, ValidationException
 	{
 		var auth = sessionDao.checkEditor();
 
@@ -142,7 +145,7 @@ public class FacilitateDAO
 		{
 			var record = findWithException(statusId, createdAt);
 
-			var v = record.payload();
+			var v = (null != value) ? value : record.payload();
 			if (record.change) facilityDao.update(v, auth.canAdmin());
 			else facilityDao.add(v, auth.canAdmin());
 

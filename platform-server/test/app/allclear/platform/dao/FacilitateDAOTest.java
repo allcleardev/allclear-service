@@ -301,20 +301,22 @@ public class FacilitateDAOTest
 		Assertions.assertNull(v.rejecterId, "Check rejecterId");
 		Assertions.assertNull(v.rejectedAt, "Check rejectedAt");
 
-		ADD_CITIZEN = dao.promote(ADD_CITIZEN.statusId, ADD_CITIZEN.createdAt());
+		ADD_CITIZEN = dao.promote(ADD_CITIZEN.statusId, ADD_CITIZEN.createdAt(), new FacilityValue(30));
 	}
 
 	@Test
 	public void promote_add_citizen_check()
 	{
+		var facilityId = FACILITY_2.id + 1L;
 		var v = dao.getByIdWithException(ADD_CITIZEN.statusId, ADD_CITIZEN.createdAt());
 		Assertions.assertEquals(PROMOTED.id, v.statusId, "Check statusId");
 		Assertions.assertEquals(PROMOTED, v.status, "Check status");
-		Assertions.assertEquals(FACILITY_2.id + 1L, v.entityId, "Check entityId");	// Added after FACILITY_2.
+		Assertions.assertEquals(facilityId, v.entityId, "Check entityId");	// Added after FACILITY_2.
 		Assertions.assertEquals(EDITOR.admin.id, v.promoterId, "Check promoterId");
 		assertThat(v.promotedAt).as("Check promotedAt").isNotNull().isAfter(v.createdAt).isCloseTo(new Date(), 500L);
 		Assertions.assertNull(v.rejecterId, "Check rejecterId");
 		Assertions.assertNull(v.rejectedAt, "Check rejectedAt");
+		Assertions.assertEquals("Test Center 30", facilityDao.getById(facilityId).name, "Check facility.name");
 	}
 
 	@Test
@@ -337,7 +339,7 @@ public class FacilitateDAOTest
 		Assertions.assertNull(v.rejecterId, "Check rejecterId");
 		Assertions.assertNull(v.rejectedAt, "Check rejectedAt");
 
-		CHANGE_PROVIDER = dao.promote(CHANGE_PROVIDER.statusId, CHANGE_PROVIDER.createdAt());
+		CHANGE_PROVIDER = dao.promote(CHANGE_PROVIDER.statusId, CHANGE_PROVIDER.createdAt(), null);
 	}
 
 	@Test
@@ -351,6 +353,7 @@ public class FacilitateDAOTest
 		assertThat(v.promotedAt).as("Check promotedAt").isNotNull().isAfter(v.createdAt).isCloseTo(new Date(), 500L);
 		Assertions.assertNull(v.rejecterId, "Check rejecterId");
 		Assertions.assertNull(v.rejectedAt, "Check rejectedAt");
+		Assertions.assertEquals("Test Center 2", facilityDao.getById(FACILITY_2.id).name, "Check facility.name");
 	}
 
 	@Test
@@ -367,7 +370,7 @@ public class FacilitateDAOTest
 	{
 		sessionDao.current(session);
 
-		assertThat(Assertions.assertThrows(ex, () -> dao.promote(statusId, createdAt)))
+		assertThat(Assertions.assertThrows(ex, () -> dao.promote(statusId, createdAt, null)))
 			.hasMessageContaining(message);
 	}
 

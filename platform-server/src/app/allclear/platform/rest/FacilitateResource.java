@@ -14,6 +14,7 @@ import app.allclear.common.value.OperationResponse;
 import app.allclear.platform.dao.FacilitateDAO;
 import app.allclear.platform.filter.FacilitateFilter;
 import app.allclear.platform.value.FacilitateValue;
+import app.allclear.platform.value.FacilityValue;
 
 /**********************************************************************************
 *
@@ -75,9 +76,10 @@ public class FacilitateResource
 	@ApiOperation(value="promote", notes="Promotes a single Facilitate request by its primary key.", response=FacilitateValue.class)
 	public FacilitateValue promote(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@PathParam("statusId") final String statusId,
-		@PathParam("createdAt") final String createdAt) throws ObjectNotFoundException, ValidationException
+		@PathParam("createdAt") final String createdAt,
+		final FacilityValue value) throws ObjectNotFoundException, ValidationException
 	{
-		return dao.promote(statusId, createdAt);
+		return dao.promote(statusId, createdAt, value);
 	}
 
 	@PUT

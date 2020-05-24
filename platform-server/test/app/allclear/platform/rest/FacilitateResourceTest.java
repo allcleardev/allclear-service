@@ -220,13 +220,15 @@ public class FacilitateResourceTest
 	public void promote_add_citizen_check()
 	{
 		var v = get(ADD_CITIZEN);
+		var facilityId = FACILITY_2.id + 1L;
 		Assertions.assertEquals(PROMOTED.id, v.statusId, "Check statusId");
 		Assertions.assertEquals(PROMOTED, v.status, "Check status");
-		Assertions.assertEquals(FACILITY_2.id + 1L, v.entityId, "Check entityId");	// Added after FACILITY_2.
+		Assertions.assertEquals(facilityId, v.entityId, "Check entityId");	// Added after FACILITY_2.
 		Assertions.assertEquals(EDITOR.admin.id, v.promoterId, "Check promoterId");
-		assertThat(v.promotedAt).as("Check promotedAt").isNotNull().isAfter(v.createdAt).isCloseTo(new Date(), 500L);
+		assertThat(v.promotedAt).as("Check promotedAt").isNotNull().isAfter(v.createdAt).isCloseTo(new Date(), 1000L);
 		Assertions.assertNull(v.rejecterId, "Check rejecterId");
 		Assertions.assertNull(v.rejectedAt, "Check rejectedAt");
+		Assertions.assertEquals("Test Center 3", facilityDao.getById(facilityId).name, "Check facility.name");
 	}
 
 	@Test
@@ -249,7 +251,8 @@ public class FacilitateResourceTest
 		Assertions.assertNull(v.rejecterId, "Check rejecterId");
 		Assertions.assertNull(v.rejectedAt, "Check rejectedAt");
 
-		CHANGE_PROVIDER = request(CHANGE_PROVIDER.statusId + "/" + CHANGE_PROVIDER.createdAt() + "/promote").method(HttpMethod.POST, FacilitateValue.class);
+		CHANGE_PROVIDER = request(CHANGE_PROVIDER.statusId + "/" + CHANGE_PROVIDER.createdAt() + "/promote")
+			.post(Entity.json(FACILITY_2), FacilitateValue.class);
 	}
 
 	@Test
@@ -260,9 +263,10 @@ public class FacilitateResourceTest
 		Assertions.assertEquals(PROMOTED, v.status, "Check status");
 		Assertions.assertEquals(FACILITY_2.id, v.entityId, "Check entityId");
 		Assertions.assertEquals(ADMIN.admin.id, v.promoterId, "Check promoterId");
-		assertThat(v.promotedAt).as("Check promotedAt").isNotNull().isAfter(v.createdAt).isCloseTo(new Date(), 500L);
+		assertThat(v.promotedAt).as("Check promotedAt").isNotNull().isAfter(v.createdAt).isCloseTo(new Date(), 1000L);
 		Assertions.assertNull(v.rejecterId, "Check rejecterId");
 		Assertions.assertNull(v.rejectedAt, "Check rejectedAt");
+		Assertions.assertEquals("Test Center 2", facilityDao.getById(FACILITY_2.id).name, "Check facility.name");
 	}
 
 	@Test
@@ -302,7 +306,7 @@ public class FacilitateResourceTest
 		Assertions.assertNull(v.promoterId, "Check promoterId");
 		Assertions.assertNull(v.promotedAt, "Check promotedAt");
 		Assertions.assertEquals(ADMIN.admin.id, v.rejecterId, "Check rejecterId");
-		assertThat(v.rejectedAt).as("Check rejectedAt").isNotNull().isAfter(v.createdAt).isCloseTo(new Date(), 500L);
+		assertThat(v.rejectedAt).as("Check rejectedAt").isNotNull().isAfter(v.createdAt).isCloseTo(new Date(), 1000L);
 	}
 
 	@Test
