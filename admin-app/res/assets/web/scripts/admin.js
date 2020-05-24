@@ -307,7 +307,7 @@ var FacilitiesHandler = new ListTemplate({
 	}
 });
 
-var FacilitateHandler = ListTemplate({
+var FacilitateHandler = new ListTemplate({
 	NAME: 'facilitate',
 	SINGULAR: 'Change Request',
 	PLURAL: 'Change Requests',
