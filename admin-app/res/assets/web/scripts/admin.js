@@ -18,7 +18,7 @@ AdminApp.doPeople = function(body) { PeopleHandler.filter({ pageSize: 100 }, bod
 AdminApp.doRegistrations = function(body) { RegistrationsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doTests = function(body) { TestsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doFacilities = EditorApp.doFacilities = function(body) { FacilitiesHandler.filter({ pageSize: 100 }, body); }
-AdminApp.doFacilitate = EditorApp.doFacilitate = function(body) { FacilitateHandler.filter({}); }
+AdminApp.doFacilitate = EditorApp.doFacilitate = function(body) { FacilitateHandler.filter({ statusId: 'o', createdAtFrom: Template.weekAgo() }, body); }
 AdminApp.doLogs = function(body) { LogsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doSessions = function(body) { SessionsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doAdmins = function(body) { AdminsHandler.init(body); }
@@ -361,21 +361,28 @@ var FacilitateHandler = new ListTemplate({
 	          new TextField('createdAt', 'Created At', 'toDateTime'),
 	          new TextField('updatedAt', 'Updated At', 'toDateTime') ],
 
-	SEARCH: [ new EditField('location', 'Location', false, false, 128, 50),
-	          new ListField('gotTested', 'Got Tested?', false, 'yesNoOptions', undefined, 'No Search'),
-	          new ListField('originatorId', 'Originator', false, 'originators', undefined, 'No Search'),
-	          new ListField('statusId', 'Status', false, 'crowdsourceStatuses', undefined, 'No Search'),
-	          new ListField('change', 'Change Request?', false, 'yesNoOptions', undefined, 'No Search'),
-	          new ListField('entityId', 'Facility ID', false, false, 19, 10),
-	          new DropField('promoterId', 'Promoter', false, 'admins', 'promoterName'),
-	          new TextField('promoterName', '', undefined, undefined, true),
-	          new DatesField('promotedAt', 'Promoted At'),
-	          new TextField('rejecterName', '', undefined, undefined, true),
-	          new DatesField('rejectedAt', 'Rejected At'),
-	          new DropField('creatorId', 'Creator', false, fillPeopleDropdownList, 'creatorName'),
-	          new TextField('creatorName', '', undefined, undefined, true),
-	          new DatesField('createdAt', 'Created At'),
-	          new DatesField('updatedAt', 'Updated At') ]
+	SEARCH: {
+		NAME: 'facilitate',
+		SINGULAR: 'Change Request',
+		PLURAL: 'Change Requests',
+		RESOURCE: 'facilitates',
+
+		FIELDS: [ new EditField('location', 'Location', false, false, 128, 50),
+		          new ListField('gotTested', 'Got Tested?', false, 'yesNoOptions', undefined, 'No Search'),
+		          new ListField('originatorId', 'Originator', false, 'originators', undefined, 'No Search'),
+		          new ListField('statusId', 'Status', false, 'crowdsourceStatuses', undefined, 'No Search'),
+		          new ListField('change', 'Change Request?', false, 'yesNoOptions', undefined, 'No Search'),
+		          new ListField('entityId', 'Facility ID', false, false, 19, 10),
+		          new DropField('promoterId', 'Promoter', false, 'admins', 'promoterName'),
+		          new TextField('promoterName', '', undefined, undefined, true),
+		          new DatesField('promotedAt', 'Promoted At'),
+		          new TextField('rejecterName', '', undefined, undefined, true),
+		          new DatesField('rejectedAt', 'Rejected At'),
+		          new DropField('creatorId', 'Creator', false, fillPeopleDropdownList, 'creatorName'),
+		          new TextField('creatorName', '', undefined, undefined, true),
+		          new DatesField('createdAt', 'Created At'),
+		          new DatesField('updatedAt', 'Updated At') ]
+	}
 });
 
 var PeopleHandler = new ListTemplate({
