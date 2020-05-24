@@ -205,7 +205,7 @@ function StampField(id, caption, isRequired, selectCallback)
 	this.doSelect = selectCallback;
 }
 
-function DropField(id, caption, isRequired, fillCallback, selectCallback, footnote, excludePath, restPath)
+function DropField(id, caption, isRequired, fillCallback, selectCallback, footnote, restPath)
 {
 	this.isEditable = this.isDropdownList = true;
 	this.id = id;
@@ -215,10 +215,8 @@ function DropField(id, caption, isRequired, fillCallback, selectCallback, footno
 		this.doFill = fillCallback;
 	else
 	{
-		this.doFill = function(criteria) {
-			Template.get(fillCallback + (excludePath ? '' : '/find'), { name: criteria.field.value }, function(data) {
-				criteria.caller.fill(criteria, data); 
-			}, undefined, restPath);
+		this.doFill = c => {
+			Template.get(fillCallback, { name: c.field.value }, data => c.caller.fill(c, data), undefined, restPath);
 		};
 	}
 	if ('function' == typeof(selectCallback))
