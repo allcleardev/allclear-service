@@ -2,7 +2,7 @@ var AdminApp = new TabTemplate();
 
 AdminApp.TABS = [ { id: 'doPeople', caption: 'People', children: [ { id: 'doRegistrations', caption: 'Registrations' },
 	                                                               { id: 'doTests', caption: 'Tests' } ] },
-	{ id: 'doFacilities', caption: 'Facilities' },
+	{ id: 'doFacilities', caption: 'Facilities', children: [ { id: 'doFacilitate', caption: 'Change Requests' } ] },
 	{ id: 'doLogs', caption: 'Logs', children: [ { id: 'doQueueStats', caption: 'Queue Stats' } ] },
 	{ id: 'doSessions', caption: 'Sessions', children: [ { id: 'doAdmins', caption: 'Admins' },
 	                                                     { id: 'doCustomers', caption: 'Customers' } ] },
@@ -11,12 +11,14 @@ AdminApp.TABS = [ { id: 'doPeople', caption: 'People', children: [ { id: 'doRegi
 
 var EditorApp = new TabTemplate();
 
-EditorApp.TABS = [ { id: 'doFacilities', caption: 'Facilities' } ];
+EditorApp.TABS = [ { id: 'doFacilities', caption: 'Facilities' },
+	{ id: 'doFacilitate', caption: 'Change Requests' } ];
 
 AdminApp.doPeople = function(body) { PeopleHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doRegistrations = function(body) { RegistrationsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doTests = function(body) { TestsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doFacilities = EditorApp.doFacilities = function(body) { FacilitiesHandler.filter({ pageSize: 100 }, body); }
+AdminApp.doFacilitate = EditorApp.doFacilitate = function(body) { FacilitateHandler.filter({}); }
 AdminApp.doLogs = function(body) { LogsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doSessions = function(body) { SessionsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doAdmins = function(body) { AdminsHandler.init(body); }
@@ -28,7 +30,7 @@ AdminApp.doHeapDump = function(body) { HeapDumpHandler.init(body); }
 AdminApp.doQueueStats = function(body) { QueuesHandler.init(body); }
 
 AdminApp.onPostInit = EditorApp.onPostInit = function(c) {
-	this.loadLists([ 'conditions', 'exposures', 'facilityTypes', 'healthWorkerStatuses', 'peopleStatuses', 'sexes', 'statures', 'symptoms', 'testCriteria', 'testTypes', 'timezones', 'visibilities' ]);
+	this.loadLists([ 'conditions', 'crowdsourceStatuses', 'exposures', 'facilityTypes', 'healthWorkerStatuses', 'originators', 'peopleStatuses', 'sexes', 'statures', 'symptoms', 'testCriteria', 'testTypes', 'timezones', 'visibilities' ]);
 }
 
 var UPLOAD_SOURCES_INSTRUCTIONS = 'Add comma separated text that is split by type, name, and code in that order.<br /><br />Types:<blockquote>';
@@ -303,6 +305,74 @@ var FacilitiesHandler = new ListTemplate({
 		PLURAL: 'Facilities',
 		RESOURCE: 'facilities'
 	}
+});
+
+var FacilitateHandler = ListTemplate({
+	NAME: 'facilitate',
+	SINGULAR: 'Change Request',
+	PLURAL: 'Change Requests',
+	RESOURCE: 'facilitates',
+
+	CAN_ADD: false,
+	CAN_EDIT: true,
+	CAN_REMOVE: true,
+
+	EDIT_METHOD: 'post',
+
+	ROW_ACTIONS: [ new RowAction('promote', 'Promote', undefined, 'promotedAt'),
+	               new RowAction('reject', 'Reject', undefined, 'rejectedAt') ],
+
+	openEntity: function(c, e) { FacilitiesHandler.EDITOR.doEdit(e.myRecord.entityId); },
+	openCreator: function(c, e) { PeopleHandler.EDITOR.doEdit(e.myRecord.creatorId); },
+	promote: function(c, e) {
+		var id = myRecord.id;
+		this.post(this.RESOURCE + '/' + id + '/promote', undefined, data => window.alert(data.message ? data.message : 'Promoted ' + id + ' successfully.'));
+	},
+	reject: function(c, e) {
+		var id = myRecord.id;
+		this.remove(this.RESOURCE, id + '/reject', data => window.alert(data.message ? data.message : 'Rejected ' + id + ' successfully.'));
+	},
+
+	COLUMNS: [ new TextColumn('status', 'Status', v => v.name),
+	           new TextColumn('originator', 'Originator', v => v.name),
+	           new TextColumn('gotTested', 'Got Tested?'),
+	           new TextColumn('change', 'Change?'),
+	           new IdColumn('entityId', 'Facility ID', false, false, 'openEntity'),
+	           new TextColumn('creatorId', 'Creator', undefined, false, false, 'openCreator'),
+	           new TextColumn('createdAt', 'Created At', 'toDateTime', true),
+	           new TextColumn('updatedAt', 'Updated At', 'toDateTime') ],
+
+	FIELDS: [ new TextField('id', 'ID'),
+	          new TextField('location', 'Location'),
+	          new TextField('gotTested', 'Got Tested?'),
+	          new TextField('originator', 'Originator', (v, p) => p.name),
+	          new TextField('status', 'Status', (v, p) => p.name),
+	          new TextField('change', 'Change Request?'),
+	          new LinkField('entityId', 'Facility ID', function(ev) { FacilitiesHandler.EDITOR.doEdit(this.myValue.entityId); }),
+	          new EditField('value', 'Facility JSON', true, false, 80, 10),
+	          new TextField('promoterId', 'Promoter'),
+	          new TextField('promotedAt', 'Promoted At', 'toDateTime'),
+	          new TextField('rejecterId', 'Rejecter'),
+	          new TextField('rejectedAt', 'Rejected At', 'toDateTime'),
+	          new LinkField('creatorId', 'Creator', function(ev) { PeopleHandler.EDITOR.doEdit(this.myValue.creatorId); }),
+	          new TextField('createdAt', 'Created At', 'toDateTime'),
+	          new TextField('updatedAt', 'Updated At', 'toDateTime') ],
+
+	SEARCH: [ new EditField('location', 'Location', false, false, 128, 50),
+	          new ListField('gotTested', 'Got Tested?', false, 'yesNoOptions', undefined, 'No Search'),
+	          new ListField('originatorId', 'Originator', false, 'originators', undefined, 'No Search'),
+	          new ListField('statusId', 'Status', false, 'crowdsourceStatuses', undefined, 'No Search'),
+	          new ListField('change', 'Change Request?', false, 'yesNoOptions', undefined, 'No Search'),
+	          new ListField('entityId', 'Facility ID', false, false, 19, 10),
+	          new DropField('promoterId', 'Promoter', false, 'admins', 'promoterName'),
+	          new TextField('promoterName', '', undefined, undefined, true),
+	          new DatesField('promotedAt', 'Promoted At'),
+	          new TextField('rejecterName', '', undefined, undefined, true),
+	          new DatesField('rejectedAt', 'Rejected At'),
+	          new DropField('creatorId', 'Creator', false, fillPeopleDropdownList, 'creatorName'),
+	          new TextField('creatorName', '', undefined, undefined, true),
+	          new DatesField('createdAt', 'Created At'),
+	          new DatesField('updatedAt', 'Updated At') ]
 });
 
 var PeopleHandler = new ListTemplate({
