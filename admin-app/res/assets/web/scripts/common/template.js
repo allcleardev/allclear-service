@@ -189,12 +189,11 @@ Template.prototype.text = Template.text = function(url, params, handler, headers
 
 Template.prototype.post = Template.post = function(url, params, handler, headers)
 {
-	if (!params)
-		params = {};
+	var data = params ? JSON.stringify(params) : null;
 
 	// Wrap all POST calls to check for authentication exceptions and force a login.
 	var me = this;
-	$.ajax(this.getRestPath() + url, { type: 'POST', data: JSON.stringify(params), dataType: 'json',
+	$.ajax(this.getRestPath() + url, { type: 'POST', data: data, dataType: 'json',
 		headers: this.appendCurrentSessionId(headers),
 		success: function(value) { handler(value); },
 		error: function(xhr) { me.handleError(xhr, handler, 'post', url, params, headers); },
