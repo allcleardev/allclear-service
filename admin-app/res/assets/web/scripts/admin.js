@@ -327,6 +327,7 @@ var FacilitateHandler = new ListTemplate({
 	ROW_ACTIONS: [ new RowAction('promote', 'Promote', undefined, 'promotedAt'),
 	               new RowAction('reject', 'Reject', undefined, 'rejectedAt') ],
 
+	getTitle: c => 'Promote/Reject ' + (c.value.change ? 'Change' : 'Create') + ' Request',
 	onListPostLoad: c => $('input[type=checkbox]', c.body).attr('disabled', true),
 	onEditorPostLoad: function(c) {
 		var id = c.value.id;
@@ -338,7 +339,8 @@ var FacilitateHandler = new ListTemplate({
 		a.appendChild(this.genButton('rejecter', 'Reject', function(ev) {
 			me.remove(me.RESOURCE, id + '/reject', data => me.processResponse(data, c, c.form));
 		}));
-	}, 
+	},
+	onEditorPreGenerate: c => c.value.value_ = Template.toJSON(c.value.value),
 	openEntity: function(c, e) { FacilitiesHandler.EDITOR.doEdit(e.myRecord.entityId); },
 	openCreator: function(c, e) { PeopleHandler.EDITOR.doEdit(e.myRecord.creatorId); },
 	promote: function(c, e) {
@@ -348,6 +350,14 @@ var FacilitateHandler = new ListTemplate({
 	reject: function(c, e) {
 		var id = myRecord.id;
 		this.remove(this.RESOURCE, id + '/reject', data => window.alert(data.message ? data.message : 'Rejected ' + id + ' successfully.'));
+	},
+	handleSubmit: function(c, f) {
+		var me = this;
+		var v = f.value_.value;
+		var value_ = c.value.value_;
+		v = (v && (v != value_)) ? this.fromJSON(value_) : null;
+
+		this.post(c.submitUrl, v, data => me.processResponse(data, c, f));
 	},
 
 	COLUMNS: [ new TextColumn('status', 'Status', 'toName'),
@@ -366,7 +376,7 @@ var FacilitateHandler = new ListTemplate({
 	          new TextField('status', 'Status', (v, p) => p.name),
 	          new TextField('change', 'Change Request?'),
 	          new LinkField('entityId', 'Facility ID', function(ev) { FacilitiesHandler.EDITOR.doEdit(this.myValue.entityId); }),
-	          new EditField('value', 'Facility JSON', true, false, 80, 10),
+	          new EditField('value_', 'Facility JSON', true, true, 80, 10),
 	          new TextField('promoterId', 'Promoter'),
 	          new TextField('promotedAt', 'Promoted At', 'toDateTime'),
 	          new TextField('rejecterId', 'Rejecter'),
