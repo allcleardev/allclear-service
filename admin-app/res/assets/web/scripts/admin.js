@@ -327,6 +327,7 @@ var FacilitateHandler = new ListTemplate({
 	ROW_ACTIONS: [ new RowAction('promote', 'Promote', undefined, 'promotedAt'),
 	               new RowAction('reject', 'Reject', undefined, 'rejectedAt') ],
 
+	onListPostLoad: c => $('input[type=checkbox]', c.body).attr('disabled', true),
 	onEditorPostLoad: function(c) {
 		var id = c.value.id;
 		c.submitUrl = this.RESOURCE + '/' + id + '/promote';
