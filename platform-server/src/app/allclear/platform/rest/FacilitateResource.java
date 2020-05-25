@@ -2,6 +2,7 @@ package app.allclear.platform.rest;
 
 import javax.ws.rs.*;
 
+import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.annotations.*;
 
 import com.codahale.metrics.annotation.Timed;
@@ -72,7 +73,7 @@ public class FacilitateResource
 	}
 
 	@POST
-	@Path("/{statusId}/{createdAt}/promote") @Timed
+	@Path("/{statusId}/{createdAt}/promote") @Timed @UnitOfWork	// For Facility add/update.
 	@ApiOperation(value="promote", notes="Promotes a single Facilitate request by its primary key.", response=FacilitateValue.class)
 	public FacilitateValue promote(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@PathParam("statusId") final String statusId,
@@ -83,7 +84,7 @@ public class FacilitateResource
 	}
 
 	@PUT
-	@Path("/citizen") @Timed
+	@Path("/citizen") @Timed @UnitOfWork(readOnly=true, transactional=false)	// For potential Facility lookup.
 	@ApiOperation(value="changeByCitizen", notes="Adds a single request by a non-provider (citizen) to change an existing facility. Returns the supplied Facilitate value with the auto generated identifier populated.", response=FacilitateValue.class)
 	public FacilitateValue changeByCitizen(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		final FacilitateValue value) throws ValidationException
@@ -92,7 +93,7 @@ public class FacilitateResource
 	}
 
 	@PUT
-	@Path("/provider") @Timed
+	@Path("/provider") @Timed @UnitOfWork(readOnly=true, transactional=false)	// For potential Facility lookup.
 	@ApiOperation(value="changeByProvider", notes="Adds a single request by a facility provider/owner to change an existing facility. Returns the supplied Facilitate value with the auto generated identifier populated.", response=FacilitateValue.class)
 	public FacilitateValue changeByProvider(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		final FacilitateValue value) throws ValidationException
