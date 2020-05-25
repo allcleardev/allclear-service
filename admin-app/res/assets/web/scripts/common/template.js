@@ -609,6 +609,11 @@ Template.prototype.toColumnJSON = function(value)
 	return this.shrink(this.toJSON(value), 200);	// Make small since generated JSON will have no whitespace for natural line breaks. DLS on 10/4/2018.
 }
 
+Template.prototype.toName = function(value)
+{
+	return value ? value.name : '';
+}
+
 /** Helper method - shrinks text if necessary. */
 Template.prototype.shrink = Template.shrink = function(value, maxSize)
 {

@@ -349,8 +349,8 @@ var FacilitateHandler = new ListTemplate({
 		this.remove(this.RESOURCE, id + '/reject', data => window.alert(data.message ? data.message : 'Rejected ' + id + ' successfully.'));
 	},
 
-	COLUMNS: [ new TextColumn('status', 'Status', v => v.name),
-	           new TextColumn('originator', 'Originator', v => v.name),
+	COLUMNS: [ new TextColumn('status', 'Status', 'toName'),
+	           new TextColumn('originator', 'Originator', 'toName'),
 	           new TextColumn('gotTested', 'Got Tested?'),
 	           new TextColumn('change', 'Change?'),
 	           new IdColumn('entityId', 'Facility ID', false, false, 'openEntity'),
@@ -719,13 +719,12 @@ var TestsHandler = new ListTemplate({
 	CAN_REMOVE: true,
 	EDIT_METHOD: 'put',
 
-	toType: v => (null != v) ? v.name : '',
 	openPerson: (c, e) => { PeopleHandler.EDITOR.doEdit(e.myRecord.personId); },
 	openFacility: (c, e) => { FacilitiesHandler.EDITOR.doEdit(e.myRecord.facilityId); },
 
 	COLUMNS: [ new IdColumn('id', 'ID', true),
 	           new TextColumn('personName', 'Person', undefined, false, false, 'openPerson'),
-	           new TextColumn('type', 'Type', 'toType'),
+	           new TextColumn('type', 'Type', 'toName'),
 	           new TextColumn('takenOn', 'Taken On', 'toDate'),
 	           new TextColumn('facilityName', 'Facility', undefined, false, false, 'openFacility'),
 	           new TextColumn('positive', 'Positive?') ],
