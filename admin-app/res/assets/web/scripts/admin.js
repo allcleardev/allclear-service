@@ -322,11 +322,22 @@ var FacilitateHandler = new ListTemplate({
 	EDIT_METHOD: 'post',
 
 	CAPTION_SUBMIT: 'Promote',
+	CAPTION_CANCEL: 'Close',
 
 	ROW_ACTIONS: [ new RowAction('promote', 'Promote', undefined, 'promotedAt'),
 	               new RowAction('reject', 'Reject', undefined, 'rejectedAt') ],
 
-	onEditorPostLoad: function(c) { c.submitUrl = this.RESOURCE + '/' + c.value.id + '/promote'; }, 
+	onEditorPostLoad: function(c) {
+		var id = c.value.id;
+		c.submitUrl = this.RESOURCE + '/' + id + '/promote';
+
+		var me = this;
+		var a = c.actions;
+		this.addSpace(a);
+		a.appendChild(this.genButton('rejecter', 'Reject', function(ev) {
+			me.remove(me.RESOURCE, id + '/reject', data => me.processResponse(data, c, c.form));
+		}));
+	}, 
 	openEntity: function(c, e) { FacilitiesHandler.EDITOR.doEdit(e.myRecord.entityId); },
 	openCreator: function(c, e) { PeopleHandler.EDITOR.doEdit(e.myRecord.creatorId); },
 	promote: function(c, e) {
