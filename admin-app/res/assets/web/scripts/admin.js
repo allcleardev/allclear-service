@@ -344,18 +344,18 @@ var FacilitateHandler = new ListTemplate({
 	openEntity: function(c, e) { FacilitiesHandler.EDITOR.doEdit(e.myRecord.entityId); },
 	openCreator: function(c, e) { PeopleHandler.EDITOR.doEdit(e.myRecord.creatorId); },
 	promote: function(c, e) {
-		var id = myRecord.id;
+		var id = e.myRecord.id;
 		this.post(this.RESOURCE + '/' + id + '/promote', undefined, data => window.alert(data.message ? data.message : 'Promoted ' + id + ' successfully.'));
 	},
 	reject: function(c, e) {
-		var id = myRecord.id;
+		var id = e.myRecord.id;
 		this.remove(this.RESOURCE, id + '/reject', data => window.alert(data.message ? data.message : 'Rejected ' + id + ' successfully.'));
 	},
 	handleSubmit: function(c, f) {
 		var me = this;
 		var v = f.value_.value;
 		var value_ = c.value.value_;
-		v = (v && (v != value_)) ? this.fromJSON(value_) : null;
+		v = (v && (v != value_)) ? this.fromJSON(v) : null;
 
 		this.post(c.submitUrl, v, data => me.processResponse(data, c, f));
 	},
