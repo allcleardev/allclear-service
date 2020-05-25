@@ -517,4 +517,16 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.1.68_ALLCLEAR-564" author="smalleyd">
+		<addColumn tableName="facility">
+			<column name="can_donate_plasma" type="BOOLEAN" defaultValueBoolean="false" remarks="Indicates that the facility accepts plasma donations.">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+
+		<rollback>
+			<dropColumn tableName="facility" columnName="can_donate_plasma" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

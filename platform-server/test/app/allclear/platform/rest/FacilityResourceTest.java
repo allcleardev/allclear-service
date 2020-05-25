@@ -122,7 +122,7 @@ public class FacilityResourceTest
 		var now = new Date();
 		var response = request()
 			.post(Entity.entity(VALUE = new FacilityValue("Julius", "56 First Street", "Louisville", "KY", bg("-35"), bg("52.607"),
-				true, false, true, false, true, false, true, false).withTestTypes(ANTIBODY, DONT_KNOW), UTF8MediaType.APPLICATION_JSON_TYPE));
+				true, false, true, false, true, false, true, true, false).withTestTypes(ANTIBODY, DONT_KNOW), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var value = response.readEntity(FacilityValue.class);
@@ -151,7 +151,7 @@ public class FacilityResourceTest
 
 		var response = request()
 			.post(Entity.entity(new FacilityValue("Julius + 1", "56 First Street", "Louisville", "KY", bg("-35"), bg("52.607"),
-				true, false, true, false, true, false, true, false), UTF8MediaType.APPLICATION_JSON_TYPE));
+				true, false, true, false, true, false, true, false, false), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, response.getStatus(), "Status");
 
 		count(new FacilityFilter(), 1L);
@@ -166,7 +166,7 @@ public class FacilityResourceTest
 
 		var response = request()
 			.post(Entity.entity(new FacilityValue("Julius + 1", "56 First Street", "Louisville", "KY", bg("-35"), bg("52.607"),
-				true, false, true, false, true, false, true, false), UTF8MediaType.APPLICATION_JSON_TYPE));
+				true, false, true, false, true, false, true, false, false), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, response.getStatus(), "Status");
 
 		count(new FacilityFilter(), 1L);
@@ -377,18 +377,20 @@ public class FacilityResourceTest
 	{
 		count(new FacilityFilter().withCity("Louisville"), 1L);
 		count(new FacilityFilter().withState("KY"), 1L);
+		count(new FacilityFilter().withCanDonatePlasma(true), 1L);
 		count(new FacilityFilter().include(DONT_KNOW), 1L);
 		count(new FacilityFilter().include(ANTIBODY), 1L);
 		count(new FacilityFilter().include(ANTIBODY, DONT_KNOW), 1L);
 		count(new FacilityFilter().exclude(NASAL_SWAB), 1L);
 		count(new FacilityFilter().withCity("New Orleans"), 0L);
 		count(new FacilityFilter().withState("LA"), 0L);
+		count(new FacilityFilter().withCanDonatePlasma(false), 0L);
 		count(new FacilityFilter().exclude(DONT_KNOW), 0L);
 		count(new FacilityFilter().exclude(ANTIBODY), 0L);
 		count(new FacilityFilter().exclude(ANTIBODY, DONT_KNOW), 0L);
 		count(new FacilityFilter().include(NASAL_SWAB), 0L);
 
-		var response = request().put(Entity.entity(VALUE.withCity("New Orleans").withState("LA").withTestTypes(NASAL_SWAB), UTF8MediaType.APPLICATION_JSON_TYPE));
+		var response = request().put(Entity.entity(VALUE.withCity("New Orleans").withState("LA").withCanDonatePlasma(false).withTestTypes(NASAL_SWAB), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var value = response.readEntity(FacilityValue.class);
@@ -403,12 +405,14 @@ public class FacilityResourceTest
 	{
 		count(new FacilityFilter().withCity("Louisville"), 0L);
 		count(new FacilityFilter().withState("KY"), 0L);
+		count(new FacilityFilter().withCanDonatePlasma(true), 0L);
 		count(new FacilityFilter().include(DONT_KNOW), 0L);
 		count(new FacilityFilter().include(ANTIBODY), 0L);
 		count(new FacilityFilter().include(ANTIBODY, DONT_KNOW), 0L);
 		count(new FacilityFilter().exclude(NASAL_SWAB), 0L);
 		count(new FacilityFilter().withCity("New Orleans"), 1L);
 		count(new FacilityFilter().withState("LA"), 1L);
+		count(new FacilityFilter().withCanDonatePlasma(false), 1L);
 		count(new FacilityFilter().exclude(DONT_KNOW), 1L);
 		count(new FacilityFilter().exclude(ANTIBODY), 1L);
 		count(new FacilityFilter().exclude(ANTIBODY, DONT_KNOW), 1L);
@@ -433,7 +437,7 @@ public class FacilityResourceTest
 
 		var response = request()
 			.put(Entity.entity(new FacilityValue("Julius + 1", "56 First Street", "Louisville", "KY", bg("-35"), bg("52.607"),
-				true, false, true, false, true, false, true, false).withId(VALUE.id), UTF8MediaType.APPLICATION_JSON_TYPE));
+				true, false, true, false, true, false, true, false, false).withId(VALUE.id), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, response.getStatus(), "Status");
 	}
 
@@ -444,7 +448,7 @@ public class FacilityResourceTest
 
 		var response = request()
 			.put(Entity.entity(new FacilityValue("Julius + 1", "56 First Street", "Louisville", "KY", bg("-35"), bg("52.607"),
-				true, false, true, false, true, false, true, false).withId(VALUE.id), UTF8MediaType.APPLICATION_JSON_TYPE));
+				true, false, true, false, true, false, true, false, false).withId(VALUE.id), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, response.getStatus(), "Status");
 	}
 
@@ -566,6 +570,7 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter(1, 20).withAcceptsInsurance(VALUE.acceptsInsurance), 1L),
 			arguments(new FacilityFilter(1, 20).withInsuranceProvidersAccepted(VALUE.insuranceProvidersAccepted), 1L),
 			arguments(new FacilityFilter(1, 20).withFreeOrLowCost(VALUE.freeOrLowCost), 1L),
+			arguments(new FacilityFilter(1, 20).withCanDonatePlasma(VALUE.canDonatePlasma), 1L),
 			arguments(new FacilityFilter(1, 20).withNotes(VALUE.notes), 1L),
 			arguments(new FacilityFilter(1, 20).withActive(VALUE.active), 1L),
 			arguments(new FacilityFilter(1, 20).withHasActivatedAt(true), 1L),
@@ -620,6 +625,7 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter(1, 20).withAcceptsInsurance(!VALUE.acceptsInsurance), 0L),
 			arguments(new FacilityFilter(1, 20).withInsuranceProvidersAccepted("invalid"), 0L),
 			arguments(new FacilityFilter(1, 20).withFreeOrLowCost(!VALUE.freeOrLowCost), 0L),
+			arguments(new FacilityFilter(1, 20).withCanDonatePlasma(!VALUE.canDonatePlasma), 0L),
 			arguments(new FacilityFilter(1, 20).withNotes("invalid"), 0L),
 			arguments(new FacilityFilter(1, 20).withActive(!VALUE.active), 0L),
 			arguments(new FacilityFilter(1, 20).withHasActivatedAt(false), 0L),
@@ -710,7 +716,7 @@ public class FacilityResourceTest
 	public void set_00()
 	{
 		var response = request().put(Entity.json(new FacilityValue("Alex", "8th Street",
-			true, false, true, false, true, false, true, true).withTestCriteriaId(CDC_CRITERIA.id)));
+			true, false, true, false, true, false, true, false, true).withTestCriteriaId(CDC_CRITERIA.id)));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var v = VALUE_1 = response.readEntity(FacilityValue.class);
@@ -741,7 +747,7 @@ public class FacilityResourceTest
 	public void set_00_invalid()
 	{
 		var response = request().put(Entity.json(new FacilityValue("Alex", "8th Avenue", null, null, null, null,
-			true, false, true, false, true, false, true, false)));
+			true, false, true, false, true, false, true, true, false)));
 		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, response.getStatus(), "Status");
 	}
 
@@ -1087,6 +1093,7 @@ public class FacilityResourceTest
 		Assertions.assertEquals(expected.acceptsInsurance, value.acceptsInsurance, assertId + "Check acceptsInsurance");
 		Assertions.assertEquals(expected.insuranceProvidersAccepted, value.insuranceProvidersAccepted, assertId + "Check insuranceProvidersAccepted");
 		Assertions.assertEquals(expected.freeOrLowCost, value.freeOrLowCost, assertId + "Check freeOrLowCost");
+		Assertions.assertEquals(expected.canDonatePlasma, value.canDonatePlasma, assertId + "Check canDonatePlasma");
 		Assertions.assertEquals(expected.notes, value.notes, assertId + "Check notes");
 		Assertions.assertEquals(expected.active, value.active, assertId + "Check active");
 		if (null == expected.activatedAt)

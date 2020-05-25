@@ -89,7 +89,7 @@ public class FacilityDAOTest
 		var value = dao.add(VALUE = new FacilityValue("Adam", "101 McClain Ave", "Miami", "FL", bg("45"), bg("-35"),
 			"888-555-1000", "888-555-1001", "adam@test.com", "http://www.adam.com", "http://www.adam.com/appoinment", "8AM to 10PM",
 			HOSPITAL.id, true, false, true, false, OTHER.id, "My other criteria", 2500, true, 16, "Doctor requires: something",
-			false, true, false, "These providers are accepted: One", true, "Quick notations", true), true);
+			false, true, false, "These providers are accepted: One", true, false, "Quick notations", true), true);
 		Assertions.assertNotNull(value, "Exists");
 		Assertions.assertTrue(value.active, "Check active");
 		assertThat(value.activatedAt).as("Check activatedAt").isNotNull().isCloseTo(new Date(), 500L);
@@ -110,7 +110,7 @@ public class FacilityDAOTest
 		return new FacilityValue("Eve", "909 Stuart St", "Atlanta", "GA", bg("-45"), bg("35"),
 			"888-555-2000", "888-555-2001", "eve@test.net", "http://www.eve.net", "http://www.eve.net/calendar", "10AM to 8PM",
 			URGENT_CARE.id, false, true, false, true, OTHER.id, "My other criteria", 2500, false, 16, "Doctor requires: something",
-			true, false, true, "These providers are accepted: Two", false, "Slow notations", false);
+			true, false, true, "These providers are accepted: Two", false, true, "Slow notations", false);
 	}
 
 	@Test
@@ -442,15 +442,17 @@ public class FacilityDAOTest
 	{
 		var v = createValid();
 		count(new FacilityFilter().withName(VALUE.name), 1L);
+		count(new FacilityFilter().withCanDonatePlasma(false), 1L);
 		count(new FacilityFilter().withActive(VALUE.active), 1L);
 		count(new FacilityFilter().exclude(NASAL_SWAB), 1L);
 		count(new FacilityFilter().exclude(ANTIBODY), 1L);
 		count(new FacilityFilter().withName(v.name), 0L);
+		count(new FacilityFilter().withCanDonatePlasma(true), 0L);
 		count(new FacilityFilter().withActive(v.active), 0L);
 		count(new FacilityFilter().include(NASAL_SWAB), 0L);
 		count(new FacilityFilter().include(ANTIBODY), 0L);
 
-		var value = dao.update(v.withId(VALUE.id).withTestTypes(NASAL_SWAB), true);
+		var value = dao.update(v.withId(VALUE.id).withCanDonatePlasma(true).withTestTypes(NASAL_SWAB), true);
 		Assertions.assertNotNull(value, "Exists");
 		check(v, value);
 
@@ -465,10 +467,12 @@ public class FacilityDAOTest
 	{
 		var v = createValid();
 		count(new FacilityFilter().withName(VALUE_1.name), 0L);
+		count(new FacilityFilter().withCanDonatePlasma(false), 0L);
 		count(new FacilityFilter().withActive(VALUE_1.active), 0L);
 		count(new FacilityFilter().exclude(NASAL_SWAB), 0L);
 		count(new FacilityFilter().exclude(ANTIBODY), 1L);
 		count(new FacilityFilter().withName(v.name), 1L);
+		count(new FacilityFilter().withCanDonatePlasma(true), 1L);
 		count(new FacilityFilter().withActive(v.active), 1L);
 		count(new FacilityFilter().include(NASAL_SWAB), 1L);
 		count(new FacilityFilter().include(ANTIBODY), 0L);
@@ -480,6 +484,7 @@ public class FacilityDAOTest
 		var record = dao.findWithException(VALUE.id);
 		Assertions.assertNotNull(record, "Exists");
 		Assertions.assertEquals("Eve", record.getName(), "Check name");
+		Assertions.assertTrue(record.isCanDonatePlasma(), "Check canDonatePlasma");
 		Assertions.assertFalse(record.isActive(), "Check active");
 		check(VALUE, record);
 	}
@@ -557,6 +562,7 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter(1, 20).withInsuranceProvidersAccepted(VALUE.insuranceProvidersAccepted), 1L),
 			arguments(new FacilityFilter(1, 20).withHasInsuranceProvidersAccepted(true), 1L),
 			arguments(new FacilityFilter(1, 20).withFreeOrLowCost(VALUE.freeOrLowCost), 1L),
+			arguments(new FacilityFilter(1, 20).withCanDonatePlasma(VALUE.canDonatePlasma), 1L),
 			arguments(new FacilityFilter(1, 20).withNotes(VALUE.notes), 1L),
 			arguments(new FacilityFilter(1, 20).withHasNotes(true), 1L),
 			arguments(new FacilityFilter(1, 20).withActive(VALUE.active), 1L),
@@ -625,6 +631,7 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter(1, 20).withInsuranceProvidersAccepted("invalid"), 0L),
 			arguments(new FacilityFilter(1, 20).withHasInsuranceProvidersAccepted(false), 0L),
 			arguments(new FacilityFilter(1, 20).withFreeOrLowCost(!VALUE.freeOrLowCost), 0L),
+			arguments(new FacilityFilter(1, 20).withCanDonatePlasma(!VALUE.canDonatePlasma), 0L),
 			arguments(new FacilityFilter(1, 20).withNotes("invalid"), 0L),
 			arguments(new FacilityFilter(1, 20).withHasNotes(false), 0L),
 			arguments(new FacilityFilter(1, 20).withActive(!VALUE.active), 0L),
@@ -893,6 +900,13 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter("freeOrLowCost", "invalid"), "freeOrLowCost", "DESC"),	// Invalid sort direction is converted to the default.
 			arguments(new FacilityFilter("freeOrLowCost", "DESC"), "freeOrLowCost", "DESC"),
 			arguments(new FacilityFilter("freeOrLowCost", "desc"), "freeOrLowCost", "DESC"),
+
+			arguments(new FacilityFilter("canDonatePlasma", null), "canDonatePlasma", "DESC"), // Missing sort direction is converted to the default.
+			arguments(new FacilityFilter("canDonatePlasma", "ASC"), "canDonatePlasma", "ASC"),
+			arguments(new FacilityFilter("canDonatePlasma", "asc"), "canDonatePlasma", "ASC"),
+			arguments(new FacilityFilter("canDonatePlasma", "invalid"), "canDonatePlasma", "DESC"),	// Invalid sort direction is converted to the default.
+			arguments(new FacilityFilter("canDonatePlasma", "DESC"), "canDonatePlasma", "DESC"),
+			arguments(new FacilityFilter("canDonatePlasma", "desc"), "canDonatePlasma", "DESC"),
 
 			arguments(new FacilityFilter("notes", null), "notes", "ASC"), // Missing sort direction is converted to the default.
 			arguments(new FacilityFilter("notes", "ASC"), "notes", "ASC"),
@@ -1231,6 +1245,7 @@ public class FacilityDAOTest
 		Assertions.assertEquals(expected.acceptsInsurance, record.isAcceptsInsurance(), assertId + "Check acceptsInsurance");
 		Assertions.assertEquals(expected.insuranceProvidersAccepted, record.getInsuranceProvidersAccepted(), assertId + "Check insuranceProvidersAccepted");
 		Assertions.assertEquals(expected.freeOrLowCost, record.isFreeOrLowCost(), assertId + "Check freeOrLowCost");
+		Assertions.assertEquals(expected.canDonatePlasma, record.isCanDonatePlasma(), assertId + "Check canDonatePlasma");
 		Assertions.assertEquals(expected.notes, record.getNotes(), assertId + "Check notes");
 		Assertions.assertEquals(expected.active, record.isActive(), assertId + "Check active");
 		Assertions.assertEquals(expected.activatedAt, record.getActivatedAt(), assertId + "Check activatedAt");
@@ -1273,6 +1288,7 @@ public class FacilityDAOTest
 		Assertions.assertEquals(expected.acceptsInsurance, value.acceptsInsurance, assertId + "Check acceptsInsurance");
 		Assertions.assertEquals(expected.insuranceProvidersAccepted, value.insuranceProvidersAccepted, assertId + "Check insuranceProvidersAccepted");
 		Assertions.assertEquals(expected.freeOrLowCost, value.freeOrLowCost, assertId + "Check freeOrLowCost");
+		Assertions.assertEquals(expected.canDonatePlasma, value.canDonatePlasma, assertId + "Check canDonatePlasma");
 		Assertions.assertEquals(expected.notes, value.notes, assertId + "Check notes");
 		Assertions.assertEquals(expected.active, value.active, assertId + "Check active");
 		Assertions.assertEquals(expected.activatedAt, value.activatedAt, assertId + "Check activatedAt");

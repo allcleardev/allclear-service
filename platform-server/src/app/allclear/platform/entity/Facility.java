@@ -189,6 +189,11 @@ public class Facility implements Serializable
 	public boolean freeOrLowCost;
 	public void setFreeOrLowCost(final boolean newValue) { freeOrLowCost = newValue; }
 
+	@Column(name="can_donate_plasma", columnDefinition="BIT", nullable=false)
+	public boolean isCanDonatePlasma() { return canDonatePlasma; }
+	public boolean canDonatePlasma;
+	public void setCanDonatePlasma(final boolean newValue) { canDonatePlasma = newValue; }
+
 	@Column(name="notes", columnDefinition="TEXT", nullable=true)
 	public String getNotes() { return notes; }
 	public String notes;
@@ -252,6 +257,7 @@ public class Facility implements Serializable
 		this.acceptsInsurance = value.acceptsInsurance;
 		this.insuranceProvidersAccepted = value.insuranceProvidersAccepted;
 		this.freeOrLowCost = value.freeOrLowCost;
+		this.canDonatePlasma = value.canDonatePlasma;
 		this.notes = value.notes;
 		this.active = value.active;
 		this.createdAt = this.updatedAt = value.createdAt = value.updatedAt = new Date();
@@ -293,6 +299,7 @@ public class Facility implements Serializable
 			(acceptsInsurance == v.acceptsInsurance) &&
 			Objects.equals(insuranceProvidersAccepted, v.insuranceProvidersAccepted) &&
 			(freeOrLowCost == v.freeOrLowCost) &&
+			(canDonatePlasma == v.canDonatePlasma) &&
 			Objects.equals(notes, v.notes) &&
 			(active == v.active) &&
 			((activatedAt == v.activatedAt) || DateUtils.truncatedEquals(activatedAt, v.activatedAt, Calendar.SECOND)) &&
@@ -332,6 +339,7 @@ public class Facility implements Serializable
 		setAcceptsInsurance(value.acceptsInsurance);
 		setInsuranceProvidersAccepted(value.insuranceProvidersAccepted);
 		setFreeOrLowCost(value.freeOrLowCost);
+		setCanDonatePlasma(value.canDonatePlasma);
 		setNotes(value.notes);
 		value.createdAt = getCreatedAt();
 		setUpdatedAt(value.updatedAt = new Date());
@@ -386,6 +394,7 @@ public class Facility implements Serializable
 			isAcceptsInsurance(),
 			getInsuranceProvidersAccepted(),
 			isFreeOrLowCost(),
+			isCanDonatePlasma(),
 			getNotes(),
 			isActive(),
 			getActivatedAt(),

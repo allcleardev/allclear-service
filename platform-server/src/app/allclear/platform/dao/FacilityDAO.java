@@ -73,6 +73,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		"acceptsInsurance", DESC,
 		"insuranceProvidersAccepted", ASC,
 		"freeOrLowCost", DESC,
+		"canDonatePlasma", DESC,
 		"notes", ASC,
 		"active", DESC,
 		"activatedAt", DESC,
@@ -512,6 +513,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.addContains("insuranceProvidersAccepted", "o.insuranceProvidersAccepted LIKE :insuranceProvidersAccepted", filter.insuranceProvidersAccepted)
 			.addNotNull("o.insuranceProvidersAccepted", filter.hasInsuranceProvidersAccepted)
 			.add("freeOrLowCost", "o.freeOrLowCost = :freeOrLowCost", filter.freeOrLowCost)
+			.add("canDonatePlasma", "o.canDonatePlasma = :canDonatePlasma", filter.canDonatePlasma)
 			.addContains("notes", "o.notes LIKE :notes", filter.notes)
 			.addNotNull("o.notes", filter.hasNotes)
 			.add("active", "o.active = :active", filter.active)
@@ -582,6 +584,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.addContains("insuranceProvidersAccepted", "o.insurance_providers_accepted LIKE :insuranceProvidersAccepted", filter.insuranceProvidersAccepted)
 			.addNotNull("o.insurance_providers_accepted", filter.hasInsuranceProvidersAccepted)
 			.add("freeOrLowCost", "o.free_or_low_cost = :freeOrLowCost", filter.freeOrLowCost)
+			.add("canDonatePlasma", "o.can_donate_plasma = :canDonatePlasma", filter.canDonatePlasma)
 			.addContains("notes", "o.notes LIKE :notes", filter.notes)
 			.addNotNull("o.notes", filter.hasNotes)
 			.add("active", "o.active = :active", filter.active)
