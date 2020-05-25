@@ -29,7 +29,7 @@ public class AuthFilter implements ContainerRequestFilter
 	public static final String PATH_SELF = "/self";
 	public static final String PATH_TWILIO = "twilio/";	// Uses Digest Auth
 	public static final String PATH_TYPES = "types/";
-	public static final List<String> PATHS_NO_AUTH = List.of("admins/auth", "info/health", "info/ping", "info/version", "peoples/auth", "peoples/confirm", "peoples/start", "swagger.json");
+	public static final List<String> PATHS_NO_AUTH = List.of("admins/auth", "facilitates/citizen", "facilitates/provider", "facilitates/search", "info/health", "info/ping", "info/version", "peoples/auth", "peoples/confirm", "peoples/start", "swagger.json");
 	public static final String PATH_REGISTER = "peoples/register";
 
 	private final SessionDAO dao;
