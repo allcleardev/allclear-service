@@ -159,6 +159,10 @@ var FacilitiesHandler = new ListTemplate({
 	CAN_REMOVE: true,
 	EDIT_METHOD: 'put',
 
+	ROW_ACTIONS: [ new RowAction('openChangeRequests', 'Change Requests') ],
+
+	openChangeRequests: (c, e) => FacilitateHandler.filter({ entityId: e.myRecord.id }, undefined, { entityId: true }),
+
 	onListPostLoad: c => c.defaultValue = { active: FACILITY_ACTIVE_DEFAULT },
 	onEditorPostLoad: function(c) {
 		var me = this;
