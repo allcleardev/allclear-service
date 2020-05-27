@@ -692,7 +692,7 @@ public class FacilityDAOTest
 	{
 		return Stream.of(
 			arguments(new FacilityFilter(null, null), "id", "DESC"), // Missing sort direction is converted to the default.
-			arguments(new FacilityFilter(null, "ASC"), "id", "ASC"),
+			arguments(new FacilityFilter(null, "ASC"), "id", "DESC"),
 			arguments(new FacilityFilter(null, "invalid"), "id", "DESC"),
 			arguments(new FacilityFilter("invalid", "invalid"), "id", "DESC"),	// Invalid sort direction is converted to the default.
 			arguments(new FacilityFilter("invalid", null), "id", "DESC"),
@@ -947,7 +947,7 @@ public class FacilityDAOTest
 
 	@ParameterizedTest
 	@MethodSource
-	private void search_sort(final FacilityFilter filter, final String expectedSortOn, final String expectedSortDir)
+	public void search_sort(final FacilityFilter filter, final String expectedSortOn, final String expectedSortDir)
 	{
 		var results = dao.search(filter);
 		Assertions.assertNotNull(results, "Exists");

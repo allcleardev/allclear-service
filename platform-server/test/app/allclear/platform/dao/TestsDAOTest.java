@@ -437,7 +437,7 @@ public class TestsDAOTest
 		return Stream.of(
 			arguments(new TestsFilter(null, null), "id", "DESC"), // Default sort
 			arguments(new TestsFilter(null, "invalid"), "id", "DESC"),
-			arguments(new TestsFilter(null, "asc"), "id", "ASC"),
+			arguments(new TestsFilter(null, "asc"), "id", "DESC"),
 			arguments(new TestsFilter("invalid", "invalid"), "id", "DESC"),
 			arguments(new TestsFilter("invalid", null), "id", "DESC"),
 			arguments(new TestsFilter("invalid", "desc"), "id", "DESC"),
@@ -523,7 +523,7 @@ public class TestsDAOTest
 
 	@ParameterizedTest
 	@MethodSource
-	private void search_sort(final TestsFilter filter, final String expectedSortOn, final String expectedSortDir)
+	public void search_sort(final TestsFilter filter, final String expectedSortOn, final String expectedSortDir)
 	{
 		var results = dao.search(filter);
 		Assertions.assertNotNull(results, "Exists");

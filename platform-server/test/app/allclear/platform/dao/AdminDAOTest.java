@@ -406,7 +406,7 @@ public class AdminDAOTest
 
 	@ParameterizedTest
 	@MethodSource
-	private void search_sort(final AdminFilter filter, final String expectedSortOn, final String expectedSortDir)
+	public void search_sort(final AdminFilter filter, final String expectedSortOn, final String expectedSortDir)
 	{
 		var results = dao.search(filter);
 		Assertions.assertNotNull(results, "Exists");

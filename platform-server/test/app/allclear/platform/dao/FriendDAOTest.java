@@ -347,7 +347,7 @@ public class FriendDAOTest
 
 	@ParameterizedTest
 	@MethodSource
-	private void search_sort(final FriendFilter filter, final String expectedSortOn, final String expectedSortDir)
+	public void search_sort(final FriendFilter filter, final String expectedSortOn, final String expectedSortDir)
 	{
 		var results = dao.search(filter);
 		Assertions.assertNotNull(results, "Exists");

@@ -200,7 +200,7 @@ public class AuditLogDAOTest
 
 	@ParameterizedTest
 	@MethodSource
-	private void search_sort(final AuditLogFilter filter, final String expectedSortOn, final String expectedSortDir)
+	public void search_sort(final AuditLogFilter filter, final String expectedSortOn, final String expectedSortDir)
 	{
 		var results = dao.search(AUDITABLE.tableName(), filter);
 		Assertions.assertNotNull(results, "Exists");

@@ -37,7 +37,7 @@ public class FriendDAO extends AbstractDAO<Friend>
 		"personId", ASC,
 		"personName", ASC + ",p.name;INNER JOIN o.person p",
 		"inviteeId", ASC,
-		"inviteeName", ASC + ",i.name;INNER JOIN o.invitee p",
+		"inviteeName", ASC + ",i.name;INNER JOIN o.invitee i",
 		"acceptedAt", DESC,
 		"rejectedAt", DESC,
 		"createdAt", DESC);

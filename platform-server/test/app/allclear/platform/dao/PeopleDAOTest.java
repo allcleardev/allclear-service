@@ -899,8 +899,8 @@ public class PeopleDAOTest
 			arguments(new PeopleFilter(null, "invalid"), "id", "ASC"),
 			arguments(new PeopleFilter(null, "asc"), "id", "ASC"),
 			arguments(new PeopleFilter("invalid", "invalid"), "id", "ASC"),
-			arguments(new PeopleFilter("invalid", null), "id", "DESC"),
-			arguments(new PeopleFilter("invalid", "desc"), "id", "DESC"),
+			arguments(new PeopleFilter("invalid", null), "id", "ASC"),
+			arguments(new PeopleFilter("invalid", "desc"), "id", "ASC"),
 
 			arguments(new PeopleFilter("id", null), "id", "ASC"), // Missing sort direction is converted to the default.
 			arguments(new PeopleFilter("id", "ASC"), "id", "ASC"),
@@ -1067,7 +1067,7 @@ public class PeopleDAOTest
 
 	@ParameterizedTest
 	@MethodSource
-	private void search_sort(final PeopleFilter filter, final String expectedSortOn, final String expectedSortDir)
+	public void search_sort(final PeopleFilter filter, final String expectedSortOn, final String expectedSortDir)
 	{
 		var results = dao.search(filter);
 		Assertions.assertNotNull(results, "Exists");

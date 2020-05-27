@@ -333,7 +333,7 @@ public class CustomerDAOTest
 
 	@ParameterizedTest
 	@MethodSource
-	private void search_sort(final CustomerFilter filter, final String expectedSortOn, final String expectedSortDir)
+	public void search_sort(final CustomerFilter filter, final String expectedSortOn, final String expectedSortDir)
 	{
 		var results = dao.search(filter);
 		Assertions.assertNotNull(results, "Exists");
