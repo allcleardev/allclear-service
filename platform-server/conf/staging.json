@@ -35,7 +35,7 @@
     "driverClass": "com.mysql.jdbc.Driver",
     "user": "${MYSQL_USERNAME:-allclear}",
     "password": "${MYSQL_PASSWORD:-allclearpwd}",
-    "url": "jdbc:mysql://ro-allclear-staging.mysql.database.azure.com:3306/allclear?useEncoding=true&characterEncoding=UTF-8&prepStmtCacheSize=100&prepStmtCacheSqlLimit=1024&serverTimezone=UTC&useSSL=true&requireSSL=true",
+    "url": "jdbc:mysql://allclear-staging.mysql.database.azure.com:3306/allclear?useEncoding=true&characterEncoding=UTF-8&prepStmtCacheSize=100&prepStmtCacheSqlLimit=1024&serverTimezone=UTC&useSSL=true&requireSSL=true",
     "maxWaitForConnection": "1s",
     "validationQuery": "SELECT 1",
     "validationQueryTimeout": "10s",
