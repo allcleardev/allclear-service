@@ -2,7 +2,8 @@ var AdminApp = new TabTemplate();
 
 AdminApp.TABS = [ { id: 'doPeople', caption: 'People', children: [ { id: 'doRegistrations', caption: 'Registrations' },
 	                                                               { id: 'doTests', caption: 'Tests' } ] },
-	{ id: 'doFacilities', caption: 'Facilities', children: [ { id: 'doFacilitate', caption: 'Change Requests' } ] },
+	{ id: 'doFacilities', caption: 'Facilities', children: [ { id: 'doFacilitate', caption: 'Change Requests' },
+	                                                         { id: 'doExperiences', caption: 'Experiences' } ] },
 	{ id: 'doLogs', caption: 'Logs', children: [ { id: 'doQueueStats', caption: 'Queue Stats' } ] },
 	{ id: 'doSessions', caption: 'Sessions', children: [ { id: 'doAdmins', caption: 'Admins' },
 	                                                     { id: 'doCustomers', caption: 'Customers' } ] },
@@ -19,6 +20,7 @@ AdminApp.doRegistrations = function(body) { RegistrationsHandler.filter({ pageSi
 AdminApp.doTests = function(body) { TestsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doFacilities = EditorApp.doFacilities = function(body) { FacilitiesHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doFacilitate = EditorApp.doFacilitate = function(body) { FacilitateHandler.filter({ statusId: 'o', createdAtFrom: Template.weekAgo(), pageSize: 100 }, body); }
+AdminApp.doExperiences = function(body) { ExperiencesHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doLogs = function(body) { LogsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doSessions = function(body) { SessionsHandler.filter({ pageSize: 100 }, body); }
 AdminApp.doAdmins = function(body) { AdminsHandler.init(body); }
@@ -30,7 +32,7 @@ AdminApp.doHeapDump = function(body) { HeapDumpHandler.init(body); }
 AdminApp.doQueueStats = function(body) { QueuesHandler.init(body); }
 
 AdminApp.onPostInit = EditorApp.onPostInit = function(c) {
-	this.loadLists([ 'conditions', 'crowdsourceStatuses', 'exposures', 'facilityTypes', 'healthWorkerStatuses', 'originators', 'peopleStatuses', 'sexes', 'statures', 'symptoms', 'testCriteria', 'testTypes', 'timezones', 'visibilities' ]);
+	this.loadLists([ 'conditions', 'crowdsourceStatuses', 'experiences', 'exposures', 'facilityTypes', 'healthWorkerStatuses', 'originators', 'peopleStatuses', 'sexes', 'statures', 'symptoms', 'testCriteria', 'testTypes', 'timezones', 'visibilities' ]);
 }
 
 var UPLOAD_SOURCES_INSTRUCTIONS = 'Add comma separated text that is split by type, name, and code in that order.<br /><br />Types:<blockquote>';
@@ -148,6 +150,56 @@ var CustomersHandler = new ListTemplate({
 	}
 });
 
+var ExperiencesHandler = new ListTemplate({
+	NAME: 'experience',
+	SINGULAR: 'Experience',
+	PLURAL: 'Experiences',
+	RESOURCE: 'experiences',
+
+	CAN_EDIT: true,
+	CAN_REMOVE: true,
+	EDIT_METHOD: 'put',
+
+	openPerson: (c, e) => PeopleHandler.EDITOR.doEdit(e.myRecord.personId);
+	openFacility: (c, e) => FacilitiesHandler.EDITOR.doEdit(e.myRecord.facilityId);
+
+	COLUMNS: [ new IdColumn('id', 'ID', true),
+	           new TextColumn('personName', 'Person', undefined, false, false, 'openPerson'),
+	           new TextColumn('facilityName', 'Facility', undefined, false, false, 'openFacility'),
+	           new TextColumn('positive', 'Positive?'),
+	           new TextColumn('tags', 'Tags', 'toNames'),
+	           new TextColumn('createdAt', 'Created At', 'toDateTime'),
+	           new TextColumn('updatedAt', 'Updated At', 'toDateTime') ],
+
+	FIELDS: [ new IdField('id', 'ID'),
+	          new DropField('personId', 'Person', true, fillPeopleDropdownList, 'personName'),
+	          new TextField('personName', '', undefined, undefined, true),
+	          new DropField('facilityId', 'Facility', true, fillFacilitiesDropdownList, 'facilityName'),
+	          new TextField('facilityName', '', undefined, undefined, true),
+	          new BoolField('positive', 'Positive?', true),
+	          new TagField('tags', 'Tags', false, 'types/experiences'),
+	          new TextField('createdAt', 'Created At', 'toDateTime'),
+	          new TextField('updatedAt', 'Updated At', 'toDateTime') ],
+
+	SEARCH: {
+		NAME: 'experience',
+		SINGULAR: 'Experience',
+		PLURAL: 'Experiences',
+		RESOURCE: 'experiences',
+
+		FIELDS: [ new EditField('id', 'ID', false, false, 20, 10),
+		          new DropField('personId', 'Person', false, fillPeopleDropdownList, 'personName'),
+		          new TextField('personName', '', undefined, undefined, true),
+		          new DropField('facilityId', 'Facility', false, fillFacilitiesDropdownList, 'facilityName'),
+		          new TextField('facilityName', '', undefined, undefined, true),
+		          new ListField('positive', 'Positive?', false, 'yesNoOptions', undefined, 'No Search'),
+		          new TagField('includeTags', 'Include Tags', false, 'types/experiences'),
+		          new TagField('excludeTags', 'Exclude Tags', false, 'types/experiences'),
+		          new DatesField('createdAt', 'Created At', 'toDateTime'),
+		          new DatesField('updatedAt', 'Updated At', 'toDateTime') ]
+	}
+});
+
 var FacilitiesHandler = new ListTemplate({
 	NAME: 'facility',
 	SINGULAR: 'Facility',
@@ -159,9 +211,11 @@ var FacilitiesHandler = new ListTemplate({
 	CAN_REMOVE: true,
 	EDIT_METHOD: 'put',
 
-	ROW_ACTIONS: [ new RowAction('openChangeRequests', 'Change Requests') ],
+	ROW_ACTIONS: [ new RowAction('openChangeRequests', 'Change Requests'),
+	               new RowAction('openExperiences', 'Experiences') ],
 
 	openChangeRequests: (c, e) => FacilitateHandler.filter({ entityId: e.myRecord.id }, undefined, { entityId: true }),
+	openExperiences: (c, e) => ExperiencesHandler.filter({ facilityId: e.myRecord.id }, undefined, { facilityName: true }),
 
 	onListPostLoad: c => c.defaultValue = { active: FACILITY_ACTIVE_DEFAULT },
 	onEditorPostLoad: function(c) {
@@ -430,7 +484,8 @@ var PeopleHandler = new ListTemplate({
 	               new RowAction('openFriendRequests', 'Friend Requests'),
 	               new RowAction('openInvitees', 'Invitees'),
 	               new RowAction('openFriendships', 'Friendships'),
-	               new RowAction('openFields', 'Fields') ],
+	               new RowAction('openFields', 'Fields'),
+	               new RowAction('openExperiences', 'Experiences') ],
 
 	alert: function(c, e) {
 		var r = e.myRecord;
@@ -451,6 +506,7 @@ var PeopleHandler = new ListTemplate({
 	openFriendRequests: function(c, e) { this.FRIENDS.filter({ personId: e.myRecord.id }); },
 	openFriendships: function(c, e) { PeopleHandler.filter({ friendshipId: e.myRecord.id, pageSize: 100 }); },
 	openSymptomsLogs: function(c, e) { this.SYMPTOMS_LOG.filter({ personId: e.myRecord.id, pageSize: 100 }); },
+	openExperiences: (c, e) => ExperiencesHandler.filter({ personId: e.myRecord.id }, undefined, { personName: true }),
 
 	COLUMNS: [ new IdColumn('id', 'ID', true),
 	           new EditColumn('name', 'Name'),

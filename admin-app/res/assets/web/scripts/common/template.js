@@ -613,6 +613,11 @@ Template.prototype.toName = function(value)
 	return value ? value.name : '';
 }
 
+Template.prototype.toNames = function(values)
+{
+	return values ? values.map(v => v.name).join(', ') : '';
+}
+
 /** Helper method - shrinks text if necessary. */
 Template.prototype.shrink = Template.shrink = function(value, maxSize)
 {
