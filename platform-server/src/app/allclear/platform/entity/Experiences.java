@@ -59,6 +59,11 @@ public class Experiences implements Serializable
 	public Date createdAt;
 	public void setCreatedAt(final Date newValue) { createdAt = newValue; }
 
+	@Column(name="updated_at", columnDefinition="DATETIME", nullable=false)
+	public Date getUpdatedAt() { return updatedAt; }
+	public Date updatedAt;
+	public void setUpdatedAt(final Date newValue) { updatedAt = newValue; }
+
 	@ManyToOne(cascade={}, fetch=FetchType.LAZY)
 	@JoinColumn(name="person_id", nullable=false, updatable=false, insertable=false)
 	public People getPerson() { return person; }
@@ -85,7 +90,7 @@ public class Experiences implements Serializable
 	{
 		this.put(cmrs);
 		this.positive = value.positive;
-		this.createdAt = value.createdAt = new Date();
+		this.createdAt = value.createdAt = this.updatedAt = value.updatedAt = new Date();
 	}
 
 	public Experiences update(final ExperiencesValue value, final Object[] cmrs)
@@ -93,6 +98,7 @@ public class Experiences implements Serializable
 		this.put(cmrs);
 		this.positive = value.positive;
 		value.createdAt = getCreatedAt();
+		this.updatedAt = value.updatedAt = new Date();
 
 		return this;
 	}
@@ -107,7 +113,8 @@ public class Experiences implements Serializable
 			Objects.equals(personId, v.personId) &&
 			Objects.equals(facilityId, v.facilityId) &&
 			(positive == v.positive) &&
-			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND);
+			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND) &&
+			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
 	}
 
 	@Override
@@ -124,7 +131,8 @@ public class Experiences implements Serializable
 			getPersonId(),
 			getFacilityId(),
 			isPositive(),
-			getCreatedAt());
+			getCreatedAt(),
+			getUpdatedAt());
 	}
 
 	@Transient

@@ -37,6 +37,7 @@ public class ExperiencesValue implements Serializable
 	public String facilityName = null;
 	public boolean positive;
 	public Date createdAt = null;
+	public Date updatedAt = null;
 	public List<NamedValue> tags;
 
 	// Mutators
@@ -47,6 +48,7 @@ public class ExperiencesValue implements Serializable
 	public ExperiencesValue withFacilityName(final String newValue) { facilityName = newValue; return this; }
 	public ExperiencesValue withPositive(final boolean newValue) { positive = newValue; return this; }
 	public ExperiencesValue withCreatedAt(final Date newValue) { createdAt = newValue; return this; }
+	public ExperiencesValue withUpdatedAt(final Date newValue) { updatedAt = newValue; return this; }
 	public ExperiencesValue withTags(final List<NamedValue> newValues) { tags = newValues; return this; }
 	public ExperiencesValue withTags(final Experience... newValues) { return withTags(Arrays.stream(newValues).map(v -> v.named()).collect(toList())); }
 	public ExperiencesValue emptyTags() { return withTags(List.of()); }
@@ -73,20 +75,22 @@ public class ExperiencesValue implements Serializable
 		final Long facilityId,
 		final boolean positive)
 	{
-		this(null, personId, facilityId, positive, null);
+		this(null, personId, facilityId, positive, null, null);
 	}
 
 	public ExperiencesValue(final Long id,
 		final String personId,
 		final Long facilityId,
 		final boolean positive,
-		final Date createdAt)
+		final Date createdAt,
+		final Date updatedAt)
 	{
 		this.id = id;
 		this.personId = personId;
 		this.facilityId = facilityId;
 		this.positive = positive;
 		this.createdAt = createdAt;
+		this.updatedAt = updatedAt;
 	}
 
 	/** Helper method - trims all string fields and converts empty strings to NULL. */
@@ -107,7 +111,8 @@ public class ExperiencesValue implements Serializable
 			Objects.equals(facilityId, v.facilityId) &&
 			Objects.equals(facilityName, v.facilityName) &&
 			(positive == v.positive) &&
-			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND);
+			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND) &&
+			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
 	}
 
 	@Override

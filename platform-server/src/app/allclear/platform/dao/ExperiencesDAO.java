@@ -37,7 +37,8 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 		"facilityId", ASC,
 		"facilityName", ASC + ",f.name;INNER JOIN o.facility f",
 		"positive", DESC,
-		"createdAt", DESC);
+		"createdAt", DESC,
+		"updatedAt", DESC);
 
 	/** Native SQL clauses. */
 	public static final String FROM_ALIAS = "o";
@@ -244,7 +245,9 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 			.add("facilityId", "o.facilityId = :facilityId", filter.facilityId)
 			.add("positive", "o.positive = :positive", filter.positive)
 			.add("createdAtFrom", "o.createdAt >= :createdAtFrom", filter.createdAtFrom)
-			.add("createdAtTo", "o.createdAt <= :createdAtTo", filter.createdAtTo);
+			.add("createdAtTo", "o.createdAt <= :createdAtTo", filter.createdAtTo)
+			.add("updatedAtFrom", "o.updatedAt >= :updatedAtFrom", filter.updatedAtFrom)
+			.add("updatedAtTo", "o.updatedAt <= :updatedAtTo", filter.updatedAtTo);
 	}
 
 	private List<ExperiencesValue> cmr(final List<ExperiencesValue> values)

@@ -28,6 +28,8 @@ public class ExperiencesFilter extends QueryFilter
 	public Boolean positive = null;
 	public Date createdAtFrom = null;
 	public Date createdAtTo = null;
+	public Date updatedAtFrom = null;
+	public Date updatedAtTo = null;
 	public List<String> includeTags = null;
 	public List<String> excludeTags = null;
 
@@ -38,6 +40,8 @@ public class ExperiencesFilter extends QueryFilter
 	public ExperiencesFilter withPositive(final Boolean newValue) { positive = newValue; return this; }
 	public ExperiencesFilter withCreatedAtFrom(final Date newValue) { createdAtFrom = newValue; return this; }
 	public ExperiencesFilter withCreatedAtTo(final Date newValue) { createdAtTo = newValue; return this; }
+	public ExperiencesFilter withUpdatedAtFrom(final Date newValue) { updatedAtFrom = newValue; return this; }
+	public ExperiencesFilter withUpdatedAtTo(final Date newValue) { updatedAtTo = newValue; return this; }
 	public ExperiencesFilter withIncludeTags(final List<String> newValues) { includeTags = newValues; return this; }
 	public ExperiencesFilter withIncludeTags(final String... newValues) { return withIncludeTags(Arrays.asList(newValues)); }
 	public ExperiencesFilter withExcludeTags(final List<String> newValues) { excludeTags = newValues; return this; }
@@ -79,13 +83,17 @@ public class ExperiencesFilter extends QueryFilter
 		@param positive represents the "positive" field.
 		@param createdAtFrom represents the "created_at" field - lower boundary.
 		@param createdAtTo represents the "created_at" field - upper boundary.
+		@param updatedAtFrom represents the "updated_at" field - lower boundary.
+		@param updatedAtTo represents the "updated_at" field - upper boundary.
 	*/
 	public ExperiencesFilter(final Long id,
 		final String personId,
 		final Long facilityId,
 		final Boolean positive,
 		final Date createdAtFrom,
-		final Date createdAtTo)
+		final Date createdAtTo,
+		final Date updatedAtFrom,
+		final Date updatedAtTo)
 	{
 		this.id = id;
 		this.personId = personId;
@@ -93,6 +101,8 @@ public class ExperiencesFilter extends QueryFilter
 		this.positive = positive;
 		this.createdAtFrom = createdAtFrom;
 		this.createdAtTo = createdAtTo;
+		this.updatedAtFrom = updatedAtFrom;
+		this.updatedAtTo = updatedAtTo;
 	}
 
 	/**************************************************************************

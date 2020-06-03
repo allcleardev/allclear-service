@@ -546,6 +546,9 @@
 			<column name="created_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was created.">
 				<constraints nullable="false" />
 			</column>
+			<column name="updated_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was last modified.">
+				<constraints nullable="false" />
+			</column>
 		</createTable>
 		<addUniqueConstraint tableName="experiences" columnNames="person_id, facility_id" constraintName="unq_experiences" />
 		<addForeignKeyConstraint baseTableName="experiences" baseColumnNames="person_id" referencedTableName="people" referencedColumnNames="id" constraintName="fk_experiences_person" />

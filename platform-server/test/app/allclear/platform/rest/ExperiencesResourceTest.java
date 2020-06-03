@@ -105,7 +105,7 @@ public class ExperiencesResourceTest
 
 		var value = response.readEntity(ExperiencesValue.class);
 		Assertions.assertNotNull(value, "Exists");
-		check(VALUE.withId(1L).withPersonId(PERSON_1.id).withPersonName(PERSON_1.name).withFacilityName(FACILITY.name).withCreatedAt(now), value);
+		check(VALUE.withId(1L).withPersonId(PERSON_1.id).withPersonName(PERSON_1.name).withFacilityName(FACILITY.name).withCreatedAt(now).withUpdatedAt(now), value);
 	}
 
 	@Test
@@ -146,7 +146,7 @@ public class ExperiencesResourceTest
 
 		var value = response.readEntity(ExperiencesValue.class);
 		Assertions.assertNotNull(value, "Exists");
-		check(VALUE.withPersonName(PERSON.name).withFacilityName(FACILITY_1.name), value);
+		check(VALUE.withPersonName(PERSON.name).withFacilityName(FACILITY_1.name).withUpdatedAt(new Date()), value);
 	}
 
 	@Test
@@ -179,28 +179,76 @@ public class ExperiencesResourceTest
 		var hourAhead = hourAhead();
 
 		return Stream.of(
-			arguments(new ExperiencesFilter(1, 20).withId(VALUE.id), 1L),
-			arguments(new ExperiencesFilter(1, 20).withPersonId(VALUE.personId), 1L),
-			arguments(new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId), 1L),
-			arguments(new ExperiencesFilter(1, 20).withPositive(VALUE.positive), 1L),
-			arguments(new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAgo), 1L),
-			arguments(new ExperiencesFilter(1, 20).withCreatedAtTo(hourAhead), 1L),
-			arguments(new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withId(VALUE.id), 1L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withPersonId(VALUE.personId), 1L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId), 1L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withPositive(VALUE.positive), 1L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAgo), 1L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withCreatedAtTo(hourAhead), 1L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo), 1L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAhead), 1L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 1L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withId(VALUE.id), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withPersonId(VALUE.personId), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withPositive(VALUE.positive), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAgo), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withCreatedAtTo(hourAhead), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAhead), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withId(VALUE.id), 1L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withPersonId(VALUE.personId), 1L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId), 1L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withPositive(VALUE.positive), 1L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAgo), 1L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withCreatedAtTo(hourAhead), 1L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo), 1L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAhead), 1L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 1L),
 
 			// Negative tests
-			arguments(new ExperiencesFilter(1, 20).withId(VALUE.id + 1000L), 0L),
-			arguments(new ExperiencesFilter(1, 20).withPersonId("invalid"), 0L),
-			arguments(new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId + 1000L), 0L),
-			arguments(new ExperiencesFilter(1, 20).withPositive(!VALUE.positive), 0L),
-			arguments(new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
-			arguments(new ExperiencesFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
-			arguments(new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L));
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withId(VALUE.id + 1000L), 0L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withPersonId("invalid"), 0L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId + 1000L), 0L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withPositive(!VALUE.positive), 0L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead), 0L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withId(VALUE.id + 1000L), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withPersonId("invalid"), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId + 1000L), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withPositive(!VALUE.positive), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withId(VALUE.id + 1000L), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withPersonId("invalid"), 1L),	// Overridden based on the current user.
+			arguments(SESSION, new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId + 1000L), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withPositive(!VALUE.positive), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L));
 	}
 
 	@ParameterizedTest
 	@MethodSource
-	public void search(final ExperiencesFilter filter, final long expectedTotal)
+	public void search(final SessionValue s, final ExperiencesFilter filter, final long expectedTotal)
 	{
+		sessionDao.current(s);
+
 		var response = request("search")
 			.post(Entity.entity(filter, UTF8MediaType.APPLICATION_JSON_TYPE));
 		var assertId = "SEARCH " + filter + ": ";
@@ -294,5 +342,9 @@ public class ExperiencesResourceTest
 			Assertions.assertNull(value.createdAt, assertId + "Check createdAt");
 		else
 			assertThat(value.createdAt).as(assertId + "Check createdAt").isCloseTo(expected.createdAt, 500L);
+		if (null == expected.updatedAt)
+			Assertions.assertNull(value.updatedAt, assertId + "Check updatedAt");
+		else
+			assertThat(value.updatedAt).as(assertId + "Check updatedAt").isCloseTo(expected.updatedAt, 500L);
 	}
 }

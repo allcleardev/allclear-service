@@ -288,6 +288,9 @@ public class ExperiencesDAOTest
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAgo), 1L),
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withCreatedAtTo(hourAhead), 1L),
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo), 1L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAhead), 1L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 1L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withId(VALUE.id), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withPersonId(VALUE.personId), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId), 0L),
@@ -295,6 +298,9 @@ public class ExperiencesDAOTest
 			arguments(SESSION, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAgo), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withCreatedAtTo(hourAhead), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAhead), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withId(VALUE.id), 1L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withPersonId(VALUE.personId), 1L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId), 1L),
@@ -302,6 +308,9 @@ public class ExperiencesDAOTest
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAgo), 1L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withCreatedAtTo(hourAhead), 1L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo), 1L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAhead), 1L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 1L),
 
 			// Negative tests
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withId(VALUE.id + 1000L), 0L),
@@ -311,6 +320,9 @@ public class ExperiencesDAOTest
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead), 0L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withId(VALUE.id + 1000L), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withPersonId("invalid"), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId + 1000L), 0L),
@@ -318,13 +330,19 @@ public class ExperiencesDAOTest
 			arguments(SESSION, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withId(VALUE.id + 1000L), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withPersonId("invalid"), 1L),	// Overridden based on the current user.
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId + 1000L), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withPositive(!VALUE.positive), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
-			arguments(SESSION_1, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L));
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L));
 	}
 
 	@ParameterizedTest
@@ -420,8 +438,14 @@ public class ExperiencesDAOTest
 			arguments(new ExperiencesFilter("createdAt", "asc"), "createdAt", "ASC"),
 			arguments(new ExperiencesFilter("createdAt", "invalid"), "createdAt", "DESC"),	// Invalid sort direction is converted to the default.
 			arguments(new ExperiencesFilter("createdAt", "DESC"), "createdAt", "DESC"),
-			arguments(new ExperiencesFilter("createdAt", "desc"), "createdAt", "DESC")
-		);
+			arguments(new ExperiencesFilter("createdAt", "desc"), "createdAt", "DESC"),
+
+			arguments(new ExperiencesFilter("updatedAt", null), "updatedAt", "DESC"), // Missing sort direction is converted to the default.
+			arguments(new ExperiencesFilter("updatedAt", "ASC"), "updatedAt", "ASC"),
+			arguments(new ExperiencesFilter("updatedAt", "asc"), "updatedAt", "ASC"),
+			arguments(new ExperiencesFilter("updatedAt", "invalid"), "updatedAt", "DESC"),	// Invalid sort direction is converted to the default.
+			arguments(new ExperiencesFilter("updatedAt", "DESC"), "updatedAt", "DESC"),
+			arguments(new ExperiencesFilter("updatedAt", "desc"), "updatedAt", "DESC"));
 	}
 
 	@ParameterizedTest
@@ -479,6 +503,7 @@ public class ExperiencesDAOTest
 		Assertions.assertEquals(expected.facilityId, record.getFacilityId(), assertId + "Check facilityId");
 		Assertions.assertEquals(expected.positive, record.isPositive(), assertId + "Check positive");
 		Assertions.assertEquals(expected.createdAt, record.getCreatedAt(), assertId + "Check createdAt");
+		Assertions.assertEquals(expected.updatedAt, record.getUpdatedAt(), assertId + "Check updatedAt");
 	}
 
 	/** Helper method - checks an expected value against a supplied value object. */
@@ -492,5 +517,6 @@ public class ExperiencesDAOTest
 		Assertions.assertEquals(expected.facilityName, value.facilityName, assertId + "Check facilityName");
 		Assertions.assertEquals(expected.positive, value.positive, assertId + "Check positive");
 		Assertions.assertEquals(expected.createdAt, value.createdAt, assertId + "Check createdAt");
+		Assertions.assertEquals(expected.updatedAt, value.updatedAt, assertId + "Check updatedAt");
 	}
 }
