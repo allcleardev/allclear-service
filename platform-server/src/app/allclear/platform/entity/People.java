@@ -42,7 +42,8 @@ import app.allclear.platform.value.PeopleValue;
 	@NamedQuery(name="getActiveAlertablePeopleIdsByLongitude", query="SELECT o.id FROM People o WHERE o.id > :lastId AND o.latitude IS NOT NULL AND ((o.longitude >= :longitudeFrom) AND (o.longitude < :longitudeTo)) AND o.alertable = TRUE AND o.active = TRUE ORDER BY o.id"),
 	@NamedQuery(name="getPeopleIdByEmail", query="SELECT o.id FROM People o WHERE o.email = :email"),
 	@NamedQuery(name="getPeopleIdByPhone", query="SELECT o.id FROM People o WHERE o.phone = :phone")})
-@NamedNativeQueries(@NamedNativeQuery(name="findActivePeopleByIdOrName", query="SELECT * FROM people o WHERE o.id LIKE :name AND o.active = TRUE UNION DISTINCT SELECT * FROM people oo WHERE oo.name LIKE :name AND oo.active = TRUE ORDER BY name", resultClass=People.class))	// Leverages both indices with 2 SELECTs as opposed to a single SELECT with an OR conjunction. DLS on 4/28/2020.
+@NamedNativeQueries({@NamedNativeQuery(name="findActivePeopleByIdOrName", query="SELECT * FROM people o WHERE o.id LIKE :name AND o.active = TRUE UNION DISTINCT SELECT * FROM people oo WHERE oo.name LIKE :name AND oo.active = TRUE ORDER BY name", resultClass=People.class),	// Leverages both indices with 2 SELECTs as opposed to a single SELECT with an OR conjunction. DLS on 4/28/2020.
+	@NamedNativeQuery(name="getPeopleNamesByIds", query="SELECT o.id, o.name FROM people o WHERE o.id IN (:ids)", resultClass=Named.class)})
 public class People implements Serializable
 {
 	private final static long serialVersionUID = 1L;

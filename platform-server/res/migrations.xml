@@ -529,4 +529,42 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.1.80_ALLCLEAR-579" author="smalleyd">
+		<createTable tableName="experiences" remarks="Represents the feedback by a user regarding their experience with a facility.">
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true" primaryKeyName="pk_experiences" />
+			</column>
+			<column name="person_id" type="VARCHAR(10)" remarks="Refers to the person.">
+				<constraints nullable="false" />
+			</column>
+			<column name="facility_id" type="BIGINT" remarks="Refers to the testing facility.">
+				<constraints nullable="false" referencedTableName="facility" referencedColumnNames="id" foreignKeyName="fk_experiences_facility" />
+			</column>
+			<column name="positive" type="BOOLEAN" defaultValueBoolean="false" remarks="Indicates whether the user experience was overall positive with the facility.">
+				<constraints nullable="false" />
+			</column>
+			<column name="created_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was created.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint tableName="experiences" columnNames="person_id, facility_id" constraintName="unq_experiences" />
+		<addForeignKeyConstraint baseTableName="experiences" baseColumnNames="person_id" referencedTableName="people" referencedColumnNames="id" constraintName="fk_experiences_person" />
+
+		<createTable tableName="experiences_tag" remarks="Represents optional structured commentary for a specific experience.">
+			<column name="experience_id" type="BIGINT" remarks="Refers to the experience.">
+				<constraints nullable="false" />
+			</column>
+			<column name="tag_id" type="CHAR(2)" remarks="Refers to the experience tag.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey tableName="experiences_tag" columnNames="experience_id, tag_id" constraintName="pk_experiences_tag" />
+		<addForeignKeyConstraint baseTableName="experiences_tag" baseColumnNames="experience_id" referencedTableName="experiences" referencedColumnNames="id" constraintName="fk_experiences_tag_1" />
+
+		<rollback>
+			<dropTable tableName="experiences_tag" />
+			<dropTable tableName="experiences" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

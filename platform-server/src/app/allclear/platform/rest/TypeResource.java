@@ -35,6 +35,11 @@ public class TypeResource
 	public List<CrowdsourceStatus> getCrowdsourceStatuses() { return CrowdsourceStatus.LIST; }
 
 	@GET
+	@Path("/experiences") @Timed
+	@ApiOperation(value="getExperiences", notes="Gets a list of experience levels.", response=Experience.class, responseContainer="List")
+	public List<Experience> getExperiences() { return Experience.LIST; }
+
+	@GET
 	@Path("/exposures") @Timed
 	@ApiOperation(value="getExposures", notes="Gets a list of exposure levels.", response=Exposure.class, responseContainer="List")
 	public List<Exposure> getExposures() { return Exposure.LIST; }

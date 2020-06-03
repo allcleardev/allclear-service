@@ -53,6 +53,15 @@ public class TypeResourceTest
 	}
 
 	@Test
+	public void getExperiences()
+	{
+		var response = request("experiences").get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		assertThat(response.readEntity(new GenericType<List<Experience>>() {})).isEqualTo(Experience.LIST);
+	}
+
+	@Test
 	public void getExposures()
 	{
 		var response = request("exposures").get();
