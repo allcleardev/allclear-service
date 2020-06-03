@@ -160,8 +160,8 @@ var ExperiencesHandler = new ListTemplate({
 	CAN_REMOVE: true,
 	EDIT_METHOD: 'put',
 
-	openPerson: (c, e) => PeopleHandler.EDITOR.doEdit(e.myRecord.personId);
-	openFacility: (c, e) => FacilitiesHandler.EDITOR.doEdit(e.myRecord.facilityId);
+	openPerson: (c, e) => PeopleHandler.EDITOR.doEdit(e.myRecord.personId),
+	openFacility: (c, e) => FacilitiesHandler.EDITOR.doEdit(e.myRecord.facilityId),
 
 	COLUMNS: [ new IdColumn('id', 'ID', true),
 	           new TextColumn('personName', 'Person', undefined, false, false, 'openPerson'),
