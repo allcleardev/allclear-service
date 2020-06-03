@@ -294,7 +294,7 @@ public class ConfigTest
 		assertThat(o.admins).as("Check admins").startsWith("DefaultEndpointsProtocol=https;AccountName=allclear-admins;AccountKey=").endsWith(";TableEndpoint=https://allclear-admins.table.cosmos.azure.com:443/;");
 		assertThat(o.auditLog).as("Check auditLog").startsWith("DefaultEndpointsProtocol=https;AccountName=allclear-audit-staging;AccountKey=").endsWith(";TableEndpoint=https://allclear-audit-staging.table.cosmos.azure.com:443/;");
 		Assertions.assertNotNull(o.geocode, "Check geocode");
-		Assertions.assertEquals("allclear-staging-mapcache.redis.cache.windows.net", o.geocode.host, "Check geocode.host");
+		Assertions.assertEquals("allclear-staging2-mapcache.redis.cache.windows.net", o.geocode.host, "Check geocode.host");
 		Assertions.assertEquals(6380, o.geocode.port, "Check geocode.port");
 		Assertions.assertEquals(200L, o.geocode.timeout, "Check geocode.timeout");
 		Assertions.assertEquals(10, o.geocode.poolSize, "Check geocode.poolSize");
@@ -306,7 +306,7 @@ public class ConfigTest
 		Assertions.assertEquals(60000L, o.task(), "Check task()");
 		assertThat(o.queue).as("Check queue").startsWith("DefaultEndpointsProtocol=https;AccountName=allclearstagingqueues;AccountKey=").endsWith(";EndpointSuffix=core.windows.net");
 		Assertions.assertNotNull(o.session, "Check session");
-		Assertions.assertEquals("allclear-staging.redis.cache.windows.net", o.session.host, "Check session.host");
+		Assertions.assertEquals("allclear-staging2.redis.cache.windows.net", o.session.host, "Check session.host");
 		Assertions.assertEquals(6380, o.session.port, "Check session.port");
 		Assertions.assertEquals(200L, o.session.timeout, "Check session.timeout");
 		Assertions.assertEquals(10, o.session.poolSize, "Check session.poolSize");
