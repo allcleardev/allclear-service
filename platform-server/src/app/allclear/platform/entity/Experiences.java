@@ -73,21 +73,26 @@ public class Experiences implements Serializable
 	public void setFacility(final Facility newValue) { facility = newValue; }
 	public void putFacility(final Facility newValue) { facilityId = (facility = newValue).getId(); }
 
+	void put(final Object[] cmrs)
+	{
+		putPerson((People) cmrs[1]);
+		putFacility((Facility) cmrs[2]);
+	}
+
 	public Experiences() {}
 
-	public Experiences(final ExperiencesValue value)
+	public Experiences(final ExperiencesValue value, final Object[] cmrs)
 	{
-		this.personId = value.personId;
-		this.facilityId = value.facilityId;
+		this.put(cmrs);
 		this.positive = value.positive;
 		this.createdAt = value.createdAt = new Date();
 	}
 
-	public Experiences update(final ExperiencesValue value)
+	public Experiences update(final ExperiencesValue value, final Object[] cmrs)
 	{
-		this.personId = value.personId;
-		this.facilityId = value.facilityId;
+		this.put(cmrs);
 		this.positive = value.positive;
+		value.createdAt = getCreatedAt();
 
 		return this;
 	}

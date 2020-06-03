@@ -164,15 +164,11 @@ public class ExperiencesResourceTest
 	public void modify_get()
 	{
 		var value = get(VALUE.id).readEntity(ExperiencesValue.class);
-System.out.println("VALUE: " + value);
-System.out.println("VALUE_1: " + dao.getById(VALUE.id));
-System.out.println("PERSON: " + peopleDao.getById(PERSON.id));
-System.out.println("PERSON_1: " + peopleDao.getById(PERSON_1.id));
 		Assertions.assertNotNull(value, "Exists");
 		Assertions.assertEquals(PERSON.id, value.personId, "Check personId");
 		Assertions.assertEquals(PERSON.name, value.personName, "Check personName");
-		Assertions.assertEquals(FACILITY.id, value.facilityId, "Check facilityId");
-		Assertions.assertEquals(FACILITY.name, value.facilityName, "Check facilityName");
+		Assertions.assertEquals(FACILITY_1.id, value.facilityId, "Check facilityId");
+		Assertions.assertEquals(FACILITY_1.name, value.facilityName, "Check facilityName");
 		Assertions.assertTrue(value.positive, "Check positive");
 		check(VALUE, value);
 	}

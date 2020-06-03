@@ -58,9 +58,9 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 	 */
 	public ExperiencesValue add(final ExperiencesValue value) throws ValidationException
 	{
-		_validate(value.withId(null).withPersonId(sessionDao.checkPerson().id));
+		var cmrs = _validate(value.withId(null).withPersonId(sessionDao.checkPerson().id));
 
-		return value.withId(persist(new Experiences(value)).getId());
+		return value.withId(persist(new Experiences(value, cmrs)).getId());
 	}
 
 	/** Updates a single Experiences value.
@@ -73,7 +73,8 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 	{
 		sessionDao.checkAdmin();
 
-		var record = _validate(value);
+		var cmrs = _validate(value);
+		var record = (Experiences) cmrs[0];
 		if (null == record)
 		{
 			if (null == value.id) throw new ValidationException("id", "Please supply the Experience ID.");
@@ -81,7 +82,7 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 			record = findWithException(value.id, false);
 		}
 
-		return value.withId(record.update(value).getId());
+		return value.withId(record.update(value, cmrs).getId());
 	}
 
 	/** Validates a single Experiences value.
@@ -97,10 +98,10 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 	/** Validates a single Experiences value and returns any CMR fields.
 	 *
 	 * @param value
-	 * @return the existing entity on updates.
+	 * @return the existing entity on updates and any CMRs.
 	 * @throws ValidationException
 	 */
-	private Experiences _validate(final ExperiencesValue value) throws ValidationException
+	private Object[] _validate(final ExperiencesValue value) throws ValidationException
 	{
 		value.clean();
 		var validator = new Validator();
@@ -129,7 +130,7 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 
 		value.denormalize(person.getName(), facility.getName());
 
-		return record;
+		return new Object[] { record, person, facility };
 	}
 
 	/** Removes a single Experiences value.
