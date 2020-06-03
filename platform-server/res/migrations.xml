@@ -562,7 +562,7 @@
 			</column>
 		</createTable>
 		<addPrimaryKey tableName="experiences_tag" columnNames="experience_id, tag_id" constraintName="pk_experiences_tag" />
-		<addForeignKeyConstraint baseTableName="experiences_tag" baseColumnNames="experience_id" referencedTableName="experiences" referencedColumnNames="id" constraintName="fk_experiences_tag_1" />
+		<addForeignKeyConstraint baseTableName="experiences_tag" baseColumnNames="experience_id" referencedTableName="experiences" referencedColumnNames="id" constraintName="fk_experiences_tag_1" onDelete="CASCADE" />
 
 		<rollback>
 			<dropTable tableName="experiences_tag" />

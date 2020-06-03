@@ -1,11 +1,14 @@
 package app.allclear.platform.filter;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 
 import app.allclear.common.ObjectUtils;
 import app.allclear.common.dao.QueryFilter;
+import app.allclear.platform.type.Experience;
 
 /********************************************************************************************************************
 *
@@ -43,9 +46,9 @@ public class ExperiencesFilter extends QueryFilter
 	public ExperiencesFilter withUpdatedAtFrom(final Date newValue) { updatedAtFrom = newValue; return this; }
 	public ExperiencesFilter withUpdatedAtTo(final Date newValue) { updatedAtTo = newValue; return this; }
 	public ExperiencesFilter withIncludeTags(final List<String> newValues) { includeTags = newValues; return this; }
-	public ExperiencesFilter withIncludeTags(final String... newValues) { return withIncludeTags(Arrays.asList(newValues)); }
+	public ExperiencesFilter withIncludeTags(final Experience... newValues) { return withIncludeTags(Arrays.asList(newValues).stream().map(v -> v.id).collect(toList())); }
 	public ExperiencesFilter withExcludeTags(final List<String> newValues) { excludeTags = newValues; return this; }
-	public ExperiencesFilter withExcludeTags(final String... newValues) { return withExcludeTags(Arrays.asList(newValues)); }
+	public ExperiencesFilter withExcludeTags(final Experience... newValues) { return withExcludeTags(Arrays.asList(newValues).stream().map(v -> v.id).collect(toList())); }
 
 	/**************************************************************************
 	*

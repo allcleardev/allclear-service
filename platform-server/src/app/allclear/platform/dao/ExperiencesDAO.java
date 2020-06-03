@@ -14,6 +14,7 @@ import app.allclear.common.hibernate.AbstractDAO;
 import app.allclear.common.hibernate.HibernateQueryBuilder;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.filter.ExperiencesFilter;
+import app.allclear.platform.type.Experience;
 import app.allclear.platform.value.ExperiencesValue;
 
 /**********************************************************************************
@@ -60,8 +61,15 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 	public ExperiencesValue add(final ExperiencesValue value) throws ValidationException
 	{
 		var cmrs = _validate(value.withId(null).withPersonId(sessionDao.checkPerson().id));
+		var record = persist(new Experiences(value, cmrs));
 
-		return value.withId(persist(new Experiences(value, cmrs)).getId());
+		if (CollectionUtils.isNotEmpty(value.tags))
+		{
+			var s = currentSession();
+			value.tags.stream().filter(v -> null != v).forEach(v -> s.persist(new ExperiencesTag(record, v)));
+		}
+
+		return value.withId(record.getId());
 	}
 
 	/** Updates a single Experiences value.
@@ -81,6 +89,27 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 			if (null == value.id) throw new ValidationException("id", "Please supply the Experience ID.");
 
 			record = findWithException(value.id, false);
+		}
+
+		if (null != value.tags)
+		{
+			var s = currentSession();
+			if (value.tags.isEmpty())
+				s.getNamedQuery("deleteExperiencesTagsById").setParameter("id", record.getId()).executeUpdate();
+			else
+			{
+				var r = record;	// MUST be effectively final.
+				var children = record.getTags();
+				var set = children.stream().map(o -> o.getTagId()).collect(toSet());
+				value.tags.stream().filter(v -> null != v).filter(v -> !set.contains(v.getId()))	// Add new tags.
+					.forEach(v -> {
+						s.persist(new ExperiencesTag(r, v));
+						set.add(v.getId());
+					});
+				children.stream()	// Remove children not in the supplied list.
+					.filter(o -> value.tags.stream().noneMatch(v -> (null != v) && o.getTagId().equals(v.getId())))
+					.forEach(o -> s.delete(o));
+			}
 		}
 
 		return value.withId(record.update(value, cmrs).getId());
@@ -120,6 +149,13 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 		var facility = session.get(Facility.class, value.facilityId);
 		if (null == facility)
 			validator.add("facilityId", "The Facility ID, %d, is invalid.", value.facilityId);
+
+		// Throw exception if errors exist.
+		validator.check();
+
+		// Check children.
+		if (CollectionUtils.isNotEmpty(value.tags))
+			value.tags.stream().filter(v -> null != v).forEach(v -> validator.ensureExistsAndContains("tags", "Tags", v.clean().getId(), Experience.VALUES));
 
 		// Throw exception if errors exist.
 		validator.check();
@@ -247,21 +283,27 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 			.add("createdAtFrom", "o.createdAt >= :createdAtFrom", filter.createdAtFrom)
 			.add("createdAtTo", "o.createdAt <= :createdAtTo", filter.createdAtTo)
 			.add("updatedAtFrom", "o.updatedAt >= :updatedAtFrom", filter.updatedAtFrom)
-			.add("updatedAtTo", "o.updatedAt <= :updatedAtTo", filter.updatedAtTo);
+			.add("updatedAtTo", "o.updatedAt <= :updatedAtTo", filter.updatedAtTo)
+			.addIn("includeTags", "EXISTS (SELECT 1 FROM ExperiencesTag t WHERE t.experienceId = o.id AND t.tagId IN {})", filter.includeTags)
+			.addIn("excludeTags", "NOT EXISTS (SELECT 1 FROM ExperiencesTag t WHERE t.experienceId = o.id AND t.tagId IN {})", filter.excludeTags);
 	}
 
 	private List<ExperiencesValue> cmr(final List<ExperiencesValue> values)
 	{
 		if (CollectionUtils.isEmpty(values)) return values;
 
+		var ids = values.stream().map(v -> v.id).collect(toList());
 		var people = namedQuery("getPeopleNamesByIds", Named.class)
 			.setParameterList("ids", values.stream().map(v -> v.personId).distinct().collect(toList()))
 			.stream().collect(toMap(o -> o.id, o -> o.name));
 		var facilities = namedQuery("getFacilityNamesByIds", Name.class)
 			.setParameterList("ids", values.stream().map(v -> v.facilityId).distinct().collect(toList()))
 			.stream().collect(toMap(o -> o.id, o -> o.name));
+		var tags = namedQuery("findExperiencesTagsByIds", ExperiencesTag.class)
+			.setParameterList("ids", ids)
+			.stream().collect(groupingBy(o -> o.getExperienceId(), mapping(o -> o.toValue(), toList())));
 
-		values.forEach(v -> v.denormalize(people.get(v.personId), facilities.get(v.facilityId)));
+		values.forEach(v -> v.denormalize(people.get(v.personId), facilities.get(v.facilityId)).withTags(tags.get(v.id)));
 
 		return values;
 	}

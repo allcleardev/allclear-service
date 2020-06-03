@@ -3,6 +3,7 @@ package app.allclear.platform.dao;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static app.allclear.platform.type.Experience.*;
 import static app.allclear.testing.TestingUtils.*;
 
 import java.util.stream.Stream;
@@ -81,9 +82,9 @@ public class ExperiencesDAOTest
 		SESSION_1 = new SessionValue(false, PERSON_1 = peopleDao.add(new PeopleValue("one", "888-555-1001", true)));
 
 		sessionDao.current(SESSION);
-		var value = dao.add(VALUE = new ExperiencesValue(FACILITY_1.id, true));
+		var value = dao.add(VALUE = new ExperiencesValue(FACILITY_1.id, true).withTags(GOOD_HYGIENE, SOCIAL_DISTANCING_ENFORCED, OVERLY_CROWDED));
 		Assertions.assertNotNull(value, "Exists");
-		check(VALUE, value);
+		check(VALUE.withTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), value);	// Replace tags with re-ordered as will be retrieved.
 	}
 
 	/** Creates a valid Experiences value for the validation tests.
@@ -189,6 +190,7 @@ public class ExperiencesDAOTest
 		Assertions.assertEquals(PERSON.id, value.personId, "Check personId");
 		Assertions.assertEquals(FACILITY_1.id, value.facilityId, "Check facilityId");
 		Assertions.assertTrue(value.positive, "Check positive");
+		assertThat(value.tags).as("Check tags").containsExactly(GOOD_HYGIENE.named(), OVERLY_CROWDED.named(), SOCIAL_DISTANCING_ENFORCED.named());
 		check(VALUE, value);
 	}
 
@@ -204,11 +206,19 @@ public class ExperiencesDAOTest
 		count(new ExperiencesFilter().withPersonId(PERSON.id), 1L);
 		count(new ExperiencesFilter().withFacilityId(FACILITY_1.id), 1L);
 		count(new ExperiencesFilter().withPositive(true), 1L);
+		count(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE), 1L);
+		count(new ExperiencesFilter().withIncludeTags(OVERLY_CROWDED), 1L);
+		count(new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED), 1L);
+		count(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L);
 		count(new ExperiencesFilter().withPersonId(PERSON_1.id), 0L);
 		count(new ExperiencesFilter().withFacilityId(FACILITY.id), 0L);
 		count(new ExperiencesFilter().withPositive(false), 0L);
+		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE), 0L);
+		count(new ExperiencesFilter().withExcludeTags(OVERLY_CROWDED), 0L);
+		count(new ExperiencesFilter().withExcludeTags(SOCIAL_DISTANCING_ENFORCED), 0L);
+		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L);
 
-		var value = dao.update(VALUE.withPersonId(PERSON_1.id).withFacilityId(FACILITY.id).withPositive(false));
+		var value = dao.update(VALUE.withPersonId(PERSON_1.id).withFacilityId(FACILITY.id).withPositive(false).emptyTags());
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 
@@ -222,9 +232,17 @@ public class ExperiencesDAOTest
 		count(new ExperiencesFilter().withPersonId(PERSON.id), 0L);
 		count(new ExperiencesFilter().withFacilityId(FACILITY_1.id), 0L);
 		count(new ExperiencesFilter().withPositive(true), 0L);
+		count(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE), 0L);
+		count(new ExperiencesFilter().withIncludeTags(OVERLY_CROWDED), 0L);
+		count(new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED), 0L);
+		count(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L);
 		count(new ExperiencesFilter().withPersonId(PERSON_1.id), 1L);
 		count(new ExperiencesFilter().withFacilityId(FACILITY.id), 1L);
 		count(new ExperiencesFilter().withPositive(false), 1L);
+		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE), 1L);
+		count(new ExperiencesFilter().withExcludeTags(OVERLY_CROWDED), 1L);
+		count(new ExperiencesFilter().withExcludeTags(SOCIAL_DISTANCING_ENFORCED), 1L);
+		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L);
 	}
 
 	public static Stream<SessionValue> modify_fail() { return Stream.of(CUSTOMER, EDITOR, SESSION, SESSION_1); }
@@ -252,6 +270,7 @@ public class ExperiencesDAOTest
 		Assertions.assertEquals(FACILITY.id, record.getFacilityId(), "Check facilityId");
 		Assertions.assertEquals(FACILITY.name, record.getFacility().getName(), "Check facilityName");
 		Assertions.assertFalse(record.isPositive(), "Check positive");
+		assertThat(record.getTags()).as("Check tags").isEmpty();
 		check(VALUE, record);
 	}
 
@@ -291,6 +310,7 @@ public class ExperiencesDAOTest
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo), 1L),
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAhead), 1L),
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 1L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withId(VALUE.id), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withPersonId(VALUE.personId), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId), 0L),
@@ -301,6 +321,7 @@ public class ExperiencesDAOTest
 			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAhead), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withId(VALUE.id), 1L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withPersonId(VALUE.personId), 1L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId), 1L),
@@ -311,6 +332,7 @@ public class ExperiencesDAOTest
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo), 1L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAhead), 1L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 1L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L),
 
 			// Negative tests
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withId(VALUE.id + 1000L), 0L),
@@ -323,6 +345,7 @@ public class ExperiencesDAOTest
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead), 0L),
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withId(VALUE.id + 1000L), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withPersonId("invalid"), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId + 1000L), 0L),
@@ -333,6 +356,7 @@ public class ExperiencesDAOTest
 			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withId(VALUE.id + 1000L), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withPersonId("invalid"), 1L),	// Overridden based on the current user.
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId + 1000L), 0L),
@@ -342,7 +366,8 @@ public class ExperiencesDAOTest
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
-			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L));
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L));
 	}
 
 	@ParameterizedTest
@@ -482,6 +507,130 @@ public class ExperiencesDAOTest
 		count(new ExperiencesFilter().withPersonId(PERSON_1.id), 0L);
 		count(new ExperiencesFilter().withFacilityId(FACILITY.id), 0L);
 		count(new ExperiencesFilter().withPositive(false), 0L);
+		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L);
+	}
+
+	@Test
+	public void z_00_add()
+	{
+		sessionDao.current(SESSION);
+		VALUE = dao.add(createValid().withTags(POOR_HYGIENE, CONFUSING_APPOINTMENT_PROCESS));
+	}
+
+	@Test
+	public void z_00_get()
+	{
+		assertThat(dao.getById(VALUE.id).tags).as("Check tags").containsExactly(CONFUSING_APPOINTMENT_PROCESS.named(), POOR_HYGIENE.named());
+	}
+
+	@Test
+	public void z_00_search()
+	{
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(CONFUSING_APPOINTMENT_PROCESS), 1L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(POOR_HYGIENE), 1L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(POOR_HYGIENE, FRIENDLY_STAFF), 1L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(CONFUSING_APPOINTMENT_PROCESS, POOR_HYGIENE), 1L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(OVERLY_CROWDED), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED, FRIENDLY_STAFF), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L);
+		assertThat(dao.search(new ExperiencesFilter()).records.get(0).tags).as("Check tags").containsExactly(CONFUSING_APPOINTMENT_PROCESS.named(), POOR_HYGIENE.named());
+	}
+
+	@Test
+	public void z_01_add()
+	{
+		dao.update(VALUE.nullTags());	// No change
+	}
+
+	@Test
+	public void z_01_get() { z_00_get(); }
+
+	@Test
+	public void z_01_search() { z_00_search(); }
+
+	@Test
+	public void z_02_add()
+	{
+		dao.update(VALUE.withTags(SOCIAL_DISTANCING_ENFORCED, OVERLY_CROWDED, GOOD_HYGIENE));
+	}
+
+	@Test
+	public void z_02_get()
+	{
+		assertThat(dao.getById(VALUE.id).tags).as("Check tags").containsExactly(GOOD_HYGIENE.named(), OVERLY_CROWDED.named(), SOCIAL_DISTANCING_ENFORCED.named());
+	}
+
+	@Test
+	public void z_02_search()
+	{
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(CONFUSING_APPOINTMENT_PROCESS), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(POOR_HYGIENE), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(POOR_HYGIENE, FRIENDLY_STAFF), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(CONFUSING_APPOINTMENT_PROCESS, POOR_HYGIENE), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE), 1L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(OVERLY_CROWDED), 1L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED), 1L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED, FRIENDLY_STAFF), 1L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L);
+		assertThat(dao.search(new ExperiencesFilter()).records.get(0).tags).as("Check tags")
+			.containsExactly(GOOD_HYGIENE.named(), OVERLY_CROWDED.named(), SOCIAL_DISTANCING_ENFORCED.named());
+	}
+
+	@Test
+	public void z_03_add()
+	{
+		dao.update(VALUE.withTags(SOCIAL_DISTANCING_ENFORCED, CONFUSING_APPOINTMENT_PROCESS, GOOD_HYGIENE));
+	}
+
+	@Test
+	public void z_03_get()
+	{
+		assertThat(dao.getById(VALUE.id).tags).as("Check tags").containsExactly(CONFUSING_APPOINTMENT_PROCESS.named(), GOOD_HYGIENE.named(), SOCIAL_DISTANCING_ENFORCED.named());
+	}
+
+	@Test
+	public void z_03_search()
+	{
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(CONFUSING_APPOINTMENT_PROCESS), 1L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(POOR_HYGIENE), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(POOR_HYGIENE, FRIENDLY_STAFF), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(CONFUSING_APPOINTMENT_PROCESS, POOR_HYGIENE), 1L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE), 1L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(OVERLY_CROWDED), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED), 1L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED, FRIENDLY_STAFF), 1L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L);
+		assertThat(dao.search(new ExperiencesFilter()).records.get(0).tags).as("Check tags")
+			.containsExactly(CONFUSING_APPOINTMENT_PROCESS.named(), GOOD_HYGIENE.named(), SOCIAL_DISTANCING_ENFORCED.named());
+	}
+
+	@Test
+	public void z_04_add()
+	{
+		dao.update(VALUE.emptyTags());
+	}
+
+	@Test
+	public void z_04_get()
+	{
+		assertThat(dao.getById(VALUE.id).tags).as("Check tags").isNull();
+	}
+
+	@Test
+	public void z_04_search()
+	{
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(CONFUSING_APPOINTMENT_PROCESS), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(POOR_HYGIENE), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(POOR_HYGIENE, FRIENDLY_STAFF), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(CONFUSING_APPOINTMENT_PROCESS, POOR_HYGIENE), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(OVERLY_CROWDED), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED, FRIENDLY_STAFF), 0L);
+		search(ADMIN, new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L);
+		assertThat(dao.search(new ExperiencesFilter()).records.get(0).tags).as("Check tags").isNull();
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.
@@ -518,5 +667,6 @@ public class ExperiencesDAOTest
 		Assertions.assertEquals(expected.positive, value.positive, assertId + "Check positive");
 		Assertions.assertEquals(expected.createdAt, value.createdAt, assertId + "Check createdAt");
 		Assertions.assertEquals(expected.updatedAt, value.updatedAt, assertId + "Check updatedAt");
+		Assertions.assertEquals(expected.tags, value.tags, assertId + "Check tags");
 	}
 }

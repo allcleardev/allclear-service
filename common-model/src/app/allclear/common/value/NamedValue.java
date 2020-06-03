@@ -3,6 +3,8 @@ package app.allclear.common.value;
 import java.io.Serializable;
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
+
 /** Value object that represents just the name and identifier portion of an entity. Used to
  *  return data for type-ahead searches.
  *
@@ -53,6 +55,13 @@ public class NamedValue implements Serializable
 	{
 		this.id = id;
 		this.name = name;
+	}
+
+	public NamedValue clean()
+	{
+		id = StringUtils.trimToNull(id);
+
+		return this;
 	}
 
 	@Override

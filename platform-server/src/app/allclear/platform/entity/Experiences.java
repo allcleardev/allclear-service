@@ -3,8 +3,10 @@ package app.allclear.platform.entity;
 import java.io.Serializable;
 import java.util.*;
 
+import java.util.stream.Collectors;
 import javax.persistence.*;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
@@ -78,6 +80,11 @@ public class Experiences implements Serializable
 	public void setFacility(final Facility newValue) { facility = newValue; }
 	public void putFacility(final Facility newValue) { facilityId = (facility = newValue).getId(); }
 
+	@OneToMany(cascade={CascadeType.REMOVE}, fetch=FetchType.LAZY, mappedBy="experience")
+	public List<ExperiencesTag> getTags() { return tags; }
+	public List<ExperiencesTag> tags;
+	public void setTags(final List<ExperiencesTag> newValues) { tags = newValues; }
+
 	void put(final Object[] cmrs)
 	{
 		putPerson((People) cmrs[1]);
@@ -138,6 +145,9 @@ public class Experiences implements Serializable
 	@Transient
 	public ExperiencesValue toValueX()
 	{
-		return toValue().denormalize(getPerson().getName(), getFacility().getName());
+		var records = getTags();
+
+		return toValue().denormalize(getPerson().getName(), getFacility().getName())
+			.withTags(CollectionUtils.isEmpty(records) ? null : records.stream().map(o -> o.toValue()).collect(Collectors.toList()));
 	}
 }

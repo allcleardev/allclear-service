@@ -2,6 +2,9 @@ package app.allclear.platform.rest;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static app.allclear.platform.type.Experience.GOOD_HYGIENE;
+import static app.allclear.platform.type.Experience.OVERLY_CROWDED;
+import static app.allclear.platform.type.Experience.SOCIAL_DISTANCING_ENFORCED;
 import static app.allclear.testing.TestingUtils.*;
 
 import java.util.*;
@@ -116,6 +119,7 @@ public class ExperiencesResourceTest
 
 		var value = response.readEntity(ExperiencesValue.class);
 		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertNull(value.tags, "Check tags");
 		check(VALUE, value);
 	}
 
@@ -137,11 +141,20 @@ public class ExperiencesResourceTest
 		count(new ExperiencesFilter().withPersonId(PERSON_1.id), 1L);
 		count(new ExperiencesFilter().withFacilityId(FACILITY.id), 1L);
 		count(new ExperiencesFilter().withPositive(false), 1L);
+		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE), 1L);
+		count(new ExperiencesFilter().withExcludeTags(OVERLY_CROWDED), 1L);
+		count(new ExperiencesFilter().withExcludeTags(SOCIAL_DISTANCING_ENFORCED), 1L);
+		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L);
 		count(new ExperiencesFilter().withPersonId(PERSON.id), 0L);
 		count(new ExperiencesFilter().withFacilityId(FACILITY_1.id), 0L);
 		count(new ExperiencesFilter().withPositive(true), 0L);
+		count(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE), 0L);
+		count(new ExperiencesFilter().withIncludeTags(OVERLY_CROWDED), 0L);
+		count(new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED), 0L);
+		count(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L);
 
-		var response = request().put(Entity.entity(VALUE.withPersonId(PERSON.id).withFacilityId(FACILITY_1.id).withPositive(true), UTF8MediaType.APPLICATION_JSON_TYPE));
+		var response = request().put(Entity.entity(VALUE.withPersonId(PERSON.id).withFacilityId(FACILITY_1.id).withPositive(true).withTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED),
+			UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var value = response.readEntity(ExperiencesValue.class);
@@ -155,9 +168,17 @@ public class ExperiencesResourceTest
 		count(new ExperiencesFilter().withPersonId(PERSON_1.id), 0L);
 		count(new ExperiencesFilter().withFacilityId(FACILITY.id), 0L);
 		count(new ExperiencesFilter().withPositive(false), 0L);
+		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE), 0L);
+		count(new ExperiencesFilter().withExcludeTags(OVERLY_CROWDED), 0L);
+		count(new ExperiencesFilter().withExcludeTags(SOCIAL_DISTANCING_ENFORCED), 0L);
+		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L);
 		count(new ExperiencesFilter().withPersonId(PERSON.id), 1L);
 		count(new ExperiencesFilter().withFacilityId(FACILITY_1.id), 1L);
 		count(new ExperiencesFilter().withPositive(true), 1L);
+		count(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE), 1L);
+		count(new ExperiencesFilter().withIncludeTags(OVERLY_CROWDED), 1L);
+		count(new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED), 1L);
+		count(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L);
 	}
 
 	@Test
@@ -170,6 +191,7 @@ public class ExperiencesResourceTest
 		Assertions.assertEquals(FACILITY_1.id, value.facilityId, "Check facilityId");
 		Assertions.assertEquals(FACILITY_1.name, value.facilityName, "Check facilityName");
 		Assertions.assertTrue(value.positive, "Check positive");
+		assertThat(value.tags).as("Check tags").containsExactly(GOOD_HYGIENE.named(), OVERLY_CROWDED.named(), SOCIAL_DISTANCING_ENFORCED.named());
 		check(VALUE, value);
 	}
 
@@ -189,6 +211,7 @@ public class ExperiencesResourceTest
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo), 1L),
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAhead), 1L),
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 1L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withId(VALUE.id), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withPersonId(VALUE.personId), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId), 0L),
@@ -199,6 +222,7 @@ public class ExperiencesResourceTest
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAhead), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withId(VALUE.id), 1L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withPersonId(VALUE.personId), 1L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId), 1L),
@@ -209,6 +233,7 @@ public class ExperiencesResourceTest
 			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo), 1L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAhead), 1L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 1L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L),
 
 			// Negative tests
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withId(VALUE.id + 1000L), 0L),
@@ -221,6 +246,7 @@ public class ExperiencesResourceTest
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead), 0L),
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
 			arguments(ADMIN, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L),
+			arguments(ADMIN, new ExperiencesFilter(1, 20).withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withId(VALUE.id + 1000L), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withPersonId("invalid"), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId + 1000L), 0L),
@@ -231,6 +257,7 @@ public class ExperiencesResourceTest
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
 			arguments(SESSION_1, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L),
+			arguments(SESSION_1, new ExperiencesFilter(1, 20).withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withId(VALUE.id + 1000L), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withPersonId("invalid"), 1L),	// Overridden based on the current user.
 			arguments(SESSION, new ExperiencesFilter(1, 20).withFacilityId(VALUE.facilityId + 1000L), 0L),
@@ -240,7 +267,8 @@ public class ExperiencesResourceTest
 			arguments(SESSION, new ExperiencesFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead), 0L),
 			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
-			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L));
+			arguments(SESSION, new ExperiencesFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L),
+			arguments(SESSION, new ExperiencesFilter(1, 20).withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L));
 	}
 
 	@ParameterizedTest
@@ -308,6 +336,7 @@ public class ExperiencesResourceTest
 		count(new ExperiencesFilter().withPersonId(PERSON.id), 0L);
 		count(new ExperiencesFilter().withFacilityId(FACILITY_1.id), 0L);
 		count(new ExperiencesFilter().withPositive(true), 0L);
+		count(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L);
 	}
 
 	/** Helper method - creates the base WebTarget. */
@@ -346,5 +375,6 @@ public class ExperiencesResourceTest
 			Assertions.assertNull(value.updatedAt, assertId + "Check updatedAt");
 		else
 			assertThat(value.updatedAt).as(assertId + "Check updatedAt").isCloseTo(expected.updatedAt, 500L);
+		Assertions.assertEquals(expected.tags, value.tags, assertId + "Check tags");
 	}
 }
