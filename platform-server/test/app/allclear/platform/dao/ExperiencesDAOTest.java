@@ -143,7 +143,7 @@ public class ExperiencesDAOTest
 			.hasMessage("The Facility ID, 1001, is invalid.");
 	}
 
-	public static Stream<SessionValue> add_noAuth() { return Stream.of(ADMIN, CUSTOMER, EDITOR); }
+	public static Stream<SessionValue> add_noAuth() { return Stream.of(null, ADMIN, CUSTOMER, EDITOR); }
 
 	@ParameterizedTest
 	@MethodSource
@@ -166,7 +166,7 @@ public class ExperiencesDAOTest
 		check(VALUE, record);
 	}
 
-	public static Stream<SessionValue> find_noAuth() { return Stream.of(CUSTOMER, EDITOR, SESSION_1); }
+	public static Stream<SessionValue> find_noAuth() { return Stream.of(null, CUSTOMER, EDITOR, SESSION_1); }
 
 	@ParameterizedTest
 	@MethodSource
@@ -245,7 +245,7 @@ public class ExperiencesDAOTest
 		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L);
 	}
 
-	public static Stream<SessionValue> modify_fail() { return Stream.of(CUSTOMER, EDITOR, SESSION, SESSION_1); }
+	public static Stream<SessionValue> modify_fail() { return Stream.of(null, CUSTOMER, EDITOR, SESSION, SESSION_1); }
 
 	@ParameterizedTest
 	@MethodSource
@@ -274,7 +274,7 @@ public class ExperiencesDAOTest
 		check(VALUE, record);
 	}
 
-	public static Stream<SessionValue> modify_find_noAuth() { return Stream.of(CUSTOMER, EDITOR, SESSION); }
+	public static Stream<SessionValue> modify_find_noAuth() { return Stream.of(null, CUSTOMER, EDITOR, SESSION); }
 
 	@ParameterizedTest
 	@MethodSource
@@ -284,7 +284,7 @@ public class ExperiencesDAOTest
 		assertThrows(NotAuthorizedException.class, () -> dao.findWithException(VALUE.id));
 	}
 
-	public static Stream<SessionValue> remove_fail() { return Stream.of(CUSTOMER, EDITOR, SESSION, SESSION_1); }
+	public static Stream<SessionValue> remove_fail() { return Stream.of(null, CUSTOMER, EDITOR, SESSION, SESSION_1); }
 
 	@ParameterizedTest
 	@MethodSource
@@ -396,7 +396,7 @@ public class ExperiencesDAOTest
 		}
 	}
 
-	public static Stream<SessionValue> search_fail() { return Stream.of(CUSTOMER, EDITOR); }
+	public static Stream<SessionValue> search_fail() { return Stream.of(null, CUSTOMER, EDITOR); }
 
 	@ParameterizedTest
 	@MethodSource
