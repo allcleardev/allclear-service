@@ -1,11 +1,13 @@
 package app.allclear.platform.dao;
 
+import static java.util.stream.Collectors.*;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static app.allclear.platform.type.Experience.*;
 import static app.allclear.testing.TestingUtils.*;
 
+import java.util.Arrays;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -24,6 +26,8 @@ import app.allclear.platform.App;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.entity.Experiences;
 import app.allclear.platform.filter.ExperiencesFilter;
+import app.allclear.platform.model.ExperiencesCalcResponse;
+import app.allclear.platform.type.Experience;
 import app.allclear.platform.value.*;
 
 /**********************************************************************************
@@ -155,6 +159,25 @@ public class ExperiencesDAOTest
 
 	public static Stream<SessionValue> find() { return Stream.of(ADMIN, SESSION); }
 
+	@Test
+	public void calc()
+	{
+		check(dao.calcByFacility(FACILITY_1.id), 1L, 0L, GOOD_HYGIENE, SOCIAL_DISTANCING_ENFORCED, OVERLY_CROWDED);
+	}
+
+	@Test
+	public void calc_none()
+	{
+		check(dao.calcByFacility(FACILITY.id), 0L, 0L);
+	}
+
+	@Test
+	public void calc_null()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.calcByFacility(null)))
+			.hasMessage("Must provide a Facility identifier.");
+	}
+
 	@ParameterizedTest
 	@MethodSource
 	public void find(final SessionValue s)
@@ -224,6 +247,18 @@ public class ExperiencesDAOTest
 
 		Assertions.assertEquals(PERSON_1.name, VALUE.personName, "Check personName");
 		Assertions.assertEquals(FACILITY.name, VALUE.facilityName, "Check facilityName");
+	}
+
+	@Test
+	public void modify_calc()
+	{
+		check(dao.calcByFacility(FACILITY.id), 0L, 1L);
+	}
+
+	@Test
+	public void modify_calc_none()
+	{
+		check(dao.calcByFacility(FACILITY_1.id), 0L, 0L);
 	}
 
 	@Test
@@ -508,6 +543,7 @@ public class ExperiencesDAOTest
 		count(new ExperiencesFilter().withFacilityId(FACILITY.id), 0L);
 		count(new ExperiencesFilter().withPositive(false), 0L);
 		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L);
+		check(dao.calcByFacility(FACILITY.id), 0L, 0L);
 	}
 
 	@Test
@@ -515,6 +551,13 @@ public class ExperiencesDAOTest
 	{
 		sessionDao.current(SESSION);
 		VALUE = dao.add(createValid().withTags(POOR_HYGIENE, CONFUSING_APPOINTMENT_PROCESS));
+	}
+
+	@Test
+	public void z_00_calc()
+	{
+		sessionDao.clear();	// No authentication required.
+		check(dao.calcByFacility(FACILITY.id), 0L, 1L, POOR_HYGIENE, CONFUSING_APPOINTMENT_PROCESS);
 	}
 
 	@Test
@@ -545,6 +588,9 @@ public class ExperiencesDAOTest
 	}
 
 	@Test
+	public void z_01_calc() { z_00_calc(); }
+
+	@Test
 	public void z_01_get() { z_00_get(); }
 
 	@Test
@@ -554,6 +600,13 @@ public class ExperiencesDAOTest
 	public void z_02_add()
 	{
 		dao.update(VALUE.withTags(SOCIAL_DISTANCING_ENFORCED, OVERLY_CROWDED, GOOD_HYGIENE));
+	}
+
+	@Test
+	public void z_02_calc()
+	{
+		sessionDao.clear();	// No authentication required.
+		check(dao.calcByFacility(FACILITY.id), 0L, 1L, SOCIAL_DISTANCING_ENFORCED, OVERLY_CROWDED, GOOD_HYGIENE);
 	}
 
 	@Test
@@ -581,7 +634,14 @@ public class ExperiencesDAOTest
 	@Test
 	public void z_03_add()
 	{
-		dao.update(VALUE.withTags(SOCIAL_DISTANCING_ENFORCED, CONFUSING_APPOINTMENT_PROCESS, GOOD_HYGIENE));
+		dao.update(VALUE.withPositive(true).withTags(SOCIAL_DISTANCING_ENFORCED, CONFUSING_APPOINTMENT_PROCESS, GOOD_HYGIENE));
+	}
+
+	@Test
+	public void z_03_calc()
+	{
+		sessionDao.clear();	// No authentication required.
+		check(dao.calcByFacility(FACILITY.id), 1L, 0L, SOCIAL_DISTANCING_ENFORCED, CONFUSING_APPOINTMENT_PROCESS, GOOD_HYGIENE);
 	}
 
 	@Test
@@ -610,6 +670,13 @@ public class ExperiencesDAOTest
 	public void z_04_add()
 	{
 		dao.update(VALUE.emptyTags());
+	}
+
+	@Test
+	public void z_04_calc()
+	{
+		sessionDao.clear();	// No authentication required.
+		check(dao.calcByFacility(FACILITY.id), 1L, 0L);
 	}
 
 	@Test
@@ -668,5 +735,17 @@ public class ExperiencesDAOTest
 		Assertions.assertEquals(expected.createdAt, value.createdAt, assertId + "Check createdAt");
 		Assertions.assertEquals(expected.updatedAt, value.updatedAt, assertId + "Check updatedAt");
 		Assertions.assertEquals(expected.tags, value.tags, assertId + "Check tags");
+	}
+
+	private void check(final ExperiencesCalcResponse response, final long positives, final long negatives, final Experience... tags)
+	{
+		Assertions.assertEquals(positives, response.positives, "Check positives");
+		Assertions.assertEquals(negatives, response.negatives, "Check negatives");
+		Assertions.assertEquals(positives + negatives, response.total, "Check total");
+
+		var tagIds = Arrays.stream(tags).map(v -> v.id).collect(toSet());
+		Experience.LIST.forEach(v -> {
+			Assertions.assertEquals(tagIds.contains(v.id) ? 1L : 0L, response.tags.get(v.id).count, "Check tags." + v.name);
+		});
 	}
 }

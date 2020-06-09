@@ -31,6 +31,7 @@ import app.allclear.platform.value.ExperiencesValue;
 	uniqueConstraints={@UniqueConstraint(columnNames={"person_id", "facility_id"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE, region="experiences")
 @NamedQueries({@NamedQuery(name="findExperience", query="SELECT OBJECT(o) FROM Experiences o WHERE o.personId = :personId AND o.facilityId = :facilityId")})
+@NamedNativeQueries({@NamedNativeQuery(name="countExperiencesPositivesByFacility", query="SELECT o.positive AS id, COUNT(o.id) AS total FROM experiences o WHERE o.facility_id = :facilityId GROUP BY o.positive", resultClass=CountByBoolean.class)})
 public class Experiences implements Serializable
 {
 	private static final long serialVersionUID = 1L;

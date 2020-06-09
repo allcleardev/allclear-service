@@ -52,7 +52,7 @@ public class App extends Application<Config>
 	public static final String QUEUE_ALERT_INIT = "alert-init";
 	public static final String SESSION = "session-cache";
 
-	public static final Class<?>[] ENTITIES = new Class<?>[] { Conditions.class, CountByName.class, Experiences.class, ExperiencesTag.class, Exposures.class, Facility.class, FacilityX.class, FacilityTestType.class, Friend.class, Friendship.class, Name.class, Named.class, People.class, PeopleFacility.class, PeopleField.class, Symptoms.class, SymptomsLog.class, Tests.class, Total.class };
+	public static final Class<?>[] ENTITIES = new Class<?>[] { Conditions.class, CountByBoolean.class, CountByName.class, Experiences.class, ExperiencesTag.class, Exposures.class, Facility.class, FacilityX.class, FacilityTestType.class, Friend.class, Friendship.class, Name.class, Named.class, People.class, PeopleFacility.class, PeopleField.class, Symptoms.class, SymptomsLog.class, Tests.class, Total.class };
 
 	private final HibernateBundle<Config> transHibernateBundle = new HibernateBundle<>(People.class, ENTITIES) {
 		@Override public DataSourceFactory getDataSourceFactory(final Config conf) { return conf.trans; }

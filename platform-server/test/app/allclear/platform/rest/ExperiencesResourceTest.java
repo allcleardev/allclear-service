@@ -6,6 +6,7 @@ import static app.allclear.platform.type.Experience.GOOD_HYGIENE;
 import static app.allclear.platform.type.Experience.OVERLY_CROWDED;
 import static app.allclear.platform.type.Experience.SOCIAL_DISTANCING_ENFORCED;
 import static app.allclear.testing.TestingUtils.*;
+import static java.util.stream.Collectors.toSet;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -24,8 +25,7 @@ import io.dropwizard.testing.junit5.ResourceExtension;
 
 import app.allclear.junit.hibernate.*;
 import app.allclear.common.dao.QueryResults;
-import app.allclear.common.errors.NotFoundExceptionMapper;
-import app.allclear.common.errors.ValidationExceptionMapper;
+import app.allclear.common.errors.*;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.common.value.OperationResponse;
@@ -33,6 +33,8 @@ import app.allclear.platform.App;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.dao.*;
 import app.allclear.platform.filter.ExperiencesFilter;
+import app.allclear.platform.model.ExperiencesCalcResponse;
+import app.allclear.platform.type.Experience;
 import app.allclear.platform.value.*;
 
 /**********************************************************************************
@@ -109,6 +111,39 @@ public class ExperiencesResourceTest
 		var value = response.readEntity(ExperiencesValue.class);
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE.withId(1L).withPersonId(PERSON_1.id).withPersonName(PERSON_1.name).withFacilityName(FACILITY.name).withCreatedAt(now).withUpdatedAt(now), value);
+	}
+
+	@Test
+	public void calc()
+	{
+		var response = request(target().path("calc").queryParam("facilityId", FACILITY.id)).get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var value = response.readEntity(ExperiencesCalcResponse.class);
+		Assertions.assertNotNull(value, "Exists");
+		check(value, 0L, 1L);
+	}
+
+	@Test
+	public void calc_none()
+	{
+		var response = request(target().path("calc").queryParam("facilityId", FACILITY_1.id)).get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var value = response.readEntity(ExperiencesCalcResponse.class);
+		Assertions.assertNotNull(value, "Exists");
+		check(value, 0L, 0L);
+	}
+
+	@Test
+	public void calc_null()
+	{
+		var response = request(target().path("calc")).get();
+		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, response.getStatus(), "Status");
+
+		var ex = response.readEntity(ErrorInfo.class);
+		Assertions.assertNotNull(ex, "Exists");
+		Assertions.assertEquals("Must provide a Facility identifier.", ex.message, "Check message");
 	}
 
 	@Test
@@ -376,5 +411,17 @@ public class ExperiencesResourceTest
 		else
 			assertThat(value.updatedAt).as(assertId + "Check updatedAt").isCloseTo(expected.updatedAt, 500L);
 		Assertions.assertEquals(expected.tags, value.tags, assertId + "Check tags");
+	}
+
+	private void check(final ExperiencesCalcResponse response, final long positives, final long negatives, final Experience... tags)
+	{
+		Assertions.assertEquals(positives, response.positives, "Check positives");
+		Assertions.assertEquals(negatives, response.negatives, "Check negatives");
+		Assertions.assertEquals(positives + negatives, response.total, "Check total");
+
+		var tagIds = Arrays.stream(tags).map(v -> v.id).collect(toSet());
+		Experience.LIST.forEach(v -> {
+			Assertions.assertEquals(tagIds.contains(v.id) ? 1L : 0L, response.tags.get(v.id).count, "Check tags." + v.name);
+		});
 	}
 }

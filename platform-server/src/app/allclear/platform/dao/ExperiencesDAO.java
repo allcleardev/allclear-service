@@ -3,7 +3,7 @@ package app.allclear.platform.dao;
 import static java.util.stream.Collectors.*;
 import static app.allclear.common.dao.OrderByBuilder.*;
 
-import java.util.List;
+import java.util.*;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.hibernate.SessionFactory;
@@ -14,6 +14,7 @@ import app.allclear.common.hibernate.AbstractDAO;
 import app.allclear.common.hibernate.HibernateQueryBuilder;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.filter.ExperiencesFilter;
+import app.allclear.platform.model.ExperiencesCalcResponse;
 import app.allclear.platform.type.Experience;
 import app.allclear.platform.value.ExperiencesValue;
 
@@ -240,6 +241,42 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 	public ExperiencesValue getByIdWithException(final Long id) throws ObjectNotFoundException
 	{
 		return findWithException(id).toValueX();
+	}
+
+	Map<Boolean, Long> calcPositivesByFacility(final Long facilityId)
+	{
+		return namedQuery("countExperiencesPositivesByFacility", CountByBoolean.class)
+			.setParameter("facilityId", facilityId)
+			.stream()
+			.collect(toMap(o -> o.id, o -> o.total));
+	}
+
+	Map<String, Long> calcTagsByFacility(final Long facilityId)
+	{
+		return namedQuery("countExperiencesTagsByFacility", CountByName.class)
+			.setParameter("facilityId", facilityId)
+			.stream()
+			.collect(toMap(o -> o.name, o -> o.total));
+	}
+
+	/** Aggregates the Experiences facet data for a single Facility.
+	 * 
+	 * @param facilityId
+	 * @return never NULL.
+	 * @throws ValidationException
+	 */
+	public ExperiencesCalcResponse calcByFacility(final Long facilityId) throws ValidationException
+	{
+		if (null == facilityId) throw new ValidationException("facilityId", "Must provide a Facility identifier.");
+
+		var positives = calcPositivesByFacility(facilityId);
+		if (positives.isEmpty()) return new ExperiencesCalcResponse();
+
+		var tags = calcTagsByFacility(facilityId);
+
+		return new ExperiencesCalcResponse(positives.getOrDefault(true, 0L),
+			positives.getOrDefault(false, 0L),
+			Experience.LIST.stream().collect(toMap(v -> v.id, v -> new ExperiencesCalcResponse.Tag(v.name, tags.getOrDefault(v.id, 0L)))));
 	}
 
 	/** Searches the Experiences entity based on the supplied filter.

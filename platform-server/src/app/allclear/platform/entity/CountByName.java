@@ -6,7 +6,7 @@ import javax.persistence.*;
 
 import app.allclear.common.ObjectUtils;
 
-/** Generic entity that represents a character primary key and name field.
+/** Generic entity that represents a character primary key and numeric field.
  * 
  * @author smalleyd
  * @version 1.1.9

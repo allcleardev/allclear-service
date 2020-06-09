@@ -13,6 +13,7 @@ import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.value.OperationResponse;
 import app.allclear.platform.dao.ExperiencesDAO;
 import app.allclear.platform.filter.ExperiencesFilter;
+import app.allclear.platform.model.ExperiencesCalcResponse;
 import app.allclear.platform.value.ExperiencesValue;
 
 /**********************************************************************************
@@ -48,6 +49,14 @@ public class ExperiencesResource
 	public ExperiencesValue get(@PathParam("id") final Long id) throws ObjectNotFoundException, ValidationException
 	{
 		return dao.getByIdWithException(id);
+	}
+
+	@GET
+	@Path("/calc") @Timed @UnitOfWork(readOnly=true, transactional=false)
+	@ApiOperation(value="calcByFacility", notes="Aggregates Experiences facets for the specified facility.", response=ExperiencesCalcResponse.class)
+	public ExperiencesCalcResponse calc(@QueryParam("facilityId") final Long facilityId) throws ValidationException
+	{
+		return dao.calcByFacility(facilityId);
 	}
 
 	@POST
