@@ -372,17 +372,19 @@ var FacilitiesHandler = new ListTemplate({
 
 		open: function(facilityId) { this.run({ url: this.RESOURCE + '?facilityId=' + facilityId, filter: { isAdd: false } }, undefined, 'get'); },
 
+		toValueAndPercent: function(v, t) { return this.toNumber(v) + ' ' + this.toPercent(v / t) + '%'; },
 		onEditorPreGenerate: function(c) {
 			var v = c.value;
 			v.tags_ = {};
 			if (v.total)
 			{
-				v.positives_ = this.toNumber(v.positives) + ' ' + this.toPercent(v.positives / v.total) + '%';
-				v.negatives_ = this.toNumber(v.negatives) + ' ' + this.toPercent(v.negatives / v.total) + '%';
+				v.positives_ = this.toValueAndPercent(v.positives, v.total);
+				v.negatives_ = this.toValueAndPercent(v.negatives, v.total);
 
-				for (k of v.tags)
+				for (k in v.tags)
 				{
-					v.tags_[k.name] = this.toNumber(k.count) + ' ' + this.toPercent(k.count / v.total) + '%';
+					var o = v.tags[k];
+					v.tags_[o.name] = this.toValueAndPercent(o.count, v.total);
 				}
 			}
 			else
