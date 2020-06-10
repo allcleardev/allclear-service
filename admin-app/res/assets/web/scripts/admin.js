@@ -212,10 +212,12 @@ var FacilitiesHandler = new ListTemplate({
 	EDIT_METHOD: 'put',
 
 	ROW_ACTIONS: [ new RowAction('openChangeRequests', 'Change Requests'),
-	               new RowAction('openExperiences', 'Experiences') ],
+	               new RowAction('openExperiences', 'Experiences'),
+	               new RowAction('calcRatings', 'Calc Ratings')],
 
 	openChangeRequests: (c, e) => FacilitateHandler.filter({ entityId: e.myRecord.id }, undefined, { entityId: true }),
 	openExperiences: (c, e) => ExperiencesHandler.filter({ facilityId: e.myRecord.id }, undefined, { facilityName: true }),
+	calcRatings: function(c, e) { this.CALC_RATINGS.open(e.myRecord.id); },
 
 	onListPostLoad: c => c.defaultValue = { active: FACILITY_ACTIVE_DEFAULT },
 	onEditorPostLoad: function(c) {
@@ -358,6 +360,43 @@ var FacilitiesHandler = new ListTemplate({
 		      new DatesField('updatedAt', 'Updated At'),
 	          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ],
 	},
+
+	CALC_RATINGS: new EditTemplate({
+		NAME: 'facility',
+		SINGULAR: 'Calculated Rating',
+		PLURAL: 'Calculated Rating',
+		RESOURCE: 'experiences/calc',
+
+		CAPTION_SUBMIT: undefined,
+		CAPTION_CANCEL: Template.prototype.CAPTION_CLOSE,
+
+		open: function(facilityId) { this.run({ url: this.RESOURCE + '?facilityId=' + facilityId, filter: { isAdd: false } }, undefined, 'get'); },
+
+		onEditorPreGenerate: function(c) {
+			var v = c.value;
+			v.tags_ = {};
+			if (v.total)
+			{
+				v.positives_ = this.toNumber(v.positives) + ' ' + this.toPercent(v.positives / v.total) + '%';
+				v.negatives_ = this.toNumber(v.negatives) + ' ' + this.toPercent(v.negatives / v.total) + '%';
+
+				for (k of v.tags)
+				{
+					v.tags_[k.name] = this.toNumber(k.count) + ' ' + this.toPercent(k.count / v.total) + '%';
+				}
+			}
+			else
+			{
+				v.positives_ = 0;
+				v.negatives_ = 0;
+			}
+		},
+
+		FIELDS: [ new TextField('total', 'Total'),
+		          new TextField('positives_', 'Positives'),
+		          new TextField('negatives_', 'Negatives'),
+		          new MetaField('tags_', 'Tags') ]
+	}),
 
 	HISTORY: {
 		NAME: 'facility',
