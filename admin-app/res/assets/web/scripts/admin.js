@@ -372,7 +372,7 @@ var FacilitiesHandler = new ListTemplate({
 
 		open: function(facilityId) { this.run({ url: this.RESOURCE + '?facilityId=' + facilityId, filter: { isAdd: false } }, undefined, 'get'); },
 
-		toValueAndPercent: function(v, t) { return this.toNumber(v) + ' ' + this.toPercent(v / t) + '%'; },
+		toValueAndPercent: function(v, t) { return this.toNumber(v) + ' (' + this.toPercent(v / t) + '%)'; },
 		onEditorPreGenerate: function(c) {
 			var v = c.value;
 			v.tags_ = {};
