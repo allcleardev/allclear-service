@@ -462,7 +462,7 @@ var FacilitateHandler = new ListTemplate({
 	onEditorPreGenerate: c => {
 		var v = c.value;
 		v.address = v.address;
-		v.value_ = Template.toJSON(v.value),
+		v.value_ = Template.toJSON(v.value);
 	},
 	openEntity: function(c, e) { FacilitiesHandler.EDITOR.doEdit(e.myRecord.entityId); },
 	openCreator: function(c, e) { PeopleHandler.EDITOR.doEdit(e.myRecord.creatorId); },
