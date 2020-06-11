@@ -438,8 +438,32 @@ var FacilitateHandler = new ListTemplate({
 		a.appendChild(this.genButton('rejecter', 'Reject', function(ev) {
 			me.remove(me.RESOURCE, id + '/reject', data => me.processResponse(data, c, c.form));
 		}));
+
+		var f = c.form;
+		f.address.onchange = function(ev) {	// ALLCLEAR-614: when the address changes, populate the Facility payload with the geocoded data. DLS on 6/11/2020.
+			var field = this.value;
+			me.get('maps/geocode', { location: field }, function(data) {
+				if (data.message)
+				{
+					window.alert(data.message);
+					return;
+				}
+
+				var v = c.value.value;
+				v.address = field;
+				if (data.city) v.city = data.city;
+				if (data.state) v.state = data.state;
+				if (data.latitude) v.latitude = data.latitude;
+				if (data.longitude) v.longitude = data.longitude;
+				f.value_.value = c.value.value_ = Template.toJSON(v);
+			});
+		};
 	},
-	onEditorPreGenerate: c => c.value.value_ = Template.toJSON(c.value.value),
+	onEditorPreGenerate: c => {
+		var v = c.value;
+		v.address = v.address;
+		v.value_ = Template.toJSON(v.value),
+	},
 	openEntity: function(c, e) { FacilitiesHandler.EDITOR.doEdit(e.myRecord.entityId); },
 	openCreator: function(c, e) { PeopleHandler.EDITOR.doEdit(e.myRecord.creatorId); },
 	promote: function(c, e) {
@@ -475,6 +499,7 @@ var FacilitateHandler = new ListTemplate({
 	          new TextField('status', 'Status', (v, p) => p.name),
 	          new TextField('change', 'Change Request?'),
 	          new LinkField('entityId', 'Facility ID', function(ev) { FacilitiesHandler.EDITOR.doEdit(this.myValue.entityId); }),
+	          new EditField('address', 'Address', false, false, 128, 50, 'Provide value to be geocoded and applied to the Facility JSON.'),
 	          new EditField('value_', 'Facility JSON', true, true, 80, 10),
 	          new TextField('promoterId', 'Promoter'),
 	          new TextField('promotedAt', 'Promoted At', 'toDateTime'),
