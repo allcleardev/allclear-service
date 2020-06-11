@@ -455,7 +455,7 @@ var FacilitateHandler = new ListTemplate({
 				if (data.state) v.state = data.state;
 				if (data.latitude) v.latitude = data.latitude;
 				if (data.longitude) v.longitude = data.longitude;
-				f.value_.value = c.value.value_ = Template.toJSON(v);
+				f.value_.value = Template.toJSON(v);	// Do NOT update 'c.value.value_'. The diff on submittal with f.value_ will trigger sending this payload. DLS on 6/11/2020.
 			});
 		};
 	},
