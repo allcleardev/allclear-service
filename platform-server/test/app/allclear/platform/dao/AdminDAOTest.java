@@ -421,6 +421,7 @@ public class AdminDAOTest
 
 	@ParameterizedTest
 	@MethodSource
+	@Disabled	// Sorting is NOT available
 	public void search_sort(final AdminFilter filter, final String expectedSortOn, final String expectedSortDir)
 	{
 		var results = dao.search(filter);
