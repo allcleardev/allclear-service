@@ -1,9 +1,7 @@
 package app.allclear.platform.value;
 
 import java.io.Serializable;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Objects;
+import java.util.*;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -38,6 +36,7 @@ public class AdminValue implements Serializable
 	public String lastName = null;
 	public boolean supers = false;
 	public boolean editor = false;
+	public boolean alertable = false;
 	public Date createdAt = null;
 	public Date updatedAt = null;
 
@@ -53,13 +52,14 @@ public class AdminValue implements Serializable
 	public AdminValue withLastName(final String newValue) { lastName = newValue; return this; }
 	public AdminValue withSupers(final boolean newValue) { supers = newValue; return this; }
 	public AdminValue withEditor(final boolean newValue) { editor = newValue; return this; }
+	public AdminValue withAlertable(final boolean newValue) { alertable = newValue; return this; }
 	public AdminValue withCreatedAt(final Date newValue) { createdAt = newValue; return this; }
 	public AdminValue withUpdatedAt(final Date newValue) { updatedAt = newValue; return this; }
 
 	public AdminValue() { super(); }
 	public AdminValue(final String id) { this(id, false); }
 	public AdminValue(final String id, final boolean supers) { this(id, supers, false); }
-	public AdminValue(final String id, final boolean supers, final boolean editor) { this(id, null, null, null, null, supers, editor); }
+	public AdminValue(final String id, final boolean supers, final boolean editor) { this(id, null, null, null, null, supers, editor, false); }
 
 	public AdminValue(final String id,
 		final String password,
@@ -67,9 +67,10 @@ public class AdminValue implements Serializable
 		final String firstName,
 		final String lastName,
 		final boolean supers,
-		final boolean editor)
+		final boolean editor,
+		final boolean alertable)
 	{
-		this(id, password, email, firstName, lastName, supers, editor, null, null);
+		this(id, password, email, firstName, lastName, supers, editor, alertable, null, null);
 	}
 
 	public AdminValue(final String id,
@@ -79,6 +80,7 @@ public class AdminValue implements Serializable
 		final String lastName,
 		final boolean supers,
 		final boolean editor,
+		final boolean alertable,
 		final Date createdAt,
 		final Date updatedAt)
 	{
@@ -89,6 +91,7 @@ public class AdminValue implements Serializable
 		this.lastName = lastName;
 		this.supers = supers;
 		this.editor = editor;
+		this.alertable = alertable;
 		this.createdAt = createdAt;
 		this.updatedAt = updatedAt;
 	}
@@ -115,15 +118,13 @@ public class AdminValue implements Serializable
 			Objects.equals(lastName, v.lastName) &&
 			supers == v.supers &&
 			editor == v.editor &&
+			alertable == v.alertable &&
 			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND) &&
 			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
 	}
 
 	@Override
-	public int hashCode()
-	{
-		return Objects.hashCode(id);
-	}
+	public int hashCode() { return Objects.hashCode(id); }
 
 	@Override
 	public String toString() { return ObjectUtils.toString(this); }

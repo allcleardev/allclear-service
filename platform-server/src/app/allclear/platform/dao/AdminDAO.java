@@ -275,6 +275,7 @@ public class AdminDAO
 		if (null != filter.lastName) filters.add(generateFilterCondition("LastName", EQUAL, filter.lastName));
 		if (null != filter.supers) filters.add(generateFilterCondition("Supers", EQUAL, filter.supers));
 		if (null != filter.editor) filters.add(generateFilterCondition("Editor", EQUAL, filter.editor));
+		if (null != filter.alertable) filters.add(generateFilterCondition("Alertable", EQUAL, filter.alertable));
 		if (null != filter.createdAtFrom) filters.add(generateFilterCondition("CreatedAt", GREATER_THAN_OR_EQUAL, filter.createdAtFrom));
 		if (null != filter.createdAtTo) filters.add(generateFilterCondition("CreatedAt", LESS_THAN_OR_EQUAL, filter.createdAtTo));
 		if (null != filter.updatedAtFrom) filters.add(generateFilterCondition("UpdatedAt", GREATER_THAN_OR_EQUAL, filter.updatedAtFrom));

@@ -72,6 +72,7 @@ var AdminsHandler = new ListTemplate({
 	           new EditColumn('lastName', 'Last Name'),
 	           new TextColumn('supers', 'Super?'),
 	           new TextColumn('editor', 'Editor?'),
+	           new TextColumn('alertable', 'Alert?'),
 	           new TextColumn('createdAt', 'Created At', 'toDateTime'),
 	           new TextColumn('updatedAt', 'Updated At', 'toDateTime') ],
 	FIELDS: [ new EditField('id', 'ID', true, false, 128, 50),
@@ -81,6 +82,7 @@ var AdminsHandler = new ListTemplate({
 	          new EditField('lastName', 'Last Name', true, false, 32, 50),
 	          new BoolField('supers', 'Super?', false),
 	          new BoolField('editor', 'Editor?', false),
+	          new BoolField('alertable', 'Alertable?', false),
 	          new TextField('createdAt', 'Created At', 'toDateTime'),
 	          new TextField('updatedAt', 'Updated At', 'toDateTime') ],
 	SEARCH: {
@@ -95,6 +97,7 @@ var AdminsHandler = new ListTemplate({
 		          new EditField('lastName', 'Last Name', false, false, 32, 50),
 		          new ListField('supers', 'Super?', false, 'yesNoOptions', undefined, 'No Search'),
 		          new ListField('editor', 'Editor?', false, 'yesNoOptions', undefined, 'No Search'),
+		          new ListField('alertable', 'Alertable?', false, 'yesNoOptions', undefined, 'No Search'),
 		          new DatesField('createdAt', 'Created At'),
 		          new DatesField('updatedAt', 'Updated At'),
 		          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ]

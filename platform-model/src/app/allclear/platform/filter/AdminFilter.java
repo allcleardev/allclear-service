@@ -28,6 +28,7 @@ public class AdminFilter extends QueryFilter
 	public String lastName = null;
 	public Boolean supers = null;
 	public Boolean editor = null;
+	public Boolean alertable = null;
 	public Date createdAtFrom = null;
 	public Date createdAtTo = null;
 	public Date updatedAtFrom = null;
@@ -40,6 +41,7 @@ public class AdminFilter extends QueryFilter
 	public AdminFilter withLastName(final String newValue) { lastName = newValue; return this; }
 	public AdminFilter withSupers(final Boolean newValue) { supers = newValue; return this; }
 	public AdminFilter withEditor(final Boolean newValue) { editor = newValue; return this; }
+	public AdminFilter withAlertable(final Boolean newValue) { alertable = newValue; return this; }
 	public AdminFilter withCreatedAtFrom(final Date newValue) { createdAtFrom = newValue; return this; }
 	public AdminFilter withCreatedAtTo(final Date newValue) { createdAtTo = newValue; return this; }
 	public AdminFilter withUpdatedAtFrom(final Date newValue) { updatedAtFrom = newValue; return this; }
@@ -81,6 +83,7 @@ public class AdminFilter extends QueryFilter
 		@param lastName represents the "last_name" field.
 		@param supers represents the "supers" field.
 		@param editor represents the "editor" field.
+		@param alertable represents the "alertable" field.
 		@param createdAtFrom represents the "created_at" field - lower boundary.
 		@param createdAtTo represents the "created_at" field - upper boundary.
 		@param updatedAtFrom represents the "updated_at" field - lower boundary.
@@ -92,6 +95,7 @@ public class AdminFilter extends QueryFilter
 		final String lastName,
 		final Boolean supers,
 		final Boolean editor,
+		final Boolean alertable,
 		final Date createdAtFrom,
 		final Date createdAtTo,
 		final Date updatedAtFrom,
@@ -103,6 +107,7 @@ public class AdminFilter extends QueryFilter
 		this.lastName = lastName;
 		this.supers = supers;
 		this.editor = editor;
+		this.alertable = alertable;
 		this.createdAtFrom = createdAtFrom;
 		this.createdAtTo = createdAtTo;
 		this.updatedAtFrom = updatedAtFrom;

@@ -57,7 +57,7 @@ public class AdminDAOTest
 	@Test
 	public void add()
 	{
-		var value = dao.add(VALUE = new AdminValue("~tester-b", CURRENT_PASSWORD = UUID.randomUUID().toString(), "dsmall@allclear.app", "Dave", "Small", true, false));
+		var value = dao.add(VALUE = new AdminValue("~tester-b", CURRENT_PASSWORD = UUID.randomUUID().toString(), "dsmall@allclear.app", "Dave", "Small", true, false, true));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
@@ -67,7 +67,7 @@ public class AdminDAOTest
 	*/
 	private AdminValue createValid()
 	{
-		return new AdminValue("kathy", "Password_2", "kathy@gmail.com", "Kathy", "Reiner", false, false);
+		return new AdminValue("kathy", "Password_2", "kathy@gmail.com", "Kathy", "Reiner", false, false, false);
 	}
 
 	@Test
@@ -255,9 +255,11 @@ public class AdminDAOTest
 	public void modify()
 	{
 		count(new AdminFilter().withFirstName("Dave"), 1L);
+		count(new AdminFilter().withAlertable(true), 1L);
 		count(new AdminFilter().withFirstName("David"), 0L);
+		count(new AdminFilter().withAlertable(false), 0L);
 
-		var value = dao.update(VALUE.withFirstName("David"));
+		var value = dao.update(VALUE.withFirstName("David").withAlertable(false));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
@@ -266,7 +268,9 @@ public class AdminDAOTest
 	public void modify_count()
 	{
 		count(new AdminFilter().withFirstName("Dave"), 0L);
+		count(new AdminFilter().withAlertable(true), 0L);
 		count(new AdminFilter().withFirstName("David"), 1L);
+		count(new AdminFilter().withAlertable(false), 1L);
 	}
 
 	@Test
@@ -275,6 +279,8 @@ public class AdminDAOTest
 		var record = dao.findWithException(VALUE.id);
 		Assertions.assertNotNull(record, "Exists");
 		Assertions.assertEquals("David", record.getFirstName(), "Check firstName");
+		Assertions.assertFalse(record.getAlertable(), "Check alertable");
+		assertThat(record.getUpdatedAt()).as("Check updatedAt").isAfter(record.getCreatedAt());
 		check(VALUE, record);
 	}
 
@@ -290,6 +296,7 @@ public class AdminDAOTest
 			arguments(new AdminFilter(1, 20).withLastName(VALUE.lastName), 1L),
 			arguments(new AdminFilter(1, 20).withSupers(VALUE.supers), 1L),
 			arguments(new AdminFilter(1, 20).withEditor(VALUE.editor), 1L),
+			arguments(new AdminFilter(1, 20).withAlertable(VALUE.alertable), 1L),
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAgo), 1L),
 			arguments(new AdminFilter(1, 20).withCreatedAtTo(hourAhead), 1L),
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
@@ -304,6 +311,7 @@ public class AdminDAOTest
 			arguments(new AdminFilter(1, 20).withLastName("invalid"), 0L),
 			arguments(new AdminFilter(1, 20).withSupers(!VALUE.supers), 0L),
 			arguments(new AdminFilter(1, 20).withEditor(!VALUE.editor), 0L),
+			arguments(new AdminFilter(1, 20).withAlertable(!VALUE.alertable), 0L),
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
 			arguments(new AdminFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
@@ -387,6 +395,13 @@ public class AdminDAOTest
 			arguments(new AdminFilter("editor", "invalid"), "editor", "DESC"),	// Invalid sort direction is converted to the default.
 			arguments(new AdminFilter("editor", "DESC"), "editor", "DESC"),
 			arguments(new AdminFilter("editor", "desc"), "editor", "DESC"),
+
+			arguments(new AdminFilter("alertable", null), "alertable", "DESC"), // Missing sort direction is converted to the default.
+			arguments(new AdminFilter("alertable", "ASC"), "alertable", "ASC"),
+			arguments(new AdminFilter("alertable", "asc"), "alertable", "ASC"),
+			arguments(new AdminFilter("alertable", "invalid"), "alertable", "DESC"),	// Invalid sort direction is converted to the default.
+			arguments(new AdminFilter("alertable", "DESC"), "alertable", "DESC"),
+			arguments(new AdminFilter("alertable", "desc"), "alertable", "DESC"),
 
 			arguments(new AdminFilter("createdAt", null), "createdAt", "DESC"), // Missing sort direction is converted to the default.
 			arguments(new AdminFilter("createdAt", "ASC"), "createdAt", "ASC"),
@@ -497,6 +512,7 @@ public class AdminDAOTest
 		Assertions.assertEquals(expected.lastName, record.getLastName(), assertId + "Check lastName");
 		Assertions.assertEquals(expected.supers, record.getSupers(), assertId + "Check supers");
 		Assertions.assertEquals(expected.editor, record.getEditor(), assertId + "Check editor");
+		Assertions.assertEquals(expected.alertable, record.getAlertable(), assertId + "Check alertable");
 		Assertions.assertEquals(expected.createdAt, record.getCreatedAt(), assertId + "Check createdAt");
 		Assertions.assertEquals(expected.updatedAt, record.getUpdatedAt(), assertId + "Check updatedAt");
 	}
@@ -513,6 +529,7 @@ public class AdminDAOTest
 		Assertions.assertEquals(expected.supers, value.supers, assertId + "Check supers");
 		Assertions.assertEquals(expected.editor, value.editor, assertId + "Check editor");
 		Assertions.assertEquals(!expected.editor || expected.supers, value.canAdmin(), assertId + "Check canAdmin()");
+		Assertions.assertEquals(expected.alertable, value.alertable, assertId + "Check alertable");
 		Assertions.assertEquals(expected.createdAt, value.createdAt, assertId + "Check createdAt");
 		Assertions.assertEquals(expected.updatedAt, value.updatedAt, assertId + "Check updatedAt");
 	}

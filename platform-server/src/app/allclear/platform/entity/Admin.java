@@ -55,6 +55,10 @@ public class Admin extends TableServiceEntity implements Serializable
 	public boolean editor;
 	public void setEditor(final boolean newValue) { editor = newValue; }
 
+	public boolean getAlertable() { return alertable; }
+	public boolean alertable;
+	public void setAlertable(final boolean newValue) { alertable = newValue; }
+
 	public long getIdentifier() { return identifier; }
 	public long identifier;
 	public void setIdentifier(final long newValue) { identifier = newValue; }
@@ -81,6 +85,7 @@ public class Admin extends TableServiceEntity implements Serializable
 		this.lastName = value.lastName;
 		this.supers = value.supers;
 		this.editor = value.editor;
+		this.alertable = value.alertable;
 		this.createdAt = this.updatedAt = value.createdAt = value.updatedAt = now;
 
 		value.password = null;	// Do NOT reflect back the user password.
@@ -98,7 +103,8 @@ public class Admin extends TableServiceEntity implements Serializable
 			Objects.equals(firstName, v.firstName) &&
 			Objects.equals(lastName, v.lastName) &&
 			(supers == v.supers) &&
-			(editor == v.editor) && 
+			(editor == v.editor) &&
+			(alertable = v.alertable) &&
 			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND) &&
 			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
 	}
@@ -118,6 +124,7 @@ public class Admin extends TableServiceEntity implements Serializable
 		setLastName(value.lastName);
 		setSupers(value.supers);
 		setEditor(value.editor);
+		setAlertable(value.alertable);
 		value.createdAt = getCreatedAt();
 		setUpdatedAt(value.updatedAt = new Date());
 
@@ -144,6 +151,7 @@ public class Admin extends TableServiceEntity implements Serializable
 			getLastName(),
 			getSupers(),
 			getEditor(),
+			getAlertable(),
 			getCreatedAt(),
 			getUpdatedAt());
 	}

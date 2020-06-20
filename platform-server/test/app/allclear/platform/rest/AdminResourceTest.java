@@ -79,7 +79,7 @@ public class AdminResourceTest
 	{
 		var now = new Date();
 		var response = request()
-			.post(Entity.entity(VALUE = new AdminValue("~abby~", "Password_1", "abby@me.me", "Abby", "Dorn", false, false), UTF8MediaType.APPLICATION_JSON_TYPE));	// MUST use ~abby~ since there is only one database instance across all environments. DLS on 4/27/2020.
+			.post(Entity.entity(VALUE = new AdminValue("~abby~", "Password_1", "abby@me.me", "Abby", "Dorn", false, false, false), UTF8MediaType.APPLICATION_JSON_TYPE));	// MUST use ~abby~ since there is only one database instance across all environments. DLS on 4/27/2020.
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var value = response.readEntity(AdminValue.class);
@@ -150,9 +150,11 @@ public class AdminResourceTest
 	public void modify()
 	{
 		count(new AdminFilter().withSupers(false), 1L);
+		count(new AdminFilter().withAlertable(false), 1L);
 		count(new AdminFilter().withSupers(true), 0L);
+		count(new AdminFilter().withAlertable(true), 0L);
 
-		var response = request().put(Entity.entity(VALUE.withSupers(true), UTF8MediaType.APPLICATION_JSON_TYPE));
+		var response = request().put(Entity.entity(VALUE.withSupers(true).withAlertable(true), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var now = new Date();
@@ -166,7 +168,9 @@ public class AdminResourceTest
 	public void modify_count()
 	{
 		count(new AdminFilter().withSupers(false), 0L);
+		count(new AdminFilter().withAlertable(false), 0L);
 		count(new AdminFilter().withSupers(true), 1L);
+		count(new AdminFilter().withAlertable(true), 1L);
 	}
 
 	@Test
@@ -175,6 +179,7 @@ public class AdminResourceTest
 		var value = get(VALUE.id).readEntity(AdminValue.class);
 		Assertions.assertNotNull(value, "Exists");
 		Assertions.assertTrue(value.supers, "Check supers");
+		Assertions.assertTrue(value.alertable, "Check alertable");
 		assertThat(value.updatedAt).as("Check updatedAt").isAfter(value.createdAt);
 		check(VALUE, value);
 	}
@@ -191,6 +196,7 @@ public class AdminResourceTest
 			arguments(new AdminFilter(1, 20).withLastName(VALUE.lastName), 1L),
 			arguments(new AdminFilter(1, 20).withSupers(VALUE.supers), 1L),
 			arguments(new AdminFilter(1, 20).withEditor(VALUE.editor), 1L),
+			arguments(new AdminFilter(1, 20).withAlertable(VALUE.alertable), 1L),
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAgo), 1L),
 			arguments(new AdminFilter(1, 20).withCreatedAtTo(hourAhead), 1L),
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
@@ -205,6 +211,7 @@ public class AdminResourceTest
 			arguments(new AdminFilter(1, 20).withLastName("invalid"), 0L),
 			arguments(new AdminFilter(1, 20).withSupers(!VALUE.supers), 0L),
 			arguments(new AdminFilter(1, 20).withEditor(!VALUE.editor), 0L),
+			arguments(new AdminFilter(1, 20).withAlertable(!VALUE.alertable), 0L),
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
 			arguments(new AdminFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
 			arguments(new AdminFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
@@ -306,6 +313,7 @@ public class AdminResourceTest
 		Assertions.assertEquals(expected.supers, value.supers, assertId + "Check supers");
 		Assertions.assertEquals(expected.editor, value.editor, assertId + "Check editor");
 		Assertions.assertEquals(!expected.editor || expected.supers, value.canAdmin(), assertId + "Check canAdmin()");
+		Assertions.assertEquals(expected.alertable, value.alertable, assertId + "Check alertable");
 		assertThat(value.createdAt).as(assertId + "Check createdAt").isCloseTo(expected.createdAt, 500L);
 		assertThat(value.updatedAt).as(assertId + "Check updatedAt").isCloseTo(expected.updatedAt, 500L);
 	}
