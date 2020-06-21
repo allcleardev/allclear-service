@@ -26,6 +26,7 @@ public class AdminFilter extends QueryFilter
 	public String email = null;
 	public String firstName = null;
 	public String lastName = null;
+	public String phone = null;
 	public Boolean supers = null;
 	public Boolean editor = null;
 	public Boolean alertable = null;
@@ -39,6 +40,7 @@ public class AdminFilter extends QueryFilter
 	public AdminFilter withEmail(final String newValue) { email = newValue; return this; }
 	public AdminFilter withFirstName(final String newValue) { firstName = newValue; return this; }
 	public AdminFilter withLastName(final String newValue) { lastName = newValue; return this; }
+	public AdminFilter withPhone(final String newValue) { phone = newValue; return this; }
 	public AdminFilter withSupers(final Boolean newValue) { supers = newValue; return this; }
 	public AdminFilter withEditor(final Boolean newValue) { editor = newValue; return this; }
 	public AdminFilter withAlertable(final Boolean newValue) { alertable = newValue; return this; }
@@ -81,6 +83,7 @@ public class AdminFilter extends QueryFilter
 		@param email represents the "email" field.
 		@param firstName represents the "first_name" field.
 		@param lastName represents the "last_name" field.
+		@param phone represents the "phone" field.
 		@param supers represents the "supers" field.
 		@param editor represents the "editor" field.
 		@param alertable represents the "alertable" field.
@@ -93,6 +96,7 @@ public class AdminFilter extends QueryFilter
 		final String email,
 		final String firstName,
 		final String lastName,
+		final String phone,
 		final Boolean supers,
 		final Boolean editor,
 		final Boolean alertable,
@@ -105,6 +109,7 @@ public class AdminFilter extends QueryFilter
 		this.email = email;
 		this.firstName = firstName;
 		this.lastName = lastName;
+		this.phone = phone;
 		this.supers = supers;
 		this.editor = editor;
 		this.alertable = alertable;
@@ -127,6 +132,7 @@ public class AdminFilter extends QueryFilter
 		email = StringUtils.trimToNull(email);
 		firstName = StringUtils.trimToNull(firstName);
 		lastName = StringUtils.trimToNull(lastName);
+		phone = StringUtils.trimToNull(phone);
 
 		return this;
 	}

@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
 import app.allclear.common.ObjectUtils;
+import app.allclear.twilio.model.TwilioUtils;
 
 /** Value object that represents an internal administrator.
  * 
@@ -27,6 +28,7 @@ public class AdminValue implements Serializable
 	public static final int MAX_LEN_EMAIL = 128;
 	public static final int MAX_LEN_FIRST_NAME = 32;
 	public static final int MAX_LEN_LAST_NAME = 32;
+	public static final int MAX_LEN_PHONE = 32;
 
 	// Members
 	public String id = null;
@@ -34,6 +36,7 @@ public class AdminValue implements Serializable
 	public String email = null;
 	public String firstName = null;
 	public String lastName = null;
+	public String phone = null;
 	public boolean supers = false;
 	public boolean editor = false;
 	public boolean alertable = false;
@@ -50,6 +53,7 @@ public class AdminValue implements Serializable
 	public AdminValue withEmail(final String newValue) { email = newValue; return this; }
 	public AdminValue withFirstName(final String newValue) { firstName = newValue; return this; }
 	public AdminValue withLastName(final String newValue) { lastName = newValue; return this; }
+	public AdminValue withPhone(final String newValue) { phone = newValue; return this; }
 	public AdminValue withSupers(final boolean newValue) { supers = newValue; return this; }
 	public AdminValue withEditor(final boolean newValue) { editor = newValue; return this; }
 	public AdminValue withAlertable(final boolean newValue) { alertable = newValue; return this; }
@@ -59,18 +63,19 @@ public class AdminValue implements Serializable
 	public AdminValue() { super(); }
 	public AdminValue(final String id) { this(id, false); }
 	public AdminValue(final String id, final boolean supers) { this(id, supers, false); }
-	public AdminValue(final String id, final boolean supers, final boolean editor) { this(id, null, null, null, null, supers, editor, false); }
+	public AdminValue(final String id, final boolean supers, final boolean editor) { this(id, null, null, null, null, null, supers, editor, false); }
 
 	public AdminValue(final String id,
 		final String password,
 		final String email,
 		final String firstName,
 		final String lastName,
+		final String phone,
 		final boolean supers,
 		final boolean editor,
 		final boolean alertable)
 	{
-		this(id, password, email, firstName, lastName, supers, editor, alertable, null, null);
+		this(id, password, email, firstName, lastName, phone, supers, editor, alertable, null, null);
 	}
 
 	public AdminValue(final String id,
@@ -78,6 +83,7 @@ public class AdminValue implements Serializable
 		final String email,
 		final String firstName,
 		final String lastName,
+		final String phone,
 		final boolean supers,
 		final boolean editor,
 		final boolean alertable,
@@ -89,6 +95,7 @@ public class AdminValue implements Serializable
 		this.email = email;
 		this.firstName = firstName;
 		this.lastName = lastName;
+		this.phone = phone;
 		this.supers = supers;
 		this.editor = editor;
 		this.alertable = alertable;
@@ -104,6 +111,7 @@ public class AdminValue implements Serializable
 		email = StringUtils.trimToNull(email);
 		firstName = StringUtils.trimToNull(firstName);
 		lastName = StringUtils.trimToNull(lastName);
+		phone = StringUtils.trimToNull(TwilioUtils.normalize(phone));
 	}
 
 	@Override
@@ -116,6 +124,7 @@ public class AdminValue implements Serializable
 			Objects.equals(email, v.email) &&
 			Objects.equals(firstName, v.firstName) &&
 			Objects.equals(lastName, v.lastName) &&
+			Objects.equals(phone, v.phone) &&
 			supers == v.supers &&
 			editor == v.editor &&
 			alertable == v.alertable &&

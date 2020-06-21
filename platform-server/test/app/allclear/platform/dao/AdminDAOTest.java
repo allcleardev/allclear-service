@@ -37,7 +37,7 @@ import app.allclear.platform.value.AdminValue;
 *
 **********************************************************************************/
 
-@Disabled
+// @Disabled
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)	// Ensure that the methods are executed in order listed.
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class AdminDAOTest
@@ -57,8 +57,9 @@ public class AdminDAOTest
 	@Test
 	public void add()
 	{
-		var value = dao.add(VALUE = new AdminValue("~tester-b", CURRENT_PASSWORD = UUID.randomUUID().toString(), "dsmall@allclear.app", "Dave", "Small", true, false, true));
+		var value = dao.add(VALUE = new AdminValue("~tester-b", CURRENT_PASSWORD = UUID.randomUUID().toString(), "dsmall@allclear.app", "Dave", "Small", "888-555-1000", true, false, true));
 		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertEquals("+18885551000", value.phone, "Check phone");
 		check(VALUE, value);
 	}
 
@@ -67,7 +68,7 @@ public class AdminDAOTest
 	*/
 	private AdminValue createValid()
 	{
-		return new AdminValue("kathy", "Password_2", "kathy@gmail.com", "Kathy", "Reiner", false, false, false);
+		return new AdminValue("kathy", "Password_2", "kathy@gmail.com", "Kathy", "Reiner", null, false, false, false);
 	}
 
 	@Test
@@ -134,6 +135,13 @@ public class AdminDAOTest
 	public void add_longLastName()
 	{
 		assertThrows(ValidationException.class, () -> dao.add(createValid().withLastName(StringUtils.repeat("A", AdminValue.MAX_LEN_LAST_NAME + 1))));
+	}
+
+	@Test
+	public void add_missingPhone()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.add(createValid().withPhone(null).withAlertable(true))))
+			.hasMessage("Must provide a phone number for alertable admins.");
 	}
 
 	@Test
@@ -255,20 +263,22 @@ public class AdminDAOTest
 	public void modify()
 	{
 		count(new AdminFilter().withFirstName("Dave"), 1L);
+		count(new AdminFilter().withPhone("+18885551000"), 1L);
 		count(new AdminFilter().withAlertable(true), 1L);
 		count(new AdminFilter().withFirstName("David"), 0L);
 		count(new AdminFilter().withAlertable(false), 0L);
 
-		var value = dao.update(VALUE.withFirstName("David").withAlertable(false));
+		var value = dao.update(VALUE.withFirstName("David").withPhone(null).withAlertable(false));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
 
-	@Test @Disabled
+	@Test
 	public void modify_count()
 	{
 		count(new AdminFilter().withFirstName("Dave"), 0L);
 		count(new AdminFilter().withAlertable(true), 0L);
+		count(new AdminFilter().withPhone("+18885551000"), 0L);
 		count(new AdminFilter().withFirstName("David"), 1L);
 		count(new AdminFilter().withAlertable(false), 1L);
 	}
@@ -279,9 +289,30 @@ public class AdminDAOTest
 		var record = dao.findWithException(VALUE.id);
 		Assertions.assertNotNull(record, "Exists");
 		Assertions.assertEquals("David", record.getFirstName(), "Check firstName");
+		Assertions.assertNull(record.getPhone(), "Check phone");
 		Assertions.assertFalse(record.getAlertable(), "Check alertable");
 		assertThat(record.getUpdatedAt()).as("Check updatedAt").isAfter(record.getCreatedAt());
 		check(VALUE, record);
+	}
+
+	@Test
+	public void modify_revert()
+	{
+		dao.update(VALUE.withPhone("888-555-1001"));
+	}
+
+	@Test
+	public void modify_revert_count()
+	{
+		count(new AdminFilter().withPhone("+18885551001"), 1L);
+	}
+
+	@Test
+	public void modify_revert_get()
+	{
+		var value = dao.getByIdWithException(VALUE.id);
+		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertEquals("+18885551001", value.phone, "Check phone");
 	}
 
 	public static Stream<Arguments> search()
@@ -511,6 +542,7 @@ public class AdminDAOTest
 		Assertions.assertEquals(expected.email, record.getEmail(), assertId + "Check email");
 		Assertions.assertEquals(expected.firstName, record.getFirstName(), assertId + "Check firstName");
 		Assertions.assertEquals(expected.lastName, record.getLastName(), assertId + "Check lastName");
+		Assertions.assertEquals(expected.phone, record.getPhone(), assertId + "Check phone");
 		Assertions.assertEquals(expected.supers, record.getSupers(), assertId + "Check supers");
 		Assertions.assertEquals(expected.editor, record.getEditor(), assertId + "Check editor");
 		Assertions.assertEquals(expected.alertable, record.getAlertable(), assertId + "Check alertable");
@@ -527,6 +559,7 @@ public class AdminDAOTest
 		Assertions.assertEquals(expected.email, value.email, assertId + "Check email");
 		Assertions.assertEquals(expected.firstName, value.firstName, assertId + "Check firstName");
 		Assertions.assertEquals(expected.lastName, value.lastName, assertId + "Check lastName");
+		Assertions.assertEquals(expected.phone, value.phone, assertId + "Check phone");
 		Assertions.assertEquals(expected.supers, value.supers, assertId + "Check supers");
 		Assertions.assertEquals(expected.editor, value.editor, assertId + "Check editor");
 		Assertions.assertEquals(!expected.editor || expected.supers, value.canAdmin(), assertId + "Check canAdmin()");

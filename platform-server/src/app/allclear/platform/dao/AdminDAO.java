@@ -129,7 +129,7 @@ public class AdminDAO
 			}
 			else
 			{
-				table.execute(merge(record.update(value)));
+				table.execute(replace(record.update(value)));
 			}
 		}
 		catch (final StorageException ex) { throw new RuntimeException(ex); }
@@ -163,7 +163,12 @@ public class AdminDAO
 			.ensureExistsAndLength("email", "Email", value.email, AdminValue.MAX_LEN_EMAIL)
 			.ensureExistsAndLength("firstName", "First Name", value.firstName, AdminValue.MAX_LEN_FIRST_NAME)
 			.ensureExistsAndLength("lastName", "Last Name", value.lastName, AdminValue.MAX_LEN_LAST_NAME)
+			.ensureLength("phone", "Phone", value.phone, AdminValue.MAX_LEN_PHONE)
 			.check();
+
+		// Alertable admins must provide a phone number to be alerted.
+		if (value.alertable && (null == value.phone))
+			validator.add("phone", "Must provide a phone number for alertable admins.").check();
 	}
 
 	/** Removes a single Admin value.
@@ -273,6 +278,7 @@ public class AdminDAO
 		if (null != filter.email) filters.add(generateFilterCondition("Email", EQUAL, filter.email));
 		if (null != filter.firstName) filters.add(generateFilterCondition("FirstName", EQUAL, filter.firstName));
 		if (null != filter.lastName) filters.add(generateFilterCondition("LastName", EQUAL, filter.lastName));
+		if (null != filter.phone) filters.add(generateFilterCondition("Phone", EQUAL, filter.phone));
 		if (null != filter.supers) filters.add(generateFilterCondition("Supers", EQUAL, filter.supers));
 		if (null != filter.editor) filters.add(generateFilterCondition("Editor", EQUAL, filter.editor));
 		if (null != filter.alertable) filters.add(generateFilterCondition("Alertable", EQUAL, filter.alertable));

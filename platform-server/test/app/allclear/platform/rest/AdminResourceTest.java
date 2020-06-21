@@ -79,12 +79,12 @@ public class AdminResourceTest
 	{
 		var now = new Date();
 		var response = request()
-			.post(Entity.entity(VALUE = new AdminValue("~abby~", "Password_1", "abby@me.me", "Abby", "Dorn", false, false, false), UTF8MediaType.APPLICATION_JSON_TYPE));	// MUST use ~abby~ since there is only one database instance across all environments. DLS on 4/27/2020.
+			.post(Entity.entity(VALUE = new AdminValue("~abby~", "Password_1", "abby@me.me", "Abby", "Dorn", "888-555-1000", false, false, false), UTF8MediaType.APPLICATION_JSON_TYPE));	// MUST use ~abby~ since there is only one database instance across all environments. DLS on 4/27/2020.
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var value = response.readEntity(AdminValue.class);
 		Assertions.assertNotNull(value, "Exists");
-		check(VALUE.withCreatedAt(now).withUpdatedAt(now), value.withPassword("Password_1"));
+		check(VALUE.withPhone("+18885551000").withCreatedAt(now).withUpdatedAt(now), value.withPassword("Password_1"));
 
 		VALUE.withPassword(null);	// For later checks
 	}
@@ -194,6 +194,7 @@ public class AdminResourceTest
 			arguments(new AdminFilter(1, 20).withEmail(VALUE.email), 1L),
 			arguments(new AdminFilter(1, 20).withFirstName(VALUE.firstName), 1L),
 			arguments(new AdminFilter(1, 20).withLastName(VALUE.lastName), 1L),
+			arguments(new AdminFilter(1, 20).withPhone(VALUE.phone), 1L),
 			arguments(new AdminFilter(1, 20).withSupers(VALUE.supers), 1L),
 			arguments(new AdminFilter(1, 20).withEditor(VALUE.editor), 1L),
 			arguments(new AdminFilter(1, 20).withAlertable(VALUE.alertable), 1L),
@@ -209,6 +210,7 @@ public class AdminResourceTest
 			arguments(new AdminFilter(1, 20).withEmail("invalid"), 0L),
 			arguments(new AdminFilter(1, 20).withFirstName("invalid"), 0L),
 			arguments(new AdminFilter(1, 20).withLastName("invalid"), 0L),
+			arguments(new AdminFilter(1, 20).withPhone("invalid"), 0L),
 			arguments(new AdminFilter(1, 20).withSupers(!VALUE.supers), 0L),
 			arguments(new AdminFilter(1, 20).withEditor(!VALUE.editor), 0L),
 			arguments(new AdminFilter(1, 20).withAlertable(!VALUE.alertable), 0L),
@@ -310,6 +312,7 @@ public class AdminResourceTest
 		Assertions.assertEquals(expected.email, value.email, assertId + "Check email");
 		Assertions.assertEquals(expected.firstName, value.firstName, assertId + "Check firstName");
 		Assertions.assertEquals(expected.lastName, value.lastName, assertId + "Check lastName");
+		Assertions.assertEquals(expected.phone, value.phone, assertId + "Check phone");
 		Assertions.assertEquals(expected.supers, value.supers, assertId + "Check supers");
 		Assertions.assertEquals(expected.editor, value.editor, assertId + "Check editor");
 		Assertions.assertEquals(!expected.editor || expected.supers, value.canAdmin(), assertId + "Check canAdmin()");

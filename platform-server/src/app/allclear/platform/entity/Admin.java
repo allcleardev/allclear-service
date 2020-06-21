@@ -47,6 +47,10 @@ public class Admin extends TableServiceEntity implements Serializable
 	public String lastName;
 	public void setLastName(final String newValue) { lastName = newValue; }
 
+	public String getPhone() { return phone; }
+	public String phone;
+	public void setPhone(final String newValue) { phone = newValue; }
+
 	public boolean getSupers() { return supers; }
 	public boolean supers;
 	public void setSupers(final boolean newValue) { supers = newValue; }
@@ -83,6 +87,7 @@ public class Admin extends TableServiceEntity implements Serializable
 		this.email = value.email;
 		this.firstName = value.firstName;
 		this.lastName = value.lastName;
+		this.phone = value.phone;
 		this.supers = value.supers;
 		this.editor = value.editor;
 		this.alertable = value.alertable;
@@ -102,6 +107,7 @@ public class Admin extends TableServiceEntity implements Serializable
 			Objects.equals(email, v.email) &&
 			Objects.equals(firstName, v.firstName) &&
 			Objects.equals(lastName, v.lastName) &&
+			Objects.equals(phone, v.phone) &&
 			(supers == v.supers) &&
 			(editor == v.editor) &&
 			(alertable = v.alertable) &&
@@ -122,6 +128,7 @@ public class Admin extends TableServiceEntity implements Serializable
 		setEmail(value.email);
 		setFirstName(value.firstName);
 		setLastName(value.lastName);
+		setPhone(value.phone);
 		setSupers(value.supers);
 		setEditor(value.editor);
 		setAlertable(value.alertable);
@@ -149,6 +156,7 @@ public class Admin extends TableServiceEntity implements Serializable
 			getEmail(),
 			getFirstName(),
 			getLastName(),
+			getPhone(),
 			getSupers(),
 			getEditor(),
 			getAlertable(),
