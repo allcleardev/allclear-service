@@ -932,6 +932,7 @@ var ConfigurationHandler = new EditTemplate({
 	FIELDS: [ new TextField('env', 'Environment'),
 	          new TextField('version', 'Version'),
 	          new TextField('baseUrl', 'Base URL'),
+	          new TextField('adminUrl', 'Admin URL'),
 	          new TextField('registrationPhone', 'Registration Sid/Phone', (v, p) => p ? p : v.registrationSid),
 	          new TextField('authPhone', 'Authentication Sid/Phone', (v, p) => p ? p : v.authSid),
 	          new TextField('alertPhone', 'Alert Sid/Phone', (v, p) => p ? p : v.alertSid),
