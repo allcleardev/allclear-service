@@ -37,7 +37,7 @@ import app.allclear.platform.value.AdminValue;
 *
 **********************************************************************************/
 
-// @Disabled
+@Disabled
 @TestMethodOrder(MethodOrderer.Alphanumeric.class)	// Ensure that the methods are executed in order listed.
 @ExtendWith(DropwizardExtensionsSupport.class)
 public class AdminDAOTest
@@ -52,6 +52,14 @@ public class AdminDAOTest
 	public static void up() throws Exception
 	{
 		dao = new AdminDAO(ConfigTest.loadTest().admins, "test");
+	}
+
+	@AfterAll
+	public static void down() throws Exception
+	{
+		// Remove any residual test admins.
+		var records = dao.search(new AdminFilter()).records;
+		if (null != records) records.forEach(o -> dao.remove(o.id));
 	}
 
 	@Test
@@ -260,6 +268,12 @@ public class AdminDAOTest
 	}
 
 	@Test
+	public void getAlertablePhoneNumbers()
+	{
+		assertThat(dao.getAlertablePhoneNumbers()).containsExactly("+18885551000");
+	}
+
+	@Test
 	public void modify()
 	{
 		count(new AdminFilter().withFirstName("Dave"), 1L);
@@ -296,6 +310,12 @@ public class AdminDAOTest
 	}
 
 	@Test
+	public void modify_getAlertablePhoneNumbers()
+	{
+		assertThat(dao.getAlertablePhoneNumbers()).isEmpty();
+	}
+
+	@Test
 	public void modify_revert()
 	{
 		dao.update(VALUE.withPhone("888-555-1001"));
@@ -313,6 +333,12 @@ public class AdminDAOTest
 		var value = dao.getByIdWithException(VALUE.id);
 		Assertions.assertNotNull(value, "Exists");
 		Assertions.assertEquals("+18885551001", value.phone, "Check phone");
+	}
+
+	@Test
+	public void modify_revert_getAlertablePhoneNumbers()
+	{
+		assertThat(dao.getAlertablePhoneNumbers()).isEmpty();
 	}
 
 	public static Stream<Arguments> search()
@@ -413,6 +439,13 @@ public class AdminDAOTest
 			arguments(new AdminFilter("lastName", "DESC"), "lastName", "DESC"),
 			arguments(new AdminFilter("lastName", "desc"), "lastName", "DESC"),
 
+			arguments(new AdminFilter("phone", null), "phone", "ASC"), // Missing sort direction is converted to the default.
+			arguments(new AdminFilter("phone", "ASC"), "phone", "ASC"),
+			arguments(new AdminFilter("phone", "asc"), "phone", "ASC"),
+			arguments(new AdminFilter("phone", "invalid"), "phone", "ASC"),	// Invalid sort direction is converted to the default.
+			arguments(new AdminFilter("phone", "DESC"), "phone", "DESC"),
+			arguments(new AdminFilter("phone", "desc"), "phone", "DESC"),
+
 			arguments(new AdminFilter("supers", null), "supers", "DESC"), // Missing sort direction is converted to the default.
 			arguments(new AdminFilter("supers", "ASC"), "supers", "ASC"),
 			arguments(new AdminFilter("supers", "asc"), "supers", "ASC"),
@@ -485,7 +518,7 @@ public class AdminDAOTest
 	}
 
 	@Test
-	public void z_add_editor()
+	public void z_00_add_editor()
 	{
 		var value = dao.add(createValid().withEditor(true));
 		Assertions.assertTrue(value.editor, "Check editor");
@@ -493,7 +526,7 @@ public class AdminDAOTest
 	}
 
 	@Test
-	public void z_get_editor()
+	public void z_00_get_editor()
 	{
 		var value = VALUE = dao.getById("kathy");
 		Assertions.assertTrue(value.editor, "Check editor");
@@ -501,7 +534,7 @@ public class AdminDAOTest
 	}
 
 	@Test
-	public void z_modify_editor()
+	public void z_00_modify_editor()
 	{
 		var value = dao.update(VALUE.withEditor(false));
 		Assertions.assertFalse(value.editor, "Check editor");
@@ -509,7 +542,7 @@ public class AdminDAOTest
 	}
 
 	@Test
-	public void z_modify_editor_get()
+	public void z_00_modify_editor_get()
 	{
 		var value = VALUE = dao.getById("kathy");
 		Assertions.assertFalse(value.editor, "Check editor");
@@ -517,9 +550,28 @@ public class AdminDAOTest
 	}
 
 	@Test
-	public void z_remove_editor()
+	public void z_00_remove_editor()
 	{
 		Assertions.assertTrue(dao.remove("kathy"));
+	}
+
+	@Test
+	public void z_10_add()
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			var id = "" + i;
+			dao.add(new AdminValue(id, "Password_1", id, id, id,
+				"888555100" + i,
+				false, false,
+				(0 == (i % 3))));
+		}
+	}
+
+	@Test
+	public void z_10_getAlertablePhoneNumbers()
+	{
+		assertThat(dao.getAlertablePhoneNumbers()).containsOnly("+18885551000", "+18885551003", "+18885551006", "+18885551009");
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.

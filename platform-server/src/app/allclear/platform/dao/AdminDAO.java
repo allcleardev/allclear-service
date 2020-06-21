@@ -241,6 +241,20 @@ public class AdminDAO
 		return findWithException(id).toValue();
 	}
 
+	/** Gets a set of phone number for Alertable admins.
+	 * 
+	 * @return never NULL.
+	 */
+	public Set<String> getAlertablePhoneNumbers()
+	{
+		var it = table.execute(from(Admin.class).select(new String[] { "Phone" }).where(generateFilterCondition("Alertable", EQUAL, true)));
+
+		var values = new HashSet<String>();
+		it.forEach(o -> { if (null != o.getPhone()) values.add(o.getPhone()); });
+
+		return values;
+	}
+
 	/** Searches the Admin entity based on the supplied filter.
 	 *
 	 * @param filter
