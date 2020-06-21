@@ -102,6 +102,12 @@ public class FacilitateResourceTest
 		sessionDao.current(ADMIN);
 	}
 
+	@AfterEach
+	public void afterEach()
+	{
+		Assertions.assertEquals(notifications, notifications_, "Check notifications");
+	}
+
 	@Test
 	public void add()
 	{
