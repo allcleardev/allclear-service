@@ -2,6 +2,8 @@ package app.allclear.platform.rest;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 import static app.allclear.platform.type.CrowdsourceStatus.*;
 import static app.allclear.platform.type.Originator.*;
 import static app.allclear.testing.TestingUtils.*;
@@ -22,6 +24,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
+
+import com.azure.storage.queue.QueueClient;
 
 import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.*;
@@ -53,6 +57,7 @@ public class FacilitateResourceTest
 
 	private static FacilitateDAO dao;
 	private static FacilityDAO facilityDao;
+	private static final QueueClient queue = mock(QueueClient.class);
 	private static final SessionDAO sessionDao = new SessionDAO(new FakeRedisClient(), ConfigTest.loadTest());
 
 	private static SessionValue ADMIN = new SessionValue(false, new AdminValue("admin"));
@@ -65,6 +70,9 @@ public class FacilitateResourceTest
 	private static FacilitateValue ADD_PROVIDER;
 	private static FacilitateValue CHANGE_CITIZEN;
 	private static FacilitateValue CHANGE_PROVIDER;
+
+	private static int notifications = 0;
+	private static int notifications_ = 0;
 
 	private static final GenericType<Map<String, Object>> TYPE_MAP = new GenericType<Map<String, Object>>() {};
 	private static final GenericType<QueryResults<FacilitateValue, FacilitateFilter>> TYPE_QUERY_RESULTS = new GenericType<QueryResults<FacilitateValue, FacilitateFilter>>() {};
@@ -84,7 +92,8 @@ public class FacilitateResourceTest
 		var factory = DAO_RULE.getSessionFactory();
 
 		facilityDao = new FacilityDAO(factory, new TestAuditor());
-		dao = new FacilitateDAO(System.getenv("AUDIT_LOG_CONNECTION_STRING"), facilityDao, sessionDao);
+		when(queue.sendMessage(any(String.class))).thenAnswer(a -> { notifications_++; return null; });
+		dao = new FacilitateDAO(System.getenv("AUDIT_LOG_CONNECTION_STRING"), facilityDao, sessionDao, queue);
 	}
 
 	@BeforeEach
@@ -112,6 +121,8 @@ public class FacilitateResourceTest
 
 		ADD_CITIZEN = response.readEntity(FacilitateValue.class);
 		Assertions.assertNotNull(ADD_CITIZEN, "Exists");
+
+		notifications++;
 	}
 
 	@Test
@@ -123,6 +134,8 @@ public class FacilitateResourceTest
 
 		ADD_PROVIDER = request("provider").post(Entity.json(new FacilitateValue(new FacilityValue(), "Around the corner", false)), FacilitateValue.class);
 		Assertions.assertNotNull(ADD_PROVIDER, "Exists");
+
+		notifications++;
 	}
 
 	@Test
@@ -134,6 +147,8 @@ public class FacilitateResourceTest
 
 		CHANGE_CITIZEN = request("citizen").put(Entity.json(new FacilitateValue(FACILITY_1.withState("Nebraska"), "One town over", true)), FacilitateValue.class);
 		Assertions.assertNotNull(CHANGE_CITIZEN, "Exists");
+
+		notifications++;
 	}
 
 	@Test
@@ -145,6 +160,8 @@ public class FacilitateResourceTest
 
 		CHANGE_PROVIDER = request("provider").put(Entity.json(new FacilitateValue(FACILITY_2.withCity("Albuquerque"), null, false)), FacilitateValue.class);
 		Assertions.assertNotNull(CHANGE_PROVIDER, "Exists");
+
+		notifications++;
 	}
 
 	@Test

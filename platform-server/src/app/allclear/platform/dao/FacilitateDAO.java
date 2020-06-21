@@ -8,6 +8,7 @@ import static com.microsoft.azure.storage.table.TableQuery.QueryComparisons.EQUA
 import static com.microsoft.azure.storage.table.TableQuery.QueryComparisons.GREATER_THAN_OR_EQUAL;
 import static com.microsoft.azure.storage.table.TableQuery.QueryComparisons.LESS_THAN_OR_EQUAL;
 
+import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.LinkedList;
@@ -16,11 +17,14 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.azure.storage.queue.QueueClient;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.microsoft.azure.storage.*;
 import com.microsoft.azure.storage.table.*;
 
 import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.*;
+import app.allclear.common.jackson.JacksonUtils;
 import app.allclear.platform.entity.Facilitate;
 import app.allclear.platform.filter.FacilitateFilter;
 import app.allclear.platform.type.CrowdsourceStatus;
@@ -40,18 +44,21 @@ import app.allclear.platform.value.FacilityValue;
 public class FacilitateDAO
 {
 	private static final Logger log = LoggerFactory.getLogger(FacilitateDAO.class);
+	private final ObjectMapper mapper = JacksonUtils.createMapperAzure();
 	public static final String TABLE = "facilitate";
 
 	private final CloudTable table;
+	private final QueueClient queue;
 	private final SessionDAO sessionDao;
 	private final FacilityDAO facilityDao;
 
-	public FacilitateDAO(final String connectionString, final FacilityDAO facilityDao, final SessionDAO sessionDao)
+	public FacilitateDAO(final String connectionString, final FacilityDAO facilityDao, final SessionDAO sessionDao, final QueueClient queue)
 		throws InvalidKeyException, StorageException, URISyntaxException
 	{
 		(table = CloudStorageAccount.parse(connectionString).createCloudTableClient().getTableReference(TABLE)).createIfNotExists();
 		log.info("TABLE: " + table);
 
+		this.queue = queue;
 		this.sessionDao = sessionDao;
 		this.facilityDao = facilityDao;
 	}
@@ -92,6 +99,9 @@ public class FacilitateDAO
 
 		try { table.execute(insert(new Facilitate(value.withStatus(CrowdsourceStatus.OPEN)))); }
 		catch (final StorageException ex) { throw new RuntimeException(ex); }
+
+		try { queue.sendMessage(mapper.writeValueAsString(value)); }
+		catch (final IOException ex) { throw new RuntimeException(ex); }
 
 		return value;
 	}

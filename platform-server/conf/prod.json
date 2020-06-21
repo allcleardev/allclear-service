@@ -2,6 +2,7 @@
   "env": "prod",
 
   "baseUrl": "${APP_BASE_URL:-https://app.allclear.app}",
+  "adminUrl": "https://api.allclear.app/manager/index.html",
   "registrationPhone": "MG84db3eef8585f4f32478113f58b6138e",
   "authPhone": "MG84db3eef8585f4f32478113f58b6138e",
 

@@ -2,6 +2,7 @@
   "env": "dev",
 
   "baseUrl": "${APP_BASE_URL:-https://app-dev.allclear.app}",
+  "adminUrl": "https://api-dev.allclear.app/manager/index.html",
   "registrationPhone": "+16466321488",
   "authPhone": "+16466321488",
 

@@ -33,6 +33,7 @@ import app.allclear.platform.entity.*;
 import app.allclear.platform.model.*;
 import app.allclear.platform.rest.*;
 import app.allclear.platform.task.*;
+import app.allclear.platform.value.FacilitateValue;
 import app.allclear.twilio.client.TwilioClient;
 
 /** Represents the Dropwizard application entry point.
@@ -50,6 +51,7 @@ public class App extends Application<Config>
 	public static final String APP_NAME = "AllClear Platform";
 	public static final String QUEUE_ALERT = "alert";
 	public static final String QUEUE_ALERT_INIT = "alert-init";
+	public static final String QUEUE_FACILITATE = "facilitate";
 	public static final String SESSION = "session-cache";
 
 	public static final Class<?>[] ENTITIES = new Class<?>[] { Conditions.class, CountByBoolean.class, CountByName.class, Experiences.class, ExperiencesTag.class, Exposures.class, Facility.class, FacilityX.class, FacilityTestType.class, Friend.class, Friendship.class, Name.class, Named.class, People.class, PeopleFacility.class, PeopleField.class, Symptoms.class, SymptomsLog.class, Tests.class, Total.class };
@@ -113,7 +115,8 @@ public class App extends Application<Config>
 		var registrationDao = new RegistrationDAO(session, twilio, conf);
 
 		var task = new QueueManager(conf.queue, conf.task(), 2,
-				new TaskOperator<>(QUEUE_ALERT, new AlertTask(factory, peopleDao, facilityDao, sessionDao), AlertRequest.class, 10, 5, 60, 3600));
+			new TaskOperator<>(QUEUE_ALERT, new AlertTask(factory, peopleDao, facilityDao, sessionDao), AlertRequest.class, 10, 5, 60, 3600),
+			new TaskOperator<>(QUEUE_FACILITATE, new FacilitateTask(adminDao, twilio, conf), FacilitateValue.class, 3, 30, 60, 3600));
 
 		lifecycle.manage(task.addOperator(new TaskOperator<>(QUEUE_ALERT_INIT, new AlertInitTask(factory, peopleDao, task.queue(QUEUE_ALERT)), AlertInitRequest.class, 10, 120, 60, 3600)));
 
@@ -141,7 +144,7 @@ public class App extends Application<Config>
         jersey.register(new AuditLogResource(auditor));
         jersey.register(new CustomerResource(customerDao));
         jersey.register(new ExperiencesResource(new ExperiencesDAO(factory, sessionDao)));
-        jersey.register(new FacilitateResource(new FacilitateDAO(conf.auditLog, facilityDao, sessionDao)));
+        jersey.register(new FacilitateResource(new FacilitateDAO(conf.auditLog, facilityDao, sessionDao, task.queue(QUEUE_FACILITATE))));
         jersey.register(new FacilityResource(facilityDao, sessionDao, map));
         jersey.register(new FriendResource(new FriendDAO(factory), sessionDao));
         jersey.register(new MapResource(map));

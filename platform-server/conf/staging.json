@@ -2,6 +2,7 @@
   "env": "staging",
 
   "baseUrl": "${APP_BASE_URL:-https://app-staging.allclear.app}",
+  "adminUrl": "https://api-staging.allclear.app/manager/index.html",
   "registrationPhone": "+16466321488",
   "authPhone": "+16466321488",
 

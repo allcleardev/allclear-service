@@ -25,7 +25,7 @@ public class TaskOperator<T> implements Serializable
 	public final TaskCallback<T> callback;	// Represents the callback that performs the task.
 	public final Class<T> clazz;	// Represents the class of the task request.
 	public final int maxTries;	// Represents the maximum number of attempts to process a request.
-	public final int timeout;	// Represents the duration of a process attempt before it times out.
+	public final int timeout;	// Represents the duration (seconds) of a process attempt before it times out.
 	public final int delay;	// Delay between retries in seconds.
 	public final int maxDelay;	// Maximum delay between retries in seconds with an exponential back off algo.
 	public int successes = 0;	// Represents the total number of requests that have been processed successfully.

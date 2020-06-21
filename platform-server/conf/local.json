@@ -2,6 +2,7 @@
   "env": "local",
 
   "baseUrl": "${APP_BASE_URL:-http://localhost:8080}",
+  "adminUrl": "https://api-local.allclear.app/manager/index.html",
   "registrationPhone": "+16466321488",
   "authPhone": "+16466321488",
 

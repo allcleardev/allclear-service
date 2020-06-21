@@ -2,6 +2,7 @@ package app.allclear.platform.dao;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.*;
 import static app.allclear.platform.type.CrowdsourceStatus.*;
 import static app.allclear.platform.type.Originator.*;
 import static app.allclear.testing.TestingUtils.*;
@@ -15,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import com.azure.storage.queue.QueueClient;
 
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
@@ -44,6 +47,7 @@ public class FacilitateDAOTest
 
 	private static FacilitateDAO dao;
 	private static FacilityDAO facilityDao;
+	private static final QueueClient queue = mock(QueueClient.class);
 	private static final SessionDAO sessionDao = new SessionDAO(new FakeRedisClient(), ConfigTest.loadTest());
 
 	private static SessionValue ADMIN = new SessionValue(false, new AdminValue("admin"));
@@ -57,19 +61,29 @@ public class FacilitateDAOTest
 	private static FacilitateValue CHANGE_CITIZEN;
 	private static FacilitateValue CHANGE_PROVIDER;
 
+	private static int notifications = 0;
+	private static int notifications_ = 0;
+
 	@BeforeAll
 	public static void up() throws Exception
 	{
 		var factory = DAO_RULE.getSessionFactory();
 
 		facilityDao = new FacilityDAO(factory, new TestAuditor());
-		dao = new FacilitateDAO(System.getenv("AUDIT_LOG_CONNECTION_STRING"), facilityDao, sessionDao);
+		when(queue.sendMessage(any(String.class))).thenAnswer(a -> { notifications_++; return null; });
+		dao = new FacilitateDAO(System.getenv("AUDIT_LOG_CONNECTION_STRING"), facilityDao, sessionDao, queue);
 	}
 
 	@BeforeEach
 	public void beforeEach()
 	{
 		sessionDao.current(ADMIN);
+	}
+
+	@AfterEach
+	public void afterEach()
+	{
+		Assertions.assertEquals(notifications, notifications_, "Check notifications");
 	}
 
 	@Test
@@ -87,6 +101,8 @@ public class FacilitateDAOTest
 		sessionDao.current(PERSON);
 
 		ADD_CITIZEN = dao.addByCitizen(new FacilitateValue(new FacilityValue(3), null, true));
+
+		notifications++;
 	}
 
 	public static Stream<Arguments> add_citizen_failure()
@@ -117,6 +133,8 @@ public class FacilitateDAOTest
 		sessionDao.clear();
 
 		ADD_PROVIDER = dao.addByProvider(new FacilitateValue(new FacilityValue(), "Around the corner", false));
+
+		notifications++;
 	}
 
 	public static Stream<Arguments> add_provider_failure()
@@ -147,6 +165,8 @@ public class FacilitateDAOTest
 		sessionDao.current(PERSON);
 
 		CHANGE_CITIZEN = dao.changeByCitizen(new FacilitateValue(FACILITY_1.withState("Nebraska"), "One town over", true));
+
+		notifications++;
 	}
 
 	public static Stream<Arguments> change_citizen_failure()
@@ -179,6 +199,8 @@ public class FacilitateDAOTest
 		sessionDao.clear();
 
 		CHANGE_PROVIDER = dao.changeByProvider(new FacilitateValue(FACILITY_2.withCity("Albuquerque"), null, false));
+
+		notifications++;
 	}
 
 	public static Stream<Arguments> change_provider_failure()

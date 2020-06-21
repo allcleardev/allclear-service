@@ -54,6 +54,7 @@ public class ConfigTest
 		Assertions.assertEquals("dev", o.env, "Check env");
 		Assertions.assertFalse(o.disableSwagger, "Check disableSwagger");
 		Assertions.assertEquals("https://app-dev.allclear.app", o.baseUrl, "Check baseUrl");
+		Assertions.assertEquals("https://api-dev.allclear.app/manager/index.html", o.adminUrl, "Check adminUrl");
 		Assertions.assertNull(o.alertSid, "Check alertSid");
 		Assertions.assertEquals("+16466321488", o.alertPhone, "Check alertPhone");
 		Assertions.assertNull(o.registrationSid, "Check registrationSid");
@@ -130,6 +131,7 @@ public class ConfigTest
 		Assertions.assertEquals("local", o.env, "Check env");
 		Assertions.assertFalse(o.disableSwagger, "Check disableSwagger");
 		Assertions.assertEquals("http://localhost:8080", o.baseUrl, "Check baseUrl");
+		Assertions.assertEquals("https://api-local.allclear.app/manager/index.html", o.adminUrl, "Check adminUrl");
 		Assertions.assertNull(o.alertSid, "Check alertSid");
 		Assertions.assertEquals("+16466321488", o.alertPhone, "Check alertPhone");
 		Assertions.assertNull(o.registrationSid, "Check registrationSid");
@@ -206,6 +208,7 @@ public class ConfigTest
 		Assertions.assertEquals("prod", o.env, "Check env");
 		Assertions.assertFalse(o.disableSwagger, "Check disableSwagger");
 		Assertions.assertEquals("https://app.allclear.app", o.baseUrl, "Check baseUrl");
+		Assertions.assertEquals("https://api.allclear.app/manager/index.html", o.adminUrl, "Check adminUrl");
 		Assertions.assertEquals("MG84db3eef8585f4f32478113f58b6138e", o.alertSid, "Check alertSid");
 		Assertions.assertNull(o.alertPhone, "Check alertPhone");
 		Assertions.assertEquals("MG84db3eef8585f4f32478113f58b6138e", o.registrationSid, "Check registrationSid");
@@ -282,6 +285,7 @@ public class ConfigTest
 		Assertions.assertEquals("staging", o.env, "Check env");
 		Assertions.assertFalse(o.disableSwagger, "Check disableSwagger");
 		Assertions.assertEquals("https://app-staging.allclear.app", o.baseUrl, "Check baseUrl");
+		Assertions.assertEquals("https://api-staging.allclear.app/manager/index.html", o.adminUrl, "Check adminUrl");
 		Assertions.assertNull(o.alertSid, "Check alertSid");
 		Assertions.assertEquals("+16466321488", o.alertPhone, "Check alertPhone");
 		Assertions.assertNull(o.registrationSid, "Check registrationSid");
@@ -358,6 +362,7 @@ public class ConfigTest
 		Assertions.assertEquals("test", o.env, "Check env");
 		Assertions.assertFalse(o.disableSwagger, "Check disableSwagger");
 		Assertions.assertEquals("https://app-test.allclear.app", o.baseUrl, "Check baseUrl");
+		Assertions.assertEquals("https://api-test.allclear.app/manager/index.html", o.adminUrl, "Check adminUrl");
 		Assertions.assertNull(o.alertSid, "Check alertSid");
 		Assertions.assertEquals("+16466321488", o.alertPhone, "Check alertPhone");
 		Assertions.assertNull(o.registrationSid, "Check registrationSid");

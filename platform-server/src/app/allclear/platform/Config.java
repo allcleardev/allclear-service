@@ -41,6 +41,7 @@ public class Config extends Configuration implements Serializable
 	public final ManifestValue manifest;
 
 	public final String baseUrl;
+	public final String adminUrl;
 	public final String alertSid;
 	public final String alertPhone;
 	public final String registrationSid;
@@ -67,6 +68,7 @@ public class Config extends Configuration implements Serializable
 		@JsonProperty("read") final DataSourceFactory read,
 		@JsonProperty("trans") final DataSourceFactory trans,
 		@JsonProperty("baseUrl") final String baseUrl,
+		@JsonProperty("adminUrl") final String adminUrl,
 		@JsonProperty("authPhone") final String authPhone,
 		@JsonProperty("alertPhone") final String alertPhone,
 		@JsonProperty("registrationPhone") final String registrationPhone,
@@ -85,6 +87,7 @@ public class Config extends Configuration implements Serializable
 		this.disableSwagger = Boolean.TRUE.equals(disableSwagger);
 
 		this.baseUrl = baseUrl;
+		this.adminUrl = adminUrl;
 		this.authSid = authPhone.startsWith("+") ? null : authPhone;
 		this.authPhone = authPhone.startsWith("+") ? authPhone : null;
 		if (StringUtils.isNotEmpty(alertPhone))

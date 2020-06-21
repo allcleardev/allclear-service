@@ -2,6 +2,7 @@
   "env": "test",
 
   "baseUrl": "${APP_BASE_URL:-https://app-test.allclear.app}",
+  "adminUrl": "https://api-test.allclear.app/manager/index.html",
   "registrationPhone": "+16466321488",
   "authPhone": "+16466321488",
 
