@@ -57,7 +57,7 @@ public class FacilitateTask implements TaskCallback<FacilitateValue>
 			conf.adminUrl) ;
 
 		phones.forEach(phone -> {
-			try { twilio.send(new SMSRequest(conf.registrationSid, conf.registrationPhone, message, phone)); }
+			try { twilio.send(new SMSRequest(conf.alertSid, conf.alertPhone, message, phone)); }
 			catch (final Exception ex)
 			{
 				log.error("Could NOT send Facilitate Request notification {} to {}: {} - {} - {}", value, phone, ex.getClass(), ex.getMessage(), ex.getStackTrace());
