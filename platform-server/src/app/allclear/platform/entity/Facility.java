@@ -195,6 +195,11 @@ public class Facility implements Serializable
 	public boolean canDonatePlasma;
 	public void setCanDonatePlasma(final boolean newValue) { canDonatePlasma = newValue; }
 
+	@Column(name="result_notification_enabled", columnDefinition="BIT", nullable=false)
+	public boolean isResultNotificationEnabled() { return resultNotificationEnabled; }
+	public boolean resultNotificationEnabled;
+	public void setResultNotificationEnabled(final boolean newValue) { resultNotificationEnabled = newValue; }
+
 	@Column(name="notes", columnDefinition="TEXT", nullable=true)
 	public String getNotes() { return notes; }
 	public String notes;
@@ -259,6 +264,7 @@ public class Facility implements Serializable
 		this.insuranceProvidersAccepted = value.insuranceProvidersAccepted;
 		this.freeOrLowCost = value.freeOrLowCost;
 		this.canDonatePlasma = value.canDonatePlasma;
+		this.resultNotificationEnabled = value.resultNotificationEnabled;
 		this.notes = value.notes;
 		this.active = value.active;
 		this.createdAt = this.updatedAt = value.createdAt = value.updatedAt = new Date();
@@ -301,6 +307,7 @@ public class Facility implements Serializable
 			Objects.equals(insuranceProvidersAccepted, v.insuranceProvidersAccepted) &&
 			(freeOrLowCost == v.freeOrLowCost) &&
 			(canDonatePlasma == v.canDonatePlasma) &&
+			(resultNotificationEnabled = v.resultNotificationEnabled) && 
 			Objects.equals(notes, v.notes) &&
 			(active == v.active) &&
 			((activatedAt == v.activatedAt) || DateUtils.truncatedEquals(activatedAt, v.activatedAt, Calendar.SECOND)) &&
@@ -347,12 +354,14 @@ public class Facility implements Serializable
 
 		if (admin)
 		{
+			setResultNotificationEnabled(value.resultNotificationEnabled);
 			setActive(value.active);
 			if (value.active && (null == activatedAt)) setActivatedAt(value.activatedAt = value.updatedAt);
 			else value.activatedAt = getActivatedAt();
 		}
 		else
 		{
+			value.resultNotificationEnabled = isResultNotificationEnabled();
 			value.active = isActive();
 			value.activatedAt = getActivatedAt();
 		}
@@ -396,6 +405,7 @@ public class Facility implements Serializable
 			getInsuranceProvidersAccepted(),
 			isFreeOrLowCost(),
 			isCanDonatePlasma(),
+			isResultNotificationEnabled(),
 			getNotes(),
 			isActive(),
 			getActivatedAt(),

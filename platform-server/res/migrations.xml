@@ -570,4 +570,16 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.1.99_ALLCLEAR-602" author="smalleyd">
+		<addColumn tableName="facility">
+			<column name="result_notification_enabled" type="BOOLEAN" defaultValueBoolean="false" remarks="Indicates that the facility has contracted to have their results sent directly to their patients via SMS, email, or push notification.">
+				<constraints nullable="false" />
+			</column>
+		</addColumn>
+
+		<rollback>
+			<dropColumn tableName="facility" columnName="result_notification_enabled" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

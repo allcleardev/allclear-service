@@ -74,6 +74,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		"insuranceProvidersAccepted", ASC,
 		"freeOrLowCost", DESC,
 		"canDonatePlasma", DESC,
+		"resultNotificationEnabled", DESC,
 		"notes", ASC,
 		"active", DESC,
 		"activatedAt", DESC,
@@ -130,7 +131,13 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		}
 		else
 		{
-			if (!admin) value.withActive(false);	// Editors can only add inactive facilities.
+			if (!admin)
+			{
+				value
+					.withResultNotificationEnabled(false)	// Only admins can set Facility contractual services. ALLCLEAR-602: DLS on 7/5/2020.
+					.withActive(false);	// Editors can only add inactive facilities.
+			}
+	
 			record = persist(new Facility(value));
 
 			var rec = record;	// Needs to be effectively final to be used in lambdas below.
@@ -514,6 +521,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.addNotNull("o.insuranceProvidersAccepted", filter.hasInsuranceProvidersAccepted)
 			.add("freeOrLowCost", "o.freeOrLowCost = :freeOrLowCost", filter.freeOrLowCost)
 			.add("canDonatePlasma", "o.canDonatePlasma = :canDonatePlasma", filter.canDonatePlasma)
+			.add("resultNotificationEnabled", "o.resultNotificationEnabled = :resultNotificationEnabled", filter.resultNotificationEnabled)
 			.addContains("notes", "o.notes LIKE :notes", filter.notes)
 			.addNotNull("o.notes", filter.hasNotes)
 			.add("active", "o.active = :active", filter.active)
@@ -585,6 +593,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.addNotNull("o.insurance_providers_accepted", filter.hasInsuranceProvidersAccepted)
 			.add("freeOrLowCost", "o.free_or_low_cost = :freeOrLowCost", filter.freeOrLowCost)
 			.add("canDonatePlasma", "o.can_donate_plasma = :canDonatePlasma", filter.canDonatePlasma)
+			.add("resultNotificationEnabled", "o.result_notification_enabled = :resultNotificationEnabled", filter.resultNotificationEnabled)
 			.addContains("notes", "o.notes LIKE :notes", filter.notes)
 			.addNotNull("o.notes", filter.hasNotes)
 			.add("active", "o.active = :active", filter.active)

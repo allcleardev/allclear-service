@@ -77,6 +77,7 @@ public class FacilityValue implements Auditable, Serializable
 	public String insuranceProvidersAccepted = null;
 	public boolean freeOrLowCost;
 	public boolean canDonatePlasma = false;
+	public boolean resultNotificationEnabled = false;	// ALLCLEAR-602: DLS on 7/5/2020.
 	public String notes = null;
 	public boolean active;
 	public Date activatedAt = null;	// ALLCLEAR-533: DLS on 5/12/2020.
@@ -128,6 +129,7 @@ public class FacilityValue implements Auditable, Serializable
 	public FacilityValue withInsuranceProvidersAccepted(final String newValue) { insuranceProvidersAccepted = newValue; return this; }
 	public FacilityValue withFreeOrLowCost(final boolean newValue) { freeOrLowCost = newValue; return this; }
 	public FacilityValue withCanDonatePlasma(final boolean newValue) { canDonatePlasma = newValue; return this; }
+	public FacilityValue withResultNotificationEnabled(final boolean newValue) { resultNotificationEnabled = newValue; return this; }
 	public FacilityValue withNotes(final String newValue) { notes = newValue; return this; }
 	public FacilityValue withActive(final boolean newValue) { active = newValue; return this; }
 	public FacilityValue withActivatedAt(final Date newValue) { activatedAt = newValue; return this; }
@@ -151,7 +153,7 @@ public class FacilityValue implements Auditable, Serializable
 
 	public FacilityValue(final int i, final String city, final String state, final int lat, final int lng, final boolean active)	// For tests
 	{
-		this("Test Center " + i, "Address " + i, city, state, new BigDecimal(lat), new BigDecimal(lng), false, false, false, false, false, false, false, false, active);
+		this("Test Center " + i, "Address " + i, city, state, new BigDecimal(lat), new BigDecimal(lng), false, false, false, false, false, false, false, false, false, active);
 	}
 
 	public FacilityValue(
@@ -165,10 +167,12 @@ public class FacilityValue implements Auditable, Serializable
 		final boolean acceptsInsurance,
 		final boolean freeOrLowCost,
 		final boolean canDonatePlasma,
+		final boolean resultNotificationEnabled,
 		final boolean active)
 	{
 		this(name, address, null, null, null, null, driveThru, referralRequired, governmentIdRequired,
-			firstResponderFriendly, telescreeningAvailable, acceptsInsurance, freeOrLowCost, canDonatePlasma, active);
+			firstResponderFriendly, telescreeningAvailable, acceptsInsurance, freeOrLowCost, canDonatePlasma,
+			resultNotificationEnabled, active);
 	}
 
 	public FacilityValue(
@@ -186,12 +190,13 @@ public class FacilityValue implements Auditable, Serializable
 		final boolean acceptsInsurance,
 		final boolean freeOrLowCost,
 		final boolean canDonatePlasma,
+		final boolean resultNotificationEnabled,
 		final boolean active)
 	{
 		this(name, address, city, state, latitude, longitude, null, null, null, null, null, null, null,
 				driveThru, null, null, referralRequired, null, null, null,
 				governmentIdRequired, null, null, firstResponderFriendly, telescreeningAvailable, acceptsInsurance,
-				null, freeOrLowCost, canDonatePlasma, null, active);
+				null, freeOrLowCost, canDonatePlasma, resultNotificationEnabled, null, active);
 	}
 
 	public FacilityValue(
@@ -224,13 +229,14 @@ public class FacilityValue implements Auditable, Serializable
 		final String insuranceProvidersAccepted,
 		final boolean freeOrLowCost,
 		final boolean canDonatePlasma,
+		final boolean resultNotificationEnabled,
 		final String notes,
 		final boolean active)
 	{
 		this(null, name, address, city, state, latitude, longitude, phone, appointmentPhone, email, url, appointmentUrl, hours, typeId, null,
 			driveThru, appointmentRequired, acceptsThirdParty, referralRequired, testCriteriaId, null, otherTestCriteria, testsPerDay,
 			governmentIdRequired, minimumAge, doctorReferralCriteria, firstResponderFriendly, telescreeningAvailable, acceptsInsurance,
-			insuranceProvidersAccepted, freeOrLowCost, canDonatePlasma, notes, active, null, null, null);
+			insuranceProvidersAccepted, freeOrLowCost, canDonatePlasma, resultNotificationEnabled, notes, active, null, null, null);
 	}
 
 	public FacilityValue(final Long id,
@@ -265,6 +271,7 @@ public class FacilityValue implements Auditable, Serializable
 		final String insuranceProvidersAccepted,
 		final boolean freeOrLowCost,
 		final boolean canDonatePlasma,
+		final boolean resultNotificationEnabled,
 		final String notes,
 		final boolean active,
 		final Date activatedAt,
@@ -303,6 +310,7 @@ public class FacilityValue implements Auditable, Serializable
 		this.insuranceProvidersAccepted = insuranceProvidersAccepted;
 		this.freeOrLowCost = freeOrLowCost;
 		this.canDonatePlasma = canDonatePlasma;
+		this.resultNotificationEnabled = resultNotificationEnabled;
 		this.notes = notes;
 		this.active = active;
 		this.activatedAt = activatedAt;
@@ -367,6 +375,7 @@ public class FacilityValue implements Auditable, Serializable
 			Objects.equals(insuranceProvidersAccepted, v.insuranceProvidersAccepted) &&
 			(freeOrLowCost == v.freeOrLowCost) &&
 			(canDonatePlasma == v.canDonatePlasma) &&
+			(resultNotificationEnabled == v.resultNotificationEnabled) &&
 			Objects.equals(notes, v.notes) &&
 			(active == v.active) &&
 			((activatedAt == v.activatedAt) || DateUtils.truncatedEquals(activatedAt, v.activatedAt, Calendar.SECOND)) &&

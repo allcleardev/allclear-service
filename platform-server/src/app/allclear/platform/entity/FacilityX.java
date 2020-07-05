@@ -59,6 +59,7 @@ public class FacilityX implements Serializable
 	@Column(name="insurance_providers_accepted", columnDefinition="TEXT", nullable=true) public String insuranceProvidersAccepted;
 	@Column(name="free_or_low_cost", columnDefinition="BIT", nullable=false) public boolean freeOrLowCost;
 	@Column(name="can_donate_plasma", columnDefinition="BIT", nullable=false) public boolean canDonatePlasma;
+	@Column(name="result_notification_enabled", columnDefinition="BIT", nullable=false) public boolean resultNotificationEnabled;
 	@Column(name="notes", columnDefinition="TEXT", nullable=true) public String notes;
 	@Column(name="active", columnDefinition="BIT", nullable=false) public boolean active;
 	@Column(name="activated_at", columnDefinition="DATETIME", nullable=true) public Date activatedAt;
@@ -102,6 +103,7 @@ public class FacilityX implements Serializable
 			insuranceProvidersAccepted,
 			freeOrLowCost,
 			canDonatePlasma,
+			resultNotificationEnabled,
 			notes,
 			active,
 			activatedAt,

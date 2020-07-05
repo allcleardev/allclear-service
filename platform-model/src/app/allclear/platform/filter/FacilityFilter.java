@@ -79,6 +79,7 @@ public class FacilityFilter extends QueryFilter
 	public Boolean hasInsuranceProvidersAccepted = null;
 	public Boolean freeOrLowCost = null;
 	public Boolean canDonatePlasma = null;
+	public Boolean resultNotificationEnabled = null;
 	public String notes = null;
 	public Boolean hasNotes = null;
 	public Boolean active = null;
@@ -147,6 +148,7 @@ public class FacilityFilter extends QueryFilter
 	public FacilityFilter withHasInsuranceProvidersAccepted(final Boolean newValue) { hasInsuranceProvidersAccepted = newValue; return this; }
 	public FacilityFilter withFreeOrLowCost(final Boolean newValue) { freeOrLowCost = newValue; return this; }
 	public FacilityFilter withCanDonatePlasma(final Boolean newValue) { canDonatePlasma = newValue; return this; }
+	public FacilityFilter withResultNotificationEnabled(final Boolean newValue) { resultNotificationEnabled = newValue; return this; }
 	public FacilityFilter withNotes(final String newValue) { notes = newValue; return this; }
 	public FacilityFilter withHasNotes(final Boolean newValue) { hasNotes = newValue; return this; }
 	public FacilityFilter withActive(final Boolean newValue) { active = newValue; return this; }
@@ -230,6 +232,7 @@ public class FacilityFilter extends QueryFilter
 		@param insuranceProvidersAccepted represents the "insurance_providers_accepted" field.
 		@param freeOrLowCost represents the "free_or_low_cost" field.
 		@param canDonatePlasma represents the "can_donate_plasma" field.
+		@param resultNotificationEnabled represents the "result_notification_enabled" field.
 		@param notes represents the "notes" field.
 		@param active represents the "active" field.
 		@param activatedAtFrom represents the "activated_at" field - lower boundary.
@@ -277,6 +280,7 @@ public class FacilityFilter extends QueryFilter
 		final String insuranceProvidersAccepted,
 		final Boolean freeOrLowCost,
 		final Boolean canDonatePlasma,
+		final Boolean resultNotificationEnabled,
 		final String notes,
 		final Boolean active,
 		final Date activatedAtFrom,
@@ -322,6 +326,7 @@ public class FacilityFilter extends QueryFilter
 		this.insuranceProvidersAccepted = insuranceProvidersAccepted;
 		this.freeOrLowCost = freeOrLowCost;
 		this.canDonatePlasma = canDonatePlasma;
+		this.resultNotificationEnabled = resultNotificationEnabled;
 		this.notes = notes;
 		this.active = active;
 		this.activatedAtFrom = activatedAtFrom;
