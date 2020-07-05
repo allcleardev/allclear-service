@@ -495,12 +495,28 @@ public class PeopleDAOTest
 		assertThrows(ObjectNotFoundException.class, () -> dao.getByIdWithException(VALUE.id + "INVALID"));
 	}
 
-	@Test
-	public void getActiveByIdOrName()
+	public static Stream<Arguments> getActiveByIdOrName()
 	{
-		assertThat(dao.getActiveByIdOrName("invalid")).as("Invalid").isEmpty();
-		assertThat(dao.getActiveByIdOrName(VALUE.id.substring(0, 3))).as("By partial ID").containsExactly(VALUE);
-		assertThat(dao.getActiveByIdOrName(VALUE.name.substring(0, 3))).as("By partial name").containsExactly(VALUE);
+		var invalid = createValid();
+
+		return Stream.of(
+			arguments("invalid", false),
+			arguments(VALUE.id.substring(0, 3), true),
+			arguments(VALUE.name.substring(0, 3), true),
+			arguments(VALUE.phone.substring(0, 3), true),
+			arguments(VALUE.email.substring(0, 3), true),
+			arguments(invalid.name, false),
+			arguments(invalid.phone, false),
+			arguments(invalid.email, false));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void getActiveByIdOrName(final String name, final boolean found)
+	{
+		var o = assertThat(dao.getActiveByIdOrName(name));
+		if (found) o.containsExactly(VALUE);
+		else o.isEmpty();
 	}
 
 	@Test
@@ -1402,6 +1418,11 @@ public class PeopleDAOTest
 		return Arrays.stream(indices).mapToObj(i -> StringUtils.leftPad(i + "", 3, '0')).map(v -> new Named(v)).collect(toList());
 	}
 
+	private static List<String> nm(final int... indices)
+	{
+		return Arrays.stream(indices).mapToObj(i -> StringUtils.leftPad(i + "", 3, '0')).collect(toList());
+	}
+
 	@Test
 	public void z_20()
 	{
@@ -1443,6 +1464,31 @@ public class PeopleDAOTest
 	{
 		assertThat(assertThrows(ValidationException.class, () -> dao.find(request)))
 			.hasMessage("Please provide at least one name or one phone number.");
+	}
+
+	public static Stream<Arguments> z_20_getActiveByIdOrName()
+	{
+		return Stream.of(
+			arguments("invalid", null),
+			arguments("006", new int[] { 6 }),
+			arguments("007", null),	// Inactive
+			arguments("105", null),
+			arguments("200", null),
+			arguments("00", new int[] { 0, 1, 2, 3, 4, 5, 6, 8, 9 }),
+			arguments("+1043", new int[] { 43 }),
+			arguments("+1047", null),	// Inactive
+			arguments("+1101", null),
+			arguments("+12", null),
+			arguments("+104", new int[] { 40, 41, 42, 43, 44, 45, 46, 48, 49 }));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_20_getActiveByIdOrName(final String name, final int[] indices)
+	{
+		var o = assertThat(dao.getActiveByIdOrName(name).stream().map(v -> v.name).collect(toList()));
+		if (null != indices) o.isEqualTo(nm(indices));
+		else o.isEmpty();
 	}
 
 	private void countByChildren(final long first, final long second)
