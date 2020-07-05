@@ -114,8 +114,8 @@ form b { display: inline-block; width: 200px; vertical-align: top; }
 form.upload b { display: inline-block; width: 90px; vertical-align: top; }
 form.admin b, form.simpleValue b, form.viewAsText b { display: inline-block; width: 100px; vertical-align: top; }
 form.session b { display: inline-block; width: 180px; vertical-align: top; }
-form.config b, form.facility b { display: inline-block; width: 200px; vertical-align: top; }
-form.people b { display: inline-block; width: 220px; vertical-align: top; }
+form.config b { display: inline-block; width: 200px; vertical-align: top; }
+form.facility b, form.people b { display: inline-block; width: 220px; vertical-align: top; }
 form b em { vertical-align: top; display: block; font-size: 8pt; font-weight: normal; padding-right: 5px; }
 form b em blockquote { vertical-align: top; display: block; font-size: 8pt; font-weight: normal; margin: 5px 0px 5px 10px; }
 form.noCaption b { display: none; }
