@@ -355,7 +355,7 @@ public class FacilityDAOTest
 	@Test
 	public void get()
 	{
-		var value = dao.getByIdWithException(VALUE.id);
+		var value = dao.getByIdWithException(VALUE.id, true);
 		Assertions.assertNotNull(value, "Exists");
 		Assertions.assertTrue(value.active, "Check active");
 		assertThat(value.activatedAt).as("Check activatedAt").isNotNull().isEqualTo(value.createdAt);
@@ -366,7 +366,7 @@ public class FacilityDAOTest
 	@Test
 	public void getWithException()
 	{
-		assertThrows(ObjectNotFoundException.class, () -> dao.getByIdWithException(VALUE.id + 1000L));
+		assertThrows(ObjectNotFoundException.class, () -> dao.getByIdWithException(VALUE.id + 1000L, true));
 	}
 
 	@Test
@@ -390,13 +390,13 @@ public class FacilityDAOTest
 	@Test
 	public void getByNameWithException()
 	{
-		Assertions.assertEquals(VALUE, dao.getByNameWithException(VALUE.name));
+		Assertions.assertEquals(VALUE, dao.getByNameWithException(VALUE.name, true));
 	}
 
 	@Test
 	public void getByNameWithException_invalid()
 	{
-		assertThat(assertThrows(ObjectNotFoundException.class, () -> dao.getByNameWithException("invalid")))
+		assertThat(assertThrows(ObjectNotFoundException.class, () -> dao.getByNameWithException("invalid", true)))
 			.hasMessage("The Facility 'invalid' does not exist.");
 	}
 
@@ -497,7 +497,7 @@ public class FacilityDAOTest
 	@Test
 	public void modify_get()
 	{
-		assertThat(dao.getById(VALUE.id).testTypes).containsExactly(NASAL_SWAB.created());
+		assertThat(dao.getById(VALUE.id, true).testTypes).containsExactly(NASAL_SWAB.created());
 	}
 
 	@Test
@@ -660,7 +660,7 @@ public class FacilityDAOTest
 	@MethodSource
 	public void search(final FacilityFilter filter, final long expectedTotal)
 	{
-		var results = dao.search(filter);
+		var results = dao.search(filter, true);
 		Assertions.assertNotNull(results, "Exists");
 		Assertions.assertEquals(expectedTotal, results.total, "Check total");
 		if (0L == expectedTotal)
@@ -686,13 +686,13 @@ public class FacilityDAOTest
 	public void search_from()
 	{
 		// Function "ST_DISTANCE_SPHERE" not found ON H2 database.
-		assertThrows(PersistenceException.class, () -> dao.search(new FacilityFilter().withFrom(new GeoFilter(bg("45.7"), bg("-35.42"), null, 50, null))));
+		assertThrows(PersistenceException.class, () -> dao.search(new FacilityFilter().withFrom(new GeoFilter(bg("45.7"), bg("-35.42"), null, 50, null)), true));
 	}
 
 	@Test
 	public void search_from_invalid()
 	{
-		Assertions.assertEquals(1L, dao.search(new FacilityFilter().withFrom(new GeoFilter(null, null, "Philadelphia", 50, null))).total);
+		Assertions.assertEquals(1L, dao.search(new FacilityFilter().withFrom(new GeoFilter(null, null, "Philadelphia", 50, null)), true).total);
 	}
 
 	public static Stream<Arguments> search_sort()
@@ -963,7 +963,7 @@ public class FacilityDAOTest
 	@MethodSource
 	public void search_sort(final FacilityFilter filter, final String expectedSortOn, final String expectedSortDir)
 	{
-		var results = dao.search(filter);
+		var results = dao.search(filter, true);
 		Assertions.assertNotNull(results, "Exists");
 		Assertions.assertEquals(expectedSortOn, results.sortOn, "Check sortOn");
 		Assertions.assertEquals(expectedSortDir, results.sortDir, "Check sortDir");
@@ -1014,13 +1014,13 @@ public class FacilityDAOTest
 	{
 		count(new FacilityFilter(), 1L);
 
-		var v = dao.getById(2L);
-		Assertions.assertNotNull(dao.getById(2L), "Exists");
+		var v = dao.getById(2L, true);
+		Assertions.assertNotNull(dao.getById(2L, true), "Exists");
 		Assertions.assertTrue(v.active, "Check active");
 		assertThat(v.activatedAt).as("Check activatedAt").isNotNull().isEqualTo(v.createdAt);
 		assertThat(v.testTypes).as("Check testTypes").containsExactly(ANTIBODY.created(), NASAL_SWAB.created());
 
-		v = dao.search(new FacilityFilter()).records.get(0);
+		v = dao.search(new FacilityFilter(), true).records.get(0);
 		assertThat(v.testTypes).as("Check testTypes").containsExactly(ANTIBODY.created(), NASAL_SWAB.created());
 	}
 
@@ -1084,10 +1084,10 @@ public class FacilityDAOTest
 	@Test
 	public void z_01_add_others_search()
 	{
-		var ids = dao.search(new FacilityFilter().withNotTestCriteriaId(CDC_CRITERIA.id)).records.stream().map(v -> v.testCriteriaId).collect(toList());
+		var ids = dao.search(new FacilityFilter().withNotTestCriteriaId(CDC_CRITERIA.id), true).records.stream().map(v -> v.testCriteriaId).collect(toList());
 		assertThat(ids).hasSize(2).containsOnly(OTHER.id, null);
 
-		ids = dao.search(new FacilityFilter().withNotTestCriteriaId(OTHER.id)).records.stream().map(v -> v.testCriteriaId).collect(toList());
+		ids = dao.search(new FacilityFilter().withNotTestCriteriaId(OTHER.id), true).records.stream().map(v -> v.testCriteriaId).collect(toList());
 		assertThat(ids).hasSize(2).containsOnly(CDC_CRITERIA.id, null);
 	}
 
@@ -1129,14 +1129,14 @@ public class FacilityDAOTest
 	@Test
 	public void z_10_add_as_editor_check()
 	{
-		var v = dao.getById(VALUE.id);
+		var v = dao.getById(VALUE.id, true);
 		Assertions.assertEquals("byEditor", v.name, "Check name");
 		Assertions.assertFalse(VALUE.resultNotificationEnabled, "Check resultNotificationEnabled");
 		Assertions.assertFalse(v.active, "Check active");
 		Assertions.assertNull(v.activatedAt, "Check activatedAt");
 		Assertions.assertNull(v.testTypes, "Check testTypes");
 
-		v = dao.search(new FacilityFilter().withId(5L)).records.get(0);
+		v = dao.search(new FacilityFilter().withId(5L), true).records.get(0);
 		Assertions.assertNull(v.testTypes, "Check testTypes");
 	}
 
@@ -1158,14 +1158,14 @@ public class FacilityDAOTest
 	@Test
 	public void z_10_modify_as_editor_check()
 	{
-		var v = dao.getById(VALUE.id);
+		var v = dao.getById(VALUE.id, true);
 		Assertions.assertEquals("byEditor", v.name, "Check name");
 		Assertions.assertFalse(v.resultNotificationEnabled, "Check resultNotificationEnabled");
 		Assertions.assertFalse(v.active, "Check active");
 		Assertions.assertNull(v.activatedAt, "Check activatedAt");
 		assertThat(v.testTypes).as("Check testTypes").containsExactly(NASAL_SWAB.created());
 
-		v = dao.search(new FacilityFilter().withId(5L)).records.get(0);
+		v = dao.search(new FacilityFilter().withId(5L), true).records.get(0);
 		assertThat(v.testTypes).as("Check testTypes").containsExactly(NASAL_SWAB.created());
 	}
 
@@ -1187,14 +1187,14 @@ public class FacilityDAOTest
 	@Test
 	public void z_11_modify_as_admin_check()
 	{
-		var v = dao.getById(VALUE.id);
+		var v = dao.getById(VALUE.id, true);
 		Assertions.assertEquals("byEditor", v.name, "Check name");
 		Assertions.assertTrue(v.resultNotificationEnabled, "Check resultNotificationEnabled");
 		Assertions.assertTrue(v.active, "Check active");
 		assertThat(v.activatedAt).as("Check activatedAt").isNotNull().isAfter(v.createdAt).isEqualTo(v.updatedAt).isCloseTo(new Date(), 1000L);
 		assertThat(v.testTypes).as("Check testTypes").containsExactly(DONT_KNOW.created());
 
-		v = dao.search(new FacilityFilter().withId(5L)).records.get(0);
+		v = dao.search(new FacilityFilter().withId(5L), true).records.get(0);
 		assertThat(v.testTypes).as("Check testTypes").containsExactly(DONT_KNOW.created());
 	}
 
@@ -1216,14 +1216,14 @@ public class FacilityDAOTest
 	@Test
 	public void z_12_modify_as_editor_check()
 	{
-		var v = dao.getById(VALUE.id);
+		var v = dao.getById(VALUE.id, true);
 		Assertions.assertEquals("byEditor", v.name, "Check name");
 		Assertions.assertTrue(v.resultNotificationEnabled, "Check resultNotificationEnabled");
 		Assertions.assertTrue(v.active, "Check active");
 		assertThat(v.activatedAt).as("Check activatedAt").isNotNull().isAfter(v.createdAt).isBefore(v.updatedAt).isCloseTo(new Date(), 1000L);
 		Assertions.assertNull(v.testTypes, "Check testTypes");
 
-		v = dao.search(new FacilityFilter().withId(5L)).records.get(0);
+		v = dao.search(new FacilityFilter().withId(5L), true).records.get(0);
 		Assertions.assertNull(v.testTypes, "Check testTypes");
 	}
 
@@ -1234,7 +1234,7 @@ public class FacilityDAOTest
 	 */
 	private void count(final FacilityFilter filter, final long expectedTotal)
 	{
-		Assertions.assertEquals(expectedTotal, dao.count(filter), "COUNT " + filter + ": Check total");
+		Assertions.assertEquals(expectedTotal, dao.count(filter, true), "COUNT " + filter + ": Check total");
 	}
 
 	/** Helper method - checks an expected value against a supplied entity record. */

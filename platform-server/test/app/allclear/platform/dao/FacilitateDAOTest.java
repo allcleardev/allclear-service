@@ -339,7 +339,7 @@ public class FacilitateDAOTest
 		assertThat(v.promotedAt).as("Check promotedAt").isNotNull().isAfter(v.createdAt).isCloseTo(new Date(), 500L);
 		Assertions.assertNull(v.rejecterId, "Check rejecterId");
 		Assertions.assertNull(v.rejectedAt, "Check rejectedAt");
-		Assertions.assertEquals("Test Center 30", facilityDao.getById(facilityId).name, "Check facility.name");
+		Assertions.assertEquals("Test Center 30", facilityDao.getById(facilityId, true).name, "Check facility.name");
 	}
 
 	@Test
@@ -376,7 +376,7 @@ public class FacilitateDAOTest
 		assertThat(v.promotedAt).as("Check promotedAt").isNotNull().isAfter(v.createdAt).isCloseTo(new Date(), 500L);
 		Assertions.assertNull(v.rejecterId, "Check rejecterId");
 		Assertions.assertNull(v.rejectedAt, "Check rejectedAt");
-		Assertions.assertEquals("Test Center 2", facilityDao.getById(FACILITY_2.id).name, "Check facility.name");
+		Assertions.assertEquals("Test Center 2", facilityDao.getById(FACILITY_2.id, true).name, "Check facility.name");
 	}
 
 	@Test

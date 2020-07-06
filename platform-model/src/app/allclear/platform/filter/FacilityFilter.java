@@ -92,6 +92,7 @@ public class FacilityFilter extends QueryFilter
 	public Date updatedAtTo = null;
 	public GeoFilter from = null;
 	public boolean restrictive = false;	// Indicate to restrict the facility search based on the current user profile. DLS on 4/6/2020.
+	public List<String> people;	// ALLCLEAR-582: DLS on 7/6/2020.
 	public List<String> includeTestTypes;	// ALLCLEAR-463: DLS on 5/9/2020.
 	public List<String> excludeTestTypes;	// ALLCLEAR-463: DLS on 5/9/2020.
 
@@ -161,6 +162,7 @@ public class FacilityFilter extends QueryFilter
 	public FacilityFilter withUpdatedAtTo(final Date newValue) { updatedAtTo = newValue; return this; }
 	public FacilityFilter withFrom(final GeoFilter newValue) { from = newValue; return this; }
 	public FacilityFilter withRestrictive(final boolean newValue) { restrictive = newValue; return this; }
+	public FacilityFilter withPeople(final List<String> newValues) { people = newValues; return this; }
 	public FacilityFilter withIncludeTestTypes(final List<String> newValues) { includeTestTypes = newValues; return this; }
 	public FacilityFilter include(final TestType... newValues) { return withIncludeTestTypes(Arrays.stream(newValues).map(o -> o.id).collect(Collectors.toList())); }
 	public FacilityFilter withExcludeTestTypes(final List<String> newValues) { excludeTestTypes = newValues; return this; }

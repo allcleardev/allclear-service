@@ -4,8 +4,7 @@ import static java.util.stream.Collectors.*;
 import static app.allclear.common.dao.OrderByBuilder.*;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -85,6 +84,8 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	/** Native SQL clauses. */
 	public static final String FROM_ALIAS = "o";
 
+	private static final Map<Long, List<CreatedValue>> EMPTY = Map.of();
+
 	private final Auditor auditor;
 
 	public FacilityDAO(final SessionFactory factory, final Auditor auditor)
@@ -114,7 +115,8 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	 */
 	public FacilityValue update(final FacilityValue value, final boolean admin) throws ValidationException
 	{
-		var cmrs = _validate(value);
+		var validator = new Validator();
+		var cmrs = _validate(value, validator);
 		var record = (Facility) cmrs[0];
 		if ((null == record) && (null != value.id))
 			record = findWithException(value.id);
@@ -126,6 +128,8 @@ public class FacilityDAO extends AbstractDAO<Facility>
 
 			var rec = record;	// Needs to be effectively final to be used in lambdas below.
 			update(s, record, record.getTestTypes(), value.testTypes, v -> new FacilityTestType(rec, v), "deleteFacilityTestTypes");
+			if (admin)
+				update(s, record, record.getPeople(), value.people, v -> new FacilityPeople(rec, person(s, v.id, validator), v), "deleteFacilityPeople");
 
 			auditor.update(value.withId(record.getId()));
 		}
@@ -142,6 +146,8 @@ public class FacilityDAO extends AbstractDAO<Facility>
 
 			var rec = record;	// Needs to be effectively final to be used in lambdas below.
 			add(s, value.testTypes, v -> new FacilityTestType(rec, v));
+			if (admin)
+				add(s, value.people, v -> new FacilityPeople(rec, person(s, v.id, validator), v));
 
 			auditor.add(value.withId(record.getId()));
 		}
@@ -149,10 +155,18 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		return value;
 	}
 
+	private People person(final Session s, final String id, final Validator validator) throws ValidationException
+	{
+		var o = s.get(People.class, id);
+		if (null == o) validator.add("people", "The Person ID '%s' is invalid.", id).check();
+
+		return o;
+	}
+
 	private void add(final Session s, final List<CreatedValue> values, final Function<CreatedValue, ? extends FacilityChild> toEntity)
 	{
 		if (CollectionUtils.isEmpty(values)) return;
-		values.stream().filter(v -> null != v).forEach(v -> s.persist(toEntity.apply(v)));
+		values.stream().filter(v -> ((null != v) && (null != v.id))).forEach(v -> s.persist(toEntity.apply(v)));
 	}
 
 	private int update(final Session s,
@@ -166,7 +180,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		if (values.isEmpty()) return namedQueryX(deleteQuery).setParameter("facilityId", record.getId()).executeUpdate();
 
 		return (int) (values.stream()	// Add new values.
-			.filter(v -> null != v)
+			.filter(v -> ((null != v) && (null != v.id)))
 			.filter(v -> !records.stream().anyMatch(o -> o.getChildId().equals(v.id)))
 			.peek(v -> s.persist(toEntity.apply(v)))
 			.count() +
@@ -183,19 +197,19 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	 */
 	public void validate(final FacilityValue value) throws ValidationException
 	{
-		_validate(value);
+		_validate(value, new Validator());
 	}
 
 	/** Validates a single Facility value and returns any CMR fields.
 	 *
 	 * @param value
+	 * @param validator
 	 * @return array of CMRs entities.
 	 * @throws ValidationException
 	 */
-	private Object[] _validate(final FacilityValue value) throws ValidationException
+	private Object[] _validate(final FacilityValue value, final Validator validator) throws ValidationException
 	{
 		value.clean();
-		var validator = new Validator();
 
 		// Throw exception after field existence checks and before FK checks.
 		validator.ensureExistsAndLength("name", "Name", value.name, FacilityValue.MAX_LEN_NAME)
@@ -244,7 +258,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		var record = get(id);
 		if (null == record) return false;
 
-		var value = record.toValueX();
+		var value = cmr(record.toValueX(), true);
 		currentSession().delete(record);
 
 		auditor.remove(value);
@@ -302,37 +316,40 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	/** Gets a single Facility value by identifier.
 	 *
 	 * @param id
+	 * @param admin
 	 * @return NULL if not found.
 	 */
-	public FacilityValue getById(final Long id)
+	public FacilityValue getById(final Long id, final boolean admin)
 	{
 		var record = get(id);
-		return (null != record) ? record.toValueX() : null;
+		return (null != record) ? cmr(record.toValueX(), admin) : null;
 	}
 
 	/** Gets a single Facility value by identifier.
 	 *
 	 * @param id
+	 * @param admin
 	 * @return never NULL.
 	 * @throws ObjectNotFoundException if the identifier is valid.
 	 */
-	public FacilityValue getByIdWithException(final Long id) throws ObjectNotFoundException
+	public FacilityValue getByIdWithException(final Long id, final boolean admin) throws ObjectNotFoundException
 	{
-		return findWithException(id).toValueX();
+		return cmr(findWithException(id).toValueX(), admin);
 	}
 
 	/** Gets a single Facility value by name.
 	 *
 	 * @param name
+	 * @param admin
 	 * @return never NULL.
 	 * @throws ObjectNotFoundException if the name is valid.
 	 */
-	public FacilityValue getByNameWithException(final String name) throws ObjectNotFoundException
+	public FacilityValue getByNameWithException(final String name, final boolean admin) throws ObjectNotFoundException
 	{
 		var record = find(name);
 		if ((null == record) || !record.isActive()) throw new ObjectNotFoundException("The Facility '" + name + "' does not exist.");
 
-		return record.toValueX();
+		return cmr(record.toValueX(), admin);
 	}
 
 	/** Gets a list of active Facility values by wild card name search.
@@ -414,17 +431,18 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	/** Searches the Facility entity based on the supplied filter.
 	 *
 	 * @param filter
+	 * @param admin
 	 * @return never NULL.
 	 * @throws ValidationException
 	 */
-	public QueryResults<FacilityValue, FacilityFilter> search(final FacilityFilter filter) throws ValidationException
+	public QueryResults<FacilityValue, FacilityFilter> search(final FacilityFilter filter, final boolean admin) throws ValidationException
 	{
 		var timer = new StopWatch();
 
 		if ((null != filter.from) && filter.from.valid())
 		{
 			filter.sortOn = "meters";	// Only sort by meters. Default to returning the closest first. DLS on 4/3/2020.
-			var builder = createNativeQuery(filter.clean(), SELECT_, FacilityX.class);
+			var builder = createNativeQuery(filter.clean(), SELECT_, FacilityX.class, admin);
 			log.info("BUILT_QUERY: {}", timer.split());
 			var v = new QueryResults<FacilityValue, FacilityFilter>(builder.aggregate(COUNT_), filter);
 			log.info("COUNT: {}", timer.split());
@@ -433,11 +451,11 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			var records = builder.orderBy(ORDER.normalize(v)).run(v);
 			log.info("QUERIED: {}", timer.split());
 
-			return v.withRecords(cmr(records.stream().map(o -> o.toValue()).collect(toList())));
+			return v.withRecords(cmr(records.stream().map(o -> o.toValue()).collect(toList()), admin));
 		}
 		else
 		{
-			var builder = createQueryBuilder(filter.clean(), SELECT);
+			var builder = createQueryBuilder(filter.clean(), SELECT, admin);
 			log.info("BUILT_QUERY: {}", timer.split());
 			var v = new QueryResults<FacilityValue, FacilityFilter>(builder.aggregate(COUNT), filter);
 			log.info("COUNT: {}", timer.split());
@@ -446,26 +464,27 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			var records = builder.orderBy(ORDER.normalize(v)).run(v);
 			log.info("QUERIED: {}", timer.split());
 
-			return v.withRecords(cmr(records.stream().map(o -> o.toValue()).collect(toList())));
+			return v.withRecords(cmr(records.stream().map(o -> o.toValue()).collect(toList()), admin));
 		}
 	}
 
 	/** Counts the number of Facility entities based on the supplied filter.
 	 *
-	 * @param value
+	 * @param filter
+	 * @param admin
 	 * @return zero if none found.
 	 * @throws ValidationException
 	 */
-	public long count(final FacilityFilter filter) throws ValidationException
+	public long count(final FacilityFilter filter, final boolean admin) throws ValidationException
 	{
 		if ((null != filter.from) && filter.from.valid())
-			return createNativeQuery(filter.clean(), null, FacilityX.class).aggregate(COUNT_);
+			return createNativeQuery(filter.clean(), null, FacilityX.class, admin).aggregate(COUNT_);
 		else
-			return createQueryBuilder(filter.clean(), null).aggregate(COUNT);
+			return createQueryBuilder(filter.clean(), null, admin).aggregate(COUNT);
 	}
 
 	/** Helper method - creates the a standard Hibernate query builder. */
-	private QueryBuilder<Facility> createQueryBuilder(final FacilityFilter filter, final String select)
+	private QueryBuilder<Facility> createQueryBuilder(final FacilityFilter filter, final String select, final boolean admin)
 		throws ValidationException
 	{
 		return createQueryBuilder(select)
@@ -532,12 +551,13 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.add("createdAtTo", "o.createdAt <= :createdAtTo", filter.createdAtTo)
 			.add("updatedAtFrom", "o.updatedAt >= :updatedAtFrom", filter.updatedAtFrom)
 			.add("updatedAtTo", "o.updatedAt <= :updatedAtTo", filter.updatedAtTo)
+			.addIn("people", "EXISTS (SELECT 1 FROM FacilityPeople pp WHERE pp.facilityId = o.id AND pp.personId IN {})", admin ? filter.people : null)
 			.addIn("includeTestTypes", "EXISTS (SELECT 1 FROM FacilityTestType tt WHERE tt.facilityId = o.id AND tt.testTypeId IN {})", filter.includeTestTypes)
 			.addIn("excludeTestTypes", "NOT EXISTS (SELECT 1 FROM FacilityTestType tt WHERE tt.facilityId = o.id AND tt.testTypeId IN {})", filter.excludeTestTypes);
 	}
 
 	/** Helper method - creates the a native SQL query. */
-	private <T> QueryBuilder<T> createNativeQuery(final FacilityFilter filter, final String select, final Class<T> entityClass)
+	private <T> QueryBuilder<T> createNativeQuery(final FacilityFilter filter, final String select, final Class<T> entityClass, final boolean admin)
 		throws ValidationException
 	{
 		var o = new NativeQueryBuilder<>(currentSession(), select, entityClass, FROM_ALIAS, null)
@@ -604,6 +624,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.add("createdAtTo", "o.created_at <= :createdAtTo", filter.createdAtTo)
 			.add("updatedAtFrom", "o.updated_at >= :updatedAtFrom", filter.updatedAtFrom)
 			.add("updatedAtTo", "o.updated_at <= :updatedAtTo", filter.updatedAtTo)
+			.addIn("people", "EXISTS (SELECT 1 FROM facility_people pp WHERE pp.facility_id = o.id AND pp.person_id IN {})", admin ? filter.people : null)
 			.addIn("includeTestTypes", "EXISTS (SELECT 1 FROM facility_test_type tt WHERE tt.facility_id = o.id AND tt.test_type_id IN {})", filter.includeTestTypes)
 			.addIn("excludeTestTypes", "NOT EXISTS (SELECT 1 FROM facility_test_type tt WHERE tt.facility_id = o.id AND tt.test_type_id IN {})", filter.excludeTestTypes)
 			.add("fromMeters", "ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:fromLongitude, :fromLatitude)) <= :fromMeters", filter.from.meters());
@@ -614,15 +635,25 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		return o;
 	}
 
-	private List<FacilityValue> cmr(final List<FacilityValue> values)	// Populate children entities.
+	private FacilityValue cmr(final FacilityValue value, final boolean admin)
+	{
+		if (admin)
+			value.withPeople(namedQuery("findFacilityPeopleByFacility", Created.class).setParameter("facilityId", value.id).stream().map(o -> o.toValue()).collect(toList()));
+
+		return value;
+	}
+
+	private List<FacilityValue> cmr(final List<FacilityValue> values, final boolean admin)	// Populate children entities.
 	{
 		if (values.isEmpty()) return values;
 
 		var ids = values.stream().map(v -> v.id).collect(toList());
+		var people = admin ? namedQuery("findFacilityPeopleByFacilities", Created.class).setParameterList("facilityIds", ids).stream()
+			.collect(groupingBy(o -> o.parentId, mapping(o -> o.toValue(), toList()))) : EMPTY;	
 		var testTypes = namedQuery("findFacilityTestTypes", FacilityTestType.class).setParameterList("facilityIds", ids).stream()
-		 		.collect(groupingBy(o -> o.getFacilityId(), mapping(o -> o.toValue(), toList())));
+		 	.collect(groupingBy(o -> o.getFacilityId(), mapping(o -> o.toValue(), toList())));
 
-		values.forEach(v -> v.withTestTypes(testTypes.get(v.id)));
+		values.forEach(v -> v.withPeople(people.get(v.id)).withTestTypes(testTypes.get(v.id)));
 
 		return values;
 	}

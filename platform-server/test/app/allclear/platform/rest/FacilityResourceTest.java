@@ -1078,7 +1078,7 @@ public class FacilityResourceTest
 	 */
 	private void count(final FacilityFilter filter, final long expectedTotal)
 	{
-		Assertions.assertEquals(expectedTotal, dao.count(filter), "COUNT " + filter + ": Check total");
+		Assertions.assertEquals(expectedTotal, dao.count(filter, true), "COUNT " + filter + ": Check total");
 	}
 
 	/** Helper method - checks an expected value against a supplied value object. */

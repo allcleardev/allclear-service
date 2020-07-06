@@ -582,4 +582,25 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.1.101_ALLCLEAR-582" author="smalleyd">
+		<createTable tableName="facility_people" remarks="Represents the associates of a facility who can act on a facility's behalf.">
+			<column name="facility_id" type="BIGINT" remarks="Refers to a facility.">
+				<constraints nullable="false" />
+			</column>
+			<column name="person_id" type="VARCHAR(10)" remarks="Refers to a person.">
+				<constraints nullable="false" />
+			</column>
+			<column name="created_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was created.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addPrimaryKey tableName="facility_people" columnNames="facility_id, person_id" constraintName="pk_facility_people" />
+		<addForeignKeyConstraint baseTableName="facility_people" baseColumnNames="facility_id" referencedTableName="facility" referencedColumnNames="id" constraintName="fk_facility_people_1" onDelete="CASCADE" />
+		<addForeignKeyConstraint baseTableName="facility_people" baseColumnNames="person_id" referencedTableName="people" referencedColumnNames="id" constraintName="fk_facility_people_2" onDelete="CASCADE" />
+
+		<rollback>
+			<dropTable tableName="facility_people" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

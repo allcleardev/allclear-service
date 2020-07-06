@@ -71,8 +71,9 @@ public class FacilityResource
 	public FacilityValue get(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		@PathParam("id") final Long id) throws ObjectNotFoundException
 	{
-		var o = dao.getByIdWithException(id);
-		if (!sessionDao.currentOrAnon().admin() && !o.active) throw new ObjectNotFoundException("The ID '" + id + "' is unavailable.");
+		var admin = sessionDao.currentOrAnon().admin();
+		var o = dao.getByIdWithException(id, admin);
+		if (!admin && !o.active) throw new ObjectNotFoundException("The ID '" + id + "' is unavailable.");
 
 		return o;
 	}
@@ -123,7 +124,7 @@ public class FacilityResource
 		if (StringUtils.isBlank(name))
 			throw new ValidationException("name", "Please provide a 'name' parameter.");
 
-		return dao.getByNameWithException(name);
+		return dao.getByNameWithException(name, sessionDao.currentOrAnon().admin());
 	}
 
 	@GET
@@ -184,7 +185,7 @@ public class FacilityResource
 
 		log.info("RESTRICTED: {} / {} in {}", filter.restrictive, restricted, timer.split());
 
-		var results = dao.search(filter);
+		var results = dao.search(filter, s.admin());	// For now allow Editors to see the associates/workers of a Facility. DLS on 7/6/2020.
 		log.info("SEARCHED: {} in {}", results.total, timer.split());
 		if (!results.noRecords())
 		{

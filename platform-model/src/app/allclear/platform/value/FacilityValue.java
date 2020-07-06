@@ -87,6 +87,7 @@ public class FacilityValue implements Auditable, Serializable
 	public Boolean restricted = null;	// Is the current user restricted from accessing this site. Populated in FacilityResource.search. DLS on 4/8/2020.
 	public Boolean favorite = null;	// ALLCLEAR-259: Has this facility been bookmarked/favorited by the current user? DLS on 4/15/2020.
 	public List<CreatedValue> testTypes = null;	// ALLCLEAR-463: DLS on 5/9/2020.
+	public List<CreatedValue> people = null;	// ALLCLEAR-582: DLS on 7/5/2020.
 
 	// Accessors
 	public boolean restricted() { return (null != testCriteria) && testCriteria.restricted; }
@@ -143,6 +144,10 @@ public class FacilityValue implements Auditable, Serializable
 	public FacilityValue emptyTestTypes() { testTypes = List.of(); return this; }
 	public FacilityValue withTestTypes(final List<CreatedValue> newValues) { testTypes = newValues; return this; }
 	public FacilityValue withTestTypes(final TestType... newValues) { return withTestTypes(Arrays.stream(newValues).map(o -> o.created()).collect(Collectors.toList())); }
+	public FacilityValue nullPeople() { people = null; return this; }
+	public FacilityValue emptyPeople() { people = List.of(); return this; }
+	public FacilityValue withPeople(final List<CreatedValue> newValues) { people = newValues; return this; }
+	public FacilityValue withPeople(final PeopleValue... newValues) { return withPeople(Arrays.stream(newValues).map(o -> o.created()).collect(Collectors.toList())); }
 
 	public FacilityValue() {}
 

@@ -226,6 +226,11 @@ public class Facility implements Serializable
 	public void setUpdatedAt(final Date newValue) { updatedAt = newValue; }
 
 	@OneToMany(cascade={CascadeType.REMOVE}, fetch=FetchType.LAZY, mappedBy="facility")
+	public List<FacilityPeople> getPeople() { return people; }
+	public List<FacilityPeople> people;
+	public void setPeople(final List<FacilityPeople> newValues) { people = newValues; }
+
+	@OneToMany(cascade={CascadeType.REMOVE}, fetch=FetchType.LAZY, mappedBy="facility")
 	@OrderBy("testTypeId")
 	public List<FacilityTestType> getTestTypes() { return testTypes; }
 	public List<FacilityTestType> testTypes;

@@ -77,6 +77,7 @@ public class PeopleValue implements Serializable
 	public List<FacilityValue> facilities = null;
 
 	// Accessors
+	public CreatedValue created() { return new CreatedValue(id, name, null); }
 	public boolean symptomatic()
 	{
 		return CollectionUtils.isNotEmpty(symptoms) &&
