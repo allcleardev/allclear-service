@@ -55,6 +55,10 @@ public class FacilityPeopleDAOTest
 	private static List<CreatedValue> get_1() { return dao.getById(VALUE_1.id, true).people; }
 
 	private static String id(final int i) { return PEOPLE.get(i).id; }
+	private static List<String> ids(final int... indices)
+	{
+		return Arrays.stream(indices).mapToObj(i -> id(i)).collect(toList());
+	}
 	private static List<CreatedValue> created(final int... indices)
 	{
 		return Arrays.stream(indices).mapToObj(i -> PEOPLE.get(i).created()).collect(toList());
@@ -255,9 +259,25 @@ public class FacilityPeopleDAOTest
 		assertThat(get_1()).as("Check first").isEmpty();
 	}
 
+	public static Stream<Arguments> search()
+	{
+		return Stream.of(
+			arguments(ids(6), true, 1L),
+			arguments(ids(6), false, 2L),
+			arguments(ids(4, 5, 7), true, 0L),
+			arguments(ids(4, 5, 7), false, 2L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void search(final List<String> people, final boolean admin, final long total)
+	{
+		Assertions.assertEquals(total, dao.search(new FacilityFilter().withPeople(people), admin).total);
+	}
+
 	@ParameterizedTest
 	@CsvSource({"1", "2"})
-	public void remove(final Long id)
+	public void testRemove(final Long id)
 	{
 		Assertions.assertTrue(dao.remove(id));
 	}

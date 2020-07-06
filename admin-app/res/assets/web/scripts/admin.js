@@ -287,6 +287,7 @@ var FacilitiesHandler = new ListTemplate({
 	          new EditField('notes', 'Notes', false, true, 60, 5),
 	          new BoolField('active', 'Active?', true),
 	          new TextField('activatedAt', 'Activated At', 'toDateTime'),
+	          new TagField('people', 'Associates', false, fillPeopleDropdownList, "Represents the associates of a facility who can act on a facility's behalf."),
 	          new TextField('createdAt', 'Created At', 'toDateTime'),
 	          new TextField('updatedAt', 'Updated At', 'toDateTime') ],
 	SEARCH: {
@@ -363,6 +364,7 @@ var FacilitiesHandler = new ListTemplate({
 		      new ListField('active', 'Active?', false, 'yesNoOptions', undefined, 'No Search'),
 		      new ListField('hasActivatedAt', 'Has Activated At', false, 'yesNoOptions', undefined, 'No Search'),
 		      new DatesField('activatedAt', 'Activated At'),
+		      new TagField('people', 'Associates', false, fillPeopleDropdownList),
 		      new DatesField('createdAt', 'Created At'),
 		      new DatesField('updatedAt', 'Updated At'),
 	          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ],
