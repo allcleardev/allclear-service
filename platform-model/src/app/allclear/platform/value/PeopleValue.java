@@ -146,6 +146,8 @@ public class PeopleValue implements Serializable
 
 	public PeopleValue() {}
 
+	public PeopleValue(final int i) { this("" + i, "" + i, true); }
+
 	public PeopleValue(
 		final String name,
 		final String phone,

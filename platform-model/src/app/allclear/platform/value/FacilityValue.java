@@ -147,6 +147,7 @@ public class FacilityValue implements Auditable, Serializable
 	public FacilityValue nullPeople() { people = null; return this; }
 	public FacilityValue emptyPeople() { people = List.of(); return this; }
 	public FacilityValue withPeople(final List<CreatedValue> newValues) { people = newValues; return this; }
+	public FacilityValue withPeople(final String... ids) { return withPeople(Arrays.stream(ids).map(id -> new CreatedValue(id)).collect(Collectors.toList())); }
 	public FacilityValue withPeople(final PeopleValue... newValues) { return withPeople(Arrays.stream(newValues).map(o -> o.created()).collect(Collectors.toList())); }
 
 	public FacilityValue() {}
