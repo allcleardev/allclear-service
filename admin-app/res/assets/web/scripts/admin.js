@@ -287,7 +287,7 @@ var FacilitiesHandler = new ListTemplate({
 	          new EditField('notes', 'Notes', false, true, 60, 5),
 	          new BoolField('active', 'Active?', true),
 	          new TextField('activatedAt', 'Activated At', 'toDateTime'),
-	          new TagField('people', 'Associates', false, fillPeopleDropdownList, "Represents the associates of a facility who can act on a facility's behalf."),
+	          new TagField('people', 'Associates', false, fillPeopleDropdownList, undefined, "Represents the associates of a facility who can act on a facility's behalf."),
 	          new TextField('createdAt', 'Created At', 'toDateTime'),
 	          new TextField('updatedAt', 'Updated At', 'toDateTime') ],
 	SEARCH: {
