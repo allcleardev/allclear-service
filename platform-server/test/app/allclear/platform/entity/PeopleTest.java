@@ -64,7 +64,7 @@ public class PeopleTest
 
 	private static People create()
 	{
-		return new People("123", "max", "888-555-1000", "max@gmail.com", "Max", "Power", DOB,
+		return new People("123", "max", "888-555-1000", "max@gmail.com", null, "Max", "Power", DOB,
 			"1", INFLUENCER.id, "0", NEITHER.id, LAT, LNG, "Omaha, NE", true, true, AUTH_AT, PHONE_VERIFIED_AT, EMAIL_VERIFIED_AT,
 			ALERTED_OF, ALERTED_AT, CREATED_AT);
 	}
@@ -77,6 +77,93 @@ public class PeopleTest
 		o.setSymptoms(SYMPTOMS.stream().map(t -> new Symptoms(t.id)).collect(toList()));
 
 		return o;
+	}
+
+	private static People createWithPassword()
+	{
+		return new People("123", "max", "888-555-1000", "max@gmail.com", "Password_1", "Max", "Power", DOB,
+			"1", INFLUENCER.id, "0", NEITHER.id, LAT, LNG, "Omaha, NE", true, true, null, PHONE_VERIFIED_AT, EMAIL_VERIFIED_AT,
+			ALERTED_OF, ALERTED_AT, CREATED_AT);
+	}
+
+	@Test
+	public void auth()
+	{
+		var o = create();
+		Assertions.assertFalse(o.checkPassword("Password_1"), "checkPassword: Without password");
+		Assertions.assertEquals(AUTH_AT, o.authAt, "checkPassword: authAt");
+		Assertions.assertFalse(o.auth("Password_1"), "auth: Without password");
+		Assertions.assertEquals(AUTH_AT, o.authAt, "auth: authAt");
+
+		o = createWithPassword();
+		Assertions.assertTrue(o.checkPassword("Password_1"), "checkPassword: With password");
+		Assertions.assertNull(o.authAt, "checkPassword: authAt");
+		Assertions.assertFalse(o.checkPassword("Password"), "checkPassword: With password");
+		Assertions.assertNull(o.authAt, "checkPassword: authAt");
+		Assertions.assertTrue(o.auth("Password_1"), "auth: With password");
+		assertThat(o.authAt).as("auth: authAt").isCloseTo(new Date(), 100L).isNotEqualTo(AUTH_AT);
+
+		var authAt = o.authAt;
+		Assertions.assertFalse(o.auth("Password"), "auth: With password");
+		assertThat(o.authAt).as("auth: authAt").isEqualTo(authAt);
+	}
+
+	@Test
+	public void auth_after_update()
+	{
+		var o = create().update(new PeopleValue().withPassword("Password_1"), false);
+		Assertions.assertFalse(o.checkPassword("Password_1"), "checkPassword: Without password");
+		Assertions.assertEquals(AUTH_AT, o.authAt, "checkPassword: authAt");
+		Assertions.assertFalse(o.auth("Password_1"), "auth: Without password");
+		Assertions.assertEquals(AUTH_AT, o.authAt, "auth: authAt");
+
+		o = create().update(new PeopleValue().withPassword("Password_1"), true);
+		Assertions.assertTrue(o.checkPassword("Password_1"), "checkPassword: Without password");
+		Assertions.assertNull(o.authAt, "checkPassword: authAt");
+		Assertions.assertTrue(o.auth("Password_1"), "auth: Without password");
+		assertThat(o.authAt).as("auth: authAt").isCloseTo(new Date(), 100L).isNotEqualTo(AUTH_AT);
+
+		o = createWithPassword().update(new PeopleValue().withPassword("Password_2"), false);
+		Assertions.assertTrue(o.checkPassword("Password_1"), "checkPassword: With password");
+		Assertions.assertFalse(o.checkPassword("Password_2"), "checkPassword: With password");
+		Assertions.assertNull(o.authAt, "checkPassword: authAt");
+		Assertions.assertTrue(o.auth("Password_1"), "auth: With password");
+		assertThat(o.authAt).as("auth: authAt").isCloseTo(new Date(), 100L).isNotEqualTo(AUTH_AT);
+
+		var authAt = o.authAt;
+		Assertions.assertFalse(o.auth("Password_2"), "auth: With password");
+		assertThat(o.authAt).as("auth: authAt").isEqualTo(authAt);
+
+		o = createWithPassword().update(new PeopleValue().withPassword("Password_2"), true);
+		Assertions.assertFalse(o.checkPassword("Password_1"), "checkPassword: With password");
+		Assertions.assertTrue(o.checkPassword("Password_2"), "checkPassword: With password");
+		Assertions.assertNull(o.authAt, "checkPassword: authAt");
+		Assertions.assertFalse(o.auth("Password_1"), "auth: With password");
+		Assertions.assertNull(o.authAt, "checkPassword: authAt");
+		Assertions.assertTrue(o.auth("Password_2"), "auth: With password");
+		assertThat(o.authAt).as("auth: authAt").isCloseTo(new Date(), 100L).isNotEqualTo(AUTH_AT);
+
+		o = createWithPassword().update(new PeopleValue().withPassword(null), false);
+		Assertions.assertTrue(o.checkPassword("Password_1"), "checkPassword: With password");
+		Assertions.assertFalse(o.checkPassword("Password_2"), "checkPassword: With password");
+		Assertions.assertNull(o.authAt, "checkPassword: authAt");
+		Assertions.assertTrue(o.auth("Password_1"), "auth: With password");
+		assertThat(o.authAt).as("auth: authAt").isCloseTo(new Date(), 100L).isNotEqualTo(AUTH_AT);
+
+		authAt = o.authAt;
+		Assertions.assertFalse(o.auth("Password_2"), "auth: With password");
+		assertThat(o.authAt).as("auth: authAt").isEqualTo(authAt);
+
+		o = createWithPassword().update(new PeopleValue().withPassword(null), true);
+		Assertions.assertTrue(o.checkPassword("Password_1"), "checkPassword: With password");
+		Assertions.assertFalse(o.checkPassword("Password_2"), "checkPassword: With password");
+		Assertions.assertNull(o.authAt, "checkPassword: authAt");
+		Assertions.assertTrue(o.auth("Password_1"), "auth: With password");
+		assertThat(o.authAt).as("auth: authAt").isCloseTo(new Date(), 100L).isNotEqualTo(AUTH_AT);
+
+		authAt = o.authAt;
+		Assertions.assertFalse(o.auth("Password_2"), "auth: With password");
+		assertThat(o.authAt).as("auth: authAt").isEqualTo(authAt);
 	}
 
 	public static Stream<Arguments> toValue()
@@ -107,6 +194,7 @@ public class PeopleTest
 		Assertions.assertEquals("max", v.name, "Check name");
 		Assertions.assertEquals("888-555-1000", v.phone, "Check phone");
 		Assertions.assertEquals("max@gmail.com", v.email, "Check email");
+		Assertions.assertNull(v.password, "Check password");
 		Assertions.assertEquals("Max", v.firstName, "Check firstName");
 		Assertions.assertEquals("Power", v.lastName, "Check lastName");
 		Assertions.assertEquals(DOB, v.dob, "Check dob");
@@ -181,6 +269,7 @@ public class PeopleTest
 		Assertions.assertEquals("max", v.name, "Check name");
 		Assertions.assertEquals("888-555-1000", v.phone, "Check phone");
 		Assertions.assertEquals("max@gmail.com", v.email, "Check email");
+		Assertions.assertNull(v.password, "Check password");
 		Assertions.assertEquals("Max", v.firstName, "Check firstName");
 		Assertions.assertEquals("Power", v.lastName, "Check lastName");
 		Assertions.assertEquals(DOB, v.dob, "Check dob");
@@ -275,6 +364,30 @@ public class PeopleTest
 			Assertions.assertNull(v.symptoms, "Check symptoms");
 	}
 
+	@ParameterizedTest
+	@MethodSource("toValue")
+	public void toValue_withPassword(final Visibility who,
+		final String visibilityId,
+		final boolean available)
+	{
+		var o = createWithPassword();
+		o.setField(new PeopleField(o.id, visibilityId, visibilityId, visibilityId, visibilityId));
+
+		Assertions.assertNull(o.toValue(who).password);
+	}
+
+	@ParameterizedTest
+	@MethodSource("toValue")
+	public void toValueX_withPassword(final Visibility who,
+		final String visibilityId,
+		final boolean available)
+	{
+		var o = createWithPassword();
+		o.setField(new PeopleField(o.id, visibilityId, visibilityId, visibilityId, visibilityId));
+
+		Assertions.assertNull(o.toValueX(who).password);
+	}
+
 	@Test
 	public void update()
 	{
@@ -289,6 +402,7 @@ public class PeopleTest
 		Assertions.assertEquals("min", o.name, "Check name");
 		Assertions.assertEquals("888-555-1001", o.phone, "Check phone");
 		Assertions.assertEquals("minnie@gmail.com", o.email, "Check email");
+		Assertions.assertNull(v.password, "Check password");
 		Assertions.assertEquals("Minnie", o.firstName, "Check firstName");
 		Assertions.assertEquals("Mouse", o.lastName, "Check lastName");
 		Assertions.assertEquals(DOB_1, o.dob, "Check dob");
@@ -337,6 +451,7 @@ public class PeopleTest
 		Assertions.assertEquals("min", o.name, "Check name");
 		Assertions.assertEquals("888-555-1001", o.phone, "Check phone");
 		Assertions.assertEquals("minnie@gmail.com", o.email, "Check email");
+		Assertions.assertNull(v.password, "Check password");
 		Assertions.assertEquals("Minnie", o.firstName, "Check firstName");
 		Assertions.assertEquals("Mouse", o.lastName, "Check lastName");
 		Assertions.assertEquals(DOB_1, o.dob, "Check dob");
@@ -388,6 +503,7 @@ public class PeopleTest
 		Assertions.assertEquals("min", o.name, "Check name");
 		Assertions.assertEquals("888-555-1001", o.phone, "Check phone");
 		Assertions.assertEquals("minnie@gmail.com", o.email, "Check email");
+		Assertions.assertNull(v.password, "Check password");
 		Assertions.assertEquals("Minnie", o.firstName, "Check firstName");
 		Assertions.assertEquals("Mouse", o.lastName, "Check lastName");
 		Assertions.assertEquals(DOB_1, o.dob, "Check dob");

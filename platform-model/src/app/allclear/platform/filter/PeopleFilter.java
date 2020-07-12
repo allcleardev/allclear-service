@@ -31,6 +31,7 @@ public class PeopleFilter extends QueryFilter
 	public String phone = null;
 	public String email = null;
 	public Boolean hasEmail = null;
+	public Boolean hasPassword = null;
 	public String firstName = null;
 	public Boolean hasFirstName = null;
 	public String lastName = null;
@@ -105,6 +106,7 @@ public class PeopleFilter extends QueryFilter
 	public PeopleFilter withPhone(final String newValue) { phone = newValue; return this; }
 	public PeopleFilter withEmail(final String newValue) { email = newValue; return this; }
 	public PeopleFilter withHasEmail(final Boolean newValue) { hasEmail = newValue; return this; }
+	public PeopleFilter withHasPassword(final Boolean newValue) { hasPassword = newValue; return this; }
 	public PeopleFilter withFirstName(final String newValue) { firstName = newValue; return this; }
 	public PeopleFilter withHasFirstName(final Boolean newValue) { hasFirstName = newValue; return this; }
 	public PeopleFilter withLastName(final String newValue) { lastName = newValue; return this; }

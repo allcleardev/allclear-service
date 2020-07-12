@@ -15,8 +15,14 @@ public class Hasher
 	/** Composes a string that is salted in preparation to be hashed. */
 	public static String salt(final long id, final String password)
 	{
+		return salt("" + id, password);
+	}
+
+	/** Composes a string that is salted in preparation to be hashed. */
+	public static String salt(final String id, final String password)
+	{
 		// Plant the primary key in the middle of the password.
-		if (StringUtils.isEmpty(password)) return "" + id;
+		if (StringUtils.isEmpty(password)) return id;
 
 		int len = password.length();
 		if (1 == len)
@@ -34,6 +40,17 @@ public class Hasher
 	 * @return never NULL
 	 */
 	public static String saltAndHash(final long id, final String password)
+	{
+		return sha256Hex(salt(id, password));
+	}
+
+	/** Salts and hashes a password.
+	 *
+	 * @param id string identifier
+	 * @param password
+	 * @return never NULL
+	 */
+	public static String saltAndHash(final String id, final String password)
 	{
 		return sha256Hex(salt(id, password));
 	}

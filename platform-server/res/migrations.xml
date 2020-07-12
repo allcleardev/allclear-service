@@ -603,4 +603,14 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.1.104_ALLCLEAR-584" author="smalleyd">
+		<addColumn tableName="people">
+			<column name="password" type="VARCHAR(64)" remarks="Represents the hashed secret used for credential authentication." />
+		</addColumn>
+
+		<rollback>
+			<dropColumn tableName="people" columnName="password" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

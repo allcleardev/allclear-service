@@ -19,6 +19,7 @@ import app.allclear.common.hibernate.NativeQueryBuilder;
 import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.filter.PeopleFilter;
+import app.allclear.platform.model.PeopleAuthRequest;
 import app.allclear.platform.model.PeopleFindRequest;
 import app.allclear.platform.type.*;
 import app.allclear.platform.value.*;
@@ -284,6 +285,54 @@ public class PeopleDAO extends AbstractDAO<People>
 		return findFieldWithException(value.id).update(value);
 	}
 
+	/** Authenticates a person with standard credentials. Optionally, it can change their password, too.
+	 *  When authenticating for the first time, the person MUST provide a new password.
+	 *  
+	 * @param request
+	 * @return the authenticated person
+	 * @throws ValidationException
+	 */
+	public PeopleValue authenticate(final PeopleAuthRequest request) throws ValidationException
+	{
+		var validator = new Validator()
+			.ensureExists("name", "Name", request.name)
+			.ensureExists("password", "Password", request.password)
+			.check();
+
+		// Find the person by ID, name, phone, or email.
+		var record = findOne(request.name);
+		if (null == record)
+			throw new ValidationException(Validator.CODE_INVALID_LOGIN_ID, "name", "Invalid credentials");
+
+		// If the user has previously logged in, then don't force the user to change their password.
+		if ((null != record.getAuthAt()) && (null == request.newPassword))
+		{
+			if (record.auth(request.password)) return record.toValueX(Visibility.ME);
+
+			throw new ValidationException(Validator.CODE_INVALID_CREDENTIALS, "password", "Invalid credentials");
+		}
+
+		// Before changing the user's password, check their credentials.
+		if (!record.checkPassword(request.password))
+			throw new ValidationException(Validator.CODE_INVALID_CREDENTIALS, "password", "Invalid credentials");
+
+		// If a new password has been supplied, change it.
+		if (null != request.newPassword)
+		{
+			validator.ensureLength("newPassword", "New Password", request.newPassword, PeopleValue.MIN_LEN_PASSWORD, PeopleValue.MAX_LEN_PASSWORD)
+				.ensureExists("confirmPassword", "Password Confirmation", request.confirmPassword)
+				.check();
+
+			if (!request.newPassword.equals(request.confirmPassword))
+				throw new ValidationException(Validator.CODE_NEW_PASSWORD_MISMATCH, "confirmPassword", "The 'Password Confirmation' does not match the 'New Password'.");
+
+			return record.updatePassword(request.newPassword).toValueX(Visibility.ME);
+		}
+
+		// The password supplied is valid BUT since the user hasn't authenticated yet, the user must change their password.
+		throw new ValidationException(Validator.CODE_MUST_CHANGE_PASSWORD, "newPassword", "Please change your password.");
+	}
+
 	/** Based on the phone number, the Person is retrieved and marked authenticated.
 	 * 
 	 * @param phone
@@ -324,6 +373,7 @@ public class PeopleDAO extends AbstractDAO<People>
 			.ensureExistsAndLength("name", "Screen Name", value.name, PeopleValue.MAX_LEN_NAME)
 			.ensureExistsAndLength("phone", "Phone Number", value.phone, PeopleValue.MAX_LEN_PHONE)
 			.ensureLength("email", "Email Address", value.email, PeopleValue.MAX_LEN_EMAIL)
+			.ensureLength("password", "Password", value.password, PeopleValue.MIN_LEN_PASSWORD, PeopleValue.MAX_LEN_PASSWORD)
 			.ensureLength("firstName", "First Name", value.firstName, PeopleValue.MAX_LEN_FIRST_NAME)
 			.ensureLength("lastName", "Last Name", value.lastName, PeopleValue.MAX_LEN_LAST_NAME)
 			.ensureLength("statusId", "Status", value.statusId, PeopleValue.MAX_LEN_STATUS_ID)
@@ -482,6 +532,7 @@ public class PeopleDAO extends AbstractDAO<People>
 			.uniqueResult();
 	}
 
+	People findOne(final String name) { return namedQuery("findActivePersonByIdOrName").setParameter("name", name).setMaxResults(1).uniqueResult(); }
 	List<People> findActiveByIdOrName(final String name) { return namedQuery("findActivePeopleByIdOrName").setParameter("name", name + "%").list(); }
 
 	PeopleField findField(final String id) { return currentSession().get(PeopleField.class, id); }
@@ -671,6 +722,7 @@ public class PeopleDAO extends AbstractDAO<People>
 			.addStarts("phone", "o.phone LIKE :phone", filter.phone)
 			.addStarts("email", "o.email LIKE :email", filter.email)
 			.addNotNull("o.email", filter.hasEmail)
+			.addNotNull("o.password", filter.hasPassword)
 			.addContains("firstName", "o.firstName LIKE :firstName", filter.firstName)
 			.addNotNull("o.firstName", filter.hasFirstName)
 			.addContains("lastName", "o.lastName LIKE :lastName", filter.lastName)

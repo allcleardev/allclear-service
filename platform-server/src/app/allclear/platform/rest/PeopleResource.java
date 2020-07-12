@@ -105,6 +105,26 @@ public class PeopleResource
 		return dao.getFieldWithException(sessionDao.checkPerson().id);
 	}
 
+	@PATCH
+	@Path("/auth") @Timed @UnitOfWork	// Authentication updates the Person record.
+	@ApiOperation(value="authenticate", notes="Authenticates a user via standard login credentials.", response=SessionValue.class)
+	public SessionValue authenticate(final PeopleAuthRequest request) throws ValidationException
+	{
+		return sessionDao.add(dao.authenticate(request), request.rememberMe);
+	}
+
+	@PATCH
+	@Path("/password") @Timed @UnitOfWork	// Changes the user password.
+	@ApiOperation(value="changePassword", notes="Changes the current user password. Authenticates the login credentials.")
+	public Response changePassword(final PeopleAuthRequest request) throws ValidationException
+	{
+		if (null == request.newPassword) throw new ValidationException("newPassword", "Please provide the new password.");
+
+		dao.authenticate(request.name(sessionDao.checkPerson().id));
+
+		return Response.ok().build();
+	}
+
 	@POST
 	@Timed @UnitOfWork
 	@ApiOperation(value="add", notes="Adds a single People. Returns the supplied People value with the auto generated identifier populated.", response=PeopleValue.class)

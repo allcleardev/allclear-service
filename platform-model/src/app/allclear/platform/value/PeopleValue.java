@@ -42,12 +42,15 @@ public class PeopleValue implements Serializable
 	public static final int MAX_LEN_HEALTH_WORKER_STATUS_ID = 1;
 	public static final int MAX_LEN_LOCATION_NAME = 255;
 	public static final int MAX_LEN_CONDITION_ID = 2;
+	public static final int MAX_LEN_PASSWORD = 40;	// Leave long enough for a UUID.
+	public static final int MIN_LEN_PASSWORD = 8;
 
 	// Members
 	public String id = null;
 	public String name = null;
 	public String phone = null;
 	public String email = null;
+	public String password = null;
 	public String firstName = null;
 	public String lastName = null;
 	public Date dob = null;
@@ -91,6 +94,7 @@ public class PeopleValue implements Serializable
 	public PeopleValue withName(final String newValue) { name = newValue; return this; }
 	public PeopleValue withPhone(final String newValue) { phone = newValue; return this; }
 	public PeopleValue withEmail(final String newValue) { email = newValue; return this; }
+	public PeopleValue withPassword(final String newValue) { password = newValue; return this; }
 	public PeopleValue withFirstName(final String newValue) { firstName = newValue; return this; }
 	public PeopleValue withLastName(final String newValue) { lastName = newValue; return this; }
 	public PeopleValue withDob(final Date newValue) { dob = newValue; return this; }
@@ -240,6 +244,7 @@ public class PeopleValue implements Serializable
 		name = StringUtils.trimToNull(name);
 		phone = StringUtils.trimToNull(phone);
 		email = StringUtils.trimToNull(email);
+		password = StringUtils.trimToNull(password);
 		firstName = StringUtils.trimToNull(firstName);
 		lastName = StringUtils.trimToNull(lastName);
 		statusId = StringUtils.trimToNull(statusId);

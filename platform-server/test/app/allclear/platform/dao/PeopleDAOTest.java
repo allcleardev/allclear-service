@@ -21,8 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.*;
 
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
@@ -479,6 +478,41 @@ public class PeopleDAOTest
 	public void findFieldWithException_invalid()
 	{
 		assertThrows(ObjectNotFoundException.class, () -> dao.findFieldWithException("INVALID"));
+	}
+
+	public static Stream<Arguments> findOne()
+	{
+		var valid = createValid();
+
+		return Stream.of(
+			arguments(VALUE.id, true),
+			arguments(VALUE.name, true),
+			arguments(VALUE.phone, true),
+			arguments(VALUE.email, true),
+			arguments(VALUE.firstName, false),
+			arguments(VALUE.lastName, false),
+			arguments("ron", false),
+			arguments("888", false),
+			arguments("+1888", false),
+			arguments("+1", false),
+			arguments("INVALID", false),
+			arguments(valid.name, false),
+			arguments(valid.phone, false),
+			arguments(valid.email, false));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void findOne(final String name, final boolean found)
+	{
+		var o = dao.findOne(name);
+		if (found)
+		{
+			Assertions.assertNotNull(o, "Exists");
+			Assertions.assertEquals(VALUE.id, o.getId(), "Check ID");
+		}
+		else
+			Assertions.assertNull(o, "Exists");
 	}
 
 	@Test
@@ -1464,6 +1498,29 @@ public class PeopleDAOTest
 	{
 		assertThat(assertThrows(ValidationException.class, () -> dao.find(request)))
 			.hasMessage("Please provide at least one name or one phone number.");
+	}
+
+	@ParameterizedTest
+	@CsvSource({"079,079",
+	            "077,",	// Inactive
+	            "09,",
+	            "009,009",
+	            "007,",	// Inactive
+	            "0790,",
+	            "+079,",
+	            "+1079,079",
+	            "+1077,",	// Inactive
+	            "+10790,"})
+	public void z_20_findOne(final String name, final String expected)
+	{
+		var o = dao.findOne(name);
+		if (null != expected)
+		{
+			Assertions.assertNotNull(o, "Exists");
+			Assertions.assertEquals(expected, o.getName(), "Check name");
+		}
+		else
+			Assertions.assertNull(o, "Exists");
 	}
 
 	public static Stream<Arguments> z_20_getActiveByIdOrName()

@@ -1,5 +1,6 @@
 package app.allclear.platform.entity;
 
+import static app.allclear.common.crypto.Hasher.saltAndHash;
 import static java.util.stream.Collectors.toList;
 
 import java.io.Serializable;
@@ -43,6 +44,7 @@ import app.allclear.platform.value.PeopleValue;
 	@NamedQuery(name="getPeopleIdByEmail", query="SELECT o.id FROM People o WHERE o.email = :email"),
 	@NamedQuery(name="getPeopleIdByPhone", query="SELECT o.id FROM People o WHERE o.phone = :phone")})
 @NamedNativeQueries({@NamedNativeQuery(name="findActivePeopleByIdOrName", query="SELECT * FROM people o WHERE o.id LIKE :name AND o.active = TRUE UNION DISTINCT SELECT * FROM people oo WHERE oo.name LIKE :name AND oo.active = TRUE UNION DISTINCT SELECT * FROM people p WHERE p.phone LIKE :name AND p.active = TRUE UNION DISTINCT SELECT * FROM people e WHERE e.email LIKE :name AND e.active = TRUE ORDER BY name", resultClass=People.class),	// Leverages all indices with 4 SELECTs as opposed to a single SELECT with an OR conjunction. DLS on 4/28/2020.
+	@NamedNativeQuery(name="findActivePersonByIdOrName", query="SELECT * FROM people o WHERE o.id = :name AND o.active = TRUE UNION DISTINCT SELECT * FROM people oo WHERE oo.name = :name AND oo.active = TRUE UNION DISTINCT SELECT * FROM people p WHERE p.phone = :name AND p.active = TRUE UNION DISTINCT SELECT * FROM people e WHERE e.email = :name AND e.active = TRUE ORDER BY id", resultClass=People.class),
 	@NamedNativeQuery(name="getPeopleNamesByIds", query="SELECT o.id, o.name FROM people o WHERE o.id IN (:ids)", resultClass=Named.class)})
 public class People implements Serializable
 {
@@ -68,6 +70,23 @@ public class People implements Serializable
 	public String getEmail() { return email; }
 	public String email;
 	public void setEmail(final String newValue) { email = newValue; }
+
+	@Column(name="password", columnDefinition="VARCHAR(64)", nullable=true)
+	public String getPassword() { return password; }
+	public String password;
+	public void setPassword(final String newValue) { password = newValue; }
+	public void putPassword(final String newValue)
+	{
+		this.password = saltAndHash(id, newValue);
+	}
+	public People updatePassword(final String newValue)
+	{
+		putPassword(newValue);
+
+		this.authAt = this.updatedAt = new Date();
+
+		return this;
+	}
 
 	@Column(name="first_name", columnDefinition="VARCHAR(32)", nullable=true)
 	public String getFirstName() { return firstName; }
@@ -234,6 +253,7 @@ public class People implements Serializable
 		final String name,
 		final String phone,
 		final String email,
+		final String password,
 		final String firstName,
 		final String lastName,
 		final Date dob,
@@ -275,17 +295,22 @@ public class People implements Serializable
 		this.alertedOf = alertedOf;
 		this.alertedAt = alertedAt;
 		this.createdAt = this.updatedAt = createdAt;
+
+		if (null != password) putPassword(password);
+		else setPassword(null);	// No password is fine for general users.
 	}
 
 	public People(final PeopleValue value)
 	{
-		this(value.id, value.name, value.phone, value.email,
+		this(value.id, value.name, value.phone, value.email, value.password,
 			value.firstName, value.lastName, value.dob,
 			value.statusId, value.statureId, value.sexId,
 			value.healthWorkerStatusId,
 			value.latitude, value.longitude, value.locationName,
 			value.alertable, value.active, value.authAt, value.phoneVerifiedAt,
 			value.emailVerifiedAt, value.alertedOf, value.alertedAt, value.initDates());
+
+		value.password = null;	// Remove the password from the potential response.
 	}
 
 	public People update(final PeopleValue value, final boolean admin)
@@ -312,6 +337,11 @@ public class People implements Serializable
 			setEmailVerifiedAt(value.emailVerifiedAt);
 			setAlertedOf(value.alertedOf);
 			setAlertedAt(value.alertedAt);
+			if (null != value.password)
+			{
+				putPassword(value.password);
+				value.password = null;	// Remove the password from the potential response.
+			}
 		}
 		else
 		{
@@ -371,6 +401,26 @@ public class People implements Serializable
 		if (null == phoneVerifiedAt) phoneVerifiedAt = updatedAt;
 
 		return this;
+	}
+
+	/** Checks the supplied value against the existing password.
+	 * 
+	 * @param value
+	 * @return TRUE if the value matches the existing password.
+	 */
+	@Transient
+	public boolean auth(final String value)
+	{
+		var results = checkPassword(value);
+		if (results) updatedAt = authAt = new Date();
+
+		return results;
+	}
+
+	@Transient
+	public boolean checkPassword(final String value)
+	{
+		return ((null != password) && saltAndHash(id, value).equals(password));
 	}
 
 	@Transient
