@@ -1,8 +1,11 @@
 package app.allclear.common.errors;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import app.allclear.common.ObjectUtils;
 
 /** Value object that represents the validation problem at the field level.
  * 
@@ -40,8 +43,14 @@ public class FieldError implements Serializable
 	}
 
 	@Override
-	public String toString()
+	public boolean equals(final Object o)
 	{
-		return new StringBuilder(name).append(": ").append(message).toString();
+		if (!(o instanceof FieldError)) return false;
+
+		var v = (FieldError) o;
+		return Objects.equals(code, v.code) && Objects.equals(name, v.name) && Objects.equals(message, v.message);
 	}
+
+	@Override
+	public String toString() { return ObjectUtils.toString(this); }
 }

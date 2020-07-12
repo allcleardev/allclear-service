@@ -28,6 +28,7 @@ public class ErrorInfo implements Serializable
 	{
 		this.message = message;
 		this.stacktrace = stacktrace;
+		this.fields = fields;
 	}
 
 	public ErrorInfo(final ValidationException ex)

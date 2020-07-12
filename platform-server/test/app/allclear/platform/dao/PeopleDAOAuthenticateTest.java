@@ -223,13 +223,27 @@ public class PeopleDAOAuthenticateTest
 	}
 
 	@ParameterizedTest
-	@CsvSource({"first,Password_1,,,422",
-	            "first,Password_2,,,200",
-	            "888-555-1000,Password_2,Password_3,Password_3,200"})
-	public void request_auth(final String name, final String password, final String newPassword, final String confirmPassword, final int status)
+	@CsvSource({"first,Password_1,,,422,AUTH-101,password,Invalid credentials",
+	            "first,Password_2,,,200,,,",
+	            "888-555-1000,Password_2,Password_3,Password_3,200,,,"})
+	public void request_auth(final String name, final String password, final String newPassword, final String confirmPassword, final int status, final String code, final String fieldName, final String message)
 	{
 		var response = request("auth").method(HttpMethod.PATCH, Entity.json(new PeopleAuthRequest(name, password, false, newPassword, confirmPassword)));
 		Assertions.assertEquals(status, response.getStatus(), "Status");
+
+		if (422 == status)
+		{
+			var ex = response.readEntity(ErrorInfo.class);
+			Assertions.assertNotNull(ex, "Exists");
+			Assertions.assertEquals(message, ex.message, "Check message");
+			assertThat(ex.fields).as("Check fields").isNotEmpty().hasSize(1).contains(new FieldError(code, fieldName, message));
+		}
+		else
+		{
+			Assertions.assertNull(code, "Check code");
+			Assertions.assertNull(fieldName, "Check fieldName");
+			Assertions.assertNull(message, "Check message");
+		}
 	}
 
 	@Test
