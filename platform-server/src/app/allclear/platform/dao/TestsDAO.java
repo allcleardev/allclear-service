@@ -13,6 +13,7 @@ import app.allclear.common.hibernate.AbstractDAO;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.filter.TestsFilter;
 import app.allclear.platform.type.TestType;
+import app.allclear.platform.value.SessionValue;
 import app.allclear.platform.value.TestsValue;
 
 /**********************************************************************************
@@ -37,8 +38,10 @@ public class TestsDAO extends AbstractDAO<Tests>
 		"takenOn", DESC,
 		"facilityId", ASC,
 		"facilityName", ASC + ",f.name;INNER JOIN o.facility f",
+		"remoteId", ASC,
 		"positive", DESC,
 		"notes", ASC,
+		"receivedAt", DESC,
 		"createdAt", DESC,
 		"updatedAt", DESC);
 
@@ -109,6 +112,7 @@ public class TestsDAO extends AbstractDAO<Tests>
 			.ensureExistsAndContains("typeId", "Type", value.typeId, TestType.VALUES)
 			.ensureExists("takenOn", "Taken On", value.takenOn)
 			.ensureExists("facilityId", "Facility", value.facilityId)
+			.ensureLength("remoteId", "RemoteId", value.remoteId, TestsValue.MAX_LEN_REMOTE_ID)
 			.ensureLength("notes", "Notes", value.notes, TestsValue.MAX_LEN_NOTES)
 			.check();
 
@@ -124,11 +128,21 @@ public class TestsDAO extends AbstractDAO<Tests>
 		// Throw exception if errors exist.
 		validator.check();
 
+		// Check for existing facility/remoteId record.
+		var record = (null != value.remoteId) ? find(value.facilityId, value.remoteId) : null;
+		if (null != record)
+		{
+			if (!record.getId().equals(value.id))
+				validator.add("remoteId", "The Remote ID '%s' is already in use.", value.remoteId).check();
+			else
+				check(record, auth);
+		}
+
 		value.personName = person.getName();
 		value.facilityName = facility.getName();
 		value.type = TestType.get(value.typeId);
 
-		return new Object[] { null, person, facility };
+		return new Object[] { record, person, facility, auth };
 	}
 
 	/** Removes a single Tests value.
@@ -149,7 +163,11 @@ public class TestsDAO extends AbstractDAO<Tests>
 
 	Tests check(final Tests record) throws NotAuthorizedException
 	{
-		var auth = sessionDao.checkAdminOrPerson();
+		return check(record, sessionDao.checkAdminOrPerson());
+	}
+
+	Tests check(final Tests record, final SessionValue auth) throws NotAuthorizedException
+	{
 		if (auth.canAdmin() || auth.person.id.equals(record.getPersonId())) return record;
 
 		throw new NotAuthorizedException("The Person '" + auth.person + "' cannot access '" + record + "'.");
@@ -168,6 +186,17 @@ public class TestsDAO extends AbstractDAO<Tests>
 			throw new ObjectNotFoundException("Could not find the Tests because id '" + id + "' is invalid.");
 
 		return check(record);
+	}
+
+	/** Finds a single Tests entity by facility and their internal system identifier.
+	 * 
+	 * @param facilityId
+	 * @param remoteId
+	 * @return NULL if not found.
+	 */
+	Tests find(final Long facilityId, final String remoteId)
+	{
+		return namedQuery("findTest").setParameter("facilityId", facilityId).setParameter("remoteId", remoteId).uniqueResult();
 	}
 
 	List<Tests> findByPerson(final String personId)
@@ -247,15 +276,20 @@ public class TestsDAO extends AbstractDAO<Tests>
 
 		return createQueryBuilder(select)
 			.add("id", "o.id = :id", filter.id)
-			.addContains("personId", "o.personId LIKE :personId", filter.personId)
-			.addContains("typeId", "o.typeId LIKE :typeId", filter.typeId)
+			.add("personId", "o.personId = :personId", filter.personId)
+			.add("typeId", "o.typeId = :typeId", filter.typeId)
 			.add("takenOn", "o.takenOn = :takenOn", filter.takenOn)
 			.add("takenOnFrom", "o.takenOn >= :takenOnFrom", filter.takenOnFrom)
 			.add("takenOnTo", "o.takenOn <= :takenOnTo", filter.takenOnTo)
 			.add("facilityId", "o.facilityId = :facilityId", filter.facilityId)
+			.addStarts("remoteId", "o.remoteId LIKE :remoteId", filter.remoteId)
+			.addNotNull("o.remoteId", filter.hasRemoteId)
 			.add("positive", "o.positive = :positive", filter.positive)
 			.addContains("notes", "o.notes LIKE :notes", filter.notes)
 			.addNotNull("o.notes", filter.hasNotes)
+			.addNotNull("o.receivedAt", filter.hasReceivedAt)
+			.add("receivedAtFrom", "o.receivedAt >= :receivedAtFrom", filter.receivedAtFrom)
+			.add("receivedAtTo", "o.receivedAt <= :receivedAtTo", filter.receivedAtTo)
 			.add("createdAtFrom", "o.createdAt >= :createdAtFrom", filter.createdAtFrom)
 			.add("createdAtTo", "o.createdAt <= :createdAtTo", filter.createdAtTo)
 			.add("updatedAtFrom", "o.updatedAt >= :updatedAtFrom", filter.updatedAtFrom)

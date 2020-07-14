@@ -29,9 +29,14 @@ public class TestsFilter extends QueryFilter
 	public Date takenOnFrom = null;
 	public Date takenOnTo = null;
 	public Long facilityId = null;
+	public String remoteId = null;
+	public Boolean hasRemoteId = null;
 	public Boolean positive = null;
 	public String notes = null;
 	public Boolean hasNotes = null;
+	public Boolean hasReceivedAt = null;
+	public Date receivedAtFrom = null;
+	public Date receivedAtTo = null;
 	public Date createdAtFrom = null;
 	public Date createdAtTo = null;
 	public Date updatedAtFrom = null;
@@ -45,9 +50,14 @@ public class TestsFilter extends QueryFilter
 	public TestsFilter withTakenOnFrom(final Date newValue) { takenOnFrom = newValue; return this; }
 	public TestsFilter withTakenOnTo(final Date newValue) { takenOnTo = newValue; return this; }
 	public TestsFilter withFacilityId(final Long newValue) { facilityId = newValue; return this; }
+	public TestsFilter withRemoteId(final String newValue) { remoteId = newValue; return this; }
+	public TestsFilter withHasRemoteId(final Boolean newValue) { hasRemoteId = newValue; return this; }
 	public TestsFilter withPositive(final Boolean newValue) { positive = newValue; return this; }
 	public TestsFilter withNotes(final String newValue) { notes = newValue; return this; }
 	public TestsFilter withHasNotes(final Boolean newValue) { hasNotes = newValue; return this; }
+	public TestsFilter withHasReceivedAt(final Boolean newValue) { hasReceivedAt = newValue; return this; }
+	public TestsFilter withReceivedAtFrom(final Date newValue) { receivedAtFrom = newValue; return this; }
+	public TestsFilter withReceivedAtTo(final Date newValue) { receivedAtTo = newValue; return this; }
 	public TestsFilter withCreatedAtFrom(final Date newValue) { createdAtFrom = newValue; return this; }
 	public TestsFilter withCreatedAtTo(final Date newValue) { createdAtTo = newValue; return this; }
 	public TestsFilter withUpdatedAtFrom(final Date newValue) { updatedAtFrom = newValue; return this; }
@@ -90,8 +100,11 @@ public class TestsFilter extends QueryFilter
 		@param takenOnFrom represents the "taken_on" field - lower boundary.
 		@param takenOnTo represents the "taken_on" field - upper boundary.
 		@param facilityId represents the "facility_id" field.
+		@param remoteId represents the "remote_id" field.
 		@param positive represents the "positive" field.
 		@param notes represents the "notes" field.
+		@param receivedAtFrom represents the "received_at" field - lower boundary.
+		@param receivedAtTo represents the "received_at" field - upper boundary.
 		@param createdAtFrom represents the "created_at" field - lower boundary.
 		@param createdAtTo represents the "created_at" field - upper boundary.
 		@param updatedAtFrom represents the "updated_at" field - lower boundary.
@@ -104,8 +117,11 @@ public class TestsFilter extends QueryFilter
 		final Date takenOnFrom,
 		final Date takenOnTo,
 		final Long facilityId,
+		final String remoteId,
 		final Boolean positive,
 		final String notes,
+		final Date receivedAtFrom,
+		final Date receivedAtTo,
 		final Date createdAtFrom,
 		final Date createdAtTo,
 		final Date updatedAtFrom,
@@ -118,8 +134,11 @@ public class TestsFilter extends QueryFilter
 		this.takenOnFrom = takenOnFrom;
 		this.takenOnTo = takenOnTo;
 		this.facilityId = facilityId;
+		this.remoteId = remoteId;
 		this.positive = positive;
 		this.notes = notes;
+		this.receivedAtFrom = receivedAtFrom;
+		this.receivedAtTo = receivedAtTo;
 		this.createdAtFrom = createdAtFrom;
 		this.createdAtTo = createdAtTo;
 		this.updatedAtFrom = updatedAtFrom;
@@ -138,6 +157,7 @@ public class TestsFilter extends QueryFilter
 		personId = StringUtils.trimToNull(personId);
 		typeId = StringUtils.trimToNull(typeId);
 		notes = StringUtils.trimToNull(notes);
+		remoteId = StringUtils.trimToNull(remoteId);
 
 		return this;
 	}

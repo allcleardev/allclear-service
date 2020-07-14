@@ -613,4 +613,23 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.1.106_ALLCLEAR-585" author="smalleyd">
+		<addColumn tableName="tests">
+			<column name="remote_id" type="VARCHAR(64)" remarks="Represents an identifier in the facility's system of record." />
+			<column name="received_at" type="DATETIME" remarks="Represents the date-time when the results are received and potentially communicated to the patient." />
+		</addColumn>
+		<dropForeignKeyConstraint baseTableName="tests" constraintName="fk_tests_facility" />
+		<addUniqueConstraint tableName="tests" columnNames="facility_id, remote_id" constraintName="unq_tests" />
+		<addForeignKeyConstraint baseTableName="tests" baseColumnNames="facility_id" referencedTableName="facility" referencedColumnNames="id" constraintName="fk_tests_facility" />
+
+		<rollback>
+			<dropForeignKeyConstraint baseTableName="tests" constraintName="fk_tests_facility" />
+			<dropUniqueConstraint tableName="tests" constraintName="unq_tests" />
+			<dropColumn tableName="tests" columnName="received_at" />
+			<dropColumn tableName="tests" columnName="remote_id" />
+
+			<addForeignKeyConstraint baseTableName="tests" baseColumnNames="facility_id" referencedTableName="facility" referencedColumnNames="id" constraintName="fk_tests_facility" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

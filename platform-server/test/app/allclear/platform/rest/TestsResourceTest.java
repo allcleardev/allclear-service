@@ -308,8 +308,13 @@ public class TestsResourceTest
 			assertThat(value.takenOn).as(assertId + "Check takenOn").isCloseTo(expected.takenOn, 500L);
 		Assertions.assertEquals(expected.facilityId, value.facilityId, assertId + "Check facilityId");
 		Assertions.assertEquals(expected.facilityName, value.facilityName, assertId + "Check facilityName");
+		Assertions.assertEquals(expected.remoteId, value.remoteId, assertId + "Check remoteId");
 		Assertions.assertEquals(expected.positive, value.positive, assertId + "Check positive");
 		Assertions.assertEquals(expected.notes, value.notes, assertId + "Check notes");
+		if (null == expected.receivedAt)
+			Assertions.assertNull(value.receivedAt, assertId + "Check receivedAt");
+		else
+			assertThat(value.receivedAt).as(assertId + "Check receivedAt").isCloseTo(expected.receivedAt, 500L);
 		if (null == expected.createdAt)
 			Assertions.assertNull(value.createdAt, assertId + "Check createdAt");
 		else

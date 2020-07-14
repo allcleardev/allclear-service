@@ -23,7 +23,7 @@
 <TR>
 <TD CLASS="header" COLSPAN="1">No.</TD><TD CLASS="header" COLSPAN="1">Table Name</TD><TD CLASS="header" COLSPAN="1">Comments</TD><TD CLASS="header" COLSPAN="1"># Records</TD></TR>
 <TR>
-<TD CLASS="detail">1</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOG">DATABASECHANGELOG</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">26</TD></TR>
+<TD CLASS="detail">1</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOG">DATABASECHANGELOG</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">27</TD></TR>
 <TR>
 <TD CLASS="detail">2</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOGLOCK">DATABASECHANGELOGLOCK</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">1</TD></TR>
 <TR>
@@ -1046,6 +1046,10 @@
 <TD CLASS="detail">8</TD><TD CLASS="detail">created_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail">Represents the date-time when the record was created.</TD></TR>
 <TR>
 <TD CLASS="detail">9</TD><TD CLASS="detail">updated_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail">Represents the date-time when the record was last modified.</TD></TR>
+<TR>
+<TD CLASS="detail">10</TD><TD CLASS="detail">remote_id</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">64</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents an identifier in the facility's system of record.</TD></TR>
+<TR>
+<TD CLASS="detail">11</TD><TD CLASS="detail">received_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the date-time when the results are received and potentially communicated to the patient.</TD></TR>
 </TABLE>
 <BR><TABLE CELLSPACING="0">
 <TR>
@@ -1055,7 +1059,7 @@
 <TR>
 <TD CLASS="detail">1</TD><TD CLASS="detail">PRIMARY</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">id</TD></TR>
 <TR>
-<TD CLASS="detail">2</TD><TD CLASS="detail">fk_tests_facility</TD><TD CLASS="detail">No</TD><TD CLASS="detail">No</TD><TD CLASS="detail">facility_id</TD></TR>
+<TD CLASS="detail">2</TD><TD CLASS="detail">unq_tests</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">No</TD><TD CLASS="detail">facility_id, remote_id</TD></TR>
 <TR>
 <TD CLASS="detail">3</TD><TD CLASS="detail">fk_tests_person</TD><TD CLASS="detail">No</TD><TD CLASS="detail">No</TD><TD CLASS="detail">person_id</TD></TR>
 </TABLE>

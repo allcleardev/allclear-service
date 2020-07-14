@@ -26,9 +26,10 @@ import app.allclear.platform.value.TestsValue;
 @Entity
 @Cacheable
 @DynamicUpdate
-@Table(name="tests")
+@Table(name="tests", uniqueConstraints={@UniqueConstraint(columnNames={"facility_id", "remote_id"})})
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE, region="tests")
-@NamedQueries(@NamedQuery(name="findTestsByPerson", query="SELECT OBJECT(o) FROM Tests o WHERE o.personId = :personId ORDER BY o.takenOn DESC"))
+@NamedQueries({@NamedQuery(name="findTest", query="SELECT OBJECT(o) FROM Tests o WHERE o.facilityId = :facilityId AND o.remoteId = :remoteId"),
+	@NamedQuery(name="findTestsByPerson", query="SELECT OBJECT(o) FROM Tests o WHERE o.personId = :personId ORDER BY o.takenOn DESC")})
 public class Tests implements Serializable
 {
 	private final static long serialVersionUID = 1L;
@@ -59,6 +60,11 @@ public class Tests implements Serializable
 	public Long facilityId;
 	public void setFacilityId(final Long newValue) { facilityId = newValue; }
 
+	@Column(name="remote_id", columnDefinition="VARCHAR(64)", nullable=true)
+	public String getRemoteId() { return remoteId; }
+	public String remoteId;
+	public void setRemoteId(final String newValue) { remoteId = newValue; }
+
 	@Column(name="positive", columnDefinition="BIT", nullable=false)
 	public boolean isPositive() { return positive; }
 	public boolean positive;
@@ -68,6 +74,11 @@ public class Tests implements Serializable
 	public String getNotes() { return notes; }
 	public String notes;
 	public void setNotes(final String newValue) { notes = newValue; }
+
+	@Column(name="received_at", columnDefinition="DATETIME", nullable=true)
+	public Date getReceivedAt() { return receivedAt; }
+	public Date receivedAt;
+	public void setReceivedAt(final Date newValue) { receivedAt = newValue; }
 
 	@Column(name="created_at", columnDefinition="DATETIME", nullable=false)
 	public Date getCreatedAt() { return createdAt; }
@@ -100,22 +111,26 @@ public class Tests implements Serializable
 		final String typeId,
 		final Date takenOn,
 		final Facility facility,
+		final String remoteId,
 		final boolean positive,
 		final String notes,
+		final Date receivedAt,
 		final Date createdAt)
 	{
 		this.personId = (this.person = person).getId();
 		this.typeId = typeId;
 		this.takenOn = takenOn;
 		this.facilityId = (this.facility = facility).getId();
+		this.remoteId = remoteId;
 		this.positive = positive;
 		this.notes = notes;
+		this.receivedAt = receivedAt;
 		this.createdAt = this.updatedAt = createdAt;
 	}
 
 	public Tests(final TestsValue value, final People person, final Facility facility)
 	{
-		this(person, value.typeId, value.takenOn, facility, value.positive, value.notes, value.createdAt = value.updatedAt = new Date());
+		this(person, value.typeId, value.takenOn, facility, value.remoteId, value.positive, value.notes, value.receivedAt, value.createdAt = value.updatedAt = new Date());
 	}
 
 	public Tests update(final TestsValue value, final People person, final Facility facility)
@@ -124,8 +139,10 @@ public class Tests implements Serializable
 		setTypeId(value.typeId);
 		setTakenOn(value.takenOn);
 		putFacility(facility);
+		setRemoteId(value.remoteId);
 		setPositive(value.positive);
 		setNotes(value.notes);
+		setReceivedAt(value.receivedAt);
 		value.createdAt = getCreatedAt();
 		setUpdatedAt(value.updatedAt = new Date());
 
@@ -143,8 +160,10 @@ public class Tests implements Serializable
 			Objects.equals(typeId, v.typeId) &&
 			DateUtils.truncatedEquals(takenOn, v.takenOn, Calendar.SECOND) &&
 			Objects.equals(facilityId, v.facilityId) &&
+			Objects.equals(remoteId, v.remoteId) &&
 			(positive == v.positive) &&
 			Objects.equals(notes, v.notes) &&
+			DateUtils.truncatedEquals(receivedAt, v.receivedAt, Calendar.SECOND) &&
 			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND) &&
 			DateUtils.truncatedEquals(updatedAt, v.updatedAt, Calendar.SECOND);
 	}
@@ -163,8 +182,10 @@ public class Tests implements Serializable
 			getTakenOn(),
 			getFacilityId(),
 			getFacility().getName(),
+			getRemoteId(),
 			isPositive(),
 			getNotes(),
+			getReceivedAt(),
 			getCreatedAt(),
 			getUpdatedAt());
 	}
@@ -177,8 +198,10 @@ public class Tests implements Serializable
 			.append(", typeId: ").append(typeId)
 			.append(", takenOn: ").append(takenOn)
 			.append(", facilityId: ").append(facilityId)
+			.append(", remoteId: ").append(remoteId)
 			.append(", positive: ").append(positive)
 			.append(", notes: ").append(notes)
+			.append(", receivedAt: ").append(receivedAt)
 			.append(", createdAt: ").append(createdAt)
 			.append(", updatedAt: ").append(updatedAt)
 			.append(" }").toString();

@@ -85,7 +85,7 @@ public class TestsDAOTest
 		PERSON = peopleDao.add(PeopleDAOTest.createValid());
 		PERSON_1 = peopleDao.add(PeopleDAOTest.createValid().withName("second").withPhone("+18885552000").withEmail(null));
 
-		var value = dao.add(VALUE = new TestsValue(PERSON.id, NASAL_SWAB.id, TAKEN_ON, FACILITY.id, false, "All the other details"));
+		var value = dao.add(VALUE = new TestsValue(PERSON.id, NASAL_SWAB.id, TAKEN_ON, FACILITY.id, false, "All the other details").withRemoteId("remote-1"));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
@@ -95,7 +95,7 @@ public class TestsDAOTest
 	*/
 	private TestsValue createValid()
 	{
-		return new TestsValue(PERSON_1.id, ANTIBODY.id, TAKEN_ON_1, FACILITY_1.id, true, "Some more information");
+		return new TestsValue(PERSON_1.id, ANTIBODY.id, TAKEN_ON_1, FACILITY_1.id, true, "Some more information").withRemoteId("local_2");
 	}
 
 	@Test
@@ -151,6 +151,18 @@ public class TestsDAOTest
 	public void add_invalidFacilityId()
 	{
 		assertThrows(ValidationException.class, () -> dao.add(createValid().withFacilityId(VALUE.id + 1000L)));
+	}
+
+	@Test
+	public void add_dupeRemoteId()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withFacilityId(FACILITY.id).withRemoteId("remote-1")));
+	}
+
+	@Test
+	public void add_longRemoteId()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withRemoteId(StringUtils.repeat("A", TestsValue.MAX_LEN_REMOTE_ID + 1))));
 	}
 
 	@Test
@@ -266,12 +278,14 @@ public class TestsDAOTest
 		count(new TestsFilter().withTypeId(VALUE.typeId), 1L);
 		count(new TestsFilter().withTakenOn(VALUE.takenOn), 1L);
 		count(new TestsFilter().withFacilityId(VALUE.facilityId), 1L);
+		count(new TestsFilter().withRemoteId("remote-1"), 1L);
 		count(new TestsFilter().withPositive(VALUE.positive), 1L);
 		count(new TestsFilter().withNotes(VALUE.notes), 1L);
 		count(new TestsFilter().withPersonId(v.personId), 0L);
 		count(new TestsFilter().withTypeId(v.typeId), 0L);
 		count(new TestsFilter().withTakenOn(v.takenOn), 0L);
 		count(new TestsFilter().withFacilityId(v.facilityId), 0L);
+		count(new TestsFilter().withRemoteId("local_2"), 0L);
 		count(new TestsFilter().withPositive(v.positive), 0L);
 		count(new TestsFilter().withNotes(v.notes), 0L);
 
@@ -295,12 +309,14 @@ public class TestsDAOTest
 		count(new TestsFilter().withTypeId(VALUE.typeId), 0L);
 		count(new TestsFilter().withTakenOn(VALUE.takenOn), 0L);
 		count(new TestsFilter().withFacilityId(VALUE.facilityId), 0L);
+		count(new TestsFilter().withRemoteId("remote-1"), 0L);
 		count(new TestsFilter().withPositive(VALUE.positive), 0L);
 		count(new TestsFilter().withNotes(VALUE.notes), 0L);
 		count(new TestsFilter().withPersonId(v.personId), 1L);
 		count(new TestsFilter().withTypeId(v.typeId), 1L);
 		count(new TestsFilter().withTakenOn(v.takenOn), 1L);
 		count(new TestsFilter().withFacilityId(v.facilityId), 1L);
+		count(new TestsFilter().withRemoteId("local_2"), 1L);
 		count(new TestsFilter().withPositive(v.positive), 1L);
 		count(new TestsFilter().withNotes(v.notes), 1L);
 
@@ -317,6 +333,7 @@ public class TestsDAOTest
 		Assertions.assertEquals(v.typeId, record.getTypeId(), "Check typeId");
 		Assertions.assertEquals(v.takenOn, record.getTakenOn(), "Check takenOn");
 		Assertions.assertEquals(v.facilityId, record.getFacilityId(), "Check facilityId");
+		Assertions.assertEquals("local_2", record.getRemoteId(), "Check remoteId");
 		Assertions.assertEquals(v.positive, record.isPositive(), "Check positive");
 		Assertions.assertEquals(v.notes, record.getNotes(), "Check notes");
 		check(VALUE, record);
@@ -357,6 +374,7 @@ public class TestsDAOTest
 			arguments(new TestsFilter(1, 20).withTakenOnTo(hourAheadTaken), 1L),
 			arguments(new TestsFilter(1, 20).withTakenOnFrom(hourAgoTaken).withTakenOnTo(hourAheadTaken), 1L),
 			arguments(new TestsFilter(1, 20).withFacilityId(VALUE.facilityId), 1L),
+			arguments(new TestsFilter(1, 20).withRemoteId("local_2"), 1L),
 			arguments(new TestsFilter(1, 20).withPositive(VALUE.positive), 1L),
 			arguments(new TestsFilter(1, 20).withNotes(VALUE.notes), 1L),
 			arguments(new TestsFilter(1, 20).withHasNotes(true), 1L),
@@ -376,6 +394,7 @@ public class TestsDAOTest
 			arguments(new TestsFilter(1, 20).withTakenOnTo(hourAgoTaken), 0L),
 			arguments(new TestsFilter(1, 20).withTakenOnFrom(hourAheadTaken).withTakenOnTo(hourAgoTaken), 0L),
 			arguments(new TestsFilter(1, 20).withFacilityId(VALUE.facilityId + 1000L), 0L),
+			arguments(new TestsFilter(1, 20).withRemoteId("remote-1"), 0L),
 			arguments(new TestsFilter(1, 20).withPositive(!VALUE.positive), 0L),
 			arguments(new TestsFilter(1, 20).withNotes("invalid"), 0L),
 			arguments(new TestsFilter(1, 20).withHasNotes(false), 0L),
@@ -491,6 +510,13 @@ public class TestsDAOTest
 			arguments(new TestsFilter("facilityName", "DESC"), "facilityName", "DESC"),
 			arguments(new TestsFilter("facilityName", "desc"), "facilityName", "DESC"),
 
+			arguments(new TestsFilter("remoteId", null), "remoteId", "ASC"), // Missing sort direction is converted to the default.
+			arguments(new TestsFilter("remoteId", "ASC"), "remoteId", "ASC"),
+			arguments(new TestsFilter("remoteId", "asc"), "remoteId", "ASC"),
+			arguments(new TestsFilter("remoteId", "invalid"), "remoteId", "ASC"),	// Invalid sort direction is converted to the default.
+			arguments(new TestsFilter("remoteId", "DESC"), "remoteId", "DESC"),
+			arguments(new TestsFilter("remoteId", "desc"), "remoteId", "DESC"),
+
 			arguments(new TestsFilter("positive", null), "positive", "DESC"), // Missing sort direction is converted to the default.
 			arguments(new TestsFilter("positive", "ASC"), "positive", "ASC"),
 			arguments(new TestsFilter("positive", "asc"), "positive", "ASC"),
@@ -504,6 +530,13 @@ public class TestsDAOTest
 			arguments(new TestsFilter("notes", "invalid"), "notes", "ASC"),	// Invalid sort direction is converted to the default.
 			arguments(new TestsFilter("notes", "DESC"), "notes", "DESC"),
 			arguments(new TestsFilter("notes", "desc"), "notes", "DESC"),
+
+			arguments(new TestsFilter("receivedAt", null), "receivedAt", "DESC"), // Missing sort direction is converted to the default.
+			arguments(new TestsFilter("receivedAt", "ASC"), "receivedAt", "ASC"),
+			arguments(new TestsFilter("receivedAt", "asc"), "receivedAt", "ASC"),
+			arguments(new TestsFilter("receivedAt", "invalid"), "receivedAt", "DESC"),	// Invalid sort direction is converted to the default.
+			arguments(new TestsFilter("receivedAt", "DESC"), "receivedAt", "DESC"),
+			arguments(new TestsFilter("receivedAt", "desc"), "receivedAt", "DESC"),
 
 			arguments(new TestsFilter("createdAt", null), "createdAt", "DESC"), // Missing sort direction is converted to the default.
 			arguments(new TestsFilter("createdAt", "ASC"), "createdAt", "ASC"),
@@ -579,6 +612,7 @@ public class TestsDAOTest
 		count(new TestsFilter().withTypeId(v.typeId), 0L);
 		count(new TestsFilter().withTakenOn(v.takenOn), 0L);
 		count(new TestsFilter().withFacilityId(v.facilityId), 0L);
+		count(new TestsFilter().withRemoteId("local_2"), 0L);
 		count(new TestsFilter().withPositive(v.positive), 0L);
 		count(new TestsFilter().withNotes(v.notes), 0L);
 	}
@@ -654,8 +688,10 @@ public class TestsDAOTest
 		Assertions.assertEquals(expected.typeId, record.getTypeId(), assertId + "Check typeId");
 		Assertions.assertEquals(expected.takenOn, record.getTakenOn(), assertId + "Check takenOn");
 		Assertions.assertEquals(expected.facilityId, record.getFacilityId(), assertId + "Check facilityId");
+		Assertions.assertEquals(expected.remoteId, record.getRemoteId(), assertId + "Check remoteId");
 		Assertions.assertEquals(expected.positive, record.isPositive(), assertId + "Check positive");
 		Assertions.assertEquals(expected.notes, record.getNotes(), assertId + "Check notes");
+		Assertions.assertEquals(expected.receivedAt, record.getReceivedAt(), assertId + "Check receivedAt");
 		Assertions.assertEquals(expected.createdAt, record.getCreatedAt(), assertId + "Check createdAt");
 		Assertions.assertEquals(expected.updatedAt, record.getUpdatedAt(), assertId + "Check updatedAt");
 	}
@@ -672,8 +708,10 @@ public class TestsDAOTest
 		Assertions.assertEquals(expected.takenOn, value.takenOn, assertId + "Check takenOn");
 		Assertions.assertEquals(expected.facilityId, value.facilityId, assertId + "Check facilityId");
 		Assertions.assertEquals(expected.facilityName, value.facilityName, assertId + "Check facilityName");
+		Assertions.assertEquals(expected.remoteId, value.remoteId, assertId + "Check remoteId");
 		Assertions.assertEquals(expected.positive, value.positive, assertId + "Check positive");
 		Assertions.assertEquals(expected.notes, value.notes, assertId + "Check notes");
+		Assertions.assertEquals(expected.receivedAt, value.receivedAt, assertId + "Check receivedAt");
 		Assertions.assertEquals(expected.createdAt, value.createdAt, assertId + "Check createdAt");
 		Assertions.assertEquals(expected.updatedAt, value.updatedAt, assertId + "Check updatedAt");
 	}
