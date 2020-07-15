@@ -58,6 +58,8 @@ public class TestsResourceTest
 	private static SessionValue ADMIN = null;
 	private static FacilityValue FACILITY = null;
 	private static PeopleValue PERSON = null;
+	private static Date RECEIVED_AT = utc(2020, 6, 14);
+	// private static Date RECEIVED_AT_1 = utc(2020, 7, 14);
 	private static Date TAKEN_ON = utc(2020, 4, 4);
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
@@ -97,7 +99,7 @@ public class TestsResourceTest
 
 		var now = new Date();
 		var response = request()
-			.post(Entity.entity(VALUE = new TestsValue(PERSON.id, NASAL_SWAB.id, TAKEN_ON, FACILITY.id, true, "All the other details"), UTF8MediaType.APPLICATION_JSON_TYPE));
+			.post(Entity.entity(VALUE = new TestsValue(PERSON.id, NASAL_SWAB.id, TAKEN_ON, FACILITY.id, true, "All the other details").withReceivedAt(RECEIVED_AT), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var value = response.readEntity(TestsValue.class);
@@ -121,6 +123,7 @@ public class TestsResourceTest
 
 		var value = response.readEntity(TestsValue.class);
 		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertEquals(RECEIVED_AT, value.receivedAt, "Check receivedAt");
 		Assertions.assertEquals(value.createdAt, value.updatedAt, "Check updatedAt");
 		check(VALUE, value);
 	}
@@ -141,10 +144,13 @@ public class TestsResourceTest
 	public void modify()
 	{
 		count(new TestsFilter().withPositive(true), 1L);
+		count(new TestsFilter().withHasReceivedAt(true), 1L);
+		count(new TestsFilter().withReceivedAtFrom(hours(RECEIVED_AT, -1)).withReceivedAtTo(hours(RECEIVED_AT, 1)), 1L);
 		count(new TestsFilter().withPositive(false), 0L);
+		count(new TestsFilter().withHasReceivedAt(false), 0L);
 
 		var now = new Date();
-		var response = request().put(Entity.entity(VALUE.withPositive(false), UTF8MediaType.APPLICATION_JSON_TYPE));
+		var response = request().put(Entity.entity(VALUE.withPositive(false).withReceivedAt(null), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var value = response.readEntity(TestsValue.class);
@@ -156,7 +162,10 @@ public class TestsResourceTest
 	public void modify_count()
 	{
 		count(new TestsFilter().withPositive(true), 0L);
+		count(new TestsFilter().withHasReceivedAt(true), 0L);
+		count(new TestsFilter().withReceivedAtFrom(hours(RECEIVED_AT, -1)).withReceivedAtTo(hours(RECEIVED_AT, 1)), 0L);
 		count(new TestsFilter().withPositive(false), 1L);
+		count(new TestsFilter().withHasReceivedAt(false), 1L);
 	}
 
 	@Test
@@ -165,6 +174,7 @@ public class TestsResourceTest
 		var value = get(VALUE.id).readEntity(TestsValue.class);
 		Assertions.assertNotNull(value, "Exists");
 		Assertions.assertFalse(value.positive, "Check positive");
+		Assertions.assertNull(value.receivedAt, "Check receivedAt");
 		assertThat(value.updatedAt).as("Check updatedAt").isAfter(value.createdAt);
 		check(VALUE, value);
 	}
@@ -187,6 +197,7 @@ public class TestsResourceTest
 			arguments(new TestsFilter(1, 20).withFacilityId(VALUE.facilityId), 1L),
 			arguments(new TestsFilter(1, 20).withPositive(VALUE.positive), 1L),
 			arguments(new TestsFilter(1, 20).withNotes(VALUE.notes), 1L),
+			arguments(new TestsFilter(1, 20).withHasReceivedAt(false), 1L),
 			arguments(new TestsFilter(1, 20).withCreatedAtFrom(hourAgo), 1L),
 			arguments(new TestsFilter(1, 20).withCreatedAtTo(hourAhead), 1L),
 			arguments(new TestsFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
@@ -205,6 +216,8 @@ public class TestsResourceTest
 			arguments(new TestsFilter(1, 20).withFacilityId(VALUE.facilityId + 1000L), 0L),
 			arguments(new TestsFilter(1, 20).withPositive(!VALUE.positive), 0L),
 			arguments(new TestsFilter(1, 20).withNotes("invalid"), 0L),
+			arguments(new TestsFilter(1, 20).withHasReceivedAt(true), 0L),
+			arguments(new TestsFilter(1, 20).withReceivedAtFrom(hours(RECEIVED_AT, -1)).withReceivedAtTo(hours(RECEIVED_AT, 1)), 0L),
 			arguments(new TestsFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
 			arguments(new TestsFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
 			arguments(new TestsFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),

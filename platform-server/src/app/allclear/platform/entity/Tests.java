@@ -133,7 +133,7 @@ public class Tests implements Serializable
 		this(person, value.typeId, value.takenOn, facility, value.remoteId, value.positive, value.notes, value.receivedAt, value.createdAt = value.updatedAt = new Date());
 	}
 
-	public Tests update(final TestsValue value, final People person, final Facility facility)
+	public Tests update(final TestsValue value, final People person, final Facility facility, final boolean admin)
 	{
 		putPerson(person);
 		setTypeId(value.typeId);
@@ -142,7 +142,8 @@ public class Tests implements Serializable
 		setRemoteId(value.remoteId);
 		setPositive(value.positive);
 		setNotes(value.notes);
-		setReceivedAt(value.receivedAt);
+		if (admin) setReceivedAt(value.receivedAt);
+		else value.receivedAt = getReceivedAt();
 		value.createdAt = getCreatedAt();
 		setUpdatedAt(value.updatedAt = new Date());
 

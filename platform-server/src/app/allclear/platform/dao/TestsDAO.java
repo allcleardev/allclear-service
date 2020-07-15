@@ -81,7 +81,7 @@ public class TestsDAO extends AbstractDAO<Tests>
 		if (null == record)
 			record = findWithException(value.id);
 
-		return value.withId(record.update(value, (People) cmrs[1], (Facility) cmrs[2]).getId());
+		return value.withId(record.update(value, (People) cmrs[1], (Facility) cmrs[2], ((SessionValue) cmrs[3]).canAdmin()).getId());
 	}
 
 	/** Validates a single Tests value.
@@ -115,6 +115,9 @@ public class TestsDAO extends AbstractDAO<Tests>
 			.ensureLength("remoteId", "RemoteId", value.remoteId, TestsValue.MAX_LEN_REMOTE_ID)
 			.ensureLength("notes", "Notes", value.notes, TestsValue.MAX_LEN_NOTES)
 			.check();
+
+		if ((null != value.receivedAt) && value.takenOn.after(value.receivedAt))
+			validator.add("receivedAt", "The Received Date must be after the Taken Date.").check();
 
 		// Validation foreign keys.
 		var session = currentSession();

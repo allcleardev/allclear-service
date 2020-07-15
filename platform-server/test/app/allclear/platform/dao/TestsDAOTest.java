@@ -57,6 +57,8 @@ public class TestsDAOTest
 	private static FacilityValue FACILITY_1 = null;
 	private static PeopleValue PERSON = null;
 	private static PeopleValue PERSON_1 = null;
+	private static Date RECEIVED_AT = utc(2020, 6, 14);
+	private static Date RECEIVED_AT_1 = utc(2020, 7, 14);
 	private static Date TAKEN_ON = utc(2020, 4, 4);
 	private static Date TAKEN_ON_1 = utc(2020, 3, 4);
 
@@ -95,7 +97,7 @@ public class TestsDAOTest
 	*/
 	private TestsValue createValid()
 	{
-		return new TestsValue(PERSON_1.id, ANTIBODY.id, TAKEN_ON_1, FACILITY_1.id, true, "Some more information").withRemoteId("local_2");
+		return new TestsValue(PERSON_1.id, ANTIBODY.id, TAKEN_ON_1, FACILITY_1.id, true, "Some more information").withRemoteId("local_2").withReceivedAt(RECEIVED_AT_1);
 	}
 
 	@Test
@@ -195,6 +197,7 @@ public class TestsDAOTest
 	{
 		var record = dao.findWithException(VALUE.id);
 		Assertions.assertNotNull(record, "Exists");
+		Assertions.assertEquals("remote-1", record.getRemoteId(), "Check remoteId");
 		check(VALUE, record);
 	}
 
@@ -230,6 +233,7 @@ public class TestsDAOTest
 	{
 		var value = dao.getByIdWithException(VALUE.id);
 		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertEquals("remote-1", value.remoteId, "Check remoteId");
 		check(VALUE, value);
 	}
 
@@ -281,6 +285,7 @@ public class TestsDAOTest
 		count(new TestsFilter().withRemoteId("remote-1"), 1L);
 		count(new TestsFilter().withPositive(VALUE.positive), 1L);
 		count(new TestsFilter().withNotes(VALUE.notes), 1L);
+		count(new TestsFilter().withHasReceivedAt(false), 1L);
 		count(new TestsFilter().withPersonId(v.personId), 0L);
 		count(new TestsFilter().withTypeId(v.typeId), 0L);
 		count(new TestsFilter().withTakenOn(v.takenOn), 0L);
@@ -288,6 +293,7 @@ public class TestsDAOTest
 		count(new TestsFilter().withRemoteId("local_2"), 0L);
 		count(new TestsFilter().withPositive(v.positive), 0L);
 		count(new TestsFilter().withNotes(v.notes), 0L);
+		count(new TestsFilter().withHasReceivedAt(true), 0L);
 
 		var value = dao.update(VALUE_1 = v.withId(VALUE.id));
 		Assertions.assertNotNull(value, "Exists");
@@ -312,6 +318,8 @@ public class TestsDAOTest
 		count(new TestsFilter().withRemoteId("remote-1"), 0L);
 		count(new TestsFilter().withPositive(VALUE.positive), 0L);
 		count(new TestsFilter().withNotes(VALUE.notes), 0L);
+		count(new TestsFilter().withHasReceivedAt(false), 0L);
+		count(new TestsFilter().withReceivedAtFrom(hours(RECEIVED_AT, -1)).withReceivedAtTo(hours(RECEIVED_AT, 1)), 0L);
 		count(new TestsFilter().withPersonId(v.personId), 1L);
 		count(new TestsFilter().withTypeId(v.typeId), 1L);
 		count(new TestsFilter().withTakenOn(v.takenOn), 1L);
@@ -319,6 +327,8 @@ public class TestsDAOTest
 		count(new TestsFilter().withRemoteId("local_2"), 1L);
 		count(new TestsFilter().withPositive(v.positive), 1L);
 		count(new TestsFilter().withNotes(v.notes), 1L);
+		count(new TestsFilter().withHasReceivedAt(true), 1L);
+		count(new TestsFilter().withReceivedAtFrom(hours(RECEIVED_AT_1, -1)).withReceivedAtTo(hours(RECEIVED_AT_1, 1)), 1L);
 
 		VALUE = VALUE_1;
 	}
@@ -336,6 +346,7 @@ public class TestsDAOTest
 		Assertions.assertEquals("local_2", record.getRemoteId(), "Check remoteId");
 		Assertions.assertEquals(v.positive, record.isPositive(), "Check positive");
 		Assertions.assertEquals(v.notes, record.getNotes(), "Check notes");
+		Assertions.assertEquals(RECEIVED_AT_1, record.getReceivedAt(), "Check receivedAt");
 		check(VALUE, record);
 	}
 
@@ -364,6 +375,8 @@ public class TestsDAOTest
 		var hourAhead = hourAhead();
 		var hourAgoTaken = hours(VALUE.takenOn, -1);
 		var hourAheadTaken = hours(VALUE.takenOn, 1);
+		var hourAgoReceived = hours(VALUE.receivedAt, -1);
+		var hourAheadReceived = hours(VALUE.receivedAt, 1);
 
 		return Stream.of(
 			arguments(new TestsFilter(1, 20).withId(VALUE.id), 1L),
@@ -378,6 +391,10 @@ public class TestsDAOTest
 			arguments(new TestsFilter(1, 20).withPositive(VALUE.positive), 1L),
 			arguments(new TestsFilter(1, 20).withNotes(VALUE.notes), 1L),
 			arguments(new TestsFilter(1, 20).withHasNotes(true), 1L),
+			arguments(new TestsFilter(1, 20).withHasReceivedAt(true), 1L),
+			arguments(new TestsFilter(1, 20).withReceivedAtFrom(hourAgoReceived), 1L),
+			arguments(new TestsFilter(1, 20).withReceivedAtTo(hourAheadReceived), 1L),
+			arguments(new TestsFilter(1, 20).withReceivedAtFrom(hourAgoReceived).withReceivedAtTo(hourAheadReceived), 1L),
 			arguments(new TestsFilter(1, 20).withCreatedAtFrom(hourAgo), 1L),
 			arguments(new TestsFilter(1, 20).withCreatedAtTo(hourAhead), 1L),
 			arguments(new TestsFilter(1, 20).withCreatedAtFrom(hourAgo).withCreatedAtTo(hourAhead), 1L),
@@ -398,6 +415,10 @@ public class TestsDAOTest
 			arguments(new TestsFilter(1, 20).withPositive(!VALUE.positive), 0L),
 			arguments(new TestsFilter(1, 20).withNotes("invalid"), 0L),
 			arguments(new TestsFilter(1, 20).withHasNotes(false), 0L),
+			arguments(new TestsFilter(1, 20).withHasReceivedAt(false), 0L),
+			arguments(new TestsFilter(1, 20).withReceivedAtFrom(hourAheadReceived), 0L),
+			arguments(new TestsFilter(1, 20).withReceivedAtTo(hourAgoReceived), 0L),
+			arguments(new TestsFilter(1, 20).withReceivedAtFrom(hourAheadReceived).withReceivedAtTo(hourAgoReceived), 0L),
 			arguments(new TestsFilter(1, 20).withCreatedAtFrom(hourAhead), 0L),
 			arguments(new TestsFilter(1, 20).withCreatedAtTo(hourAgo), 0L),
 			arguments(new TestsFilter(1, 20).withCreatedAtFrom(hourAhead).withCreatedAtTo(hourAgo), 0L),
@@ -628,7 +649,9 @@ public class TestsDAOTest
 	@Test
 	public void z_00_get()
 	{
-		Assertions.assertEquals(PERSON.id, dao.getById(VALUE.id).personId);
+		var v = dao.getById(VALUE.id);
+		Assertions.assertEquals(PERSON.id, v.personId, "Check personId");
+		Assertions.assertEquals(RECEIVED_AT_1, v.receivedAt, "Check receivedAt");	// People can set receivedAt on add.
 	}
 
 	@Test
@@ -637,6 +660,65 @@ public class TestsDAOTest
 		sessionDao.current(PERSON_1);
 
 		assertThrows(NotAuthorizedException.class, () -> dao.getById(VALUE.id));
+	}
+
+	@Test
+	public void z_00_modify_00()
+	{
+		sessionDao.current(PERSON);
+
+		var v = dao.update(VALUE.withReceivedAt(RECEIVED_AT));
+		Assertions.assertEquals(RECEIVED_AT_1, v.receivedAt, "Check receivedAt");	// People cannot set receivedAt on update.
+	}
+
+	@Test
+	public void z_00_modify_00_get()
+	{
+		var v = dao.getById(VALUE.id);
+		Assertions.assertEquals(RECEIVED_AT_1, v.receivedAt, "Check receivedAt");	// People cannot set receivedAt on update.
+	}
+
+	@Test
+	public void z_00_modify_01()
+	{
+		sessionDao.current(EDITOR);
+
+		assertThrows(NotAuthorizedException.class, () -> dao.update(VALUE.withReceivedAt(RECEIVED_AT)));
+	}
+
+	@Test
+	public void z_00_modify_01_get()
+	{
+		var v = dao.getById(VALUE.id);
+		Assertions.assertEquals(RECEIVED_AT_1, v.receivedAt, "Check receivedAt");	// Editors cannot set receivedAt on update.
+	}
+
+	@Test
+	public void z_00_modify_02()
+	{
+		var v = dao.update(VALUE.withReceivedAt(RECEIVED_AT));
+		Assertions.assertEquals(RECEIVED_AT, v.receivedAt, "Check receivedAt");	// Admins can set receivedAt on update.
+	}
+
+	@Test
+	public void z_00_modify_02_get()
+	{
+		var v = dao.getById(VALUE.id);
+		Assertions.assertEquals(RECEIVED_AT, v.receivedAt, "Check receivedAt");	// Admins can set receivedAt on update.
+	}
+
+	@Test
+	public void z_00_modify_03()
+	{
+		var v = dao.update(VALUE.withReceivedAt(null));
+		Assertions.assertNull(v.receivedAt, "Check receivedAt");	// Admins can set receivedAt on update.
+	}
+
+	@Test
+	public void z_00_modify_03_get()
+	{
+		var v = dao.getById(VALUE.id);
+		Assertions.assertNull(v.receivedAt, "Check receivedAt");	// Admins can set receivedAt on update.
 	}
 
 	@Test
