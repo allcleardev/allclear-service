@@ -235,6 +235,11 @@ public class People implements Serializable
 	public List<Facility> facilities;
 	public void setFacilities(final List<Facility> newValues) { facilities = newValues; }
 
+	@OneToMany(cascade={CascadeType.REMOVE}, fetch=FetchType.LAZY, mappedBy="person")
+	public List<FacilityPeople> getAssociations() { return associations; }
+	public List<FacilityPeople> associations;
+	public void setAssociations(final List<FacilityPeople> newValues) { associations = newValues; }
+
 	public People() {}
 
 	/** For test */
@@ -476,6 +481,17 @@ public class People implements Serializable
 		if (fields.visibilitySymptoms().available(who)) v.withSymptoms(toCreatedValues(getSymptoms()));
 
 		return v.withFacilities(facilities_);
+	}
+
+	@Transient
+	public PeopleValue toValue()	// Used for full profile of authenticated user which includes facility associations. DLS on 7/15/2020.
+	{
+		var o = toValueX(Visibility.ME);
+
+		var values = getAssociations();
+		if (CollectionUtils.isNotEmpty(values)) o.associations = values.stream().map(v -> v.toCreate()).collect(toList());
+
+		return o;
 	}
 
 	@Transient

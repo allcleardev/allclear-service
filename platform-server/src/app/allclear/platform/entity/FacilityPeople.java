@@ -9,6 +9,7 @@ import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
 import org.hibernate.annotations.DynamicUpdate;
 
+import app.allclear.common.value.CreateValue;
 import app.allclear.common.value.CreatedValue;
 
 /**********************************************************************************
@@ -99,9 +100,12 @@ public class FacilityPeople implements FacilityChild
 	@Transient
 	public CreatedValue toValue()
 	{
-		return new CreatedValue(
-			getPersonId(),
-			getPerson().getName(),
-			getCreatedAt());
+		return new CreatedValue(getPersonId(), getPerson().getName(), getCreatedAt());
+	}
+
+	@Transient
+	public CreateValue toCreate()
+	{
+		return new CreateValue(getFacilityId(), getFacility().getName(), getCreatedAt());
 	}
 }

@@ -2,21 +2,15 @@ package app.allclear.platform.dao;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
-import static app.allclear.platform.type.Condition.*;
-import static app.allclear.platform.type.Exposure.*;
-import static app.allclear.platform.type.HealthWorkerStatus.*;
-import static app.allclear.platform.type.Symptom.*;
-import static app.allclear.platform.type.Visibility.*;
 
 import java.util.Date;
-import java.util.function.Supplier;
+import java.util.List;
 import java.util.stream.Stream;
 
 import javax.ws.rs.HttpMethod;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.GenericType;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
@@ -26,17 +20,14 @@ import org.junit.jupiter.params.provider.*;
 
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
-import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.*;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.junit.hibernate.*;
 import app.allclear.platform.App;
 import app.allclear.platform.ConfigTest;
-import app.allclear.platform.filter.PeopleFilter;
 import app.allclear.platform.model.PeopleAuthRequest;
 import app.allclear.platform.rest.PeopleResource;
-import app.allclear.platform.type.*;
 import app.allclear.platform.value.*;
 
 /** Functional test class that verifies the PeopleDAO field access.
@@ -55,11 +46,12 @@ public class PeopleDAOAuthenticateTest
 	public final HibernateTransactionRule transRule = new HibernateTransactionRule(DAO_RULE);
 
 	private static PeopleDAO dao;
+	private static FacilityDAO facilityDao;
 	private static SessionDAO sessionDao;
 	private static FakeRedisClient redis = new FakeRedisClient();
 	private static SessionValue ADMIN;
-	private static SessionValue FIRST_;
-	private static SessionValue SECOND_;
+	private static final FacilityValue FACILITY = new FacilityValue(0);
+	private static final FacilityValue FACILITY_1 = new FacilityValue(1);
 	private static final PeopleValue FIRST = new PeopleValue("first", "888-555-1000", true).withEmail("first@test.com");
 	private static final PeopleValue SECOND = new PeopleValue("second", "888-555-1001", false).withEmail("second@test.com");
 
@@ -69,8 +61,6 @@ public class PeopleDAOAuthenticateTest
 		.addResource(new ValidationExceptionMapper())
 		.addResource(new PeopleResource(dao, null, sessionDao, null))
 		.build();
-	private static final GenericType<QueryResults<PeopleValue, PeopleFilter>> TYPE_QUERY_RESULTS =
-		new GenericType<QueryResults<PeopleValue, PeopleFilter>>() {};
 
 	@BeforeAll
 	public static void up()
@@ -78,6 +68,7 @@ public class PeopleDAOAuthenticateTest
 		var factory = DAO_RULE.getSessionFactory();
 
 		dao = new PeopleDAO(factory);
+		facilityDao = new FacilityDAO(factory, new TestAuditor());
 		sessionDao = new SessionDAO(redis, ConfigTest.loadTest());
 	}
 
@@ -93,9 +84,10 @@ public class PeopleDAOAuthenticateTest
 		dao.add(FIRST);
 		dao.add(SECOND);
 
+		facilityDao.add(FACILITY.withPeople(List.of(SECOND.created())), true);
+		facilityDao.add(FACILITY_1.withPeople(List.of(FIRST.created(), SECOND.created())), true);
+
 		ADMIN = sessionDao.add(new SessionValue(false, new AdminValue("admin")));
-		FIRST_ = sessionDao.add(new SessionValue(false, FIRST));
-		SECOND_ = sessionDao.add(new SessionValue(false, SECOND));
 	}
 
 	public static Stream<Arguments> authenticate()
@@ -203,6 +195,7 @@ public class PeopleDAOAuthenticateTest
 		var o = dao.authenticate(new PeopleAuthRequest(name, password, false, newPassword, confirmPassword));
 		Assertions.assertNotNull(o, "Exists");
 		Assertions.assertEquals(FIRST.id, o.id, "Check ID");
+		assertThat(o.associations).as("Check associations").containsExactly(FACILITY_1.created());
 	}
 
 	@ParameterizedTest
@@ -243,6 +236,9 @@ public class PeopleDAOAuthenticateTest
 			Assertions.assertNull(code, "Check code");
 			Assertions.assertNull(fieldName, "Check fieldName");
 			Assertions.assertNull(message, "Check message");
+
+			var o = response.readEntity(SessionValue.class).person;
+			assertThat(o.associations).as("Check associations").containsExactly(FACILITY_1.created());
 		}
 	}
 
@@ -303,6 +299,39 @@ public class PeopleDAOAuthenticateTest
 	public void request_password_success_check()
 	{
 		request_auth_check();
+	}
+
+	@Test
+	public void second()
+	{
+		dao.update(SECOND.withPassword("Password_2").withActive(true), true);
+	}
+
+	@ParameterizedTest
+	@CsvSource({"888-555-1001,Password_1,,,422,AUTH-101,password,Invalid credentials",
+	            "second,Password_2,,,422,AUTH-115,newPassword,Please change your password.",
+	            "888-555-1001,Password_2,Password_3,Password_3,200,,,"})
+	public void second_auth(final String name, final String password, final String newPassword, final String confirmPassword, final int status, final String code, final String fieldName, final String message)
+	{
+		var response = request("auth").method(HttpMethod.PATCH, Entity.json(new PeopleAuthRequest(name, password, false, newPassword, confirmPassword)));
+		Assertions.assertEquals(status, response.getStatus(), "Status");
+
+		if (422 == status)
+		{
+			var ex = response.readEntity(ErrorInfo.class);
+			Assertions.assertNotNull(ex, "Exists");
+			Assertions.assertEquals(message, ex.message, "Check message");
+			assertThat(ex.fields).as("Check fields").isNotEmpty().hasSize(1).contains(new FieldError(code, fieldName, message));
+		}
+		else
+		{
+			Assertions.assertNull(code, "Check code");
+			Assertions.assertNull(fieldName, "Check fieldName");
+			Assertions.assertNull(message, "Check message");
+
+			var o = response.readEntity(SessionValue.class).person;
+			assertThat(o.associations).as("Check associations").containsExactly(FACILITY.created(), FACILITY_1.created());
+		}
 	}
 
 	private WebTarget target() { return RULE.client().target(TARGET); }

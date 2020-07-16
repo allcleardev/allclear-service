@@ -21,6 +21,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.*;
 
+import com.azure.storage.queue.QueueClient;
+
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 
@@ -35,7 +37,9 @@ import app.allclear.platform.App;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.dao.*;
 import app.allclear.platform.entity.Facility;
+import app.allclear.platform.entity.Friendship;
 import app.allclear.platform.filter.FacilityFilter;
+import app.allclear.platform.filter.PeopleFilter;
 import app.allclear.platform.value.*;
 
 /**********************************************************************************
@@ -67,12 +71,16 @@ public class FacilityPeopleResourceTest
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
 		.addResource(new FacilityResource(dao, sessionDao, mock(MapClient.class)))
+		.addResource(new PeopleResource(peopleDao, mock(RegistrationDAO.class), sessionDao, mock(QueueClient.class)))
 		.build();
 
 	/** Primary URI to test. */
 	private static final String TARGET = "/facilities";
+	private static final String PEOPLES = "/peoples";
 	private static final GenericType<QueryResults<FacilityValue, FacilityFilter>> TYPE_QUERY_RESULTS =
 		new GenericType<QueryResults<FacilityValue, FacilityFilter>>() {};
+	private static final GenericType<QueryResults<PeopleValue, PeopleFilter>> TYPE_QUERY_RESULTS_ =
+		new GenericType<QueryResults<PeopleValue, PeopleFilter>>() {};
 
 	private static FacilityValue cloned() { return SerializationUtils.clone(VALUE); }
 	private static FacilityValue cloned_1() { return SerializationUtils.clone(VALUE_1); }
@@ -102,6 +110,11 @@ public class FacilityPeopleResourceTest
 
 		sessionDao.current(ADMIN);
 		VALUE_1 = request().post(Entity.json(new FacilityValue(1).withPeople(created(1, 4, 7))), FacilityValue.class);
+
+		var now = new Date();
+		var s = transRule.getSession();
+		var friendId = PEOPLE.get(0).id;
+		PEOPLE.forEach(v -> s.save(new Friendship(v.id, friendId, now)));
 	}
 
 	@Test
@@ -194,9 +207,39 @@ public class FacilityPeopleResourceTest
 		assertThat(values.get(0).people).as("Check first: search").isNull();
 	}
 
+	public static Stream<Arguments> search()
+	{
+		return Stream.of(
+			arguments(ADMIN, new PeopleFilter().withHasAssociations(true), 6L),
+			arguments(ADMIN, new PeopleFilter().withHasAssociations(false), 4L),
+			arguments(ADMIN, new PeopleFilter().withIncludeAssociations(VALUE.id), 3L),
+			arguments(ADMIN, new PeopleFilter().withIncludeAssociations(VALUE_1.id), 3L),
+			arguments(ADMIN, new PeopleFilter().withIncludeAssociations(VALUE.id, VALUE_1.id), 6L),
+			arguments(ADMIN, new PeopleFilter().withExcludeAssociations(VALUE.id), 7L),
+			arguments(ADMIN, new PeopleFilter().withExcludeAssociations(VALUE_1.id), 7L),
+			arguments(ADMIN, new PeopleFilter().withExcludeAssociations(VALUE.id, VALUE_1.id), 4L),
+			arguments(PERSON, new PeopleFilter().withHasAssociations(true), 10L),
+			arguments(PERSON, new PeopleFilter().withHasAssociations(false), 10L),
+			arguments(PERSON, new PeopleFilter().withIncludeAssociations(VALUE.id), 10L),
+			arguments(PERSON, new PeopleFilter().withIncludeAssociations(VALUE_1.id), 10L),
+			arguments(PERSON, new PeopleFilter().withIncludeAssociations(VALUE.id, VALUE_1.id), 10L),
+			arguments(PERSON, new PeopleFilter().withExcludeAssociations(VALUE.id), 10L),
+			arguments(PERSON, new PeopleFilter().withExcludeAssociations(VALUE_1.id), 10L),
+			arguments(PERSON, new PeopleFilter().withExcludeAssociations(VALUE.id, VALUE_1.id), 10L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void search(final SessionValue user, final PeopleFilter filter, final long total)
+	{
+		sessionDao.current(user);
+
+		Assertions.assertEquals(total, peoples("search").post(Entity.json(filter), TYPE_QUERY_RESULTS_).total);
+	}
+
 	@ParameterizedTest
 	@CsvSource({"1", "2"})
-	public void remove(final String id)
+	public void testRemove(final String id)
 	{
 		sessionDao.current(ADMIN);
 
@@ -205,9 +248,11 @@ public class FacilityPeopleResourceTest
 
 	/** Helper method - creates the base WebTarget. */
 	private WebTarget target() { return RULE.client().target(TARGET); }
+	private WebTarget peoples() { return RULE.client().target(PEOPLES); }
 
 	/** Helper method - creates the request from the WebTarget. */
 	private Invocation.Builder request() { return request(target()); }
 	private Invocation.Builder request(final String path) { return request(target().path(path)); }
 	private Invocation.Builder request(final WebTarget target) { return target.request(UTF8MediaType.APPLICATION_JSON_TYPE); }
+	private Invocation.Builder peoples(final String path) { return request(peoples().path(path)); }
 }

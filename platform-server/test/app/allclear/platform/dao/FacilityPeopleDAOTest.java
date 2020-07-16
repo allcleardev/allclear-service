@@ -10,6 +10,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SerializationUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,9 +21,11 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
 import app.allclear.junit.hibernate.*;
 import app.allclear.common.errors.ValidationException;
+import app.allclear.common.value.CreateValue;
 import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.App;
 import app.allclear.platform.filter.FacilityFilter;
+import app.allclear.platform.filter.PeopleFilter;
 import app.allclear.platform.value.FacilityValue;
 import app.allclear.platform.value.PeopleValue;
 
@@ -49,6 +52,8 @@ public class FacilityPeopleDAOTest
 	private static FacilityValue VALUE_1 = null;
 	private static List<PeopleValue> PEOPLE = null;
 
+	private static CreateValue cr() { return VALUE.created(); }
+	private static CreateValue cr1() { return VALUE_1.created(); }
 	private static FacilityValue cloned() { return SerializationUtils.clone(VALUE); }
 	private static FacilityValue cloned_1() { return SerializationUtils.clone(VALUE_1); }
 	private static List<CreatedValue> get() { return dao.getById(VALUE.id, true).people; }
@@ -62,6 +67,10 @@ public class FacilityPeopleDAOTest
 	private static List<CreatedValue> created(final int... indices)
 	{
 		return Arrays.stream(indices).mapToObj(i -> PEOPLE.get(i).created()).collect(toList());
+	}
+	private static List<PeopleValue> people(final int... indices)
+	{
+		return ArrayUtils.isEmpty(indices) ? null : Arrays.stream(indices).mapToObj(i -> PEOPLE.get(i)).collect(toList());
 	}
 
 	@BeforeAll
@@ -86,6 +95,18 @@ public class FacilityPeopleDAOTest
 		dao.findWithException(VALUE_1.id).setActive(true);
 	}
 
+	public static Stream<PeopleValue> add_check() { return PEOPLE.stream(); }
+
+	@ParameterizedTest
+	@MethodSource
+	public void add_check(final PeopleValue value)
+	{
+		var set = Set.of("1", "4", "7");
+		var expected = set.contains(value.name) ? List.of(cr()) : null;
+		Assertions.assertEquals(expected, peopleDao.getById(value.id).associations, "Check getById");
+		Assertions.assertEquals(expected, peopleDao.getByIdWithException(value.id).associations, "Check getByIdWithException");
+	}
+
 	@Test
 	public void add_invalidPersonId()
 	{
@@ -101,6 +122,40 @@ public class FacilityPeopleDAOTest
 		Assertions.assertEquals(4L, dao.add(new FacilityValue(2).withPeople(id(0), "NOT-ID", id(6)), false).id);	// No error because the people are NOT added.
 
 		transRule.rollback();
+	}
+
+	public static Stream<Arguments> add_search()
+	{
+		return Stream.of(
+			arguments(VALUE.id, new int[] { 1, 4, 7 }, new int[] { 0, 2, 3, 5, 6, 8, 9 }),
+			arguments(VALUE_1.id, null, new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void add_search(final Long facilityId, final int[] includes, final int[] excludes)
+	{
+		assertThat(peopleDao.search(new PeopleFilter("name", "ASC").withIncludeAssociations(facilityId)).records)
+			.as("Check includeAssociations")
+			.isEqualTo(people(includes));
+		assertThat(peopleDao.search(new PeopleFilter("name", "ASC").withExcludeAssociations(facilityId)).records)
+			.as("Check excludeAssociations")
+			.isEqualTo(people(excludes));
+	}
+
+	public static Stream<Arguments> add_search_exists()
+	{
+		return Stream.of(
+			arguments(true, new int[] { 1, 4, 7 }),
+			arguments(false, new int[] { 0, 2, 3, 5, 6, 8, 9 }));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void add_search_exists(final boolean exists, final int[] indices)
+	{
+		assertThat(peopleDao.search(new PeopleFilter("name", "ASC").withHasAssociations(exists)).records)
+			.isEqualTo(people(indices));
 	}
 
 	public static Stream<Arguments> getById()
@@ -182,6 +237,45 @@ public class FacilityPeopleDAOTest
 		assertThat(values.get(0).people).as("Check first: search").isEqualTo(created(2, 5, 8));
 	}
 
+	@ParameterizedTest
+	@MethodSource("add_check")
+	public void modify_00_get(final PeopleValue value)
+	{
+		var one = Set.of("1", "4", "7");
+		var two = Set.of("2", "5", "8");
+		var expected = one.contains(value.name) ? List.of(cr()) : two.contains(value.name) ? List.of(cr1()) : null;
+		Assertions.assertEquals(expected, peopleDao.getById(value.id).associations, "Check getById");
+		Assertions.assertEquals(expected, peopleDao.getByIdWithException(value.id).associations, "Check getByIdWithException");
+	}
+
+	public static Stream<Arguments> modify_00_search()
+	{
+		return Stream.of(
+			arguments(VALUE.id, new int[] { 1, 4, 7 }, new int[] { 0, 2, 3, 5, 6, 8, 9 }),
+			arguments(VALUE_1.id, new int[] { 2, 5, 8 }, new int[] { 0, 1, 3, 4, 6, 7, 9 }));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_00_search(final Long facilityId, final int[] includes, final int[] excludes)
+	{
+		add_search(facilityId, includes, excludes);
+	}
+
+	public static Stream<Arguments> modify_00_search_exists()
+	{
+		return Stream.of(
+			arguments(true, new int[] { 1, 2, 4, 5, 7, 8 }),
+			arguments(false, new int[] { 0, 3, 6, 9 }));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_00_search_exists(final boolean exists, final int[] indices)
+	{
+		add_search_exists(exists, indices);
+	}
+
 	@Test
 	public void modify_01()
 	{
@@ -193,6 +287,31 @@ public class FacilityPeopleDAOTest
 	public void modify_01_check()
 	{
 		modify_00_check();
+	}
+
+	@ParameterizedTest
+	@MethodSource("add_check")
+	public void modify_01_get(final PeopleValue value)
+	{
+		modify_00_get(value);
+	}
+
+	public static Stream<Arguments> modify_01_search() { return modify_00_search(); }
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_01_search(final Long facilityId, final int[] includes, final int[] excludes)
+	{
+		add_search(facilityId, includes, excludes);
+	}
+
+	public static Stream<Arguments> modify_01_search_exists() { return modify_00_search_exists(); }
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_01_search_exists(final boolean exists, final int[] indices)
+	{
+		add_search_exists(exists, indices);
 	}
 
 	@Test
@@ -213,6 +332,41 @@ public class FacilityPeopleDAOTest
 		assertThat(values.get(0).people).as("Check first: search").isNull();
 	}
 
+	@ParameterizedTest
+	@MethodSource("add_check")
+	public void modify_02_get(final PeopleValue value)
+	{
+		add_check(value);
+	}
+
+	public static Stream<Arguments> modify_02_search()
+	{
+		return Stream.of(
+			arguments(VALUE.id, new int[] { 1, 4, 7 }, new int[] { 0, 2, 3, 5, 6, 8, 9 }),
+			arguments(VALUE_1.id, null, new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_02_search(final Long facilityId, final int[] includes, final int[] excludes)
+	{
+		add_search(facilityId, includes, excludes);
+	}
+
+	public static Stream<Arguments> modify_02_search_exists()
+	{
+		return Stream.of(
+			arguments(true, new int[] { 1, 4, 7 }),
+			arguments(false, new int[] { 0, 2, 3, 5, 6, 8, 9 }));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_02_search_exists(final boolean exists, final int[] indices)
+	{
+		add_search_exists(exists, indices);
+	}
+
 	@Test
 	public void modify_03()
 	{
@@ -231,6 +385,44 @@ public class FacilityPeopleDAOTest
 		assertThat(values.get(0).people).as("Check first: search").isNull();
 	}
 
+	@ParameterizedTest
+	@MethodSource("add_check")
+	public void modify_03_get(final PeopleValue value)
+	{
+		var one = Set.of("2", "5", "8");
+		var expected = one.contains(value.name) ? List.of(cr()) : null;
+		Assertions.assertEquals(expected, peopleDao.getById(value.id).associations, "Check getById");
+		Assertions.assertEquals(expected, peopleDao.getByIdWithException(value.id).associations, "Check getByIdWithException");
+	}
+
+	public static Stream<Arguments> modify_03_search()
+	{
+		return Stream.of(
+			arguments(VALUE.id, new int[] { 2, 5, 8 }, new int[] { 0, 1, 3, 4, 6, 7, 9 }),
+			arguments(VALUE_1.id, null, new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_03_search(final Long facilityId, final int[] includes, final int[] excludes)
+	{
+		add_search(facilityId, includes, excludes);
+	}
+
+	public static Stream<Arguments> modify_03_search_exists()
+	{
+		return Stream.of(
+			arguments(true, new int[] { 2, 5, 8 }),
+			arguments(false, new int[] { 0, 1, 3, 4, 6, 7, 9 }));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_03_search_exists(final boolean exists, final int[] indices)
+	{
+		add_search_exists(exists, indices);
+	}
+
 	@Test
 	public void modify_04()
 	{
@@ -245,18 +437,148 @@ public class FacilityPeopleDAOTest
 		assertThat(get_1()).as("Check first").isEmpty();
 	}
 
+	@ParameterizedTest
+	@MethodSource("add_check")
+	public void modify_04_get(final PeopleValue value)
+	{
+		var one = Set.of("3", "5", "9");
+		var expected = one.contains(value.name) ? List.of(cr()) : null;
+		Assertions.assertEquals(expected, peopleDao.getById(value.id).associations, "Check getById");
+		Assertions.assertEquals(expected, peopleDao.getByIdWithException(value.id).associations, "Check getByIdWithException");
+	}
+
+	public static Stream<Arguments> modify_04_search()
+	{
+		return Stream.of(
+			arguments(VALUE.id, new int[] { 3, 5, 9 }, new int[] { 0, 1, 2, 4, 6, 7, 8 }),
+			arguments(VALUE_1.id, null, new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_04_search(final Long facilityId, final int[] includes, final int[] excludes)
+	{
+		add_search(facilityId, includes, excludes);
+	}
+
+	public static Stream<Arguments> modify_04_search_exists()
+	{
+		return Stream.of(
+			arguments(true, new int[] { 3, 5, 9 }),
+			arguments(false, new int[] { 0, 1, 2, 4, 6, 7, 8 }));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_04_search_exists(final boolean exists, final int[] indices)
+	{
+		add_search_exists(exists, indices);
+	}
+
 	@Test
 	public void modify_05()
 	{
-		dao.update(cloned().withPeople(created(6)), true);
-		dao.update(cloned_1().withPeople(created(6)), false);
+		// dao.update(cloned().withPeople(created(5, 9, 3)), true);
+		dao.update(cloned_1().withPeople(created(5, 7, 3)), true);
 	}
 
 	@Test
 	public void modify_05_check()
 	{
+		assertThat(get()).as("Check zero").isEqualTo(created(3, 5, 9));
+		assertThat(get_1()).as("Check first").isEqualTo(created(3, 5, 7));
+	}
+
+	@ParameterizedTest
+	@MethodSource("add_check")
+	public void modify_05_get(final PeopleValue value)
+	{
+		var one = Set.of("3", "5");
+		var two = Set.of("9");
+		var three = Set.of("7");
+		var expected = one.contains(value.name) ? List.of(cr(), cr1()) : two.contains(value.name) ? List.of(cr()) : three.contains(value.name) ? List.of(cr1()) : null;
+		Assertions.assertEquals(expected, peopleDao.getById(value.id).associations, "Check getById");
+		Assertions.assertEquals(expected, peopleDao.getByIdWithException(value.id).associations, "Check getByIdWithException");
+	}
+
+	public static Stream<Arguments> modify_05_search()
+	{
+		return Stream.of(
+			arguments(VALUE.id, new int[] { 3, 5, 9 }, new int[] { 0, 1, 2, 4, 6, 7, 8 }),
+			arguments(VALUE_1.id, new int[] { 3, 5, 7 }, new int[] { 0, 1, 2, 4, 6, 8, 9 }));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_05_search(final Long facilityId, final int[] includes, final int[] excludes)
+	{
+		add_search(facilityId, includes, excludes);
+	}
+
+	public static Stream<Arguments> modify_05_search_exists()
+	{
+		return Stream.of(
+			arguments(true, new int[] { 3, 5, 7, 9 }),
+			arguments(false, new int[] { 0, 1, 2, 4, 6, 8 }));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_05_search_exists(final boolean exists, final int[] indices)
+	{
+		add_search_exists(exists, indices);
+	}
+
+	@Test
+	public void modify_06()
+	{
+		dao.update(cloned().withPeople(created(6)), true);
+		dao.update(cloned_1().emptyPeople(), true);
+	}
+
+	@Test
+	public void modify_06_check()
+	{
 		assertThat(get()).as("Check zero").isEqualTo(created(6));
 		assertThat(get_1()).as("Check first").isEmpty();
+	}
+
+	@ParameterizedTest
+	@MethodSource("add_check")
+	public void modify_06_get(final PeopleValue value)
+	{
+		var one = Set.of("6");
+		var expected = one.contains(value.name) ? List.of(cr()) : null;
+		Assertions.assertEquals(expected, peopleDao.getById(value.id).associations, "Check getById");
+		Assertions.assertEquals(expected, peopleDao.getByIdWithException(value.id).associations, "Check getByIdWithException");
+	}
+
+	public static Stream<Arguments> modify_06_search()
+	{
+		return Stream.of(
+			arguments(VALUE.id, new int[] { 6 }, new int[] { 0, 1, 2, 3, 4, 5, 7, 8, 9 }),
+			arguments(VALUE_1.id, null, new int[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_06_search(final Long facilityId, final int[] includes, final int[] excludes)
+	{
+		add_search(facilityId, includes, excludes);
+	}
+
+	public static Stream<Arguments> modify_06_search_exists()
+	{
+		return Stream.of(
+			arguments(true, new int[] { 6 }),
+			arguments(false, new int[] { 0, 1, 2, 3, 4, 5, 7, 8, 9 }));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_06_search_exists(final boolean exists, final int[] indices)
+	{
+		add_search_exists(exists, indices);
 	}
 
 	public static Stream<Arguments> search()

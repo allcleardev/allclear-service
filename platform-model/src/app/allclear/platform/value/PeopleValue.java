@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
 import app.allclear.common.ObjectUtils;
+import app.allclear.common.value.CreateValue;
 import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.type.*;
 import app.allclear.twilio.model.TwilioUtils;
@@ -78,6 +79,7 @@ public class PeopleValue implements Serializable
 	public List<CreatedValue> exposures = null;
 	public List<CreatedValue> symptoms = null;
 	public List<FacilityValue> facilities = null;
+	public List<CreateValue> associations = null;	// A list of facilities with which a person has an association (usually a worker). DLS on 7/15/2020. 
 
 	// Accessors
 	public CreatedValue created() { return new CreatedValue(id, name, null); }
@@ -88,6 +90,7 @@ public class PeopleValue implements Serializable
 	}
 	public boolean healthWorker() { return (null != healthWorkerStatus) && healthWorkerStatus.staff; }
 	public boolean meetsCdcPriority3() { return healthWorker() || symptomatic(); }
+	public boolean associated() { return CollectionUtils.isNotEmpty(associations); }
 
 	// Mutators
 	public PeopleValue withId(final String newValue) { id = newValue; return this; }
@@ -140,6 +143,7 @@ public class PeopleValue implements Serializable
 		return withSymptoms(Arrays.asList(newValues).stream().map(v -> v.created()).collect(toList()));
 	}
 	public PeopleValue withFacilities(final List<FacilityValue> newValues) { facilities = newValues; return this; }
+	public PeopleValue withAssociations(final List<CreateValue> newValues) { associations = newValues; return this; }
 
 	public PeopleValue registered() { return withActive(true).withAuthAt(new Date()).withAlertedOf(null).withAlertedAt(null); }
 	public PeopleValue registeredByPhone() { return registered().withPhoneVerifiedAt(authAt).withEmailVerifiedAt(null); }

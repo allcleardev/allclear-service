@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 
 import app.allclear.common.ObjectUtils;
+import app.allclear.common.value.CreateValue;
 import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.type.*;
 
@@ -397,4 +398,6 @@ public class FacilityValue implements Auditable, Serializable
 
 	@Override
 	public String toString() { return ObjectUtils.toString(this); }
+
+	public CreateValue created() { return new CreateValue(id, name, null); }
 }

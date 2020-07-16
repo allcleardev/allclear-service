@@ -307,7 +307,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		// If the user has previously logged in, then don't force the user to change their password.
 		if ((null != record.getAuthAt()) && (null == request.newPassword))
 		{
-			if (record.auth(request.password)) return record.toValueX(Visibility.ME);
+			if (record.auth(request.password)) return record.toValue();
 
 			throw new ValidationException(Validator.CODE_INVALID_CREDENTIALS, "password", "Invalid credentials");
 		}
@@ -326,7 +326,7 @@ public class PeopleDAO extends AbstractDAO<People>
 			if (!request.newPassword.equals(request.confirmPassword))
 				throw new ValidationException(Validator.CODE_NEW_PASSWORD_MISMATCH, "confirmPassword", "The 'Password Confirmation' does not match the 'New Password'.");
 
-			return record.updatePassword(request.newPassword).toValueX(Visibility.ME);
+			return record.updatePassword(request.newPassword).toValue();
 		}
 
 		// The password supplied is valid BUT since the user hasn't authenticated yet, the user must change their password.
@@ -344,7 +344,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		var record = findByPhone(phone);
 		if (null == record) throw new ObjectNotFoundException("Could not find the account with phone number '" + phone + "'.");
 
-		return record.auth().toValueX(Visibility.ME);	// MUST get the full profile. Needed for Facility restrictions. DLS on 4/12/2020.
+		return record.auth().toValue();	// MUST get the full profile. Needed for Facility restrictions. DLS on 4/12/2020.
 	}
 
 	/** Validates a single People value.
@@ -580,7 +580,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		var record = get(id);
 		if (null == record) return null;
 
-		return record.toValueX(Visibility.ME);
+		return record.toValue();
 	}
 
 	/** Gets a single People value by identifier.
@@ -591,7 +591,7 @@ public class PeopleDAO extends AbstractDAO<People>
 	 */
 	public PeopleValue getByIdWithException(final String id) throws ValidationException
 	{
-		return findWithException(id).toValueX(Visibility.ME);
+		return findWithException(id).toValue();
 	}
 
 	/** Gets a single Friend of the specified Person.
@@ -784,6 +784,9 @@ public class PeopleDAO extends AbstractDAO<People>
 			.addExists("SELECT 1 FROM PeopleFacility c WHERE c.personId = o.id", filter.hasFacilities)
 			.addIn("includeFacilities", "EXISTS (SELECT 1 FROM PeopleFacility c WHERE c.personId = o.id AND c.facilityId IN {})", filter.includeFacilities)
 			.addIn("excludeFacilities", "NOT EXISTS (SELECT 1 FROM PeopleFacility c WHERE c.personId = o.id AND c.facilityId IN {})", filter.excludeFacilities)
+			.addExists("SELECT 1 FROM FacilityPeople d WHERE d.personId = o.id", filter.hasAssociations)
+			.addIn("includeAssociations", "EXISTS (SELECT 1 FROM FacilityPeople d WHERE d.personId = o.id AND d.facilityId IN {})", filter.includeAssociations)
+			.addIn("excludeAssociations", "NOT EXISTS (SELECT 1 FROM FacilityPeople d WHERE d.personId = o.id AND d.facilityId IN {})", filter.excludeAssociations)
 			.addContains("visibilityHealthWorkerStatusId", "fa.visibilityHealthWorkerStatusId LIKE :visibilityHealthWorkerStatusId", filter.visibilityHealthWorkerStatusId, "INNER JOIN o.field fa")
 			.addContains("visibilityConditions", "fa.visibilityConditions LIKE :visibilityConditions", filter.visibilityConditions, "INNER JOIN o.field fa")
 			.addContains("visibilityExposures", "fa.visibilityExposures LIKE :visibilityExposures", filter.visibilityExposures, "INNER JOIN o.field fa")

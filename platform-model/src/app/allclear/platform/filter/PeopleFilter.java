@@ -94,6 +94,9 @@ public class PeopleFilter extends QueryFilter
 	public Boolean hasFacilities = null;
 	public List<Long> includeFacilities = null;
 	public List<Long> excludeFacilities = null;
+	public Boolean hasAssociations = null;
+	public List<Long> includeAssociations = null;
+	public List<Long> excludeAssociations = null;
 	public String visibilityHealthWorkerStatusId = null;
 	public String visibilityConditions = null;
 	public String visibilityExposures = null;
@@ -177,10 +180,23 @@ public class PeopleFilter extends QueryFilter
 	public PeopleFilter withIncludeFacilities(final Long... newValues) { return withIncludeFacilities(Arrays.asList(newValues)); }
 	public PeopleFilter withExcludeFacilities(final List<Long> newValues) { excludeFacilities = newValues; return this; }
 	public PeopleFilter withExcludeFacilities(final Long... newValues) { return withExcludeFacilities(Arrays.asList(newValues)); }
+	public PeopleFilter withHasAssociations(final Boolean newValue) { hasAssociations = newValue; return this; }
+	public PeopleFilter withIncludeAssociations(final List<Long> newValues) { includeAssociations = newValues; return this; }
+	public PeopleFilter withIncludeAssociations(final Long... newValues) { return withIncludeAssociations(Arrays.asList(newValues)); }
+	public PeopleFilter withExcludeAssociations(final List<Long> newValues) { excludeAssociations = newValues; return this; }
+	public PeopleFilter withExcludeAssociations(final Long... newValues) { return withExcludeAssociations(Arrays.asList(newValues)); }
 	public PeopleFilter withVisibilityHealthWorkerStatusId(final String newValue) { visibilityHealthWorkerStatusId = newValue; return this; }
 	public PeopleFilter withVisibilityConditions(final String newValue) { visibilityConditions = newValue; return this; }
 	public PeopleFilter withVisibilityExposures(final String newValue) { visibilityExposures = newValue; return this; }
 	public PeopleFilter withVisibilitySymptoms(final String newValue) { visibilitySymptoms = newValue; return this; }
+
+	public PeopleFilter notAdmin()	// NULLing admin-only filter fields.
+	{
+		hasAssociations = null;
+		includeAssociations = excludeAssociations = null;
+
+		return this;
+	}
 
 	// Internal usage
 	private Visibility who = Visibility.ME;
