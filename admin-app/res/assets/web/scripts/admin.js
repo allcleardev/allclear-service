@@ -891,7 +891,7 @@ var TestsHandler = new ListTemplate({
 	          new EditField('remoteId', 'Remote ID', false, false, 64, 50, "Represents an identifier in the facility's system of record."),
 	          new BoolField('positive', 'Positive?', true),
 	          new EditField('notes', 'Notes', false, true, 60, 5),
-	          new EditField('receivedAt', 'Received At', false, false, 23, 23, 'Example: 2020-07-14T21:00:00-0400', 'yyyy-mm-ddThh:mm:ss-0000'),
+	          new EditField('receivedAt', 'Received At', false, false, 24, 26, 'Example: 2020-07-14T21:00:00-0400', 'yyyy-mm-ddThh:mm:ss-0000'),
 	          new TextField('createdAt', 'Created At', 'toDateTime'),
 	          new TextField('updatedAt', 'Updated At', 'toDateTime') ],
 	SEARCH: {
