@@ -603,4 +603,94 @@ public class FacilityPeopleDAOTest
 	{
 		Assertions.assertTrue(dao.remove(id));
 	}
+
+	@Test
+	public void z_add()
+	{
+		VALUE = dao.add(new FacilityValue(0), false);
+		VALUE_1 = dao.add(new FacilityValue(1), false);
+
+		PEOPLE = List.of(
+			peopleDao.add(new PeopleValue(10).withAssociations(VALUE), true),
+			peopleDao.add(new PeopleValue(11).withAssociations(VALUE), false),
+			peopleDao.add(new PeopleValue(12).withAssociations(VALUE)),
+			peopleDao.add(new PeopleValue(13).withAssociations(VALUE, VALUE_1), true),
+			peopleDao.add(new PeopleValue(14).withAssociations(VALUE, VALUE_1), false),
+			peopleDao.add(new PeopleValue(15).withAssociations(VALUE, VALUE_1)),
+			peopleDao.add(new PeopleValue(16).withAssociations(VALUE_1), true),
+			peopleDao.add(new PeopleValue(17).withAssociations(VALUE_1), false),
+			peopleDao.add(new PeopleValue(18).withAssociations(VALUE_1)),
+			peopleDao.add(new PeopleValue(19).withAssociations(VALUE_1, VALUE), true));
+	}
+
+	public static Stream<Arguments> z_add_check()
+	{
+		return Stream.of(
+			arguments(0, List.of(VALUE)),
+			arguments(1, null),
+			arguments(2, null),
+			arguments(3, List.of(VALUE, VALUE_1)),
+			arguments(4, null),
+			arguments(5, null),
+			arguments(6, List.of(VALUE_1)),
+			arguments(7, null),
+			arguments(8, null),
+			arguments(9, List.of(VALUE_1, VALUE)));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_add_check(final int i, final List<FacilityValue> values)
+	{
+		var vv = (null != values) ? values.stream().map(v -> v.created()).collect(toList()) : null;
+		var v = PEOPLE.get(i);
+		assertThat(peopleDao.getById(v.id).associations).as("Check getById: " + v.name).isEqualTo(vv);
+	}
+
+	
+	public static Stream<Arguments> z_modify()
+	{
+		return Stream.of(
+			arguments(0, true, List.of()),
+			arguments(1, true, List.of(VALUE_1)),
+			arguments(2, false, null),
+			arguments(3, true, List.of(VALUE_1, VALUE)),
+			arguments(4, false, null),
+			arguments(5, false, List.of(VALUE_1)),
+			arguments(6, true, List.of(VALUE)),
+			arguments(7, true, null),
+			arguments(8, false, null),
+			arguments(9, true, null));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_modify(final int i, final boolean admin, final List<FacilityValue> values)
+	{
+		var vv = (null != values) ? values.stream().map(v -> v.created()).collect(toList()) : null;
+		var v = PEOPLE.get(i);
+		Assertions.assertNotNull(peopleDao.update(v.withAssociations(vv), admin));
+	}
+
+	public static Stream<Arguments> z_modify_check()
+	{
+		return Stream.of(
+			arguments(0, null),
+			arguments(1, List.of(VALUE_1)),
+			arguments(2, null),
+			arguments(3, List.of(VALUE, VALUE_1)),
+			arguments(4, null),
+			arguments(5, null),
+			arguments(6, List.of(VALUE)),
+			arguments(7, null),
+			arguments(8, null),
+			arguments(9, List.of(VALUE_1, VALUE)));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_modify_check(final int i, final List<FacilityValue> values)
+	{
+		z_add_check(i, values);
+	}
 }

@@ -1,10 +1,10 @@
 package app.allclear.platform.dao;
 
+import static java.util.stream.Collectors.*;
 import static app.allclear.common.dao.OrderByBuilder.*;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -106,10 +106,11 @@ public class PeopleDAO extends AbstractDAO<People>
 	/** Adds a single People value.
 	 *
 	 * @param value
+	 * @param admin
 	 * @return never NULL.
 	 * @throws ValidationException
 	 */
-	public PeopleValue add(final PeopleValue value) throws ValidationException
+	public PeopleValue add(final PeopleValue value, final boolean admin) throws ValidationException
 	{
 		_validate(value.withId(generateId()));
 		var record = persist(new People(value));
@@ -122,7 +123,26 @@ public class PeopleDAO extends AbstractDAO<People>
 		add(s, value.symptoms, v -> new Symptoms(record, v));
 		add(s, value.symptoms, v -> new SymptomsLog(record, v));
 
+		if (admin)
+		{
+			if (CollectionUtils.isNotEmpty(value.associations))
+			{
+				var added = new HashSet<Long>(value.associations.size());
+				value.associations.stream()
+					.filter(v -> (null != v) && (null != v.id) && !added.contains(v.id))
+					.map(v -> s.get(Facility.class, v.id))
+					.filter(o -> null != o)
+					.forEach(o -> { s.persist(new FacilityPeople(o, record, value.createdAt)); added.add(o.getId()); });
+			}
+		}
+
 		return value.withId(record.getId());
+	}
+
+	/** Defaults to non-admin. */
+	public PeopleValue add(final PeopleValue value) throws ValidationException
+	{
+		return add(value, false);
 	}
 
 	private void add(final Session s, final List<CreatedValue> values, final Function<CreatedValue, ? extends PeopleChild> toEntity)
@@ -159,7 +179,7 @@ public class PeopleDAO extends AbstractDAO<People>
 			})
 			.filter(o -> (null != o))
 			.peek(o -> existingIds.add(o.getId()))
-			.collect(Collectors.toList());
+			.collect(toList());
 
 		validator.check();	// Were there any invalid facility IDs.
 
@@ -190,6 +210,28 @@ public class PeopleDAO extends AbstractDAO<People>
 		update(s, record, value.conditions, record.getConditions(), "deleteConditionsByPerson", v -> new Conditions(r, v));
 		update(s, record, value.exposures, record.getExposures(), "deleteExposuresByPerson", v -> new Exposures(r, v));
 		update(s, record, value.symptoms, record.getSymptoms(), v -> new Symptoms(r, v), v -> new SymptomsLog(r, v), "updateSymptomsLog");
+
+		if (admin)
+		{
+			if (null != value.associations)
+			{
+				if (value.associations.isEmpty()) namedQueryX("deleteFacilityPeopleByPerson").setParameter("personId", record.getId()).executeUpdate();
+				else
+				{
+					var existing = r.getAssociations();
+					var existingIds = existing.stream().map(o -> o.getFacilityId()).collect(toSet());
+					value.associations.stream()
+						.filter(v -> (null != v) && (null != v.id) && !existingIds.contains(v.id))
+						.map(v -> s.get(Facility.class, v.id))
+						.filter(o -> null != o)
+						.forEach(o -> { s.persist(new FacilityPeople(o, r, value.createdAt)); existingIds.add(o.getId()); });
+	
+					existing.stream()
+						.filter(o -> value.associations.stream().filter(v -> null != v).noneMatch(v -> o.getFacilityId().equals(v.id)))
+						.forEach(o -> s.delete(o));
+				}
+			}
+		}
 
 		return value.withId(record.update(value, admin).getId());
 	}
@@ -644,7 +686,7 @@ public class PeopleDAO extends AbstractDAO<People>
 	 */
 	public List<PeopleValue> getActiveByIdOrName(final String name)
 	{
-		return findActiveByIdOrName(name).stream().map(o -> o.toValue(Visibility.ME)).collect(Collectors.toList());
+		return findActiveByIdOrName(name).stream().map(o -> o.toValue(Visibility.ME)).collect(toList());
 	}
 
 	/** Finds a list of People names by name or phone number.
@@ -677,7 +719,7 @@ public class PeopleDAO extends AbstractDAO<People>
 		var v = new QueryResults<PeopleValue, PeopleFilter>(builder.aggregate(COUNT), filter);
 		if (v.isEmpty()) return v;
 
-		return v.withRecords(builder.orderBy(ORDER.normalize(v)).run(v).stream().map(o -> o.toValue(filter.who())).collect(Collectors.toList()));
+		return v.withRecords(builder.orderBy(ORDER.normalize(v)).run(v).stream().map(o -> o.toValue(filter.who())).collect(toList()));
 	}
 
 	/** Counts the number of People entities based on the supplied filter.

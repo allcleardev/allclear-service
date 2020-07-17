@@ -27,7 +27,8 @@ import app.allclear.common.value.CreatedValue;
 @DynamicUpdate
 @Table(name="facility_people")
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE, region="facility_people")
-@NamedQueries({@NamedQuery(name="deleteFacilityPeople", query="DELETE FROM FacilityPeople o WHERE o.facilityId = :facilityId")})
+@NamedQueries({@NamedQuery(name="deleteFacilityPeople", query="DELETE FROM FacilityPeople o WHERE o.facilityId = :facilityId"),
+	@NamedQuery(name="deleteFacilityPeopleByPerson", query="DELETE FROM FacilityPeople o WHERE o.personId = :personId")})
 @NamedNativeQueries({@NamedNativeQuery(name="findFacilityPeopleByFacility", query="SELECT p.id, p.name, o.created_at, o.facility_id AS parent_id FROM facility_people o INNER JOIN people p ON o.person_id = p.id WHERE o.facility_id = :facilityId ORDER BY p.name", resultClass=Created.class),
 	@NamedNativeQuery(name="findFacilityPeopleByFacilities", query="SELECT p.id, p.name, o.created_at, o.facility_id AS parent_id FROM facility_people o INNER JOIN people p ON o.person_id = p.id WHERE o.facility_id IN (:facilityIds) ORDER BY o.facility_id, p.name", resultClass=Created.class)})
 public class FacilityPeople implements FacilityChild
@@ -73,11 +74,19 @@ public class FacilityPeople implements FacilityChild
 
 	public FacilityPeople(final Facility facility,
 		final People person,
-		final CreatedValue value)
+		final Date createdAt)
 	{
 		this.facilityId = (this.facility = facility).getId();
 		this.personId = (this.person = person).getId();
-		this.createdAt = ((null != value.createdAt) ? value.createdAt : (value.createdAt = facility.getUpdatedAt()));
+		this.createdAt = createdAt;
+	}
+
+	public FacilityPeople(final Facility facility,
+		final People person,
+		final CreatedValue value)
+	{
+		this(facility, person,
+			((null != value.createdAt) ? value.createdAt : (value.createdAt = facility.getUpdatedAt())));
 	}
 
 	@Override

@@ -144,6 +144,7 @@ public class PeopleValue implements Serializable
 	}
 	public PeopleValue withFacilities(final List<FacilityValue> newValues) { facilities = newValues; return this; }
 	public PeopleValue withAssociations(final List<CreateValue> newValues) { associations = newValues; return this; }
+	public PeopleValue withAssociations(final FacilityValue... newValues) { return withAssociations(Arrays.stream(newValues).map(v -> v.created()).collect(toList())); }
 
 	public PeopleValue registered() { return withActive(true).withAuthAt(new Date()).withAlertedOf(null).withAlertedAt(null); }
 	public PeopleValue registeredByPhone() { return registered().withPhoneVerifiedAt(authAt).withEmailVerifiedAt(null); }

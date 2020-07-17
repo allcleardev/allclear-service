@@ -133,7 +133,7 @@ public class PeopleResource
 	{
 		sessionDao.checkAdmin();	// Only admins can add application users.
 
-		return dao.add(value);
+		return dao.add(value, true);
 	}
 
 	@POST
