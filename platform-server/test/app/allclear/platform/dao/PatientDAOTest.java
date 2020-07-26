@@ -1,5 +1,6 @@
 package app.allclear.platform.dao;
 
+import static org.fest.assertions.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static app.allclear.testing.TestingUtils.*;
@@ -17,6 +18,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
 import app.allclear.junit.hibernate.*;
+import app.allclear.common.errors.NotAuthorizedException;
 import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.redis.FakeRedisClient;
@@ -61,9 +63,9 @@ public class PatientDAOTest
 	private static final SessionValue ADMIN = new SessionValue(false, new AdminValue("admin"));
 	private static final SessionValue EDITOR = new SessionValue(false, new AdminValue("editor", false, true));
 	private static final SessionValue PATIENT_ = new SessionValue(false, PATIENT);
-	private static final SessionValue PATIENT_1_ = new SessionValue(false, PATIENT);
+	private static final SessionValue PATIENT_1_ = new SessionValue(false, PATIENT_1);
 	private static final SessionValue ASSOCIATE_ = new SessionValue(false, ASSOCIATE);
-	private static final SessionValue ASSOCIATE_1_ = new SessionValue(false, ASSOCIATE);
+	private static final SessionValue ASSOCIATE_1_ = new SessionValue(false, ASSOCIATE_1);
 
 	@BeforeAll
 	public static void up()
@@ -88,8 +90,8 @@ public class PatientDAOTest
 		FACILITY_1 = facilityDao.add(new FacilityValue(1), true);
 		peopleDao.add(PATIENT);
 		peopleDao.add(PATIENT_1);
-		peopleDao.add(ASSOCIATE.withAssociations(FACILITY));
-		peopleDao.add(ASSOCIATE_1.withAssociations(FACILITY, FACILITY_1));
+		peopleDao.add(ASSOCIATE.withAssociations(FACILITY), true);
+		peopleDao.add(ASSOCIATE_1.withAssociations(FACILITY_1), true);
 
 		var value = dao.add(VALUE = new PatientValue(FACILITY.id, PATIENT_1.id, false, ENROLLED_AT, null));
 		Assertions.assertNotNull(value, "Exists");
@@ -146,6 +148,48 @@ public class PatientDAOTest
 		assertThrows(ValidationException.class, () -> dao.add(createValid().withEnrolledAt(new Date()).withRejectedAt(new Date())));
 	}
 
+	public static Stream<Arguments> check()
+	{
+		return Stream.of(
+			arguments(ADMIN, false, false, true),
+			arguments(ADMIN, true, false, true),
+			arguments(ADMIN, false, true, true),
+			arguments(ADMIN, true, true, true),
+			arguments(EDITOR, false, false, false),
+			arguments(EDITOR, true, false, false),
+			arguments(EDITOR, false, true, false),
+			arguments(EDITOR, true, true, false),
+			arguments(PATIENT_, false, false, false),
+			arguments(PATIENT_, true, false, false),
+			arguments(PATIENT_, false, true, false),
+			arguments(PATIENT_, true, true, false),
+			arguments(PATIENT_1_, false, false, true),
+			arguments(PATIENT_1_, true, false, true),
+			arguments(PATIENT_1_, false, true, true),
+			arguments(PATIENT_1_, true, true, true),
+			arguments(ASSOCIATE_, false, false, true),
+			arguments(ASSOCIATE_, true, false, false),
+			arguments(ASSOCIATE_, false, true, true),
+			arguments(ASSOCIATE_, true, true, false),
+			arguments(ASSOCIATE_1_, false, false, false),
+			arguments(ASSOCIATE_1_, true, false, false),
+			arguments(ASSOCIATE_1_, false, true, false),
+			arguments(ASSOCIATE_1_, true, true, false));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void check(final SessionValue session, final boolean update, final boolean removal, final boolean success)
+	{
+		sessionDao.current(session);
+
+		var record = dao.find(VALUE.id);
+		if (success)
+			check(VALUE, dao.check(record, update, removal));
+		else
+			assertThrows(NotAuthorizedException.class, () -> dao.check(record, update, removal));
+	}
+
 	@Test
 	public void find()
 	{
@@ -172,6 +216,58 @@ public class PatientDAOTest
 	public void getWithException()
 	{
 		assertThrows(ObjectNotFoundException.class, () -> dao.getByIdWithException(VALUE.id + 1000L));
+
+		System.out.println("ASSOCIATE: " + ASSOCIATE);
+		System.out.println("ASSOCIATED: " + facilityDao.getById(FACILITY.id, true));
+	}
+
+	public static Stream<Arguments> getEnrolledByFacilityAndName()
+	{
+		PATIENT_1.withHealthWorkerStatusId(null).withHealthWorkerStatus(null);	// These fields are NOT returned from the getEnrolledByFacilityAndName call.
+
+		return Stream.of(
+			arguments(ADMIN, FACILITY.id, "0", false, false),
+			arguments(ADMIN, FACILITY.id, "1", true, false),
+			arguments(ADMIN, FACILITY_1.id, "0", false, false),
+			arguments(ADMIN, FACILITY_1.id, "1", false, false),
+			arguments(EDITOR, FACILITY.id, "0", false, true),
+			arguments(EDITOR, FACILITY.id, "1", false, true),
+			arguments(EDITOR, FACILITY_1.id, "0", false, true),
+			arguments(EDITOR, FACILITY_1.id, "1", false, true),
+			arguments(PATIENT_, FACILITY.id, "0", false, true),
+			arguments(PATIENT_, FACILITY.id, "1", false, true),
+			arguments(PATIENT_, FACILITY_1.id, "0", false, true),
+			arguments(PATIENT_, FACILITY_1.id, "1", false, true),
+			arguments(PATIENT_1_, FACILITY.id, "0", false, true),
+			arguments(PATIENT_1_, FACILITY.id, "1", false, true),
+			arguments(PATIENT_1_, FACILITY_1.id, "0", false, true),
+			arguments(PATIENT_1_, FACILITY_1.id, "1", false, true),
+			arguments(ASSOCIATE_, FACILITY.id, "0", false, false),
+			arguments(ASSOCIATE_, FACILITY.id, "1", true, false),
+			arguments(ASSOCIATE_, FACILITY_1.id, "0", false, false),
+			arguments(ASSOCIATE_, FACILITY_1.id, "1", true, false),	// Ignores the supplied Facility ID.
+			arguments(ASSOCIATE_1_, FACILITY.id, "0", false, false),
+			arguments(ASSOCIATE_1_, FACILITY.id, "1", false, false),
+			arguments(ASSOCIATE_1_, FACILITY_1.id, "0", false, false),
+			arguments(ASSOCIATE_1_, FACILITY_1.id, "1", false, false));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void getEnrolledByFacilityAndName(final SessionValue session, final Long facilityId, final String name, final boolean success, final boolean error)
+	{
+		sessionDao.current(session);
+
+		if (error)
+			assertThrows(NotAuthorizedException.class, () -> dao.getEnrolledByFacilityAndName(facilityId, name));
+		else
+		{
+			var values = dao.getEnrolledByFacilityAndName(facilityId, name);
+			if (success)
+				assertThat(values).containsExactly(PATIENT_1);
+			else
+				assertThat(values).isEmpty();
+		}
 	}
 
 	@Test
@@ -194,6 +290,48 @@ public class PatientDAOTest
 		var value = dao.update(VALUE.withFacilityId(FACILITY_1.id).withPersonId(PATIENT.id).withAlertable(true).withEnrolledAt(null).withRejectedAt(REJECTED_AT_1));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
+	}
+
+	public static Stream<Arguments> modify_check()
+	{
+		return Stream.of(
+			arguments(ADMIN, false, false, true),
+			arguments(ADMIN, true, false, true),
+			arguments(ADMIN, false, true, true),
+			arguments(ADMIN, true, true, true),
+			arguments(EDITOR, false, false, false),
+			arguments(EDITOR, true, false, false),
+			arguments(EDITOR, false, true, false),
+			arguments(EDITOR, true, true, false),
+			arguments(PATIENT_, false, false, true),
+			arguments(PATIENT_, true, false, true),
+			arguments(PATIENT_, false, true, true),
+			arguments(PATIENT_, true, true, true),
+			arguments(PATIENT_1_, false, false, false),
+			arguments(PATIENT_1_, true, false, false),
+			arguments(PATIENT_1_, false, true, false),
+			arguments(PATIENT_1_, true, true, false),
+			arguments(ASSOCIATE_, false, false, false),
+			arguments(ASSOCIATE_, true, false, false),
+			arguments(ASSOCIATE_, false, true, false),
+			arguments(ASSOCIATE_, true, true, false),
+			arguments(ASSOCIATE_1_, false, false, true),
+			arguments(ASSOCIATE_1_, true, false, false),
+			arguments(ASSOCIATE_1_, false, true, true),
+			arguments(ASSOCIATE_1_, true, true, false));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_check(final SessionValue session, final boolean update, final boolean removal, final boolean success)
+	{
+		sessionDao.current(session);
+
+		var record = dao.find(VALUE.id);
+		if (success)
+			check(VALUE, dao.check(record, update, removal));
+		else
+			assertThrows(NotAuthorizedException.class, () -> dao.check(record, update, removal));
 	}
 
 	@Test
@@ -300,6 +438,29 @@ public class PatientDAOTest
 		}
 	}
 
+	public static Stream<Arguments> search_as()
+	{
+		return Stream.of(
+			arguments(ADMIN, true, 1L),
+			arguments(EDITOR, false, 0L),
+			arguments(PATIENT_, true, 1L),
+			arguments(PATIENT_1_, true, 0L),
+			arguments(ASSOCIATE_, true, 0L),
+			arguments(ASSOCIATE_1_, true, 1L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void search_as(final SessionValue session, final boolean success, final long expectedTotal)
+	{
+		sessionDao.current(session);
+
+		if (success)
+			search(new PatientFilter(), expectedTotal);
+		else
+			assertThrows(NotAuthorizedException.class, () -> dao.search(new PatientFilter()));
+	}
+
 	public static Stream<Arguments> search_sort()
 	{
 		return Stream.of(
@@ -385,9 +546,26 @@ public class PatientDAOTest
 		Assertions.assertEquals(expectedSortDir, results.sortDir, "Check sortDir");
 	}
 
+	public static Stream<SessionValue> testRemove_fail()
+	{
+		return Stream.of(EDITOR, PATIENT_1_, ASSOCIATE_);
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void testRemove_fail(final SessionValue session)
+	{
+		sessionDao.current(session);
+
+		assertThrows(NotAuthorizedException.class, () -> dao.remove(VALUE.id));
+	}
+
+	@Test
+	public void testRemove_fail_count() { modify_count(); }
+
 	/** Test removal after the search. */
 	@Test
-	public void testRemove()
+	public void testRemove_success()
 	{
 		Assertions.assertFalse(dao.remove(VALUE.id + 1000L), "Invalid");
 		Assertions.assertTrue(dao.remove(VALUE.id), "Removed");
@@ -396,14 +574,14 @@ public class PatientDAOTest
 
 	/** Test removal after the search. */
 	@Test
-	public void testRemove_find()
+	public void testRemove_success_find()
 	{
 		assertThrows(ObjectNotFoundException.class, () -> dao.findWithException(VALUE.id));
 	}
 
 	/** Test removal after the search. */
 	@Test
-	public void testRemove_search()
+	public void testRemove_success_search()
 	{
 		count(new PatientFilter().withId(VALUE.id), 0L);
 		count(new PatientFilter().withFacilityId(FACILITY_1.id), 0L);
@@ -411,6 +589,50 @@ public class PatientDAOTest
 		count(new PatientFilter().withAlertable(true), 0L);
 		count(new PatientFilter().withHasEnrolledAt(false), 0L);
 		count(new PatientFilter().withHasRejectedAt(true), 0L);
+	}
+
+	@Test
+	public void z_00_add()
+	{
+		sessionDao.current(PATIENT_);
+
+		VALUE = dao.add(new PatientValue(FACILITY_1.id, PATIENT_1.id, false, ENROLLED_AT_1, null));	// Will ignore the supplied personId.
+	}
+
+	@Test
+	public void z_00_get()
+	{
+		var value = dao.getById(VALUE.id);
+		Assertions.assertEquals(FACILITY_1.id, value.facilityId, "Check facilityId");
+		Assertions.assertEquals(PATIENT.id, value.personId, "Check personId");
+	}
+
+	@Test
+	public void z_00_remove_fail()
+	{
+		sessionDao.current(PATIENT_1_);
+
+		assertThrows(NotAuthorizedException.class, () -> dao.remove(VALUE.id));
+	}
+
+	@Test
+	public void z_00_remove_fail_check()
+	{
+		z_00_get();
+	}
+
+	@Test
+	public void z_00_remove_success()
+	{
+		sessionDao.current(PATIENT_);
+
+		Assertions.assertTrue(dao.remove(VALUE.id));
+	}
+
+	@Test
+	public void z_00_remove_success_check()
+	{
+		Assertions.assertNull(dao.getById(VALUE.id));
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.

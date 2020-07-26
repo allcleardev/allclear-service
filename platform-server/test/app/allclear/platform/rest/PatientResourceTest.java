@@ -67,16 +67,16 @@ public class PatientResourceTest
 	private static final PeopleValue PATIENT_1 = new PeopleValue(1);
 	private static final PeopleValue ASSOCIATE = new PeopleValue(10);
 	private static final PeopleValue ASSOCIATE_1 = new PeopleValue(11);
-	private static final Date ENROLLED_AT = utc(2020, 6, 1);
+	// private static final Date ENROLLED_AT = utc(2020, 6, 1);
 	private static final Date ENROLLED_AT_1 = utc(2020, 7, 1);
 	private static final Date REJECTED_AT = utc(2020, 6, 15);
 	private static final Date REJECTED_AT_1 = utc(2020, 7, 15);
 	private static final SessionValue ADMIN = new SessionValue(false, new AdminValue("admin"));
-	private static final SessionValue EDITOR = new SessionValue(false, new AdminValue("editor", false, true));
+	/* private static final SessionValue EDITOR = new SessionValue(false, new AdminValue("editor", false, true));
 	private static final SessionValue PATIENT_ = new SessionValue(false, PATIENT);
 	private static final SessionValue PATIENT_1_ = new SessionValue(false, PATIENT);
 	private static final SessionValue ASSOCIATE_ = new SessionValue(false, ASSOCIATE);
-	private static final SessionValue ASSOCIATE_1_ = new SessionValue(false, ASSOCIATE);
+	private static final SessionValue ASSOCIATE_1_ = new SessionValue(false, ASSOCIATE); */
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
 		.addResource(new NotFoundExceptionMapper())
@@ -114,8 +114,8 @@ public class PatientResourceTest
 		FACILITY_1 = facilityDao.add(new FacilityValue(1), true);
 		peopleDao.add(PATIENT);
 		peopleDao.add(PATIENT_1);
-		peopleDao.add(ASSOCIATE.withAssociations(FACILITY));
-		peopleDao.add(ASSOCIATE_1.withAssociations(FACILITY, FACILITY_1));
+		peopleDao.add(ASSOCIATE.withAssociations(FACILITY), true);
+		peopleDao.add(ASSOCIATE_1.withAssociations(FACILITY, FACILITY_1), true);
 
 		var now = new Date();
 		var response = request()

@@ -99,6 +99,10 @@ public class PatientDAO extends AbstractDAO<Patient>
 	private Object[] _validate(final PatientValue value) throws ValidationException
 	{
 		value.clean();
+
+		var auth = sessionDao.checkAdminOrPerson();
+		if (auth.person()) value.personId = auth.person.id;
+
 		var validator = new Validator();
 
 		// Throw exception after field existence checks and before FK checks.
@@ -156,7 +160,7 @@ public class PatientDAO extends AbstractDAO<Patient>
 	Patient check(final Patient record, final SessionValue session, final boolean update, final boolean removal)
 	{
 		if (session.admin() ||	// Admins can see everything.
-			session.person.id.equals(record.getPersonId()))	// A patient can view, update, and remove patients.
+			session.person.id.equals(record.getPersonId()))	// A patient can view, update, and remove themselves.
 				return record;
 
 		if (!session.person.associated())
@@ -168,6 +172,8 @@ public class PatientDAO extends AbstractDAO<Patient>
 
 		return record;
 	}
+
+	Patient find(final Long id) { return get(id); }
 
 	/** Finds a single Patient entity by identifier.
 	 *
