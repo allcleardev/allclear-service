@@ -236,4 +236,6 @@ public class TestingUtils
 	public static Date hours(final Date value, final long i) { return new Date(value.getTime() + (i * MILLISECONDS_HOUR)); }
 	public static Date hourAgo() { return new Date(System.currentTimeMillis() - MILLISECONDS_HOUR); }
 	public static Date hourAhead() { return new Date(System.currentTimeMillis() + MILLISECONDS_HOUR); }
+	public static Date hourAgo(final Date value) { return hours(value, -1L); }
+	public static Date hourAhead(final Date value) { return hours(value, 1L); }
 }

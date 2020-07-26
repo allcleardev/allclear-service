@@ -632,4 +632,35 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.1.111_ALLCLEAR-585" author="smalleyd">
+		<createTable tableName="patient" remarks="Represents people who sought the services of a facility.">
+			<column name="id" type="BIGINT" autoIncrement="true">
+				<constraints nullable="false" primaryKey="true" primaryKeyName="pk_patient" />
+			</column>
+			<column name="facility_id" type="BIGINT" remarks="Refers to the facility.">
+				<constraints nullable="false" />
+			</column>
+			<column name="person_id" type="VARCHAR(10)" remarks="Refers to the person/patient.">
+				<constraints nullable="false" referencedTableName="people" referencedColumnNames="id" foreignKeyName="fk_patient_person" />
+			</column>
+			<column name="alertable" type="BOOLEAN" defaultValueBoolean="false" remarks="Indicates that a patient wishes to be notified with their test results.">
+				<constraints nullable="false" />
+			</column>
+			<column name="enrolled_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the patient accepts enrollment request." />
+			<column name="rejected_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the patient rejects enrollment request." />
+			<column name="created_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was created.">
+				<constraints nullable="false" />
+			</column>
+			<column name="updated_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the record was last modified.">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+		<addUniqueConstraint tableName="patient" columnNames="facility_id, person_id" constraintName="unq_patient" />
+		<addForeignKeyConstraint baseTableName="patient" baseColumnNames="facility_id" referencedTableName="facility" referencedColumnNames="id" constraintName="fk_patient_facility" />
+
+		<rollback>
+			<dropTable tableName="patient" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>
