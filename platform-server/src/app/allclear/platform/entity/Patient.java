@@ -91,6 +91,16 @@ public class Patient implements Serializable
 
 	public Patient() {}
 
+	public Patient(final Facility facility, final People person)
+	{
+		putFacility(facility);
+		putPerson(person);
+		this.alertable = false;
+		this.enrolledAt = null;
+		this.rejectedAt = null;
+		this.createdAt = this.updatedAt = new Date();
+	}
+
 	public Patient(final PatientValue value, final Object[] cmrs)
 	{
 		this.facilityId = value.facilityId = (this.facility = (Facility) cmrs[1]).getId();

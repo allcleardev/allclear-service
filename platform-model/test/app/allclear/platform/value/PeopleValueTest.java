@@ -43,6 +43,43 @@ public class PeopleValueTest
 			.withUpdatedAt(value);
 	}
 
+	public static Stream<Arguments> associatedWith()
+	{
+		var empty = new PeopleValue();
+		var one = new PeopleValue().withAssociations(new FacilityValue(1L));
+		var two = new PeopleValue().withAssociations(new FacilityValue(2L));
+		var three = new PeopleValue().withAssociations(new FacilityValue(3L));
+		var nullish = new PeopleValue().withAssociations(new FacilityValue());
+		var oneAndTwo = new PeopleValue().withAssociations(new FacilityValue(1L), new FacilityValue(2L));
+
+		return Stream.of(
+			arguments(empty, 1L, false),
+			arguments(empty, 2L, false),
+			arguments(empty, null, false),
+			arguments(nullish, 1L, false),
+			arguments(nullish, 2L, false),
+			arguments(nullish, null, false),
+			arguments(one, 1L, true),
+			arguments(one, 2L, false),
+			arguments(one, null, false),
+			arguments(two, 1L, false),
+			arguments(two, 2L, true),
+			arguments(two, null, false),
+			arguments(three, 1L, false),
+			arguments(three, 2L, false),
+			arguments(three, null, false),
+			arguments(oneAndTwo, 1L, true),
+			arguments(oneAndTwo, 2L, true),
+			arguments(oneAndTwo, null, false));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void associatedWith(final PeopleValue value, final Long facilityId, final boolean expected)
+	{
+		Assertions.assertEquals(expected, value.associatedWith(facilityId));
+	}
+
 	public static Stream<Arguments> create()
 	{
 		return Stream.of(

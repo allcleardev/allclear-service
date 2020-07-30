@@ -153,6 +153,8 @@ public class FacilityValue implements Auditable, Serializable
 
 	public FacilityValue() {}
 
+	public FacilityValue(final long id) { this.id = id; }
+
 	public FacilityValue(final int i)	// For tests
 	{
 		this(i, "City" + i, "State " + i, i, i, true);

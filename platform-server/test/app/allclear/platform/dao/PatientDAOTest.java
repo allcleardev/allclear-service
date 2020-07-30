@@ -635,6 +635,49 @@ public class PatientDAOTest
 		Assertions.assertNull(dao.getById(VALUE.id));
 	}
 
+	public static Stream<Arguments> z_10_enroll_fail()
+	{
+		return Stream.of(
+			arguments(ADMIN, FACILITY.id, PATIENT.id, NotAuthorizedException.class, "Must be a Person session."),
+			arguments(EDITOR, FACILITY.id, PATIENT.id, NotAuthorizedException.class, "Must be a Person session."),
+			arguments(PATIENT_, FACILITY.id, PATIENT.id, NotAuthorizedException.class, " is not an associate of the facility ID '1'."),
+			arguments(ASSOCIATE_1_, FACILITY.id, PATIENT.id, NotAuthorizedException.class, " is not an associate of the facility ID '1'."),
+			arguments(ASSOCIATE_, null, PATIENT.id, NotAuthorizedException.class, " is not an associate of the facility ID 'null'."),
+			arguments(ASSOCIATE_, 1000L, PATIENT.id, NotAuthorizedException.class, " is not an associate of the facility ID '1000'."),
+			arguments(ASSOCIATE_, FACILITY.id, null, ValidationException.class, "Person is not set."),
+			arguments(ASSOCIATE_, FACILITY.id, StringUtils.repeat('1', PatientValue.MAX_LEN_PERSON_ID + 1), ValidationException.class, "Person '11111111111' is longer than the expected size of 10."),
+			arguments(ASSOCIATE_, FACILITY.id, "invalid", ValidationException.class, "The Person ID, invalid, is invalid."));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_10_enroll_fail(final SessionValue session, final Long facilityId, final String personId, final Class<? extends Exception> ex, final String message)
+	{
+		sessionDao.current(session);
+
+		assertThat(assertThrows(ex, () -> dao.enroll(facilityId, personId)))
+			.hasMessageContaining(message);
+	}
+
+	@Test
+	public void z_10_enroll_success()
+	{
+		sessionDao.current(ASSOCIATE_);
+
+		var record = dao.enroll(FACILITY.id, PATIENT_1.id);
+		Assertions.assertNotNull(record, "Exists");
+		Assertions.assertEquals(3L, record.getId(), "Check id");
+	}
+
+	@Test
+	public void z_10_enroll_success_check()
+	{
+		var record = dao.findWithException(3L);
+		Assertions.assertNotNull(record, "Exists");
+		Assertions.assertEquals(FACILITY.id, record.getFacilityId(), "Check facilityId");
+		Assertions.assertEquals(PATIENT_1.id, record.getPersonId(), "Check personId");
+	}
+
 	/** Helper method - calls the DAO count call and compares the expected total value.
 	 *
 	 * @param filter

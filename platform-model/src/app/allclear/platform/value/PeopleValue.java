@@ -91,6 +91,7 @@ public class PeopleValue implements Serializable
 	public boolean healthWorker() { return (null != healthWorkerStatus) && healthWorkerStatus.staff; }
 	public boolean meetsCdcPriority3() { return healthWorker() || symptomatic(); }
 	public boolean associated() { return CollectionUtils.isNotEmpty(associations); }
+	public boolean associatedWith(final Long facilityId) { return (null != facilityId) && associated() && associations.stream().anyMatch(o -> (null != o) && facilityId.equals(o.id)); }
 
 	// Mutators
 	public PeopleValue withId(final String newValue) { id = newValue; return this; }

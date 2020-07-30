@@ -65,6 +65,45 @@ public class PatientDAO extends AbstractDAO<Patient>
 		return value.withId(persist(new Patient(value, _validate(value.withId(null)))).getId());
 	}
 
+	/** Enrolls a Patient with a Facility.
+	 * 
+	 * @param facilityId
+	 * @param personId
+	 * @return never NULL
+	 * @throws ValidationException
+	 */
+	public Patient enroll(final Long facilityId, final String personId)
+		throws ValidationException
+	{
+		var auth = sessionDao.checkPerson();
+		if (!sessionDao.checkPerson().associatedWith(facilityId))
+			throw new NotAuthorizedException("The current user '" + auth + "' is not an associate of the facility ID '" + facilityId + "'.");
+
+		var record = find(facilityId, personId);
+		if (null != record) return record;
+
+		var validator = new Validator();
+
+		// Throw exception after field existence checks and before FK checks.
+		validator.ensureExists("facilityId", "Facility", facilityId)
+			.ensureExistsAndLength("personId", "Person", personId, PatientValue.MAX_LEN_PERSON_ID)
+			.check();
+
+		// Validation foreign keys.
+		var session = currentSession();
+		var facility = session.get(Facility.class, facilityId);
+		if (null == facility)
+			validator.add("facilityId", "The Facility ID, %d, is invalid.", facilityId);
+		var person = session.get(People.class, personId);
+		if (null == person)
+			validator.add("personId", "The Person ID, %s, is invalid.", personId);
+
+		// Throw exception if errors exist.
+		validator.check();
+
+		return persist(new Patient(facility, person));
+	}
+
 	/** Updates a single Patient value.
 	 *
 	 * @param value
