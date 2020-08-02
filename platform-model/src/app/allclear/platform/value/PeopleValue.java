@@ -166,6 +166,14 @@ public class PeopleValue implements Serializable
 		this(name, phone, null, null, null, null, null, null, null, HealthWorkerStatus.NEITHER.id, null, null, null, false, active);
 	}
 
+	public PeopleValue(	// For enrolling new Patients by a Facility Associate. DLS on 7/30/2020.
+		final String phone,
+		final String firstName,
+		final String lastName)
+	{
+		this(System.nanoTime() + "", phone, null, firstName, lastName, null, null, null, null, HealthWorkerStatus.NEITHER.id, null, null, null, false, false);
+	}
+
 	public PeopleValue(
 		final String name,
 		final String phone,

@@ -1,5 +1,6 @@
 package app.allclear.platform.rest;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.ws.rs.*;
@@ -13,8 +14,9 @@ import app.allclear.common.errors.ValidationException;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.resources.Headers;
 import app.allclear.common.value.OperationResponse;
-import app.allclear.platform.dao.TestsDAO;
+import app.allclear.platform.dao.*;
 import app.allclear.platform.filter.TestsFilter;
+import app.allclear.platform.model.TestInitRequest;
 import app.allclear.platform.value.TestsValue;
 
 /**********************************************************************************
@@ -34,14 +36,18 @@ import app.allclear.platform.value.TestsValue;
 public class TestsResource
 {
 	private final TestsDAO dao;
+	private final PatientDAO patientDao;
+	private final PeopleDAO peopleDao;
 
 	/** Populator.
 	 * 
 	 * @param dao
 	 */
-	public TestsResource(final TestsDAO dao)
+	public TestsResource(final TestsDAO dao, final PatientDAO patientDao, final PeopleDAO peopleDao)
 	{
 		this.dao = dao;
+		this.patientDao = patientDao;
+		this.peopleDao = peopleDao;
 	}
 
 	@GET
@@ -51,6 +57,16 @@ public class TestsResource
 		@PathParam("id") final Long id) throws ValidationException
 	{
 		return dao.getByIdWithException(id);
+	}
+
+	@GET
+	@Path("/{facilityId}/{remoteId}") @Timed @UnitOfWork
+	@ApiOperation(value="getByFacilityAndRemoteId", notes="", response=TestsValue.class)
+	public TestsValue getByFacilityAndRemoteId(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@PathParam("facilityId") final Long facilityId,
+		@PathParam("remoteId") final String remoteId)
+	{
+		return dao.getByFacilityAndRemoteId(facilityId, remoteId);
 	}
 
 	@GET
@@ -69,6 +85,27 @@ public class TestsResource
 		final TestsValue value) throws ValidationException
 	{
 		return dao.add(value);
+	}
+
+	@POST
+	@Path("/init") @Timed @UnitOfWork
+	@ApiOperation(value="init", notes="Initializes a pending Test with patient retrieval and potential enrollment.", response=TestsValue.class)
+	public TestsValue init(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final TestInitRequest request) throws ValidationException
+	{
+		if (!request.valid()) throw new ValidationException("phone", "Please provide either a Person ID or a the patient phone number.");
+
+		var personId = (null != request.personId) ? request.personId :
+			peopleDao.getOrAdd(request.phone, request.firstName, request.lastName).getId();
+
+		var patient = patientDao.enroll(request.facilityId, personId);
+
+		if ((null == patient.getEnrolledAt()) && (null == patient.getRejectedAt()))	// Send enrollment SMS message.
+		{
+			
+		}
+		
+		return dao.add(patient, request.typeId, request.identifier);
 	}
 
 	@PUT

@@ -642,7 +642,7 @@ public class PatientDAOTest
 			arguments(EDITOR, FACILITY.id, PATIENT.id, NotAuthorizedException.class, "Must be a Person session."),
 			arguments(PATIENT_, FACILITY.id, PATIENT.id, NotAuthorizedException.class, " is not an associate of the facility ID '1'."),
 			arguments(ASSOCIATE_1_, FACILITY.id, PATIENT.id, NotAuthorizedException.class, " is not an associate of the facility ID '1'."),
-			arguments(ASSOCIATE_, null, PATIENT.id, NotAuthorizedException.class, " is not an associate of the facility ID 'null'."),
+			arguments(ASSOCIATE_, null, PATIENT.id, ValidationException.class, "Facility is not set."),
 			arguments(ASSOCIATE_, 1000L, PATIENT.id, NotAuthorizedException.class, " is not an associate of the facility ID '1000'."),
 			arguments(ASSOCIATE_, FACILITY.id, null, ValidationException.class, "Person is not set."),
 			arguments(ASSOCIATE_, FACILITY.id, StringUtils.repeat('1', PatientValue.MAX_LEN_PERSON_ID + 1), ValidationException.class, "Person '11111111111' is longer than the expected size of 10."),

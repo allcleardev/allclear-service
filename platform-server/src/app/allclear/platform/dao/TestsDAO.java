@@ -2,6 +2,7 @@ package app.allclear.platform.dao;
 
 import static app.allclear.common.dao.OrderByBuilder.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -69,6 +70,28 @@ public class TestsDAO extends AbstractDAO<Tests>
 		return value.withId(persist(new Tests(value, (People) cmrs[1], (Facility) cmrs[2])).getId());
 	}
 
+	/** Adds a single Tests for a patient by a facility associate.
+	 * 
+	 * @param patient
+	 * @param typeId
+	 * @param remoteId
+	 * @return never NULL.
+	 * @throws ValidationException
+	 */
+	public TestsValue add(final Patient patient, final String typeId, final String remoteId) throws ValidationException
+	{
+		var validator = new Validator();
+		validator
+			.ensureExistsAndContains("typeId", "Type", typeId, TestType.VALUES)
+			.ensureLength("remoteId", "Remote ID", remoteId, TestsValue.MAX_LEN_REMOTE_ID)
+			.check();
+
+		if ((null != remoteId) && (null != find(patient.getFacilityId(), remoteId)))
+			validator.add("remoteId", "The Remote ID '%s' is already in use.", remoteId).check();
+
+		return persist(new Tests(patient, typeId, remoteId, new Date())).toValue();
+	}
+
 	/** Updates a single Tests value.
 	 *
 	 * @param value
@@ -112,7 +135,7 @@ public class TestsDAO extends AbstractDAO<Tests>
 			.ensureExistsAndContains("typeId", "Type", value.typeId, TestType.VALUES)
 			.ensureExists("takenOn", "Taken On", value.takenOn)
 			.ensureExists("facilityId", "Facility", value.facilityId)
-			.ensureLength("remoteId", "RemoteId", value.remoteId, TestsValue.MAX_LEN_REMOTE_ID)
+			.ensureLength("remoteId", "Remote ID", value.remoteId, TestsValue.MAX_LEN_REMOTE_ID)
 			.ensureLength("notes", "Notes", value.notes, TestsValue.MAX_LEN_NOTES)
 			.check();
 
@@ -171,7 +194,10 @@ public class TestsDAO extends AbstractDAO<Tests>
 
 	Tests check(final Tests record, final SessionValue auth) throws NotAuthorizedException
 	{
-		if (auth.canAdmin() || auth.person.id.equals(record.getPersonId())) return record;
+		if (auth.canAdmin() ||
+		    auth.person.id.equals(record.getPersonId()) ||
+		    auth.person.associatedWith(record.getFacilityId()))
+				return record;
 
 		throw new NotAuthorizedException("The Person '" + auth.person + "' cannot access '" + record + "'.");
 	}
@@ -232,6 +258,22 @@ public class TestsDAO extends AbstractDAO<Tests>
 	public TestsValue getByIdWithException(final Long id) throws ObjectNotFoundException
 	{
 		return findWithException(id).toValue();
+	}
+
+	/** Gets a single Tests value by facility and their internal system identifier.
+	 * 
+	 * @param facilityId
+	 * @param remoteId
+	 * @return never NULL.
+	 * @throws ObjectNotFoundException if not found.
+	 */
+	public TestsValue getByFacilityAndRemoteId(final Long facilityId, final String remoteId)
+		throws ObjectNotFoundException
+	{
+		var o = find(facilityId, remoteId);
+		if (null == o) throw new ObjectNotFoundException("The Facility " + facilityId + " and Remote ID '" + remoteId + "' does not exist.");
+
+		return check(o).toValue();
 	}
 
 	/** Gets a list of Test values for a person.

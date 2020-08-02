@@ -57,6 +57,8 @@ public class TestsDAOTest
 	private static FacilityValue FACILITY_1 = null;
 	private static PeopleValue PERSON = null;
 	private static PeopleValue PERSON_1 = null;
+	private static PeopleValue ASSOCIATE = null;
+	private static PeopleValue ASSOCIATE_1 = null;
 	private static Date RECEIVED_AT = utc(2020, 6, 14);
 	private static Date RECEIVED_AT_1 = utc(2020, 7, 14);
 	private static Date TAKEN_ON = utc(2020, 4, 4);
@@ -86,6 +88,8 @@ public class TestsDAOTest
 		FACILITY_1 = facilityDao.add(FacilityDAOTest.createValid().withName("second"), true);
 		PERSON = peopleDao.add(PeopleDAOTest.createValid());
 		PERSON_1 = peopleDao.add(PeopleDAOTest.createValid().withName("second").withPhone("+18885552000").withEmail(null));
+		ASSOCIATE = peopleDao.add(new PeopleValue(10).withAssociations(FACILITY));
+		ASSOCIATE_1 = peopleDao.add(new PeopleValue(11).withAssociations(FACILITY_1));
 
 		var value = dao.add(VALUE = new TestsValue(PERSON.id, NASAL_SWAB.id, TAKEN_ON, FACILITY.id, false, "All the other details").withRemoteId("remote-1"));
 		Assertions.assertNotNull(value, "Exists");
@@ -173,14 +177,42 @@ public class TestsDAOTest
 		assertThrows(ValidationException.class, () -> dao.add(createValid().withNotes(StringUtils.repeat("A", TestsValue.MAX_LEN_NOTES + 1))));
 	}
 
+	public static Stream<SessionValue> check_fail()
+	{
+		return Stream.of(EDITOR, new SessionValue(false, PERSON_1), new SessionValue(false, ASSOCIATE_1));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void check_fail(final SessionValue session)
+	{
+		sessionDao.current(session);
+
+		assertThrows(NotAuthorizedException.class, () -> dao.check(dao.findWithException(VALUE.id)));
+	}
+
+	public static Stream<SessionValue> check_success()
+	{
+		return Stream.of(ADMIN, new SessionValue(false, PERSON), new SessionValue(false, ASSOCIATE));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void check_success(final SessionValue session)
+	{
+		sessionDao.current(session);
+
+		Assertions.assertNotNull(dao.check(dao.findWithException(VALUE.id)));
+	}
+
 	public static Stream<Arguments> count()
 	{
 		return Stream.of(
-			arguments(new PeopleFilter("createdAt", "ASC"), List.of(PERSON, PERSON_1)),
+			arguments(new PeopleFilter("createdAt", "ASC"), List.of(PERSON, PERSON_1, ASSOCIATE, ASSOCIATE_1)),
 			arguments(new PeopleFilter("createdAt", "ASC").withHasTakenTest(true), List.of(PERSON)),
-			arguments(new PeopleFilter("createdAt", "ASC").withHasTakenTest(false), List.of(PERSON_1)),
+			arguments(new PeopleFilter("createdAt", "ASC").withHasTakenTest(false), List.of(PERSON_1, ASSOCIATE, ASSOCIATE_1)),
 			arguments(new PeopleFilter("createdAt", "ASC").withHasPositiveTest(true), null),
-			arguments(new PeopleFilter("createdAt", "ASC").withHasPositiveTest(false), List.of(PERSON, PERSON_1)));
+			arguments(new PeopleFilter("createdAt", "ASC").withHasPositiveTest(false), List.of(PERSON, PERSON_1, ASSOCIATE, ASSOCIATE_1)));
 	}
 
 	@ParameterizedTest
@@ -353,11 +385,11 @@ public class TestsDAOTest
 	public static Stream<Arguments> modify_search()
 	{
 		return Stream.of(
-			arguments(new PeopleFilter("createdAt", "ASC"), List.of(PERSON, PERSON_1)),
+			arguments(new PeopleFilter("createdAt", "ASC"), List.of(PERSON, PERSON_1, ASSOCIATE, ASSOCIATE_1)),
 			arguments(new PeopleFilter("createdAt", "ASC").withHasTakenTest(true), List.of(PERSON_1)),
-			arguments(new PeopleFilter("createdAt", "ASC").withHasTakenTest(false), List.of(PERSON)),
+			arguments(new PeopleFilter("createdAt", "ASC").withHasTakenTest(false), List.of(PERSON, ASSOCIATE, ASSOCIATE_1)),
 			arguments(new PeopleFilter("createdAt", "ASC").withHasPositiveTest(true), List.of(PERSON_1)),
-			arguments(new PeopleFilter("createdAt", "ASC").withHasPositiveTest(false), List.of(PERSON)));
+			arguments(new PeopleFilter("createdAt", "ASC").withHasPositiveTest(false), List.of(PERSON, ASSOCIATE, ASSOCIATE_1)));
 	}
 
 	@ParameterizedTest

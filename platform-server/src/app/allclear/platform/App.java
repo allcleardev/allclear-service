@@ -111,6 +111,7 @@ public class App extends Application<Config>
 		var auditor = new AuditLogDAO(factory, sessionDao, conf.auditLog);
 		var customerDao = new CustomerDAO(conf.env, conf.admins, session);
 		var facilityDao = new FacilityDAO(factory, auditor);
+		var patientDao = new PatientDAO(factory, sessionDao);
 		var peopleDao = new PeopleDAO(factory);
 		var registrationDao = new RegistrationDAO(session, twilio, conf);
 
@@ -148,13 +149,13 @@ public class App extends Application<Config>
         jersey.register(new FacilityResource(facilityDao, sessionDao, map));
         jersey.register(new FriendResource(new FriendDAO(factory), sessionDao));
         jersey.register(new MapResource(map));
-        jersey.register(new PatientResource(new PatientDAO(factory, sessionDao)));
+        jersey.register(new PatientResource(patientDao));
 		jersey.register(new PeopleResource(peopleDao, registrationDao, sessionDao, task.queue(QUEUE_ALERT)));
 		jersey.register(new app.allclear.common.azure.QueueResource(task));
 		jersey.register(new RegistrationResource(registrationDao));
 		jersey.register(new SessionResource(sessionDao));
 		jersey.register(new SymptomsLogResource(new SymptomsLogDAO(factory), sessionDao));
-		jersey.register(new TestsResource(new TestsDAO(factory, sessionDao)));
+		jersey.register(new TestsResource(new TestsDAO(factory, sessionDao), patientDao, peopleDao));
 		jersey.register(new TwilioResource(conf.twilio.authToken, peopleDao));
 		jersey.register(new TypeResource());
 

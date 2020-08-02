@@ -75,6 +75,9 @@ public class PatientDAO extends AbstractDAO<Patient>
 	public Patient enroll(final Long facilityId, final String personId)
 		throws ValidationException
 	{
+		var validator = new Validator();
+		validator.ensureExists("facilityId", "Facility", facilityId).check();
+
 		var auth = sessionDao.checkPerson();
 		if (!sessionDao.checkPerson().associatedWith(facilityId))
 			throw new NotAuthorizedException("The current user '" + auth + "' is not an associate of the facility ID '" + facilityId + "'.");
@@ -82,10 +85,8 @@ public class PatientDAO extends AbstractDAO<Patient>
 		var record = find(facilityId, personId);
 		if (null != record) return record;
 
-		var validator = new Validator();
-
 		// Throw exception after field existence checks and before FK checks.
-		validator.ensureExists("facilityId", "Facility", facilityId)
+		validator
 			.ensureExistsAndLength("personId", "Person", personId, PatientValue.MAX_LEN_PERSON_ID)
 			.check();
 
@@ -290,6 +291,18 @@ public class PatientDAO extends AbstractDAO<Patient>
 	public PatientValue getByIdWithException(final Long id) throws ObjectNotFoundException
 	{
 		return check(findWithException(id)).toValue();
+	}
+
+	/** Gets a single Patient value by facility and person.
+	 * 
+	 * @param facilityId
+	 * @param personId
+	 * @return NULL if not found.
+	 */
+	public PatientValue getByFacilityAndPerson(final Long facilityId, final String personId)
+	{
+		var o = find(facilityId, personId);
+		return (null != o) ? o.toValue() : null;
 	}
 
 	/** Gets the patients associated with a specific facility (set of facilities) by a wildcard name search.

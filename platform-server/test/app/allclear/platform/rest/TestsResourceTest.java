@@ -52,6 +52,7 @@ public class TestsResourceTest
 
 	private static TestsDAO dao = null;
 	private static FacilityDAO facilityDao = null;
+	private static PatientDAO patientDao = null;
 	private static PeopleDAO peopleDao = null;
 	private static SessionDAO sessionDao = new SessionDAO(new FakeRedisClient(), ConfigTest.loadTest());
 	private static TestsValue VALUE = null;
@@ -65,7 +66,7 @@ public class TestsResourceTest
 	public final ResourceExtension RULE = ResourceExtension.builder()
 		.addResource(new NotFoundExceptionMapper())
 		.addResource(new ValidationExceptionMapper())
-		.addResource(new TestsResource(dao)).build();
+		.addResource(new TestsResource(dao, patientDao, peopleDao)).build();
 
 	/** Primary URI to test. */
 	private static final String TARGET = "/tests";
@@ -81,6 +82,7 @@ public class TestsResourceTest
 		var factory = DAO_RULE.getSessionFactory();
 		dao = new TestsDAO(factory, sessionDao);
 		facilityDao = new FacilityDAO(factory, new TestAuditor());
+		patientDao = new PatientDAO(factory, sessionDao);
 		peopleDao = new PeopleDAO(factory);
 	}
 

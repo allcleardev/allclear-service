@@ -128,6 +128,11 @@ public class Tests implements Serializable
 		this.createdAt = this.updatedAt = createdAt;
 	}
 
+	public Tests(final Patient patient, final String typeId, final String remoteId, final Date now)
+	{
+		this(patient.getPerson(), typeId, now, patient.getFacility(), remoteId, false, null, null, now);
+	}
+
 	public Tests(final TestsValue value, final People person, final Facility facility)
 	{
 		this(person, value.typeId, value.takenOn, facility, value.remoteId, value.positive, value.notes, value.receivedAt, value.createdAt = value.updatedAt = new Date());

@@ -394,9 +394,11 @@ public class PeopleDAO extends AbstractDAO<People>
 	 * @param value
 	 * @throws ValidationException
 	 */
-	public void validate(final PeopleValue value) throws ValidationException
+	public PeopleValue validate(final PeopleValue value) throws ValidationException
 	{
 		_validate(value);
+
+		return value;
 	}
 
 	/** Validates a single People value and returns any CMR fields.
@@ -610,6 +612,22 @@ public class PeopleDAO extends AbstractDAO<People>
 		}
 
 		throw new ValidationException("Please provide a phone number.");
+	}
+
+	/** Gets a single People entity by phone number. If NOT found, add an inactive new member.
+	 * 
+	 * @param phone
+	 * @param firstName
+	 * @param lastName
+	 * @return never NULL.
+	 * @throws ValidationException
+	 */
+	public People getOrAdd(final String phone, final String firstName, final String lastName) throws ValidationException
+	{
+		var record = findByPhone(phone);
+		if (null != record) return record;
+
+		return persist(new People(validate(new PeopleValue(phone, firstName, lastName).withId(generateId()))));
 	}
 
 	/** Gets a single People value by identifier.

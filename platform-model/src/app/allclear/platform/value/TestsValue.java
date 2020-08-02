@@ -68,6 +68,11 @@ public class TestsValue implements Serializable
 		this(null, personId, null, typeId, null, takenOn, facilityId, null, null, positive, notes, null, null, null);
 	}
 
+	public TestsValue(final String personId, final String typeId, final Date takenOn, final Long facilityId, final String remoteId)
+	{
+		this(null, personId, null, typeId, null, takenOn, facilityId, null, remoteId, false, null, null, null, null);
+	}
+
 	public TestsValue(final Long id,
 		final String personId,
 		final String personName,
