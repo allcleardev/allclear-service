@@ -6,10 +6,8 @@ import static org.apache.commons.lang3.StringUtils.repeat;
 import static app.allclear.testing.TestingUtils.*;
 import static app.allclear.platform.type.TestType.*;
 
-import java.util.*;
 import java.util.stream.Stream;
 import javax.ws.rs.client.*;
-import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 
 import org.junit.jupiter.api.*;
@@ -22,15 +20,12 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 
 import app.allclear.junit.hibernate.*;
-import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.*;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.redis.FakeRedisClient;
-import app.allclear.common.value.OperationResponse;
 import app.allclear.platform.App;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.dao.*;
-import app.allclear.platform.filter.TestsFilter;
 import app.allclear.platform.model.TestInitRequest;
 import app.allclear.platform.type.TestType;
 import app.allclear.platform.value.*;
@@ -57,7 +52,6 @@ public class TestsResourceInitTest
 	private static PatientDAO patientDao = null;
 	private static PeopleDAO peopleDao = null;
 	private static SessionDAO sessionDao = new SessionDAO(new FakeRedisClient(), ConfigTest.loadTest());
-	private static TestsValue VALUE = null;
 	private static SessionValue ADMIN = null;
 	private static SessionValue EDITOR = null;
 	private static FacilityValue FACILITY = null;
@@ -77,11 +71,6 @@ public class TestsResourceInitTest
 
 	/** Primary URI to test. */
 	private static final String TARGET = "/tests";
-
-	/** Generic types for reading values from responses. */
-	private static final GenericType<List<TestsValue>> TYPE_LIST_VALUE = new GenericType<List<TestsValue>>() {};
-	private static final GenericType<QueryResults<TestsValue, TestsFilter>> TYPE_QUERY_RESULTS =
-		new GenericType<QueryResults<TestsValue, TestsFilter>>() {};
 
 	@BeforeAll
 	public static void up()
@@ -134,7 +123,7 @@ public class TestsResourceInitTest
 
 	public static Stream<Arguments> init_invalid()
 	{
-		var typeId = TestType.ANTIBODY.id;
+		var typeId = ANTIBODY.id;
 
 		return Stream.of(
 			arguments(new TestInitRequest(FACILITY.id, PATIENT.id, null, "remote-1"), "Type is not set."),
@@ -170,7 +159,7 @@ public class TestsResourceInitTest
 	{
 		sessionDao.current(ASSOCIATE_);
 
-		var type = TestType.ANTIBODY;
+		var type = ANTIBODY;
 		var response = request("init")
 			.post(Entity.json(new TestInitRequest(FACILITY.id, PATIENT.id, type.id, "remote-1")));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
@@ -200,7 +189,7 @@ public class TestsResourceInitTest
 		var response = request(FACILITY.id, "remote-1");
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());
 
-		var type = TestType.ANTIBODY;
+		var type = ANTIBODY;
 		var value = response.readEntity(TestsValue.class);
 		Assertions.assertNotNull(value, "Exists");
 		Assertions.assertEquals(FACILITY.id, value.facilityId, "Check facilityId");
@@ -232,7 +221,7 @@ public class TestsResourceInitTest
 		sessionDao.current(ASSOCIATE_);
 
 		var response = request("init")
-			.post(Entity.json(new TestInitRequest(FACILITY.id, PATIENT.id, TestType.ANTIBODY.id, "remote-1")));
+			.post(Entity.json(new TestInitRequest(FACILITY.id, PATIENT.id, ANTIBODY.id, "remote-1")));
 		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, response.getStatus(), "Status");
 		assertThat(response.readEntity(ErrorInfo.class).message).as("Check error message").isEqualTo("The Remote ID 'remote-1' is already in use.");
 	}
@@ -241,7 +230,6 @@ public class TestsResourceInitTest
 	private WebTarget target() { return RULE.client().target(TARGET); }
 
 	/** Helper method - creates the request from the WebTarget. */
-	private Invocation.Builder request() { return request(target()); }
 	private Invocation.Builder request(final String path) { return request(target().path(path)); }
 	private Invocation.Builder request(final WebTarget target) { return target.request(UTF8MediaType.APPLICATION_JSON_TYPE); }
 	private Response request(final Long facilityId, final String remoteId) { return request(facilityId + "/" + remoteId).get(); }
