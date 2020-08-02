@@ -34,6 +34,8 @@ public class FacilityX implements Serializable
 	@Column(name="address", columnDefinition="VARCHAR(128)", nullable=false) public String address;
 	@Column(name="city", columnDefinition="VARCHAR(128)", nullable=false) public String city;
 	@Column(name="state", columnDefinition="VARCHAR(128)", nullable=false) public String state;
+	@Column(name="county_id", columnDefinition="CHAR(5)", nullable=true) public String countyId;
+	@Column(name="county_name", columnDefinition="VARCHAR(128)", nullable=true) public String countyName;
 	@Column(name="latitude", columnDefinition="DECIMAL(12,8)", nullable=false) public BigDecimal latitude;
 	@Column(name="longitude", columnDefinition="DECIMAL(12,8)", nullable=false) public BigDecimal longitude;
 	@Column(name="phone", columnDefinition="VARCHAR(32)", nullable=true) public String phone;
@@ -76,6 +78,8 @@ public class FacilityX implements Serializable
 			address,
 			city,
 			state,
+			countyId,
+			countyName,
 			latitude,
 			longitude,
 			phone,

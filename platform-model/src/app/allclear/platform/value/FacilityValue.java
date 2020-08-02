@@ -32,6 +32,8 @@ public class FacilityValue implements Auditable, Serializable
 	public static final int MAX_LEN_ADDRESS = 128;
 	public static final int MAX_LEN_CITY = 128;
 	public static final int MAX_LEN_STATE = 128;
+	public static final int MAX_LEN_COUNTY_ID = 5;
+	public static final int MAX_LEN_COUNTY_NAME = 128;
 	public static final int MAX_LEN_PHONE = 32;
 	public static final int MAX_LEN_APPOINTMENT_PHONE = 32;
 	public static final int MAX_LEN_EMAIL = 128;
@@ -51,6 +53,8 @@ public class FacilityValue implements Auditable, Serializable
 	public String address = null;
 	public String city = null;
 	public String state = null;
+	public String countyId = null;
+	public String countyName = null;
 	public BigDecimal latitude = null;
 	public BigDecimal longitude = null;
 	public String phone = null;
@@ -104,6 +108,9 @@ public class FacilityValue implements Auditable, Serializable
 	public FacilityValue withAddress(final String newValue) { address = newValue; return this; }
 	public FacilityValue withCity(final String newValue) { city = newValue; return this; }
 	public FacilityValue withState(final String newValue) { state = newValue; return this; }
+	public FacilityValue withCountyId(final String newValue) { countyId = newValue; return this; }
+	public FacilityValue withCountyName(final String newValue) { countyName = newValue; return this; }
+	public FacilityValue withCounty(final String countyId, final String countyName) { return withCountyId(countyId).withCountyName(countyName); }
 	public FacilityValue withLatitude(final BigDecimal newValue) { latitude = newValue; return this; }
 	public FacilityValue withLongitude(final BigDecimal newValue) { longitude = newValue; return this; }
 	public FacilityValue withPhone(final String newValue) { phone = newValue; return this; }
@@ -242,7 +249,7 @@ public class FacilityValue implements Auditable, Serializable
 		final String notes,
 		final boolean active)
 	{
-		this(null, name, address, city, state, latitude, longitude, phone, appointmentPhone, email, url, appointmentUrl, hours, typeId, null,
+		this(null, name, address, city, state, null, null, latitude, longitude, phone, appointmentPhone, email, url, appointmentUrl, hours, typeId, null,
 			driveThru, appointmentRequired, acceptsThirdParty, referralRequired, testCriteriaId, null, otherTestCriteria, testsPerDay,
 			governmentIdRequired, minimumAge, doctorReferralCriteria, firstResponderFriendly, telescreeningAvailable, acceptsInsurance,
 			insuranceProvidersAccepted, freeOrLowCost, canDonatePlasma, resultNotificationEnabled, notes, active, null, null, null);
@@ -253,6 +260,8 @@ public class FacilityValue implements Auditable, Serializable
 		final String address,
 		final String city,
 		final String state,
+		final String countyId,
+		final String countyName,
 		final BigDecimal latitude,
 		final BigDecimal longitude,
 		final String phone,
@@ -292,6 +301,8 @@ public class FacilityValue implements Auditable, Serializable
 		this.address = address;
 		this.city = city;
 		this.state = state;
+		this.countyId = countyId;
+		this.countyName = countyName;
 		this.latitude = latitude;
 		this.longitude = longitude;
 		this.phone = phone;
@@ -334,6 +345,8 @@ public class FacilityValue implements Auditable, Serializable
 		address = StringUtils.trimToNull(address);
 		city = StringUtils.trimToNull(city);
 		state = StringUtils.trimToNull(state);
+		countyId = StringUtils.trimToNull(countyId);
+		countyName = StringUtils.trimToNull(countyName);
 		phone = StringUtils.trimToNull(phone);
 		appointmentPhone = StringUtils.trimToNull(appointmentPhone);
 		email = StringUtils.trimToNull(email);
@@ -359,6 +372,8 @@ public class FacilityValue implements Auditable, Serializable
 			Objects.equals(address, v.address) &&
 			Objects.equals(city, v.city) &&
 			Objects.equals(state, v.state) &&
+			Objects.equals(countyId, v.countyId) &&
+			Objects.equals(countyName, v.countyName) &&
 			(0 == Objects.compare(latitude, v.latitude, (a, b) -> a.compareTo(b))) &&
 			(0 == Objects.compare(longitude, v.longitude, (a, b) -> a.compareTo(b))) &&
 			Objects.equals(phone, v.phone) &&

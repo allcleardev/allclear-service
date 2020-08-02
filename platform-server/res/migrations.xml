@@ -663,4 +663,16 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.1.112_FIPS" author="smalleyd">
+		<addColumn tableName="facility">
+			<column name="county_id" type="CHAR(5)" remarks="Represents a US county FIPS identifier." />
+			<column name="county_name" type="VARCHAR(128)" remarks="Represents a US county name." />
+		</addColumn>
+
+		<rollback>
+			<dropColumn tableName="facility" columnName="county_name" />
+			<dropColumn tableName="facility" columnName="county_id" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

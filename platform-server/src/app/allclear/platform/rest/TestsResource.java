@@ -1,6 +1,5 @@
 package app.allclear.platform.rest;
 
-import java.util.Date;
 import java.util.List;
 
 import javax.ws.rs.*;

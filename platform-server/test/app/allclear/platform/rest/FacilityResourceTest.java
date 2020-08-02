@@ -122,7 +122,7 @@ public class FacilityResourceTest
 		var now = new Date();
 		var response = request()
 			.post(Entity.entity(VALUE = new FacilityValue("Julius", "56 First Street", "Louisville", "KY", bg("-35"), bg("52.607"),
-				true, false, true, false, true, false, true, true, true, false).withTestTypes(ANTIBODY, DONT_KNOW), UTF8MediaType.APPLICATION_JSON_TYPE));
+				true, false, true, false, true, false, true, true, true, false).withCounty("48167", "Galveston").withTestTypes(ANTIBODY, DONT_KNOW), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var value = response.readEntity(FacilityValue.class);
@@ -379,6 +379,10 @@ public class FacilityResourceTest
 	{
 		count(new FacilityFilter().withCity("Louisville"), 1L);
 		count(new FacilityFilter().withState("KY"), 1L);
+		count(new FacilityFilter().withHasCountyId(true), 1L);
+		count(new FacilityFilter().withCountyId("48167"), 1L);
+		count(new FacilityFilter().withHasCountyName(true), 1L);
+		count(new FacilityFilter().withCountyName("Galveston"), 1L);
 		count(new FacilityFilter().withCanDonatePlasma(true), 1L);
 		count(new FacilityFilter().withResultNotificationEnabled(true), 1L);
 		count(new FacilityFilter().include(DONT_KNOW), 1L);
@@ -387,6 +391,8 @@ public class FacilityResourceTest
 		count(new FacilityFilter().exclude(NASAL_SWAB), 1L);
 		count(new FacilityFilter().withCity("New Orleans"), 0L);
 		count(new FacilityFilter().withState("LA"), 0L);
+		count(new FacilityFilter().withHasCountyId(false), 0L);
+		count(new FacilityFilter().withHasCountyName(false), 0L);
 		count(new FacilityFilter().withCanDonatePlasma(false), 0L);
 		count(new FacilityFilter().withResultNotificationEnabled(false), 0L);
 		count(new FacilityFilter().exclude(DONT_KNOW), 0L);
@@ -394,7 +400,7 @@ public class FacilityResourceTest
 		count(new FacilityFilter().exclude(ANTIBODY, DONT_KNOW), 0L);
 		count(new FacilityFilter().include(NASAL_SWAB), 0L);
 
-		var response = request().put(Entity.entity(VALUE.withCity("New Orleans").withState("LA").withCanDonatePlasma(false).withResultNotificationEnabled(false).withTestTypes(NASAL_SWAB), UTF8MediaType.APPLICATION_JSON_TYPE));
+		var response = request().put(Entity.entity(VALUE.withCity("New Orleans").withState("LA").withCounty(null, null).withCanDonatePlasma(false).withResultNotificationEnabled(false).withTestTypes(NASAL_SWAB), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var value = response.readEntity(FacilityValue.class);
@@ -409,6 +415,10 @@ public class FacilityResourceTest
 	{
 		count(new FacilityFilter().withCity("Louisville"), 0L);
 		count(new FacilityFilter().withState("KY"), 0L);
+		count(new FacilityFilter().withHasCountyId(true), 0L);
+		count(new FacilityFilter().withCountyId("48167"), 0L);
+		count(new FacilityFilter().withHasCountyName(true), 0L);
+		count(new FacilityFilter().withCountyName("Galveston"), 0L);
 		count(new FacilityFilter().withCanDonatePlasma(true), 0L);
 		count(new FacilityFilter().withResultNotificationEnabled(true), 0L);
 		count(new FacilityFilter().include(DONT_KNOW), 0L);
@@ -417,6 +427,8 @@ public class FacilityResourceTest
 		count(new FacilityFilter().exclude(NASAL_SWAB), 0L);
 		count(new FacilityFilter().withCity("New Orleans"), 1L);
 		count(new FacilityFilter().withState("LA"), 1L);
+		count(new FacilityFilter().withHasCountyId(false), 1L);
+		count(new FacilityFilter().withHasCountyName(false), 1L);
 		count(new FacilityFilter().withCanDonatePlasma(false), 1L);
 		count(new FacilityFilter().withResultNotificationEnabled(false), 1L);
 		count(new FacilityFilter().exclude(DONT_KNOW), 1L);
@@ -432,6 +444,8 @@ public class FacilityResourceTest
 		Assertions.assertNotNull(value, "Exists");
 		Assertions.assertEquals("New Orleans", value.city, "Check city");
 		Assertions.assertEquals("LA", value.state, "Check state");
+		Assertions.assertNull(value.countyId, "Check countyId");
+		Assertions.assertNull(value.countyName, "Check countyName");
 		Assertions.assertFalse(value.canDonatePlasma, "Check canDonatePlasma");
 		Assertions.assertFalse(value.resultNotificationEnabled, "Check resultNotificationEnabled");
 		assertThat(value.testTypes).as("Check testTypes").containsExactly(NASAL_SWAB.created());
@@ -545,6 +559,8 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter(1, 20).withAddress(VALUE.address), 1L),
 			arguments(new FacilityFilter(1, 20).withCity(VALUE.city), 1L),
 			arguments(new FacilityFilter(1, 20).withState(VALUE.state), 1L),
+			arguments(new FacilityFilter(1, 20).withHasCountyId(false), 1L),
+			arguments(new FacilityFilter(1, 20).withHasCountyName(false), 1L),
 			arguments(new FacilityFilter(1, 20).withLatitudeFrom(latDown), 1L),
 			arguments(new FacilityFilter(1, 20).withLatitudeTo(latUp), 1L),
 			arguments(new FacilityFilter(1, 20).withLongitudeFrom(lngDown), 1L),
@@ -603,6 +619,10 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter(1, 20).withAddress("invalid"), 0L),
 			arguments(new FacilityFilter(1, 20).withCity("invalid"), 0L),
 			arguments(new FacilityFilter(1, 20).withState("invalid"), 0L),
+			arguments(new FacilityFilter(1, 20).withCountyId("48167"), 0L),
+			arguments(new FacilityFilter(1, 20).withHasCountyId(true), 0L),
+			arguments(new FacilityFilter(1, 20).withCountyName("Galveston"), 0L),
+			arguments(new FacilityFilter(1, 20).withHasCountyName(true), 0L),
 			arguments(new FacilityFilter(1, 20).withLatitudeFrom(latUp), 0L),
 			arguments(new FacilityFilter(1, 20).withLatitudeTo(latDown), 0L),
 			arguments(new FacilityFilter(1, 20).withLongitudeFrom(lngUp), 0L),
@@ -1090,6 +1110,8 @@ public class FacilityResourceTest
 		Assertions.assertEquals(expected.address, value.address, assertId + "Check address");
 		Assertions.assertEquals(expected.city, value.city, assertId + "Check city");
 		Assertions.assertEquals(expected.state, value.state, assertId + "Check state");
+		Assertions.assertEquals(expected.countyId, value.countyId, assertId + "Check countyId");
+		Assertions.assertEquals(expected.countyName, value.countyName, assertId + "Check countyName");
 		assertThat(value.latitude).as(assertId + "Check latitude").isEqualByComparingTo(expected.latitude);
 		assertThat(value.longitude).as(assertId + "Check longitude").isEqualByComparingTo(expected.longitude);
 		Assertions.assertEquals(expected.phone, value.phone, assertId + "Check phone");

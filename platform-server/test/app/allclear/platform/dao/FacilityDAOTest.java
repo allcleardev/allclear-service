@@ -162,6 +162,18 @@ public class FacilityDAOTest
 	}
 
 	@Test
+	public void add_longCountyId()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withCountyId(StringUtils.repeat("A", FacilityValue.MAX_LEN_COUNTY_ID + 1)), true));
+	}
+
+	@Test
+	public void add_longCountyName()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withCountyName(StringUtils.repeat("A", FacilityValue.MAX_LEN_COUNTY_NAME + 1)), true));
+	}
+
+	@Test
 	public void add_highLatitude()
 	{
 		assertThrows(ValidationException.class, () -> dao.add(createValid().withLatitude(bg("91")), true));
@@ -442,19 +454,25 @@ public class FacilityDAOTest
 	{
 		var v = createValid();
 		count(new FacilityFilter().withName(VALUE.name), 1L);
+		count(new FacilityFilter().withHasCountyId(false), 1L);
+		count(new FacilityFilter().withHasCountyName(false), 1L);
 		count(new FacilityFilter().withCanDonatePlasma(false), 1L);
 		count(new FacilityFilter().withResultNotificationEnabled(false), 1L);
 		count(new FacilityFilter().withActive(VALUE.active), 1L);
 		count(new FacilityFilter().exclude(NASAL_SWAB), 1L);
 		count(new FacilityFilter().exclude(ANTIBODY), 1L);
 		count(new FacilityFilter().withName(v.name), 0L);
+		count(new FacilityFilter().withHasCountyId(true), 0L);
+		count(new FacilityFilter().withCountyId("48167"), 0L);
+		count(new FacilityFilter().withHasCountyName(true), 0L);
+		count(new FacilityFilter().withCountyName("Galveston"), 0L);
 		count(new FacilityFilter().withCanDonatePlasma(true), 0L);
 		count(new FacilityFilter().withResultNotificationEnabled(true), 0L);
 		count(new FacilityFilter().withActive(v.active), 0L);
 		count(new FacilityFilter().include(NASAL_SWAB), 0L);
 		count(new FacilityFilter().include(ANTIBODY), 0L);
 
-		var value = dao.update(v.withId(VALUE.id).withCanDonatePlasma(true).withResultNotificationEnabled(true).withTestTypes(NASAL_SWAB), true);
+		var value = dao.update(v.withId(VALUE.id).withCounty("48167", "Galveston").withCanDonatePlasma(true).withResultNotificationEnabled(true).withTestTypes(NASAL_SWAB), true);
 		Assertions.assertNotNull(value, "Exists");
 		check(v, value);
 
@@ -469,12 +487,18 @@ public class FacilityDAOTest
 	{
 		var v = createValid();
 		count(new FacilityFilter().withName(VALUE_1.name), 0L);
+		count(new FacilityFilter().withHasCountyId(false), 0L);
+		count(new FacilityFilter().withHasCountyName(false), 0L);
 		count(new FacilityFilter().withCanDonatePlasma(false), 0L);
 		count(new FacilityFilter().withResultNotificationEnabled(false), 0L);
 		count(new FacilityFilter().withActive(VALUE_1.active), 0L);
 		count(new FacilityFilter().exclude(NASAL_SWAB), 0L);
 		count(new FacilityFilter().exclude(ANTIBODY), 1L);
 		count(new FacilityFilter().withName(v.name), 1L);
+		count(new FacilityFilter().withHasCountyId(true), 1L);
+		count(new FacilityFilter().withCountyId("48167"), 1L);
+		count(new FacilityFilter().withHasCountyName(true), 1L);
+		count(new FacilityFilter().withCountyName("Galveston"), 1L);
 		count(new FacilityFilter().withCanDonatePlasma(true), 1L);
 		count(new FacilityFilter().withResultNotificationEnabled(true), 1L);
 		count(new FacilityFilter().withActive(v.active), 1L);
@@ -488,6 +512,8 @@ public class FacilityDAOTest
 		var record = dao.findWithException(VALUE.id);
 		Assertions.assertNotNull(record, "Exists");
 		Assertions.assertEquals("Eve", record.getName(), "Check name");
+		Assertions.assertEquals("48167", record.getCountyId(), "Check countyId");
+		Assertions.assertEquals("Galveston", record.getCountyName(), "Check countyName");
 		Assertions.assertTrue(record.isCanDonatePlasma(), "Check canDonatePlasma");
 		Assertions.assertTrue(record.isResultNotificationEnabled(), "Check resultNotificationEnabled");
 		Assertions.assertFalse(record.isActive(), "Check active");
@@ -521,6 +547,10 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter(1, 20).withAddress(VALUE.address), 1L),
 			arguments(new FacilityFilter(1, 20).withCity(VALUE.city), 1L),
 			arguments(new FacilityFilter(1, 20).withState(VALUE.state), 1L),
+			arguments(new FacilityFilter(1, 20).withCountyId(VALUE.countyId), 1L),
+			arguments(new FacilityFilter(1, 20).withHasCountyId(true), 1L),
+			arguments(new FacilityFilter(1, 20).withCountyName(VALUE.countyName), 1L),
+			arguments(new FacilityFilter(1, 20).withHasCountyName(true), 1L),
 			arguments(new FacilityFilter(1, 20).withLatitudeFrom(latDown), 1L),
 			arguments(new FacilityFilter(1, 20).withLatitudeTo(latUp), 1L),
 			arguments(new FacilityFilter(1, 20).withLongitudeFrom(lngDown), 1L),
@@ -591,6 +621,10 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter(1, 20).withAddress("invalid"), 0L),
 			arguments(new FacilityFilter(1, 20).withCity("invalid"), 0L),
 			arguments(new FacilityFilter(1, 20).withState("invalid"), 0L),
+			arguments(new FacilityFilter(1, 20).withCountyId("invalid"), 0L),
+			arguments(new FacilityFilter(1, 20).withHasCountyId(false), 0L),
+			arguments(new FacilityFilter(1, 20).withCountyName("invalid"), 0L),
+			arguments(new FacilityFilter(1, 20).withHasCountyName(false), 0L),
 			arguments(new FacilityFilter(1, 20).withLatitudeFrom(latUp), 0L),
 			arguments(new FacilityFilter(1, 20).withLatitudeTo(latDown), 0L),
 			arguments(new FacilityFilter(1, 20).withLongitudeFrom(lngUp), 0L),
@@ -739,6 +773,20 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter("state", "invalid"), "state", "ASC"),	// Invalid sort direction is converted to the default.
 			arguments(new FacilityFilter("state", "DESC"), "state", "DESC"),
 			arguments(new FacilityFilter("state", "desc"), "state", "DESC"),
+
+			arguments(new FacilityFilter("countyId", null), "countyId", "ASC"), // Missing sort direction is converted to the default.
+			arguments(new FacilityFilter("countyId", "ASC"), "countyId", "ASC"),
+			arguments(new FacilityFilter("countyId", "asc"), "countyId", "ASC"),
+			arguments(new FacilityFilter("countyId", "invalid"), "countyId", "ASC"),	// Invalid sort direction is converted to the default.
+			arguments(new FacilityFilter("countyId", "DESC"), "countyId", "DESC"),
+			arguments(new FacilityFilter("countyId", "desc"), "countyId", "DESC"),
+
+			arguments(new FacilityFilter("countyName", null), "countyName", "ASC"), // Missing sort direction is converted to the default.
+			arguments(new FacilityFilter("countyName", "ASC"), "countyName", "ASC"),
+			arguments(new FacilityFilter("countyName", "asc"), "countyName", "ASC"),
+			arguments(new FacilityFilter("countyName", "invalid"), "countyName", "ASC"),	// Invalid sort direction is converted to the default.
+			arguments(new FacilityFilter("countyName", "DESC"), "countyName", "DESC"),
+			arguments(new FacilityFilter("countyName", "desc"), "countyName", "DESC"),
 
 			arguments(new FacilityFilter("latitude", null), "latitude", "DESC"), // Missing sort direction is converted to the default.
 			arguments(new FacilityFilter("latitude", "ASC"), "latitude", "ASC"),
@@ -1246,6 +1294,8 @@ public class FacilityDAOTest
 		Assertions.assertEquals(expected.address, record.getAddress(), assertId + "Check address");
 		Assertions.assertEquals(expected.city, record.getCity(), assertId + "Check city");
 		Assertions.assertEquals(expected.state, record.getState(), assertId + "Check state");
+		Assertions.assertEquals(expected.countyId, record.getCountyId(), assertId + "Check countyId");
+		Assertions.assertEquals(expected.countyName, record.getCountyName(), assertId + "Check countyName");
 		assertThat(record.getLatitude()).as(assertId + "Check latitude").isEqualByComparingTo(expected.latitude);
 		assertThat(record.getLongitude()).as(assertId + "Check longitude").isEqualByComparingTo(expected.longitude);
 		Assertions.assertEquals(expected.phone, record.getPhone(), assertId + "Check phone");
@@ -1288,6 +1338,8 @@ public class FacilityDAOTest
 		Assertions.assertEquals(expected.address, value.address, assertId + "Check address");
 		Assertions.assertEquals(expected.city, value.city, assertId + "Check city");
 		Assertions.assertEquals(expected.state, value.state, assertId + "Check state");
+		Assertions.assertEquals(expected.countyId, value.countyId, assertId + "Check countyId");
+		Assertions.assertEquals(expected.countyName, value.countyName, assertId + "Check countyName");
 		assertThat(value.latitude).as(assertId + "Check latitude").isEqualByComparingTo(expected.latitude);
 		assertThat(value.longitude).as(assertId + "Check longitude").isEqualByComparingTo(expected.longitude);
 		Assertions.assertEquals(expected.phone, value.phone, assertId + "Check phone");

@@ -70,6 +70,16 @@ public class Facility implements Serializable
 	public String state;
 	public void setState(final String newValue) { state = newValue; }
 
+	@Column(name="county_id", columnDefinition="CHAR(5)", nullable=true)
+	public String getCountyId() { return countyId; }
+	public String countyId;
+	public void setCountyId(final String newValue) { countyId = newValue; }
+
+	@Column(name="county_name", columnDefinition="VARCHAR(128)", nullable=true)
+	public String getCountyName() { return countyName; }
+	public String countyName;
+	public void setCountyName(final String newValue) { countyName = newValue; }
+
 	@Column(name="latitude", columnDefinition="DECIMAL(12,8)", nullable=false)
 	public BigDecimal getLatitude() { return latitude; }
 	public BigDecimal latitude;
@@ -244,6 +254,8 @@ public class Facility implements Serializable
 		this.address = value.address;
 		this.city = value.city;
 		this.state = value.state;
+		this.countyId = value.countyId;
+		this.countyName = value.countyName;
 		this.latitude = value.latitude;
 		this.longitude = value.longitude;
 		this.phone = value.phone;
@@ -287,6 +299,8 @@ public class Facility implements Serializable
 			Objects.equals(address, v.address) &&
 			Objects.equals(city, v.city) &&
 			Objects.equals(state, v.state) &&
+			Objects.equals(countyId, v.countyId) &&
+			Objects.equals(countyName, v.countyName) &&
 			(0 == Objects.compare(latitude, v.latitude, (a, b) -> a.compareTo(b))) &&
 			(0 == Objects.compare(longitude, v.longitude, (a, b) -> a.compareTo(b))) &&
 			Objects.equals(phone, v.phone) &&
@@ -328,6 +342,8 @@ public class Facility implements Serializable
 		setAddress(value.address);
 		setCity(value.city);
 		setState(value.state);
+		setCountyId(value.countyId);
+		setCountyName(value.countyName);
 		setLatitude(value.latitude);
 		setLongitude(value.longitude);
 		setPhone(value.phone);
@@ -383,6 +399,8 @@ public class Facility implements Serializable
 			getAddress(),
 			getCity(),
 			getState(),
+			getCountyId(),
+			getCountyName(),
 			getLatitude(),
 			getLongitude(),
 			getPhone(),
