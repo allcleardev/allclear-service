@@ -240,8 +240,34 @@ var FacilitiesHandler = new ListTemplate({
 				if (!f.state.value && data.state) f.state.value = data.state;
 				if (!f.latitude.value && data.latitude) f.latitude.value = data.latitude;
 				if (!f.longitude.value && data.longitude) f.longitude.value = data.longitude;
+
+				me.onCoordChange(f);
 			});
 		};
+
+		f.latitude.onchange = f.longitude.onchange = function(ev) { me.onCoordChange(f); };
+	},
+
+	onCoordChange: function(f) {
+		var lat = f.latitude.value;
+		var lng = f.longitude.value;
+
+		if (!lat || !lng) return;
+
+		this.get('maps/block', { latitude: lat, longitude: lng }, function(data) {
+			if (data.message)
+			{
+				window.alert(data.message);
+				return;
+			}
+
+			var o = data.County;
+			if (o)
+			{
+				if (o.FIPS) f.countyId.value = o.FIPS;
+				if (o.name) f.countyName.value = o.name;
+			}
+		});
 	},
 
 	COLUMNS: [ new IdColumn('id', 'ID', true),
@@ -259,6 +285,8 @@ var FacilitiesHandler = new ListTemplate({
 	          new EditField('state', 'State', true, false, 128, 50),
 	          new EditField('latitude', 'Latitude', true, false, 9, 9),
 	          new EditField('longitude', 'Longitude', true, false, 10, 10),
+	          new EditField('countyId', 'County ID', false, false, 5, 5),
+	          new EditField('countyName', 'County Name', false, false, 128, 50),
 	          new EditField('phone', 'Phone Number', false, false, 32, 20),
 	          new EditField('appointmentPhone', 'Appointment Phone', false, false, 32, 20),
 	          new EditField('email', 'Email Address', false, false, 128, 50),
@@ -315,6 +343,10 @@ var FacilitiesHandler = new ListTemplate({
 		      new EditField('state', 'State', false, false, 128, 50),
 		      new RangeField('latitude', 'Latitude', false, 9, 9),
 		      new RangeField('longitude', 'Longitude', false, 10, 10),
+		      new EditField('countyId', 'County ID', false, false, 5, 5),
+		      new EditField('hasCountyId', 'Has County ID', false, 'yesNoOptions', undefined, 'No Search'),
+		      new EditField('countyName', 'County Name', false, false, 128, 50),
+		      new EditField('hasCountyName', 'Has County Name', false, 'yesNoOptions', undefined, 'No Search'),
 		      new EditField('phone', 'Phone Number', false, false, 32, 20),
 		      new ListField('hasPhone', 'Has Phone Number', false, 'yesNoOptions', undefined, 'No Search'),
 		      new EditField('appointmentPhone', 'Appointment Phone', false, false, 32, 20),
