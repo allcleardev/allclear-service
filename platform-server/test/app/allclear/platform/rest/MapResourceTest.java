@@ -13,8 +13,7 @@ import javax.ws.rs.client.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.*;
 
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
@@ -25,6 +24,7 @@ import app.allclear.common.errors.ValidationExceptionMapper;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.google.client.MapClient;
 import app.allclear.google.model.GeocodeResponse;
+import app.allclear.platform.fcc.GeoResponse;
 import app.allclear.platform.model.GeocodedResponse;
 
 /**********************************************************************************
@@ -57,6 +57,34 @@ public class MapResourceTest
 		when(map.geocode(contains("Street"))).thenReturn(loadObject("/google/map/geocode.json", GeocodeResponse.class));
 		when(map.geocode(contains("Avenue"))).thenReturn(loadObject("/google/map/geocode-requestDenied.json", GeocodeResponse.class));
 		when(map.geocode(contains("Lane"))).thenReturn(loadObject("/google/map/geocode-zeroResults.json", GeocodeResponse.class));
+	}
+
+	@ParameterizedTest
+	@CsvSource({"29.3066829,-94.7970101,galveston,",
+	            "40.7342964,-74.056983,jersey_city,'FCC0001: The coordinate lies on the boundary of mulitple blocks, the block contains the clicked location is selected. For a complete list use showall=true to display ''intersection'' element in the Block'"})
+	public void block(final String latitude, final String longitude, final String expected, final String message) throws Exception
+	{
+		var expected_ = loadObject("/fcc/block-" + expected + ".json", GeoResponse.class);
+		var response = request(target().path("block").queryParam("latitude", latitude).queryParam("longitude", longitude)).get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var value = response.readEntity(GeoResponse.class);
+		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertEquals(expected_, value, "Check value");
+		Assertions.assertEquals(message, value.message(), "Check message");
+	}
+
+	@ParameterizedTest
+	@CsvSource({"90.3066829,-94.7970101,Latitude '90.3066829' is greater than the accepted value of 90.",
+	            "29.3066829,-180.7970101,Longitude '-180.7970101' is less than the accepted value of -180."})
+	public void block_fail(final String latitude, final String longitude, final String message)
+	{
+		var response = request(target().path("block").queryParam("latitude", latitude).queryParam("longitude", longitude)).get();
+		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, response.getStatus(), "Status");
+
+		var error = response.readEntity(ErrorInfo.class);
+		Assertions.assertNotNull(error, "Exists");
+		Assertions.assertEquals(message, error.message, "Check message");
 	}
 
 	@Test

@@ -1,5 +1,7 @@
 package app.allclear.platform.rest;
 
+import java.math.BigDecimal;
+
 import javax.ws.rs.*;
 
 import org.apache.commons.lang3.StringUtils;
@@ -10,8 +12,11 @@ import com.codahale.metrics.annotation.Timed;
 
 import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
+import app.allclear.common.errors.Validator;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.google.client.MapClient;
+import app.allclear.platform.fcc.GeoClient;
+import app.allclear.platform.fcc.GeoResponse;
 import app.allclear.platform.model.GeocodedResponse;
 
 /**********************************************************************************
@@ -31,6 +36,7 @@ import app.allclear.platform.model.GeocodedResponse;
 public class MapResource
 {
 	private final MapClient map;
+	private final GeoClient geo = new GeoClient();
 
 	/** Populator.
 	 * 
@@ -39,6 +45,21 @@ public class MapResource
 	public MapResource(final MapClient map)
 	{
 		this.map = map;
+	}
+
+	@GET
+	@Path("/block") @Timed
+	@ApiOperation(value="getBlock", notes="Gets the GEO Block from the FCC API.", response=GeoResponse.class)
+	public GeoResponse getBlock(@QueryParam("latitude") @ApiParam(name="latitude", value="GEO latitude") final BigDecimal latitude,
+		@QueryParam("longitude") @ApiParam(name="longitude", value="GEO longitude") final BigDecimal longitude) 
+			throws ValidationException
+	{
+		new Validator()
+			.ensureExistsAndLatitude("latitude", "Latitude", latitude)
+			.ensureExistsAndLongitude("longitude", "Longitude", longitude)
+			.check();
+
+		return geo.find(latitude, longitude);
 	}
 
 	@GET
