@@ -1,6 +1,7 @@
 var AdminApp = new TabTemplate();
 
-AdminApp.TABS = [ { id: 'doPeople', caption: 'People', children: [ { id: 'doRegistrations', caption: 'Registrations' },
+AdminApp.TABS = [ { id: 'doPeople', caption: 'People', children: [ { id: 'doPatients', 'Patients' },
+	                                                               { id: 'doRegistrations', caption: 'Registrations' },
 	                                                               { id: 'doTests', caption: 'Tests' } ] },
 	{ id: 'doFacilities', caption: 'Facilities', children: [ { id: 'doFacilitate', caption: 'Change Requests' },
 	                                                         { id: 'doExperiences', caption: 'Experiences' } ] },
@@ -15,21 +16,22 @@ var EditorApp = new TabTemplate();
 EditorApp.TABS = [ { id: 'doFacilities', caption: 'Facilities' },
 	{ id: 'doFacilitate', caption: 'Change Requests' } ];
 
-AdminApp.doPeople = function(body) { PeopleHandler.filter({ pageSize: 100 }, body); }
-AdminApp.doRegistrations = function(body) { RegistrationsHandler.filter({ pageSize: 100 }, body); }
-AdminApp.doTests = function(body) { TestsHandler.filter({ pageSize: 100 }, body); }
-AdminApp.doFacilities = EditorApp.doFacilities = function(body) { FacilitiesHandler.filter({ pageSize: 100 }, body); }
-AdminApp.doFacilitate = EditorApp.doFacilitate = function(body) { FacilitateHandler.filter({ statusId: 'o', createdAtFrom: Template.weekAgo(), pageSize: 100 }, body); }
-AdminApp.doExperiences = function(body) { ExperiencesHandler.filter({ pageSize: 100 }, body); }
-AdminApp.doLogs = function(body) { LogsHandler.filter({ pageSize: 100 }, body); }
-AdminApp.doSessions = function(body) { SessionsHandler.filter({ pageSize: 100 }, body); }
-AdminApp.doAdmins = function(body) { AdminsHandler.init(body); }
-AdminApp.doCustomers = function(body) { CustomersHandler.init(body); }
-AdminApp.doConfig = function(body) { ConfigurationHandler.init(body); }
-AdminApp.doHibernate = function(body) { HibernateHandler.init(body); }
-AdminApp.doHeapDump = function(body) { HeapDumpHandler.init(body); }
+AdminApp.doPeople = body => PeopleHandler.filter({ pageSize: 100 }, body);
+AdminApp.doPatients = body => PatientsHandler.filter({ pageSize: 100 }, body);
+AdminApp.doRegistrations = body => RegistrationsHandler.filter({ pageSize: 100 }, body);
+AdminApp.doTests = body => TestsHandler.filter({ pageSize: 100 }, body);
+AdminApp.doFacilities = EditorApp.doFacilities = body => FacilitiesHandler.filter({ pageSize: 100 }, body);
+AdminApp.doFacilitate = EditorApp.doFacilitate = body => FacilitateHandler.filter({ statusId: 'o', createdAtFrom: Template.weekAgo(), pageSize: 100 }, body);
+AdminApp.doExperiences = body => ExperiencesHandler.filter({ pageSize: 100 }, body);
+AdminApp.doLogs = body => LogsHandler.filter({ pageSize: 100 }, body);
+AdminApp.doSessions = body => SessionsHandler.filter({ pageSize: 100 }, body);
+AdminApp.doAdmins = body => AdminsHandler.init(body);
+AdminApp.doCustomers = body => CustomersHandler.init(body);
+AdminApp.doConfig = body => ConfigurationHandler.init(body);
+AdminApp.doHibernate = body => HibernateHandler.init(body);
+AdminApp.doHeapDump = body => HeapDumpHandler.init(body);
 
-AdminApp.doQueueStats = function(body) { QueuesHandler.init(body); }
+AdminApp.doQueueStats = body => QueuesHandler.init(body);
 
 AdminApp.onPostInit = EditorApp.onPostInit = function(c) {
 	this.loadLists([ 'conditions', 'crowdsourceStatuses', 'experiences', 'exposures', 'facilityTypes', 'healthWorkerStatuses', 'originators', 'peopleStatuses', 'sexes', 'statures', 'symptoms', 'testCriteria', 'testTypes', 'timezones', 'visibilities' ]);
@@ -218,11 +220,13 @@ var FacilitiesHandler = new ListTemplate({
 
 	ROW_ACTIONS: [ new RowAction('openChangeRequests', 'Change Requests'),
 	               new RowAction('openExperiences', 'Experiences'),
-	               new RowAction('calcRatings', 'Calc Ratings')],
+	               new RowAction('calcRatings', 'Calc Ratings'),
+	               new RowAction('openPatients', 'Patients') ],
 
 	openChangeRequests: (c, e) => FacilitateHandler.filter({ entityId: e.myRecord.id }, undefined, { entityId: true }),
 	openExperiences: (c, e) => ExperiencesHandler.filter({ facilityId: e.myRecord.id }, undefined, { facilityName: true }),
 	calcRatings: function(c, e) { this.CALC_RATINGS.open(e.myRecord.id); },
+	openPatients: (c, e) => PatientsHandler.filter({ facilityId: e.myRecord.id }, undefined, { facilityName: true }),
 
 	onListPostLoad: c => c.defaultValue = { active: FACILITY_ACTIVE_DEFAULT },
 	onEditorPostLoad: function(c) {
@@ -571,6 +575,58 @@ var FacilitateHandler = new ListTemplate({
 		          new DatesField('createdAt', 'Created At'),
 		          new DatesField('updatedAt', 'Updated At'),
 		          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ]
+	}
+});
+
+var PatientsHandler = new ListTemplate({
+	NAME: 'patient',
+	SINGULAR: 'Patient',
+	PLURAL: 'Patients',
+	RESOURCE: 'patients',
+
+	CAN_ADD: true,
+	CAN_EDIT: true,
+	CAN_REMOVE: true,
+	EDIT_METHOD: 'put',
+
+	COLUMNS: [ new IdField('id', 'ID', true),
+	           new TextColumn('facilityName', 'Facility'),
+	           new TextColumn('personName', 'Person'),
+	           new TextColumn('alertable', 'Alertable?'),
+	           new TextColumn('enrolledAt', 'Enrolled At', 'toDateTime'),
+	           new TextColumn('rejectedAt', 'Rejected At', 'toDateTime'),
+	           new TextColumn('createdAt', 'Created At', 'toDateTime'),
+	           new TextColumn('updatedAt', 'Updated At', 'toDateTime') ],
+
+	FIELDS: [ new IdField('id', 'ID'),
+	          new DropField('facilityId', 'Facility', true, 'facilities', 'facilityName'),
+	          new TextField('facilityName', '', undefined, undefined, true),
+	          new DropField('personId', 'Person', true, fillPeopleDropdownList, 'personName'),
+	          new TextField('personName', '', undefined, undefined, true),
+	          new BoolField('alertable', 'Alertable?', false),
+	          new EditField('enrolledAt', 'Enrolled At', false, false, 24, 26, 'Example: 2020-08-03T21:00:00-0400', 'yyyy-mm-ddThh:mm:ss-0000'),
+	          new EditField('rejectedAt', 'Rejected At', false, false, 24, 26, 'Example: 2020-08-03T21:00:00-0400', 'yyyy-mm-ddThh:mm:ss-0000'),
+	          new TextField('createdAt', 'Created At', 'toDateTime'),
+	          new TextField('updatedAt', 'Updated At', 'toDateTime') ],
+
+	SEARCH: {
+		NAME: 'patient',
+		SINGULAR: 'Patient',
+		PLURAL: 'Patients',
+		RESOURCE: 'patients',
+
+		FIELDS: [ new EditField('id', 'ID', false, false, 19, 10),
+		          new DropField('facilityId', 'Facility', false, 'facilities', 'facilityName'),
+		          new TextField('facilityName', '', undefined, undefined, true),
+		          new DropField('personId', 'Person', false, fillPeopleDropdownList, 'personName'),
+		          new TextField('personName', '', undefined, undefined, true),
+		          new ListField('alertable', 'Alertable?', false, 'yesNoOptions', undefined, 'No Search'),
+		          new DatesField('enrolledAt', 'Enrolled At'),
+		          new ListField('hasEnrolledAt', 'Has Enrolled At', false, 'yesNoOptions', undefined, 'No Search'),
+		          new DatesField('rejectedAt', 'Rejected At'),
+		          new ListField('hasRejectedAt', 'Has Rejected At', false, 'yesNoOptions', undefined, 'No Search'),
+		          new DatesField('createdAt', 'Created At'),
+		          new DatesField('updatedAt', 'Updated At')]
 	}
 });
 
