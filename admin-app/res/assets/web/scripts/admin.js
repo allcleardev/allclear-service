@@ -467,7 +467,7 @@ var FacilitiesHandler = new ListTemplate({
 			var v = c.value;
 			var t = c.texts['total'];
 			var s = c.texts['status'];
-			var c = c.texts['currentId'];
+			var cur = c.texts['currentId'];
 
 			s.innerHTML = 'Running ...';
 
@@ -479,6 +479,8 @@ var FacilitiesHandler = new ListTemplate({
 				else
 				{
 					var count = 0;
+					var expected = data.records.length;
+					var lastId = data.records[expected - 1].id;
 					data.records.forEach(rec => {
 						if (rec.latitude && rec.longitude)
 						{
@@ -489,16 +491,32 @@ var FacilitiesHandler = new ListTemplate({
 									if (b.County.FIPS) rec.countyId = b.County.FIPS;
 									if (b.County.name) rec.countyName = b.County.name;
 
-									me.put('facilities', rec, d => {});
+									me.put('facilities', rec, d => {
+										if (lastId == rec.id)
+										{
+											l.value = l.value + '\nGeocoded ' + count + ' / ' + expected + ', IDs: ' + data.records[0].id + ' - ' + v.currentId;
+											me.handleSubmit(c, f);
+										}
+									});	// Run the next one when on the last record.
+								}
+								else if (lastId == rec.id)	// Run the next one when on the last record.
+								{
+									l.value = l.value + '\nGeocoded ' + count + ' / ' + expected + ', IDs: ' + data.records[0].id + ' - ' + v.currentId;
+									me.handleSubmit(c, f);
 								}
 							});
 						}
+						else if (lastId == rec.id)	// Run the next one when on the last record.
+						{
+							l.value = l.value + '\nGeocoded ' + count + ' / ' + expected + ', IDs: ' + data.records[0].id + ' - ' + v.currentId;
+							me.handleSubmit(c, f);
+						}
 
 						t.innerHTML = me.toText(v.total++);
-						c.innerHTML = me.toText(v.currentId = rec.id);
+						cur.innerHTML = me.toText(v.currentId = rec.id);
 					});
 
-					l.value = l.value + '\nGeocoded ' + count + ', IDs: ' + data.records[0].id + ' - ' + v.currentId;
+					l.value = l.value + '\nGeocoding ' + expected + ', IDs: ' + data.records[0].id + ' - ' + v.currentId;
 				}
 			});
 		},
