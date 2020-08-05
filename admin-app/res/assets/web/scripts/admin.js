@@ -218,11 +218,14 @@ var FacilitiesHandler = new ListTemplate({
 	CAN_REMOVE: true,
 	EDIT_METHOD: 'put',
 
+	ACTIONS: [ new RowAction('geocode', 'Geocode') ],
+
 	ROW_ACTIONS: [ new RowAction('openChangeRequests', 'Change Requests'),
 	               new RowAction('openExperiences', 'Experiences'),
 	               new RowAction('calcRatings', 'Calc Ratings'),
 	               new RowAction('openPatients', 'Patients') ],
 
+	geocode: function(c, e) { this.GEOCODE.open(); },
 	openChangeRequests: (c, e) => FacilitateHandler.filter({ entityId: e.myRecord.id }, undefined, { entityId: true }),
 	openExperiences: (c, e) => ExperiencesHandler.filter({ facilityId: e.myRecord.id }, undefined, { facilityName: true }),
 	calcRatings: function(c, e) { this.CALC_RATINGS.open(e.myRecord.id); },
@@ -443,6 +446,67 @@ var FacilitiesHandler = new ListTemplate({
 		          new TextField('positives_', 'Positives'),
 		          new TextField('negatives_', 'Negatives'),
 		          new MetaField('tags_', 'Tags') ]
+	}),
+
+	GEOCODE: new EditTemplate({
+		NAME: 'facility',
+		SINGULAR: 'Geocode',
+		PLURAL: 'Geocode',
+		RESOURCE: 'facilities',
+
+		CAPTION_SUBMIT: 'Run',
+		CAPTION_CANCEL: Template.prototype.CAPTION_CLOSE,
+
+		getTitle: c => 'Geocode Facilities',
+
+		open: function(facilityId) { this.run({ value: { status: 'Waiting', total: 0, currentId: 0, log: 'Click Run to start.' }, filter: { isAdd: false } }, undefined, 'get'); },
+
+		handleSubmit: function(c, f) {
+			var me = this;
+			var l = f.log;
+			var v = c.value;
+			var t = c.texts['total'];
+			var s = c.texts['status'];
+			var c = c.texts['currentId'];
+
+			s.innerHTML = 'Running ...';
+
+			this.post('facilities/search', { idFrom: v.currentId, hasCountyId: false, sortOn: 'id', sortDir: 'ASC' }, data => {
+				if (!data.records)
+				{
+					s.innerHTML = 'DONE';
+				}
+				else
+				{
+					var count = 0;
+					data.records.forEach(rec => {
+						if (rec.lat && rec.lng)
+						{
+							me.get('maps/block', { latitude: rec.lat, longitude: rec.lng }, b => {
+								if (b.County)
+								{
+									if (b.County.FIPS) rec.countyId.value = b.County.FIPS;
+									if (b.County.name) rec.countyName.value = b.County.name;
+
+									me.put('facilities', rec, d => {});
+									count++;
+								}
+							});
+						}
+
+						t.innerHTML = me.toText(v.total++);
+						c.innerHTML = me.toText(v.currentId = rec.id);
+					});
+
+					l.value = l.value + '\nGeocoded ' + count + ', IDs: ' + data.records[0].id + ' - ' + v.currentId;
+				}
+			});
+		},
+
+		FIELDS: [ new TextField('status', 'Status'),
+		          new TextField('total', 'Total'),
+		          new TextField('currentId', 'Current ID'),
+		          new EditField('log', 'Log', false, true, 60, 40) ]
 	}),
 
 	HISTORY: {
