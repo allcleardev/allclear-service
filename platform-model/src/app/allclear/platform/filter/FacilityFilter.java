@@ -28,6 +28,8 @@ public class FacilityFilter extends QueryFilter
 
 	// Members
 	public Long id = null;
+	public Long idFrom = null;
+	public Long idTo = null;
 	public String name = null;
 	public String address = null;
 	public String city = null;
@@ -102,6 +104,8 @@ public class FacilityFilter extends QueryFilter
 
 	// Mutators
 	public FacilityFilter withId(final Long newValue) { id = newValue; return this; }
+	public FacilityFilter withIdFrom(final Long newValue) { idFrom = newValue; return this; }
+	public FacilityFilter withIdTo(final Long newValue) { idTo = newValue; return this; }
 	public FacilityFilter withName(final String newValue) { name = newValue; return this; }
 	public FacilityFilter withAddress(final String newValue) { address = newValue; return this; }
 	public FacilityFilter withCity(final String newValue) { city = newValue; return this; }

@@ -555,6 +555,8 @@ public class FacilityResourceTest
 
 		return Stream.of(
 			arguments(new FacilityFilter(1, 20).withId(VALUE.id), 1L),
+			arguments(new FacilityFilter(1, 20).withIdFrom(VALUE.id), 1L),
+			arguments(new FacilityFilter(1, 20).withIdTo(VALUE.id), 1L),
 			arguments(new FacilityFilter(1, 20).withName(VALUE.name), 1L),
 			arguments(new FacilityFilter(1, 20).withAddress(VALUE.address), 1L),
 			arguments(new FacilityFilter(1, 20).withCity(VALUE.city), 1L),
@@ -615,6 +617,8 @@ public class FacilityResourceTest
 
 			// Negative tests
 			arguments(new FacilityFilter(1, 20).withId(VALUE.id + 1000L), 0L),
+			arguments(new FacilityFilter(1, 20).withIdFrom(VALUE.id + 1L), 0L),
+			arguments(new FacilityFilter(1, 20).withIdTo(VALUE.id - 1L), 0L),
 			arguments(new FacilityFilter(1, 20).withName("invalid"), 0L),
 			arguments(new FacilityFilter(1, 20).withAddress("invalid"), 0L),
 			arguments(new FacilityFilter(1, 20).withCity("invalid"), 0L),

@@ -493,6 +493,8 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	{
 		return createQueryBuilder(select)
 			.add("id", "o.id = :id", filter.id)
+			.add("idFrom", "o.id >= :idFrom", filter.idFrom)
+			.add("idTo", "o.id <= :idTo", filter.idTo)
 			.addContains("name", "o.name LIKE :name", filter.name)
 			.addContains("address", "o.address LIKE :address", filter.address)
 			.addContains("city", "o.city LIKE :city", filter.city)
@@ -570,6 +572,8 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	{
 		var o = new NativeQueryBuilder<>(currentSession(), select, entityClass, FROM_ALIAS, null)
 			.add("id", "o.id = :id", filter.id)
+			.add("idFrom", "o.id >= :idFrom", filter.idFrom)
+			.add("idTo", "o.id <= :idTo", filter.idTo)
 			.addContains("name", "o.name LIKE :name", filter.name)
 			.addContains("address", "o.address LIKE :address", filter.address)
 			.addContains("city", "o.city LIKE :city", filter.city)
