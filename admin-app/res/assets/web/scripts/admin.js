@@ -589,7 +589,7 @@ var PatientsHandler = new ListTemplate({
 	CAN_REMOVE: true,
 	EDIT_METHOD: 'put',
 
-	COLUMNS: [ new IdField('id', 'ID', true),
+	COLUMNS: [ new IdColumn('id', 'ID', true),
 	           new TextColumn('facilityName', 'Facility'),
 	           new TextColumn('personName', 'Person'),
 	           new TextColumn('alertable', 'Alertable?'),
