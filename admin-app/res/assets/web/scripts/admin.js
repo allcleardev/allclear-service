@@ -485,11 +485,11 @@ var FacilitiesHandler = new ListTemplate({
 							me.get('maps/block', { latitude: rec.latitude, longitude: rec.longitude }, b => {
 								if (b.County)
 								{
-									if (b.County.FIPS) rec.countyId.value = b.County.FIPS;
-									if (b.County.name) rec.countyName.value = b.County.name;
+									count++;
+									if (b.County.FIPS) rec.countyId = b.County.FIPS;
+									if (b.County.name) rec.countyName = b.County.name;
 
 									me.put('facilities', rec, d => {});
-									count++;
 								}
 							});
 						}
