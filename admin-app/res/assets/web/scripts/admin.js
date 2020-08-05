@@ -471,7 +471,7 @@ var FacilitiesHandler = new ListTemplate({
 
 			s.innerHTML = 'Running ...';
 
-			this.post('facilities/search', { idFrom: v.currentId, hasCountyId: false, sortOn: 'id', sortDir: 'ASC', pageSize: 250 }, data => {
+			this.post('facilities/search', { idFrom: v.currentId + 1, hasCountyId: false, sortOn: 'id', sortDir: 'ASC', pageSize: 250 }, data => {
 				if (!data.records)
 				{
 					s.innerHTML = 'DONE';
