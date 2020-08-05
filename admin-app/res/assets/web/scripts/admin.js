@@ -471,7 +471,7 @@ var FacilitiesHandler = new ListTemplate({
 
 			s.innerHTML = 'Running ...';
 
-			this.post('facilities/search', { idFrom: v.currentId, hasCountyId: false, sortOn: 'id', sortDir: 'ASC' }, data => {
+			this.post('facilities/search', { idFrom: v.currentId, hasCountyId: false, sortOn: 'id', sortDir: 'ASC', pageSize: 250 }, data => {
 				if (!data.records)
 				{
 					s.innerHTML = 'DONE';
@@ -480,9 +480,9 @@ var FacilitiesHandler = new ListTemplate({
 				{
 					var count = 0;
 					data.records.forEach(rec => {
-						if (rec.lat && rec.lng)
+						if (rec.latitude && rec.longitude)
 						{
-							me.get('maps/block', { latitude: rec.lat, longitude: rec.lng }, b => {
+							me.get('maps/block', { latitude: rec.latitude, longitude: rec.longitude }, b => {
 								if (b.County)
 								{
 									if (b.County.FIPS) rec.countyId.value = b.County.FIPS;
@@ -506,7 +506,7 @@ var FacilitiesHandler = new ListTemplate({
 		FIELDS: [ new TextField('status', 'Status'),
 		          new TextField('total', 'Total'),
 		          new TextField('currentId', 'Current ID'),
-		          new EditField('log', 'Log', false, true, 60, 40) ]
+		          new EditField('log', 'Log', false, true, 60, 30) ]
 	}),
 
 	HISTORY: {
