@@ -687,7 +687,7 @@ public class PatientDAOTest
 	@MethodSource
 	public void z_11_accept_fail(final PeopleValue person)
 	{
-		Assertions.assertFalse(dao.accept(person.id));
+		Assertions.assertNull(dao.accept(person.id));
 	}
 
 	@Test
@@ -700,7 +700,7 @@ public class PatientDAOTest
 	@MethodSource("z_11_accept_fail")
 	public void z_11_reject_fail(final PeopleValue person)
 	{
-		Assertions.assertFalse(dao.reject(person.id));
+		Assertions.assertNull(dao.reject(person.id));
 	}
 
 	@Test
@@ -712,7 +712,7 @@ public class PatientDAOTest
 	@Test
 	public void z_12_accept()
 	{
-		Assertions.assertTrue(dao.accept(PATIENT_1.id));
+		Assertions.assertEquals(FACILITY.name, dao.accept(PATIENT_1.id));
 	}
 
 	@Test
@@ -731,7 +731,7 @@ public class PatientDAOTest
 	@Test
 	public void z_12_accept_iterate()
 	{
-		Assertions.assertFalse(dao.accept(PATIENT_1.id));	// Already accepted.
+		Assertions.assertNull(dao.accept(PATIENT_1.id));	// Already accepted.
 	}
 
 	@Test
@@ -743,7 +743,7 @@ public class PatientDAOTest
 	@Test
 	public void z_12_reject()
 	{
-		Assertions.assertTrue(dao.reject(PATIENT_1.id));
+		Assertions.assertEquals(FACILITY.name, dao.reject(PATIENT_1.id));
 	}
 
 	@Test
@@ -762,7 +762,7 @@ public class PatientDAOTest
 	@Test
 	public void z_12_reject_iterate()
 	{
-		Assertions.assertFalse(dao.reject(PATIENT_1.id));	// Already rejected.
+		Assertions.assertNull(dao.reject(PATIENT_1.id));	// Already rejected.
 	}
 
 	@Test
@@ -811,7 +811,7 @@ public class PatientDAOTest
 	@Test
 	public void z_21_accept()
 	{
-		Assertions.assertTrue(dao.accept(PATIENT_1.id));
+		Assertions.assertEquals(FACILITY_1.name, dao.accept(PATIENT_1.id));
 	}
 
 	@ParameterizedTest
@@ -832,7 +832,7 @@ public class PatientDAOTest
 	@Test
 	public void z_21_accept_more()
 	{
-		Assertions.assertTrue(dao.accept(PATIENT_1.id));
+		Assertions.assertEquals(FACILITY.name, dao.accept(PATIENT_1.id));
 	}
 
 	@ParameterizedTest
@@ -846,7 +846,7 @@ public class PatientDAOTest
 	@Test
 	public void z_21_accept_more_more()
 	{
-		Assertions.assertFalse(dao.accept(PATIENT_1.id));
+		Assertions.assertNull(dao.accept(PATIENT_1.id));
 	}
 
 	@ParameterizedTest
@@ -860,7 +860,7 @@ public class PatientDAOTest
 	@Test
 	public void z_21_reject()
 	{
-		Assertions.assertTrue(dao.reject(PATIENT_1.id));
+		Assertions.assertEquals(FACILITY_1.name, dao.reject(PATIENT_1.id));
 	}
 
 	@ParameterizedTest
@@ -886,7 +886,7 @@ public class PatientDAOTest
 	@Test
 	public void z_21_reject_more()
 	{
-		Assertions.assertTrue(dao.reject(PATIENT_1.id));
+		Assertions.assertEquals(FACILITY.name, dao.reject(PATIENT_1.id));
 	}
 
 	@ParameterizedTest
@@ -900,7 +900,7 @@ public class PatientDAOTest
 	@Test
 	public void z_21_reject_more_more()
 	{
-		Assertions.assertFalse(dao.reject(PATIENT_1.id));
+		Assertions.assertNull(dao.reject(PATIENT_1.id));
 	}
 
 	@ParameterizedTest
@@ -914,7 +914,7 @@ public class PatientDAOTest
 	@Test
 	public void z_22_accept()
 	{
-		Assertions.assertTrue(dao.accept(PATIENT_1.id));
+		Assertions.assertEquals(FACILITY_1.name, dao.accept(PATIENT_1.id));
 	}
 
 	@Test

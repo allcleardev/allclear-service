@@ -156,7 +156,7 @@ public class App extends Application<Config>
 		jersey.register(new SessionResource(sessionDao));
 		jersey.register(new SymptomsLogResource(new SymptomsLogDAO(factory), sessionDao));
 		jersey.register(new TestsResource(new TestsDAO(factory, sessionDao), patientDao, peopleDao));
-		jersey.register(new TwilioResource(conf.twilio.authToken, peopleDao));
+		jersey.register(new TwilioResource(conf.twilio.authToken, patientDao, peopleDao, conf));
 		jersey.register(new TypeResource());
 
 		setupSwagger(conf, env);

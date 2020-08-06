@@ -109,12 +109,12 @@ public class PatientDAO extends AbstractDAO<Patient>
 	/** Accepts an enrollment request of a facility. Finds the most outstanding request.
 	 * 
 	 * @param personId
-	 * @return TRUE if found and not already accepted.
+	 * @return the name of the facility who's request is accepted. Otherwise NULL.
 	 */
-	public boolean accept(final String personId)
+	public String accept(final String personId)
 	{
 		var record = namedQuery("findAcceptablePatientsByPerson").setParameter("personId", personId).setMaxResults(1).uniqueResult();
-		if (null == record) return false;
+		if (null == record) return null;
 
 		var now = new Date();
 		record.setEnrolledAt(now);
@@ -122,18 +122,18 @@ public class PatientDAO extends AbstractDAO<Patient>
 		record.setAlertable(true);
 		record.setUpdatedAt(now);
 
-		return true;
+		return record.getFacility().getName();
 	}
 
 	/** Rejects an enrollment request of a facility. Finds the most outstanding request.
 	 * 
 	 * @param personId
-	 * @return TRUE if found and not already rejected.
+	 * @return the name of the facility who's request is rejected. Otherwise NULL.
 	 */
-	public boolean reject(final String personId)
+	public String reject(final String personId)
 	{
 		var record = namedQuery("findRejectablePatientsByPerson").setParameter("personId", personId).setMaxResults(1).uniqueResult();
-		if (null == record) return false;
+		if (null == record) return null;
 
 		var now = new Date();
 		record.setEnrolledAt(null);
@@ -141,7 +141,7 @@ public class PatientDAO extends AbstractDAO<Patient>
 		record.setAlertable(false);
 		record.setUpdatedAt(now);
 
-		return true;
+		return record.getFacility().getName();
 	}
 
 	/** Updates a single Patient value.
