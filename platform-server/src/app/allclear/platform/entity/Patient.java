@@ -28,8 +28,10 @@ import app.allclear.platform.value.PatientValue;
 @Table(name="patient")
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE, region="patient")
 @NamedQueries({@NamedQuery(name="findPatient", query="SELECT OBJECT(o) FROM Patient o WHERE o.facilityId = :facilityId AND o.personId = :personId"),
+	@NamedQuery(name="findAcceptablePatientsByPerson", query="SELECT OBJECT(o) FROM Patient o WHERE o.personId = :personId AND o.enrolledAt IS NULL ORDER BY id DESC"),	// Finds the most recent patient record for a person that is available for accepting. DLS on 8/6/2020.
 	@NamedQuery(name="findEnrolledPatientsByAssociateAndName", query="SELECT OBJECT(p) FROM Patient o INNER JOIN o.person p INNER JOIN o.facility f INNER JOIN f.people a WHERE a.personId = :associateId AND o.enrolledAt IS NOT NULL AND ((p.name LIKE :name) OR (p.phone LIKE :name) OR (p.email LIKE :name) OR (p.firstName LIKE :name) OR (p.lastName LIKE :name)) ORDER BY p.name"),
-	@NamedQuery(name="findEnrolledPatientsByFacilityAndName", query="SELECT OBJECT(p) FROM Patient o INNER JOIN o.person p WHERE o.facilityId = :facilityId AND o.enrolledAt IS NOT NULL AND ((p.name LIKE :name) OR (p.phone LIKE :name) OR (p.email LIKE :name) OR (p.firstName LIKE :name) OR (p.lastName LIKE :name)) ORDER BY p.name")})
+	@NamedQuery(name="findEnrolledPatientsByFacilityAndName", query="SELECT OBJECT(p) FROM Patient o INNER JOIN o.person p WHERE o.facilityId = :facilityId AND o.enrolledAt IS NOT NULL AND ((p.name LIKE :name) OR (p.phone LIKE :name) OR (p.email LIKE :name) OR (p.firstName LIKE :name) OR (p.lastName LIKE :name)) ORDER BY p.name"),
+	@NamedQuery(name="findRejectablePatientsByPerson", query="SELECT OBJECT(o) FROM Patient o WHERE o.personId = :personId AND o.rejectedAt IS NULL ORDER BY id DESC")})	// Finds the most recent patient record for a person that is available for rejecting. DLS on 8/6/2020.
 public class Patient implements Serializable
 {
 	private static final long serialVersionUID = 1L;

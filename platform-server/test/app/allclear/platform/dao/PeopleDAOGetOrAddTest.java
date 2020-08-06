@@ -6,7 +6,7 @@ import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
-
+import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.junit.hibernate.*;
 import app.allclear.platform.App;
 import app.allclear.platform.type.HealthWorkerStatus;
@@ -63,7 +63,7 @@ public class PeopleDAOGetOrAddTest
 	@Test
 	public void change_activate()
 	{
-		Assertions.assertTrue(dao.activateByPhone("888-555-1000"));
+		Assertions.assertTrue(dao.activate(ID));
 	}
 
 	@Test
@@ -107,12 +107,18 @@ public class PeopleDAOGetOrAddTest
 	@Test
 	public void change_reactivate()
 	{
-		Assertions.assertFalse(dao.activateByPhone("888-555-1000"));
+		Assertions.assertFalse(dao.activate(ID));
 	}
 
 	@Test
 	public void change_reactivate_check()
 	{
 		change_modify_check();
+	}
+
+	@Test
+	public void invalidId_active()
+	{
+		Assertions.assertThrows(ObjectNotFoundException.class, () -> dao.activate("invalid"));
 	}
 }

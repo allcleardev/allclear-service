@@ -487,16 +487,15 @@ public class PeopleDAO extends AbstractDAO<People>
 		return true;
 	}
 
-	/** Switch on the ACTIVE field on the user associated with the phone.
+	/** Switch on the ACTIVE field on the user associated with the Person ID.
 	 * 
-	 * @param phone
+	 * @param id
 	 * @return TRUE if the user is found and is currently inactive.
 	 * @throws ObjectNotFoundException
 	 */
-	public boolean activateByPhone(final String phone) throws ObjectNotFoundException
+	public boolean activate(final String id) throws ObjectNotFoundException
 	{
-		var record = findByPhone(phone);
-		if (null == record) throw new ObjectNotFoundException("The Phone Number '" + phone + "' could not be found.");
+		var record = findWithException(id);
 
 		if (record.isActive()) return false;
 
@@ -647,6 +646,18 @@ public class PeopleDAO extends AbstractDAO<People>
 		if (null != record) return record;
 
 		return persist(new People(validate(new PeopleValue(phone, firstName, lastName).withId(generateId()))));
+	}
+
+	/** Gets the identifier of a person by their phone number.
+	 * 
+	 * @param phone
+	 * @return NULL if not found.
+	 */
+	public String getIdByPhone(final String phone)
+	{
+		var record = findByPhone(phone);
+
+		return (null != record) ? record.getId() : null;
 	}
 
 	/** Gets a single People value by identifier.

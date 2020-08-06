@@ -3,6 +3,7 @@ package app.allclear.platform.dao;
 import static java.util.stream.Collectors.toList;
 import static app.allclear.common.dao.OrderByBuilder.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -103,6 +104,44 @@ public class PatientDAO extends AbstractDAO<Patient>
 		validator.check();
 
 		return persist(new Patient(facility, person));
+	}
+
+	/** Accepts an enrollment request of a facility. Finds the most outstanding request.
+	 * 
+	 * @param personId
+	 * @return TRUE if found and not already accepted.
+	 */
+	public boolean accept(final String personId)
+	{
+		var record = namedQuery("findAcceptablePatientsByPerson").setParameter("personId", personId).setMaxResults(1).uniqueResult();
+		if (null == record) return false;
+
+		var now = new Date();
+		record.setEnrolledAt(now);
+		record.setRejectedAt(null);
+		record.setAlertable(true);
+		record.setUpdatedAt(now);
+
+		return true;
+	}
+
+	/** Rejects an enrollment request of a facility. Finds the most outstanding request.
+	 * 
+	 * @param personId
+	 * @return TRUE if found and not already rejected.
+	 */
+	public boolean reject(final String personId)
+	{
+		var record = namedQuery("findRejectablePatientsByPerson").setParameter("personId", personId).setMaxResults(1).uniqueResult();
+		if (null == record) return false;
+
+		var now = new Date();
+		record.setEnrolledAt(null);
+		record.setRejectedAt(now);
+		record.setAlertable(false);
+		record.setUpdatedAt(now);
+
+		return true;
 	}
 
 	/** Updates a single Patient value.

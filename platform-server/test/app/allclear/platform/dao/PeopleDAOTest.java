@@ -572,6 +572,18 @@ public class PeopleDAOTest
 	}
 
 	@Test
+	public void getIdByPhone()
+	{
+		Assertions.assertEquals(VALUE.id, dao.getIdByPhone("888-555-1000"));
+	}
+
+	@Test
+	public void getIdByPhone_invalid()
+	{
+		Assertions.assertNull(dao.getIdByPhone("888-555-1001"));
+	}
+
+	@Test
 	public void modify()
 	{
 		count(new PeopleFilter().withId(VALUE.id), 1L);

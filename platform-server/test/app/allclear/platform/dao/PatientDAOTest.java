@@ -12,8 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.*;
 
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
@@ -676,6 +675,255 @@ public class PatientDAOTest
 		Assertions.assertNotNull(record, "Exists");
 		Assertions.assertEquals(FACILITY.id, record.getFacilityId(), "Check facilityId");
 		Assertions.assertEquals(PATIENT_1.id, record.getPersonId(), "Check personId");
+		Assertions.assertNull(record.getEnrolledAt(), "Check enrolledAt");
+		Assertions.assertNull(record.getRejectedAt(), "Check rejectedAt");
+		Assertions.assertFalse(record.isAlertable(), "Check alertable");
+		Assertions.assertEquals(record.getUpdatedAt(), record.getCreatedAt(), "Check createdAt");
+	}
+
+	public static Stream<PeopleValue> z_11_accept_fail() { return Stream.of(ASSOCIATE, ASSOCIATE_1, PATIENT); }
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_11_accept_fail(final PeopleValue person)
+	{
+		Assertions.assertFalse(dao.accept(person.id));
+	}
+
+	@Test
+	public void z_11_accept_fail_check()
+	{
+		z_10_enroll_success_check();	// Unchanged.
+	}
+
+	@ParameterizedTest
+	@MethodSource("z_11_accept_fail")
+	public void z_11_reject_fail(final PeopleValue person)
+	{
+		Assertions.assertFalse(dao.reject(person.id));
+	}
+
+	@Test
+	public void z_11_reject_fail_check()
+	{
+		z_10_enroll_success_check();	// Unchanged.
+	}
+
+	@Test
+	public void z_12_accept()
+	{
+		Assertions.assertTrue(dao.accept(PATIENT_1.id));
+	}
+
+	@Test
+	public void z_12_accept_check()
+	{
+		var record = dao.findWithException(3L);
+		Assertions.assertNotNull(record, "Exists");
+		Assertions.assertEquals(FACILITY.id, record.getFacilityId(), "Check facilityId");
+		Assertions.assertEquals(PATIENT_1.id, record.getPersonId(), "Check personId");
+		assertThat(record.getEnrolledAt()).as("Check enrolledAt").isCloseTo(new Date(), 1000L);
+		Assertions.assertNull(record.getRejectedAt(), "Check rejectedAt");
+		Assertions.assertTrue(record.isAlertable(), "Check alertable");
+		assertThat(record.getUpdatedAt()).as("Check createdAt").isAfter(record.getCreatedAt()).isEqualTo(record.getEnrolledAt());
+	}
+
+	@Test
+	public void z_12_accept_iterate()
+	{
+		Assertions.assertFalse(dao.accept(PATIENT_1.id));	// Already accepted.
+	}
+
+	@Test
+	public void z_12_accept_iterate_check()
+	{
+		z_12_accept_check();
+	}
+
+	@Test
+	public void z_12_reject()
+	{
+		Assertions.assertTrue(dao.reject(PATIENT_1.id));
+	}
+
+	@Test
+	public void z_12_reject_check()
+	{
+		var record = dao.findWithException(3L);
+		Assertions.assertNotNull(record, "Exists");
+		Assertions.assertEquals(FACILITY.id, record.getFacilityId(), "Check facilityId");
+		Assertions.assertEquals(PATIENT_1.id, record.getPersonId(), "Check personId");
+		Assertions.assertNull(record.getEnrolledAt(), "Check enrolledAt");
+		assertThat(record.getRejectedAt()).as("Check rejectedAt").isCloseTo(new Date(), 1000L);
+		Assertions.assertFalse(record.isAlertable(), "Check alertable");
+		assertThat(record.getUpdatedAt()).as("Check createdAt").isAfter(record.getCreatedAt()).isEqualTo(record.getRejectedAt());
+	}
+
+	@Test
+	public void z_12_reject_iterate()
+	{
+		Assertions.assertFalse(dao.reject(PATIENT_1.id));	// Already rejected.
+	}
+
+	@Test
+	public void z_12_reject_iterate_check()
+	{
+		z_12_reject_check();
+	}
+
+	@Test
+	public void z_19_revert()
+	{
+		var record = dao.findWithException(3L);
+		record.setEnrolledAt(null);
+		record.setRejectedAt(null);
+		record.setAlertable(false);
+		record.setUpdatedAt(record.getCreatedAt());
+	}
+
+	@Test
+	public void z_19_revert_check()
+	{
+		z_10_enroll_success_check();
+	}
+
+	@Test
+	public void z_20_enroll_success()
+	{
+		sessionDao.current(ASSOCIATE_1_);
+
+		var record = dao.enroll(FACILITY_1.id, PATIENT_1.id);
+		Assertions.assertNotNull(record, "Exists");
+		Assertions.assertEquals(4L, record.getId(), "Check id");
+	}
+
+	@Test
+	public void z_20_enroll_success_check()
+	{
+		z_10_enroll_success_check();
+
+		var record = dao.findWithException(4L);
+		Assertions.assertNull(record.getEnrolledAt(), "Check enrolledAt");
+		Assertions.assertNull(record.getRejectedAt(), "Check rejectedAt");
+		Assertions.assertFalse(record.isAlertable(), "Check alertable");
+	}
+
+	@Test
+	public void z_21_accept()
+	{
+		Assertions.assertTrue(dao.accept(PATIENT_1.id));
+	}
+
+	@ParameterizedTest
+	@CsvSource({"3,false",
+	            "4,true"})
+	public void z_21_accept_check(final long id, final boolean expected)
+	{
+		var record = dao.findWithException(id);
+		if (expected)
+			assertThat(record.getEnrolledAt()).as("Check enrolledAt").isCloseTo(new Date(), 500L);
+		else
+			Assertions.assertNull(record.getEnrolledAt(), "Check enrolledAt");
+
+		Assertions.assertNull(record.getRejectedAt(), "Check rejectedAt");
+		Assertions.assertEquals(expected, record.isAlertable(), "Check alertable");
+	}
+
+	@Test
+	public void z_21_accept_more()
+	{
+		Assertions.assertTrue(dao.accept(PATIENT_1.id));
+	}
+
+	@ParameterizedTest
+	@CsvSource({"3,true",
+	            "4,true"})
+	public void z_21_accept_more_check(final long id, final boolean expected)
+	{
+		z_21_accept_check(id, expected);
+	}
+
+	@Test
+	public void z_21_accept_more_more()
+	{
+		Assertions.assertFalse(dao.accept(PATIENT_1.id));
+	}
+
+	@ParameterizedTest
+	@CsvSource({"3,true",
+	            "4,true"})
+	public void z_21_accept_more_more_check(final long id, final boolean expected)
+	{
+		z_21_accept_check(id, expected);
+	}
+
+	@Test
+	public void z_21_reject()
+	{
+		Assertions.assertTrue(dao.reject(PATIENT_1.id));
+	}
+
+	@ParameterizedTest
+	@CsvSource({"3,false",
+	            "4,true"})
+	public void z_21_reject_check(final long id, final boolean expected)
+	{
+		var record = dao.findWithException(id);
+		if (expected)
+		{
+			Assertions.assertNull(record.getEnrolledAt(), "Check enrolledAt");
+			assertThat(record.getRejectedAt()).as("Check rejectedAt").isCloseTo(new Date(), 500L);
+		}
+		else
+		{
+			assertThat(record.getEnrolledAt()).as("Check enrolledAt").isCloseTo(new Date(), 500L);
+			Assertions.assertNull(record.getRejectedAt(), "Check rejectedAt");
+		}
+
+		Assertions.assertEquals(!expected, record.isAlertable(), "Check alertable");
+	}
+
+	@Test
+	public void z_21_reject_more()
+	{
+		Assertions.assertTrue(dao.reject(PATIENT_1.id));
+	}
+
+	@ParameterizedTest
+	@CsvSource({"3,true",
+	            "4,true"})
+	public void z_21_reject_more_check(final long id, final boolean expected)
+	{
+		z_21_reject_check(id, expected);
+	}
+
+	@Test
+	public void z_21_reject_more_more()
+	{
+		Assertions.assertFalse(dao.reject(PATIENT_1.id));
+	}
+
+	@ParameterizedTest
+	@CsvSource({"3,true",
+	            "4,true"})
+	public void z_21_reject_more_more_check(final long id, final boolean expected)
+	{
+		z_21_reject_check(id, expected);
+	}
+
+	@Test
+	public void z_22_accept()
+	{
+		Assertions.assertTrue(dao.accept(PATIENT_1.id));
+	}
+
+	@Test
+	public void z_22_accept_check()
+	{
+		var record = dao.findWithException(4L);
+		assertThat(record.getEnrolledAt()).as("Check enrolledAt").isCloseTo(new Date(), 500L);
+		Assertions.assertNull(record.getRejectedAt(), "Check rejectedAt");
+		Assertions.assertTrue(record.isAlertable(), "Check alertable");
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.
