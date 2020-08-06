@@ -61,18 +61,37 @@ public class PeopleDAOGetOrAddTest
 	}
 
 	@Test
-	public void change()
+	public void change_activate()
+	{
+		Assertions.assertTrue(dao.activateByPhone("888-555-1000"));
+	}
+
+	@Test
+	public void change_activate_check()
+	{
+		var record = dao.findByPhone("888-555-1000");
+		Assertions.assertNotNull(record, "Exists");
+		Assertions.assertEquals(ID, record.getId(), "Check ID");
+		Assertions.assertEquals("888-555-1000", record.getPhone(), "Check phone");
+		Assertions.assertEquals("Greg", record.getFirstName(), "Check firstName");
+		Assertions.assertEquals("Landers", record.getLastName(), "Check lastName");
+		Assertions.assertEquals(HealthWorkerStatus.NEITHER.id, record.getHealthWorkerStatusId(), "Check healthWorkerStatusId");
+		Assertions.assertFalse(record.isAlertable(), "Check alertable");
+		Assertions.assertTrue(record.isActive(), "Check active");
+	}
+
+	@Test
+	public void change_modify()
 	{
 		var record = dao.findByPhone("888-555-1000");
 		record.setFirstName("Benjamin");
 		record.setLastName("Von Trapp");
 		record.setHealthWorkerStatusId(HealthWorkerStatus.LIVE_WITH.id);
 		record.setAlertable(true);
-		record.setActive(true);
 	}
 
 	@Test
-	public void change_check()
+	public void change_modify_check()
 	{
 		var record = dao.getOrAdd("888-555-1000", "Betty", "White");
 		Assertions.assertNotNull(record, "Exists");
@@ -83,5 +102,17 @@ public class PeopleDAOGetOrAddTest
 		Assertions.assertEquals(HealthWorkerStatus.LIVE_WITH.id, record.getHealthWorkerStatusId(), "Check healthWorkerStatusId");
 		Assertions.assertTrue(record.isAlertable(), "Check alertable");
 		Assertions.assertTrue(record.isActive(), "Check active");
+	}
+
+	@Test
+	public void change_reactivate()
+	{
+		Assertions.assertFalse(dao.activateByPhone("888-555-1000"));
+	}
+
+	@Test
+	public void change_reactivate_check()
+	{
+		change_modify_check();
 	}
 }
