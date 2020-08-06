@@ -39,10 +39,6 @@ public class TwilioResourceTest
 	private static PatientDAO patientDao;
 	private static PeopleDAO peopleDao;
 
-	private static FacilityValue FACILITY;
-	private static PeopleValue PERSON;
-	private static PeopleValue PERSON_1;
-
 	public static final HibernateRule DAO_RULE = new HibernateRule(App.ENTITIES);
 	public final HibernateTransactionRule transRule = new HibernateTransactionRule(DAO_RULE);
 	public final ResourceExtension RULE = ResourceExtension.builder().addResource(rest).build();
@@ -112,11 +108,11 @@ public class TwilioResourceTest
 	@Test
 	public void add()
 	{
-		PERSON = peopleDao.add(new PeopleValue("person", "888-555-1000", false));
-		PERSON_1 = peopleDao.add(new PeopleValue("person1", "888-555-1001", false));
-		FACILITY = facilityDao.add(new FacilityValue(0).withName("Zero"), true);
+		peopleDao.add(new PeopleValue("person1", "888-555-1001", false));
+		var person = peopleDao.add(new PeopleValue("person", "888-555-1000", false));
+		var facility = facilityDao.add(new FacilityValue(0).withName("Zero"), true);
 
-		patientDao.add(new PatientValue(FACILITY.id, PERSON.id, false, null, null));
+		patientDao.add(new PatientValue(facility.id, person.id, false, null, null));
 	}
 
 	@ParameterizedTest
