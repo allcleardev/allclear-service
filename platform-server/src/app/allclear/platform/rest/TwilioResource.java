@@ -62,7 +62,7 @@ public class TwilioResource
 		this.hmac = new HmacUtils(HmacAlgorithms.HMAC_SHA_1, authToken);
 	}
 
-	private void checkSignature(final UriInfo uri,
+	protected void checkSignature(final UriInfo uri,
 		final String signature,
 		final MultivaluedMap<String, String> params) throws NotAuthorizedException
 	{
@@ -169,7 +169,7 @@ public class TwilioResource
 		}
 
 		log.warn("PATIENT_REQUEST_NOT_FOUND: {}", from);
-		return response("You do have any outstanding test notification requests.");
+		return response("You do not have any outstanding test notification requests.");
 	}
 
 	String response(final String body)
