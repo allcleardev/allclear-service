@@ -26,10 +26,8 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import app.allclear.common.dao.QueryResults;
 import app.allclear.common.mediatype.UTF8MediaType;
-import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.junit.hibernate.*;
 import app.allclear.platform.App;
-import app.allclear.platform.ConfigTest;
 import app.allclear.platform.filter.PeopleFilter;
 import app.allclear.platform.rest.PeopleResource;
 import app.allclear.platform.type.*;
@@ -52,8 +50,7 @@ public class PeopleDAOFieldTest
 
 	private static PeopleDAO dao;
 	private static FriendDAO friendDao;
-	private static SessionDAO sessionDao;
-	private static FakeRedisClient redis = new FakeRedisClient();
+	private static final SessionDAO sessionDao = new FakeSessionDAO();
 	private static SessionValue ADMIN;
 	private static SessionValue FIRST_;
 	private static SessionValue SECOND_;
@@ -82,7 +79,6 @@ public class PeopleDAOFieldTest
 
 		dao = new PeopleDAO(factory);
 		friendDao = new FriendDAO(factory);
-		sessionDao = new SessionDAO(redis, ConfigTest.loadTest());
 	}
 
 	@Test

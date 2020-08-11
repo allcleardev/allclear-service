@@ -20,9 +20,7 @@ import app.allclear.junit.hibernate.*;
 import app.allclear.common.errors.NotAuthorizedException;
 import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
-import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.platform.App;
-import app.allclear.platform.ConfigTest;
 import app.allclear.platform.entity.Patient;
 import app.allclear.platform.filter.PatientFilter;
 import app.allclear.platform.value.*;
@@ -47,7 +45,7 @@ public class PatientDAOTest
 	private static PatientDAO dao = null;
 	private static FacilityDAO facilityDao = null;
 	private static PeopleDAO peopleDao = null;
-	private static SessionDAO sessionDao = null;
+	private static final SessionDAO sessionDao = new FakeSessionDAO();
 	private static PatientValue VALUE = null;
 	private static FacilityValue FACILITY = null;
 	private static FacilityValue FACILITY_1 = null;
@@ -70,7 +68,6 @@ public class PatientDAOTest
 	public static void up()
 	{
 		var factory = DAO_RULE.getSessionFactory();
-		sessionDao = new SessionDAO(new FakeRedisClient(), ConfigTest.loadTest());
 		dao = new PatientDAO(factory, sessionDao);
 		facilityDao = new FacilityDAO(factory, new TestAuditor());
 		peopleDao = new PeopleDAO(factory);

@@ -80,7 +80,7 @@ public class PatientDAO extends AbstractDAO<Patient>
 		validator.ensureExists("facilityId", "Facility", facilityId).check();
 
 		var auth = sessionDao.checkPerson();
-		if (!sessionDao.checkPerson().associatedWith(facilityId))
+		if (!auth.associatedWith(facilityId))
 			throw new NotAuthorizedException("The current user '" + auth + "' is not an associate of the facility ID '" + facilityId + "'.");
 
 		var record = find(facilityId, personId);

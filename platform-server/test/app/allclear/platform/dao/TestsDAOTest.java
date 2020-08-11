@@ -20,9 +20,7 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
 import app.allclear.junit.hibernate.*;
 import app.allclear.common.errors.*;
-import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.platform.App;
-import app.allclear.platform.ConfigTest;
 import app.allclear.platform.entity.Tests;
 import app.allclear.platform.filter.PeopleFilter;
 import app.allclear.platform.filter.TestsFilter;
@@ -48,7 +46,7 @@ public class TestsDAOTest
 	private static TestsDAO dao = null;
 	private static FacilityDAO facilityDao = null;
 	private static PeopleDAO peopleDao = null;
-	private static SessionDAO sessionDao = new SessionDAO(new FakeRedisClient(), ConfigTest.loadTest());
+	private static final SessionDAO sessionDao = new FakeSessionDAO();
 	private static TestsValue VALUE = null;
 	private static TestsValue VALUE_1 = null;
 	private static SessionValue ADMIN = null;

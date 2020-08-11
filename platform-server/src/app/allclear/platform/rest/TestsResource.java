@@ -16,6 +16,7 @@ import app.allclear.common.value.OperationResponse;
 import app.allclear.platform.dao.*;
 import app.allclear.platform.filter.TestsFilter;
 import app.allclear.platform.model.TestInitRequest;
+import app.allclear.platform.model.TestReceiptRequest;
 import app.allclear.platform.value.TestsValue;
 
 /**********************************************************************************
@@ -105,6 +106,15 @@ public class TestsResource
 		}
 		
 		return dao.add(patient, request.typeId, request.identifier);
+	}
+
+	@POST
+	@Path("/receive") @Timed @UnitOfWork
+	@ApiOperation(value="receive", notes="Receives the Test results and optionally sends the notification to the patient.", response=TestsValue.class)
+	public TestsValue receive(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final TestReceiptRequest request) throws ValidationException
+	{
+		return dao.receive(request);
 	}
 
 	@PUT

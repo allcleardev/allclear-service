@@ -21,9 +21,7 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
 import app.allclear.junit.hibernate.*;
 import app.allclear.common.errors.*;
-import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.platform.App;
-import app.allclear.platform.ConfigTest;
 import app.allclear.platform.entity.Experiences;
 import app.allclear.platform.filter.ExperiencesFilter;
 import app.allclear.platform.model.ExperiencesCalcResponse;
@@ -50,7 +48,7 @@ public class ExperiencesDAOTest
 	private static ExperiencesDAO dao = null;
 	private static FacilityDAO facilityDao = null;
 	private static PeopleDAO peopleDao = null;
-	private static SessionDAO sessionDao = new SessionDAO(new FakeRedisClient(), ConfigTest.loadTest());
+	private static final SessionDAO sessionDao = new FakeSessionDAO();
 	private static ExperiencesValue VALUE = null;
 	private static FacilityValue FACILITY = null;
 	private static FacilityValue FACILITY_1 = null;

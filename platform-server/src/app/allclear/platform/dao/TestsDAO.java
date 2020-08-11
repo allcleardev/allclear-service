@@ -13,6 +13,7 @@ import app.allclear.common.errors.*;
 import app.allclear.common.hibernate.AbstractDAO;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.filter.TestsFilter;
+import app.allclear.platform.model.TestReceiptRequest;
 import app.allclear.platform.type.TestType;
 import app.allclear.platform.value.SessionValue;
 import app.allclear.platform.value.TestsValue;
@@ -105,6 +106,35 @@ public class TestsDAO extends AbstractDAO<Tests>
 			record = findWithException(value.id);
 
 		return value.withId(record.update(value, (People) cmrs[1], (Facility) cmrs[2], ((SessionValue) cmrs[3]).canAdmin()).getId());
+	}
+
+	/** Receives the Test results and optionally sends the notification to the patient.
+	 * 
+	 * @param request
+	 * @return never NULL.
+	 * @throws NotAuthorizedException if not a facility associate and not associated with the test's facility.
+	 * @throws ValidationException
+	 */
+	public TestsValue receive(final TestReceiptRequest request) throws NotAuthorizedException, ValidationException
+	{
+		var validator = new Validator().ensureExists("id", "ID", request.id)
+			.ensureLength("notes", "Notes", request.notes, TestsValue.MAX_LEN_NOTES)
+			.check();
+
+		var record = get(request.id);
+		if (null == record) validator.add("id", "The ID, %d, is invalid.", request.id).check();
+
+		var auth = sessionDao.checkPerson();
+		if (!auth.associatedWith(record.getFacilityId()))
+			throw new NotAuthorizedException("The current user '" + auth + "' is not an associate of the facility ID '" + record.getFacilityId() + "'.");
+
+		var now = new Date();
+		record.setPositive(request.positive);
+		record.setNotes(request.notes);
+		record.setReceivedAt(now);
+		record.setUpdatedAt(now);
+
+		return record.toValue();
 	}
 
 	/** Validates a single Tests value.

@@ -14,9 +14,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
 import app.allclear.junit.hibernate.*;
-import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.platform.App;
-import app.allclear.platform.ConfigTest;
 import app.allclear.platform.filter.AuditLogFilter;
 import app.allclear.platform.value.*;
 
@@ -39,8 +37,7 @@ public class AuditLogDAOTest
 	public final HibernateTransactionRule transRule = new HibernateTransactionRule(DAO_RULE);	// Transactions are need to trigger the afterTrans action in the AuditLogDAO.insert method. DLS on 5/10/2020.
 
 	private static AuditLogDAO dao = null;
-	private static final FakeRedisClient redis = new FakeRedisClient();
-	private static final SessionDAO sessionDao = new SessionDAO(redis, ConfigTest.loadTest());
+	private static final SessionDAO sessionDao = new FakeSessionDAO();
 	private static final FacilityValue AUDITABLE = new FacilityValue(-1).withId(-1L);
 	private static AuditLogValue VALUE;
 	private static SessionValue ADMIN = new SessionValue(false, new AdminValue("linda", false, false));

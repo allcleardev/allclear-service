@@ -22,10 +22,8 @@ import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 import io.dropwizard.testing.junit5.ResourceExtension;
 import app.allclear.common.errors.*;
 import app.allclear.common.mediatype.UTF8MediaType;
-import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.junit.hibernate.*;
 import app.allclear.platform.App;
-import app.allclear.platform.ConfigTest;
 import app.allclear.platform.model.PeopleAuthRequest;
 import app.allclear.platform.rest.PeopleResource;
 import app.allclear.platform.value.*;
@@ -47,8 +45,7 @@ public class PeopleDAOAuthenticateTest
 
 	private static PeopleDAO dao;
 	private static FacilityDAO facilityDao;
-	private static SessionDAO sessionDao;
-	private static FakeRedisClient redis = new FakeRedisClient();
+	private static final SessionDAO sessionDao = new FakeSessionDAO();
 	private static SessionValue ADMIN;
 	private static final FacilityValue FACILITY = new FacilityValue(0);
 	private static final FacilityValue FACILITY_1 = new FacilityValue(1);
@@ -69,7 +66,6 @@ public class PeopleDAOAuthenticateTest
 
 		dao = new PeopleDAO(factory);
 		facilityDao = new FacilityDAO(factory, new TestAuditor());
-		sessionDao = new SessionDAO(redis, ConfigTest.loadTest());
 	}
 
 	@BeforeEach

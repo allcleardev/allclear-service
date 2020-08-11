@@ -22,10 +22,8 @@ import com.azure.storage.queue.QueueClient;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
 import app.allclear.common.errors.*;
-import app.allclear.common.redis.FakeRedisClient;
 import app.allclear.junit.hibernate.*;
 import app.allclear.platform.App;
-import app.allclear.platform.ConfigTest;
 import app.allclear.platform.filter.FacilitateFilter;
 import app.allclear.platform.value.*;
 
@@ -48,7 +46,7 @@ public class FacilitateDAOTest
 	private static FacilitateDAO dao;
 	private static FacilityDAO facilityDao;
 	private static final QueueClient queue = mock(QueueClient.class);
-	private static final SessionDAO sessionDao = new SessionDAO(new FakeRedisClient(), ConfigTest.loadTest());
+	private static final SessionDAO sessionDao = new FakeSessionDAO();
 
 	private static SessionValue ADMIN = new SessionValue(false, new AdminValue("admin"));
 	private static SessionValue CUSTOMER = new SessionValue(new CustomerValue("customer").withId("customer1"));

@@ -6,10 +6,12 @@ import static org.apache.commons.lang3.StringUtils.repeat;
 import static app.allclear.testing.TestingUtils.*;
 import static app.allclear.platform.type.TestType.*;
 
+import java.util.Date;
 import java.util.stream.Stream;
 import javax.ws.rs.client.*;
 import javax.ws.rs.core.Response;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,6 +29,7 @@ import app.allclear.platform.App;
 import app.allclear.platform.ConfigTest;
 import app.allclear.platform.dao.*;
 import app.allclear.platform.model.TestInitRequest;
+import app.allclear.platform.model.TestReceiptRequest;
 import app.allclear.platform.type.TestType;
 import app.allclear.platform.value.*;
 
@@ -62,6 +65,7 @@ public class TestsResourceInitTest
 	private static SessionValue ASSOCIATE_1_ = null;
 	private static PeopleValue PATIENT = null;
 	private static PeopleValue PATIENT_1 = null;
+	private static Long ID = null;
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
 		.addResource(new AuthorizationExceptionMapper())
@@ -173,6 +177,8 @@ public class TestsResourceInitTest
 		Assertions.assertEquals("remote-1", value.remoteId, "Check remoteId");
 		Assertions.assertFalse(value.positive, "Check positive");
 		Assertions.assertNull(value.notes, "Check notes");
+
+		ID = value.id;
 	}
 
 	public static Stream<SessionValue> init_success_check()
@@ -224,6 +230,131 @@ public class TestsResourceInitTest
 			.post(Entity.json(new TestInitRequest(FACILITY.id, PATIENT.id, ANTIBODY.id, "remote-1")));
 		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, response.getStatus(), "Status");
 		assertThat(response.readEntity(ErrorInfo.class).message).as("Check error message").isEqualTo("The Remote ID 'remote-1' is already in use.");
+	}
+
+	public static Stream<SessionValue> receive_fail()
+	{
+		return Stream.of(ADMIN, ASSOCIATE_1_, new SessionValue(false, PATIENT), new SessionValue(false, PATIENT_1));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void receive_fail(final SessionValue session)
+	{
+		sessionDao.current(session);
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request("receive")
+			.post(Entity.json(new TestReceiptRequest(ID, true, "special notes"))).getStatus());
+	}
+
+	public static Stream<Arguments> receive_invalid()
+	{
+		return Stream.of(
+			arguments(new TestReceiptRequest(null, true, "special notes"), "ID is not set."),
+			arguments(new TestReceiptRequest(ID, true, StringUtils.repeat('a', TestsValue.MAX_LEN_NOTES + 1)), "Notes 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa...' is longer than the expected size of 65535."),
+			arguments(new TestReceiptRequest(ID + 1000L, true, "special notes"), "The ID, 1001, is invalid."));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void receive_invalid(final TestReceiptRequest value, final String message)
+	{
+		sessionDao.current(ASSOCIATE_);
+
+		var response = request("receive").post(Entity.json(value));
+		Assertions.assertEquals(HTTP_STATUS_VALIDATION_EXCEPTION, response.getStatus(), "Status");
+		assertThat(response.readEntity(ErrorInfo.class).message).as("Check error message").contains(message);
+	}
+
+	@ParameterizedTest
+	@MethodSource("init_success_check")
+	public void receive_succes(final SessionValue session)	// Make sure that after the failure that nothing has changed.
+	{
+		init_success_check(session);
+	}
+
+	@Test
+	public void receive_success_00()
+	{
+		sessionDao.current(ASSOCIATE_);
+
+		var response = request("receive").post(Entity.json(new TestReceiptRequest(ID, true, "special notes")));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var value = response.readEntity(TestsValue.class);
+		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertTrue(value.positive, "Check positive");
+		Assertions.assertEquals("special notes", value.notes, "Check notes");
+		assertThat(value.updatedAt).as("Check updatedAt").isNotNull().isCloseTo(new Date(), 500L).isAfter(value.createdAt);
+	}
+
+	public static Stream<SessionValue> receive_success_00_check()
+	{
+		return Stream.of(ADMIN, new SessionValue(false, PATIENT), ASSOCIATE_);
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void receive_success_00_check(final SessionValue session)
+	{
+		sessionDao.current(session);
+
+		var response = request(FACILITY.id, "remote-1");
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());
+
+		var type = ANTIBODY;
+		var value = response.readEntity(TestsValue.class);
+		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertEquals(FACILITY.id, value.facilityId, "Check facilityId");
+		Assertions.assertEquals(PATIENT.id, value.personId, "Check personId");
+		Assertions.assertEquals(type.id, value.typeId, "Check typeId");
+		Assertions.assertEquals(type,  value.type, "Check type");
+		Assertions.assertEquals("remote-1", value.remoteId, "Check remoteId");
+		Assertions.assertTrue(value.positive, "Check positive");
+		Assertions.assertEquals("special notes", value.notes, "Check notes");
+		assertThat(value.updatedAt).as("Check updatedAt").isNotNull().isCloseTo(new Date(), 500L).isAfter(value.createdAt);
+	}
+
+	@Test
+	public void receive_success_01()
+	{
+		sessionDao.current(ASSOCIATE_);
+
+		var response = request("receive").post(Entity.json(new TestReceiptRequest(ID, false, "False positive")));
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var value = response.readEntity(TestsValue.class);
+		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertFalse(value.positive, "Check positive");
+		Assertions.assertEquals("False positive", value.notes, "Check notes");
+		assertThat(value.updatedAt).as("Check updatedAt").isNotNull().isCloseTo(new Date(), 500L).isAfter(value.createdAt);
+	}
+
+	public static Stream<SessionValue> receive_success_01_check()
+	{
+		return Stream.of(ADMIN, new SessionValue(false, PATIENT), ASSOCIATE_);
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void receive_success_01_check(final SessionValue session)
+	{
+		sessionDao.current(session);
+
+		var response = request(FACILITY.id, "remote-1");
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus());
+
+		var type = ANTIBODY;
+		var value = response.readEntity(TestsValue.class);
+		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertEquals(FACILITY.id, value.facilityId, "Check facilityId");
+		Assertions.assertEquals(PATIENT.id, value.personId, "Check personId");
+		Assertions.assertEquals(type.id, value.typeId, "Check typeId");
+		Assertions.assertEquals(type,  value.type, "Check type");
+		Assertions.assertEquals("remote-1", value.remoteId, "Check remoteId");
+		Assertions.assertFalse(value.positive, "Check positive");
+		Assertions.assertEquals("False positive", value.notes, "Check notes");
+		assertThat(value.updatedAt).as("Check updatedAt").isNotNull().isCloseTo(new Date(), 500L).isAfter(value.createdAt);
 	}
 
 	/** Helper method - creates the base WebTarget. */
