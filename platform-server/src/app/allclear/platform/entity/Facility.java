@@ -38,8 +38,9 @@ import app.allclear.platform.value.FacilityValue;
 	@NamedQuery(name="findActiveFacilitiesByName", query="SELECT OBJECT(o) FROM Facility o WHERE o.name LIKE :name AND o.active = TRUE ORDER BY o.name"),
 	@NamedQuery(name="findFacility", query="SELECT OBJECT(o) FROM Facility o WHERE o.name = :name")})
 @NamedNativeQueries({@NamedNativeQuery(name="getFacilityCitiesByState", query="SELECT o.city AS name, COUNT(o.city) AS total FROM facility o WHERE o.state = :state AND o.active = TRUE GROUP BY o.city ORDER BY o.city", resultClass=CountByName.class),
+	@NamedNativeQuery(name="getFacilityCounties", query="SELECT o.county_id AS name, COUNT(o.county_id) AS total FROM facility o WHERE o.active = TRUE AND o.county_id IS NOT NULL GROUP BY o.county_id ORDER BY o.county_id", resultClass=CountByName.class),
 	@NamedNativeQuery(name="getFacilityNamesByIds", query="SELECT o.id, o.name FROM facility o WHERE o.id IN (:ids)", resultClass=Name.class),
-	@NamedNativeQuery(name="getFacilityStates", query="SELECT o.state AS name, COUNT(o.state) AS total FROM facility o WHERE o.active = TRUE GROUP BY o.state ORDER BY o.state", resultClass=CountByName.class)})
+	@NamedNativeQuery(name="getFacilityStates", query="SELECT o.state AS name, COUNT(o.state) AS total FROM facility o WHERE o.active = TRUE AND o.state IS NOT NULL GROUP BY o.state ORDER BY o.state", resultClass=CountByName.class)})
 public class Facility implements Serializable
 {
 	private final static long serialVersionUID = 1L;

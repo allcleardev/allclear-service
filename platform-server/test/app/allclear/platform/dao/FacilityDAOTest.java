@@ -444,6 +444,12 @@ public class FacilityDAOTest
 	}
 
 	@Test
+	public void getDistinctCounties()
+	{
+		assertThat(dao.getDistinctCounties()).isEmpty();
+	}
+
+	@Test
 	public void getDistinctStates()
 	{
 		assertThat(dao.getDistinctStates()).containsExactly(new CountByName("FL", 1L));
@@ -530,6 +536,12 @@ public class FacilityDAOTest
 	public void modify_getActiveByName()
 	{
 		assertThat(dao.getActiveByName(VALUE.name)).isEmpty();
+	}
+
+	@Test
+	public void modify_getDistinctCounties()
+	{
+		assertThat(dao.getDistinctCounties()).isEmpty();	// Inactive
 	}
 
 	public static Stream<Arguments> search()
@@ -1052,7 +1064,7 @@ public class FacilityDAOTest
 	@Test
 	public void z_00_add()
 	{
-		VALUE = dao.add(createValid().withActive(true).withTestTypes(NASAL_SWAB, ANTIBODY), true);
+		VALUE = dao.add(createValid().withActive(true).withTestTypes(NASAL_SWAB, ANTIBODY).withCounty("11111", "First"), true);
 		Assertions.assertNotNull(VALUE, "Exists");
 		Assertions.assertEquals(2L, VALUE.id, "Check ID");
 		Assertions.assertTrue(VALUE.active, "Check active");
@@ -1077,9 +1089,15 @@ public class FacilityDAOTest
 	}
 
 	@Test
+	public void z_00_getDistinctCounties()
+	{
+		assertThat(dao.getDistinctCounties()).containsExactly(new CountByName("11111", 1L));
+	}
+
+	@Test
 	public void z_00_modify()
 	{
-		VALUE = dao.add(createValid().withActive(true).withId(20L).nullTestTypes(), true);
+		VALUE = dao.add(createValid().withCounty("11111", "First").withActive(true).withId(20L).nullTestTypes(), true);
 		Assertions.assertNotNull(VALUE, "Exists");
 		Assertions.assertEquals(2L, VALUE.id, "Check ID");
 		Assertions.assertTrue(VALUE.active, "Check active");
@@ -1097,7 +1115,7 @@ public class FacilityDAOTest
 	@Test
 	public void z_01_add_others()
 	{
-		dao.add(createValid().withName("restrictive-0").withCity("Dallas").withState("Texas").withTestCriteriaId(null).withActive(true), true);
+		dao.add(createValid().withName("restrictive-0").withCity("Dallas").withState("Texas").withCounty("22222", "Two").withTestCriteriaId(null).withActive(true), true);
 		dao.add(createValid().withName("restrictive-1").withCity("Austin").withState("Texas").withTestCriteriaId(CDC_CRITERIA.id).withActive(true), true);
 
 		peopleDao.addFacilities(PERSON.id, List.of(3L));
@@ -1161,6 +1179,12 @@ public class FacilityDAOTest
 	}
 
 	@Test
+	public void z_02_getDistinctCounties()
+	{
+		assertThat(dao.getDistinctCounties()).containsExactly(new CountByName("11111", 1L), new CountByName("22222", 1L));
+	}
+
+	@Test
 	public void z_02_getDistinctStates()
 	{
 		assertThat(dao.getDistinctStates()).containsExactly(new CountByName("GA", 1L), new CountByName("Texas", 2L));
@@ -1169,7 +1193,7 @@ public class FacilityDAOTest
 	@Test
 	public void z_10_add_as_editor()
 	{
-		VALUE = dao.add(createValid().withName("byEditor").withResultNotificationEnabled(true).withActive(true), false);
+		VALUE = dao.add(createValid().withCountyId("11111").withName("byEditor").withResultNotificationEnabled(true).withActive(true), false);
 		Assertions.assertEquals(5L, VALUE.id, "Check ID");
 		Assertions.assertFalse(VALUE.resultNotificationEnabled, "Check resultNotificationEnabled");
 		Assertions.assertFalse(VALUE.active, "Check active");
@@ -1190,6 +1214,12 @@ public class FacilityDAOTest
 
 		v = dao.search(new FacilityFilter().withId(5L), true).records.get(0);
 		Assertions.assertNull(v.testTypes, "Check testTypes");
+	}
+
+	@Test
+	public void z_10_add_as_editor_getDistinctCounties()
+	{
+		z_02_getDistinctCounties();	// New facility is inactive so no change.
 	}
 
 	@Test
@@ -1222,6 +1252,12 @@ public class FacilityDAOTest
 	}
 
 	@Test
+	public void z_10_modify_as_editor_getDistinctCounties()
+	{
+		z_02_getDistinctCounties();	// Facility is still inactive so no change.
+	}
+
+	@Test
 	public void z_11_modify_as_admin()
 	{
 		var v = dao.update(VALUE.withResultNotificationEnabled(true).withActive(true).withTestTypes(DONT_KNOW), true);
@@ -1251,6 +1287,12 @@ public class FacilityDAOTest
 	}
 
 	@Test
+	public void z_11_modify_as_admin_getDistinctCounties()
+	{
+		assertThat(dao.getDistinctCounties()).containsExactly(new CountByName("11111", 2L), new CountByName("22222", 1L));
+	}
+
+	@Test
 	public void z_12_modify_as_editor()
 	{
 		var v = dao.update(VALUE.withResultNotificationEnabled(false).withActive(false).emptyTestTypes(), false);
@@ -1277,6 +1319,12 @@ public class FacilityDAOTest
 
 		v = dao.search(new FacilityFilter().withId(5L), true).records.get(0);
 		Assertions.assertNull(v.testTypes, "Check testTypes");
+	}
+
+	@Test
+	public void z_12_modify_as_editor_getDistinctCounties()
+	{
+		z_11_modify_as_admin_getDistinctCounties();	// No change
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.

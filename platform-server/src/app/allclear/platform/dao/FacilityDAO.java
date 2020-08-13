@@ -423,6 +423,15 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		return namedQuery("getFacilityCitiesByState", CountByName.class).setParameter("state", state).list();
 	}
 
+	/** Gets the distinct list of facility counties.
+	 * 
+	 * @return never NULL
+	 */
+	public List<CountByName> getDistinctCounties()
+	{
+		return namedQuery("getFacilityCounties", CountByName.class).list();
+	}
+
 	/** Gets the distinct list of facility states.
 	 * 
 	 * @return never NULL

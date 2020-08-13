@@ -107,7 +107,7 @@ public class FacilityResource
 
 	@GET
 	@Path("/cities") @Timed @UnitOfWork(readOnly=true, transactional=false)
-	@ApiOperation(value="getDistinctStates", notes="Gets the distinct list of facility cities by state.", response=CountByName.class, responseContainer="List")
+	@ApiOperation(value="getDistinctCitiesByState", notes="Gets the distinct list of facility cities by state.", response=CountByName.class, responseContainer="List")
 	public List<CountByName> getDistinctCitiesByState(@QueryParam("state") final String state)
 	{
 		if (StringUtils.isBlank(state))
@@ -115,6 +115,11 @@ public class FacilityResource
 
 		return dao.getDistinctCitiesByState(state);
 	}
+
+	@GET
+	@Path("/fips") @Timed @UnitOfWork(readOnly=true, transactional=false)
+	@ApiOperation(value="getDistinctCounties", notes="Gets the distinct list of facility counties/FIPS codes.", response=CountByName.class, responseContainer="List")
+	public List<CountByName> getDistinctCounties() { return dao.getDistinctCounties(); }
 
 	@GET
 	@Path("/name") @Timed @UnitOfWork(readOnly=true, transactional=false)

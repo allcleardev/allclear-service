@@ -84,7 +84,7 @@ public class FacilityResourceFacetTest
 
 	@ParameterizedTest
 	@CsvFileSource(resources="/feeds/facility_facets.csv", numLinesToSkip=1)
-	public void add_all(final int i, final String city, final String state, final boolean active)
+	public void add_all(final int i, final String city, final String state, final String countyId, final String countyName, final boolean active)
 	{
 		if (active)
 		{
@@ -95,7 +95,7 @@ public class FacilityResourceFacetTest
 		else
 			inactiveCount++;
 
-		Assertions.assertEquals(HTTP_STATUS_OK, request().post(Entity.json(new FacilityValue(i, city, state, 45, 45, active))).getStatus());
+		Assertions.assertEquals(HTTP_STATUS_OK, request().post(Entity.json(new FacilityValue(i, city, state, 45, 45, active).withCounty(countyId, countyName))).getStatus());
 	}
 
 	@Test
@@ -226,6 +226,14 @@ public class FacilityResourceFacetTest
 		var info = response.readEntity(ErrorInfo.class);
 		Assertions.assertNotNull(info, "Exists");
 		Assertions.assertEquals("Please provide a 'state' parameter.", info.message, "Check message");
+	}
+
+	@Test
+	public void getDistinctCounties()
+	{
+		var response = request("fips").get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+		assertThat(response.readEntity(CountByName[].class)).containsExactly(new CountByName("02111", 2L), new CountByName("11223", 1L), new CountByName("12334", 3L), new CountByName("12335", 1L));
 	}
 
 	@Test
