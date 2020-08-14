@@ -582,7 +582,27 @@ var FacilitateHandler = new ListTemplate({
 				if (data.state) v.state = data.state;
 				if (data.latitude) v.latitude = data.latitude;
 				if (data.longitude) v.longitude = data.longitude;
-				f.value_.value = Template.toJSON(v);	// Do NOT update 'c.value.value_'. The diff on submittal with f.value_ will trigger sending this payload. DLS on 6/11/2020.
+				if (v.latitude && v.longitude)
+				{
+					me.get('maps/block', { latitude: v.latitude, longitude: v.longitude }, function(block) {
+						if (block.message)
+						{
+							window.alert(block.message);
+							return;
+						}
+
+						var o = block.County;
+						if (o)
+						{
+							if (o.FIPS) v.countyId = o.FIPS;
+							if (o.name) v.countyName = o.name;
+						}
+
+						f.value_.value = Template.toJSON(v);	// Do NOT update 'c.value.value_'. The diff on submittal with f.value_ will trigger sending this payload. DLS on 6/11/2020.
+					});
+				}
+				else
+					f.value_.value = Template.toJSON(v);	// Do NOT update 'c.value.value_'. The diff on submittal with f.value_ will trigger sending this payload. DLS on 6/11/2020.
 			});
 		};
 	},
