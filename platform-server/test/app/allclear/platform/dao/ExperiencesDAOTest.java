@@ -102,7 +102,7 @@ public class ExperiencesDAOTest
 	{
 		sessionDao.current(SESSION);
 		assertThat(assertThrows(ValidationException.class, () -> dao.add(createValid().withFacilityId(FACILITY_1.id))))
-			.hasMessage("You have already provided an Experience for " + FACILITY_1.name + ".");
+			.hasMessage("You have already provided an Experience for " + FACILITY_1.name + " today.");
 	}
 
 	@Test

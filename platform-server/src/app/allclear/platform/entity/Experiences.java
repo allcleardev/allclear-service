@@ -27,10 +27,9 @@ import app.allclear.platform.value.ExperiencesValue;
 @Entity
 @Cacheable
 @DynamicUpdate
-@Table(name="experiences",
-	uniqueConstraints={@UniqueConstraint(columnNames={"person_id", "facility_id"})})
+@Table(name="experiences")
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE, region="experiences")
-@NamedQueries({@NamedQuery(name="findExperience", query="SELECT OBJECT(o) FROM Experiences o WHERE o.personId = :personId AND o.facilityId = :facilityId")})
+@NamedQueries({@NamedQuery(name="countRecentExperiencesByPerson", query="SELECT COUNT(o.id) FROM Experiences o WHERE o.personId = :personId AND o.facilityId = :facilityId AND o.createdAt >= :createdAt")})
 @NamedNativeQueries({@NamedNativeQuery(name="countExperiencesPositivesByFacility", query="SELECT o.positive AS id, COUNT(o.id) AS total FROM experiences o WHERE o.facility_id = :facilityId GROUP BY o.positive", resultClass=CountByBoolean.class)})
 public class Experiences implements Serializable
 {

@@ -12,6 +12,7 @@ import app.allclear.common.dao.*;
 import app.allclear.common.errors.*;
 import app.allclear.common.hibernate.AbstractDAO;
 import app.allclear.common.hibernate.HibernateQueryBuilder;
+import app.allclear.common.time.CalendarUtils;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.filter.ExperiencesFilter;
 import app.allclear.platform.model.ExperiencesCalcResponse;
@@ -161,14 +162,13 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 		// Throw exception if errors exist.
 		validator.check();
 
-		// Checks for an existing experience.
-		var record = find(value.personId, value.facilityId);
-		if ((null != record) && !record.getId().equals(value.id))
-			validator.add("facilityId", "You have already provided an Experience for %s.", facility.getName()).check();
+		// Checks for an existing experience on adds.
+		if ((null == value.id) && (0L < countTodayExperiencesByPerson(value.personId, value.facilityId)))
+			validator.add("facilityId", "You have already provided an Experience for %s today.", facility.getName()).check();
 
 		value.denormalize(person.getName(), facility.getName());
 
-		return new Object[] { record, person, facility };
+		return new Object[] { null, person, facility };
 	}
 
 	/** Removes a single Experiences value.
@@ -214,11 +214,6 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 			throw new ObjectNotFoundException("Could not find the Experiences because id '" + id + "' is invalid.");
 
 		return check(record, readOnly);
-	}
-
-	Experiences find(final String personId, final Long facilityId)
-	{
-		return namedQuery("findExperience").setParameter("personId", personId).setParameter("facilityId", facilityId).uniqueResult();
 	}
 
 	/** Gets a single Experiences value by identifier.
@@ -277,6 +272,33 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 		return new ExperiencesCalcResponse(positives.getOrDefault(true, 0L),
 			positives.getOrDefault(false, 0L),
 			Experience.LIST.stream().collect(toMap(v -> v.id, v -> new ExperiencesCalcResponse.Tag(v.name, tags.getOrDefault(v.id, 0L)))));
+	}
+
+	/** Counts the number of experiences by the person for the specified facility today.
+	 * 
+	 * @param personId
+	 * @param facilityId
+	 * @return zero if none found.
+	 */
+	public long countTodayExperiencesByPerson(final String personId, final Long facilityId)
+	{
+		return countRecentExperiencesByPerson(personId, facilityId, CalendarUtils.today().getTime());
+	}
+
+	/** Counts the number of experiences by the person for the specified facility since the specified creation date.
+	 * 
+	 * @param personId
+	 * @param facilityId
+	 * @param createdAt
+	 * @return zero if none found.
+	 */
+	public long countRecentExperiencesByPerson(final String personId, final Long facilityId, final Date createdAt)
+	{
+		return namedQuery("countRecentExperiencesByPerson", Long.class)
+			.setParameter("personId", personId)
+			.setParameter("facilityId", facilityId)
+			.setParameter("createdAt", createdAt)
+			.uniqueResult();
 	}
 
 	/** Searches the Experiences entity based on the supplied filter.
