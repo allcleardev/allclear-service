@@ -698,6 +698,109 @@ public class ExperiencesDAOTest
 		assertThat(dao.search(new ExperiencesFilter()).records.get(0).tags).as("Check tags").isNull();
 	}
 
+	@Test
+	public void z_09_clear()
+	{
+		Assertions.assertEquals(1, transRule.getSession().createQuery("DELETE FROM Experiences o").executeUpdate());
+	}
+
+	@Test
+	public void z_10_add()
+	{
+		sessionDao.current(SESSION);
+
+		VALUE = dao.add(createValid());
+	}
+
+	@Test
+	public void z_10_add_dupe()
+	{
+		sessionDao.current(SESSION);
+
+		assertThat(assertThrows(ValidationException.class, () -> dao.add(createValid())))
+			.hasMessage("You have already provided an Experience for Test Center 0 today.");
+	}
+
+	public static Stream<Arguments> z_10_add_dupe_check()
+	{
+		var hourAgo = hourAgo();
+
+		return Stream.of(
+			arguments(new ExperiencesFilter(), 1L),
+			arguments(new ExperiencesFilter().withPersonId(PERSON.id), 1L),
+			arguments(new ExperiencesFilter().withFacilityId(FACILITY.id), 1L),
+			arguments(new ExperiencesFilter().withPersonId(PERSON_1.id), 0L),
+			arguments(new ExperiencesFilter().withFacilityId(FACILITY_1.id), 0L),
+			arguments(new ExperiencesFilter().withCreatedAtFrom(hourAgo), 1L),
+			arguments(new ExperiencesFilter().withCreatedAtTo(hourAgo), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_10_add_dupe_check(final ExperiencesFilter filter, final long expected)
+	{
+		count(filter, expected);
+	}
+
+	@Test
+	public void z_10_change_created()
+	{
+		var o = dao.findWithException(VALUE.id);
+		var date = days(o.getCreatedAt(), -1);
+		o.setCreatedAt(date);
+		o.setUpdatedAt(date);
+	}
+
+	public static Stream<Arguments> z_10_change_created_check()
+	{
+		var hourAgo = hourAgo();
+
+		return Stream.of(
+			arguments(new ExperiencesFilter(), 1L),
+			arguments(new ExperiencesFilter().withPersonId(PERSON.id), 1L),
+			arguments(new ExperiencesFilter().withFacilityId(FACILITY.id), 1L),
+			arguments(new ExperiencesFilter().withPersonId(PERSON_1.id), 0L),
+			arguments(new ExperiencesFilter().withFacilityId(FACILITY_1.id), 0L),
+			arguments(new ExperiencesFilter().withCreatedAtFrom(hourAgo), 0L),
+			arguments(new ExperiencesFilter().withCreatedAtTo(hourAgo), 1L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_10_change_created_check(final ExperiencesFilter filter, final long expected)
+	{
+		count(filter, expected);
+	}
+
+	@Test
+	public void z_10_dupe_next_day()
+	{
+		sessionDao.current(SESSION);
+
+		dao.add(createValid());
+	}
+
+	public static Stream<Arguments> z_10_dupe_next_day_check()
+	{
+		var hourAgo = hourAgo();
+
+		return Stream.of(
+			arguments(new ExperiencesFilter(), 2L),
+			arguments(new ExperiencesFilter().withPersonId(PERSON.id), 2L),
+			arguments(new ExperiencesFilter().withFacilityId(FACILITY.id), 2L),
+			arguments(new ExperiencesFilter().withPersonId(PERSON_1.id), 0L),
+			arguments(new ExperiencesFilter().withFacilityId(FACILITY_1.id), 0L),
+			arguments(new ExperiencesFilter().withCreatedAtFrom(hourAgo), 1L),
+			arguments(new ExperiencesFilter().withCreatedAtTo(hourAgo), 1L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_10_dupe_next_day_check(final ExperiencesFilter filter, final long expected)
+	{
+		count(filter, expected);
+	}
+
 	/** Helper method - calls the DAO count call and compares the expected total value.
 	 *
 	 * @param filter
