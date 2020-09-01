@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import app.allclear.common.ObjectUtils;
 import app.allclear.common.value.CreatedValue;
 
-/** Represents the statuses that be associated with People.
+/** Represents the possible pre-existing conditions that a person could have.
  * 
  * @author smalleyd
  * @version 1.0.0

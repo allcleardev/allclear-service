@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import app.allclear.common.ObjectUtils;
 
-/** Represents the statuses that be associated with People.
+/** Represents the possible health care worker status of a person.
  * 
  * @author smalleyd
  * @version 1.0.53

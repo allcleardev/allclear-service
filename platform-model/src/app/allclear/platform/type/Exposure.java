@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import app.allclear.common.ObjectUtils;
 import app.allclear.common.value.CreatedValue;
 
-/** Represents the statuses that be associated with People.
+/** Represents the disease exposure levels that can be associated with People.
  * 
  * @author smalleyd
  * @version 1.0.0
