@@ -205,26 +205,44 @@ public class FriendDAOTest
 		assertThrows(ObjectNotFoundException.class, () -> dao.getByIdWithException(VALUE.personId, "INVALID"));
 	}
 
+	public static Stream<Arguments> modif()
+	{
+		return Stream.of(
+			arguments(acceptedAt(), 1L),
+			arguments(rejectedAt(), 1L),
+			arguments(acceptedAt1(), 0L),
+			arguments(rejectedAt1(), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modif(final FriendFilter filter, final long expected)
+	{
+		count(filter, expected);
+	}
+
 	@Test
 	public void modify()
 	{
-		count(acceptedAt(), 1L);
-		count(rejectedAt(), 1L);
-		count(acceptedAt1(), 0L);
-		count(rejectedAt1(), 0L);
-
 		var value = dao.update(VALUE.withAcceptedAt(ACCEPTED_AT_1).withRejectedAt(REJECTED_AT_1));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
 
-	@Test
-	public void modify_count()
+	public static Stream<Arguments> modify_count()
 	{
-		count(acceptedAt(), 0L);
-		count(rejectedAt(), 0L);
-		count(acceptedAt1(), 1L);
-		count(rejectedAt1(), 1L);
+		return Stream.of(
+			arguments(acceptedAt(), 0L),
+			arguments(rejectedAt(), 0L),
+			arguments(acceptedAt1(), 1L),
+			arguments(rejectedAt1(), 1L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_count(final FriendFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	@Test
@@ -372,13 +390,19 @@ public class FriendDAOTest
 		assertThrows(ObjectNotFoundException.class, () -> dao.findWithException(VALUE.personId, VALUE.inviteeId));
 	}
 
-	/** Test removal after the search. */
-	@Test
-	public void testRemove_search()
+	public static Stream<Arguments> testRemove_search()
 	{
-		count(new FriendFilter().withPersonId(VALUE.personId).withInviteeId(VALUE.inviteeId), 0L);
-		count(acceptedAt1(), 0L);
-		count(rejectedAt1(), 0L);
+		return Stream.of(
+			arguments(new FriendFilter().withPersonId(VALUE.personId).withInviteeId(VALUE.inviteeId), 0L),
+			arguments(acceptedAt1(), 0L),
+			arguments(rejectedAt1(), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void testRemove_search(final FriendFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	@Test

@@ -455,29 +455,42 @@ public class FacilityDAOTest
 		assertThat(dao.getDistinctStates()).containsExactly(new CountByName("FL", 1L));
 	}
 
+	public static Stream<Arguments> modif()
+	{
+		var v = createValid();
+
+		return Stream.of(
+			arguments(new FacilityFilter().withName(VALUE.name), 1L),
+			arguments(new FacilityFilter().withHasCountyId(false), 1L),
+			arguments(new FacilityFilter().withHasCountyName(false), 1L),
+			arguments(new FacilityFilter().withCanDonatePlasma(false), 1L),
+			arguments(new FacilityFilter().withResultNotificationEnabled(false), 1L),
+			arguments(new FacilityFilter().withActive(VALUE.active), 1L),
+			arguments(new FacilityFilter().exclude(NASAL_SWAB), 1L),
+			arguments(new FacilityFilter().exclude(ANTIBODY), 1L),
+			arguments(new FacilityFilter().withName(v.name), 0L),
+			arguments(new FacilityFilter().withHasCountyId(true), 0L),
+			arguments(new FacilityFilter().withCountyId("48167"), 0L),
+			arguments(new FacilityFilter().withHasCountyName(true), 0L),
+			arguments(new FacilityFilter().withCountyName("Galveston"), 0L),
+			arguments(new FacilityFilter().withCanDonatePlasma(true), 0L),
+			arguments(new FacilityFilter().withResultNotificationEnabled(true), 0L),
+			arguments(new FacilityFilter().withActive(v.active), 0L),
+			arguments(new FacilityFilter().include(NASAL_SWAB), 0L),
+			arguments(new FacilityFilter().include(ANTIBODY), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modif(final FacilityFilter filter, final long expected)
+	{
+		count(filter, expected);
+	}
+
 	@Test
 	public void modify()
 	{
 		var v = createValid();
-		count(new FacilityFilter().withName(VALUE.name), 1L);
-		count(new FacilityFilter().withHasCountyId(false), 1L);
-		count(new FacilityFilter().withHasCountyName(false), 1L);
-		count(new FacilityFilter().withCanDonatePlasma(false), 1L);
-		count(new FacilityFilter().withResultNotificationEnabled(false), 1L);
-		count(new FacilityFilter().withActive(VALUE.active), 1L);
-		count(new FacilityFilter().exclude(NASAL_SWAB), 1L);
-		count(new FacilityFilter().exclude(ANTIBODY), 1L);
-		count(new FacilityFilter().withName(v.name), 0L);
-		count(new FacilityFilter().withHasCountyId(true), 0L);
-		count(new FacilityFilter().withCountyId("48167"), 0L);
-		count(new FacilityFilter().withHasCountyName(true), 0L);
-		count(new FacilityFilter().withCountyName("Galveston"), 0L);
-		count(new FacilityFilter().withCanDonatePlasma(true), 0L);
-		count(new FacilityFilter().withResultNotificationEnabled(true), 0L);
-		count(new FacilityFilter().withActive(v.active), 0L);
-		count(new FacilityFilter().include(NASAL_SWAB), 0L);
-		count(new FacilityFilter().include(ANTIBODY), 0L);
-
 		var value = dao.update(v.withId(VALUE.id).withCounty("48167", "Galveston").withCanDonatePlasma(true).withResultNotificationEnabled(true).withTestTypes(NASAL_SWAB), true);
 		Assertions.assertNotNull(value, "Exists");
 		check(v, value);
@@ -488,28 +501,36 @@ public class FacilityDAOTest
 		auditorUpdates++;
 	}
 
-	@Test
-	public void modify_count()
+	public static Stream<Arguments> modify_count()
 	{
 		var v = createValid();
-		count(new FacilityFilter().withName(VALUE_1.name), 0L);
-		count(new FacilityFilter().withHasCountyId(false), 0L);
-		count(new FacilityFilter().withHasCountyName(false), 0L);
-		count(new FacilityFilter().withCanDonatePlasma(false), 0L);
-		count(new FacilityFilter().withResultNotificationEnabled(false), 0L);
-		count(new FacilityFilter().withActive(VALUE_1.active), 0L);
-		count(new FacilityFilter().exclude(NASAL_SWAB), 0L);
-		count(new FacilityFilter().exclude(ANTIBODY), 1L);
-		count(new FacilityFilter().withName(v.name), 1L);
-		count(new FacilityFilter().withHasCountyId(true), 1L);
-		count(new FacilityFilter().withCountyId("48167"), 1L);
-		count(new FacilityFilter().withHasCountyName(true), 1L);
-		count(new FacilityFilter().withCountyName("Galveston"), 1L);
-		count(new FacilityFilter().withCanDonatePlasma(true), 1L);
-		count(new FacilityFilter().withResultNotificationEnabled(true), 1L);
-		count(new FacilityFilter().withActive(v.active), 1L);
-		count(new FacilityFilter().include(NASAL_SWAB), 1L);
-		count(new FacilityFilter().include(ANTIBODY), 0L);
+
+		return Stream.of(
+			arguments(new FacilityFilter().withName(VALUE_1.name), 0L),
+			arguments(new FacilityFilter().withHasCountyId(false), 0L),
+			arguments(new FacilityFilter().withHasCountyName(false), 0L),
+			arguments(new FacilityFilter().withCanDonatePlasma(false), 0L),
+			arguments(new FacilityFilter().withResultNotificationEnabled(false), 0L),
+			arguments(new FacilityFilter().withActive(VALUE_1.active), 0L),
+			arguments(new FacilityFilter().exclude(NASAL_SWAB), 0L),
+			arguments(new FacilityFilter().exclude(ANTIBODY), 1L),
+			arguments(new FacilityFilter().withName(v.name), 1L),
+			arguments(new FacilityFilter().withHasCountyId(true), 1L),
+			arguments(new FacilityFilter().withCountyId("48167"), 1L),
+			arguments(new FacilityFilter().withHasCountyName(true), 1L),
+			arguments(new FacilityFilter().withCountyName("Galveston"), 1L),
+			arguments(new FacilityFilter().withCanDonatePlasma(true), 1L),
+			arguments(new FacilityFilter().withResultNotificationEnabled(true), 1L),
+			arguments(new FacilityFilter().withActive(v.active), 1L),
+			arguments(new FacilityFilter().include(NASAL_SWAB), 1L),
+			arguments(new FacilityFilter().include(ANTIBODY), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_count(final FacilityFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	@Test
@@ -1051,14 +1072,20 @@ public class FacilityDAOTest
 		assertThrows(ObjectNotFoundException.class, () -> dao.findWithException(VALUE.id));
 	}
 
-	/** Test removal after the search. */
-	@Test
-	public void testRemove_search()
+	public static Stream<Arguments> testRemove_search()
 	{
-		count(new FacilityFilter().withId(VALUE.id), 0L);
-		count(new FacilityFilter().withName(VALUE.name), 0L);
-		count(new FacilityFilter().withActive(VALUE.active), 0L);
-		count(new FacilityFilter().include(NASAL_SWAB), 0L);
+		return Stream.of(
+			arguments(new FacilityFilter().withId(VALUE.id), 0L),
+			arguments(new FacilityFilter().withName(VALUE.name), 0L),
+			arguments(new FacilityFilter().withActive(VALUE.active), 0L),
+			arguments(new FacilityFilter().include(NASAL_SWAB), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void testRemove_search(final FacilityFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	@Test

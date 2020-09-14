@@ -583,85 +583,108 @@ public class PeopleDAOTest
 		Assertions.assertNull(dao.getIdByPhone("888-555-1001"));
 	}
 
+	public static Stream<Arguments> modif()
+	{
+		var v = createValid();
+
+		return Stream.of(
+			arguments(new PeopleFilter().withId(VALUE.id), 1L),
+			arguments(new PeopleFilter().withName(VALUE.name), 1L),
+			arguments(new PeopleFilter().withPhone(VALUE.phone), 1L),
+			arguments(new PeopleFilter().withEmail(VALUE.email), 1L),
+			arguments(new PeopleFilter().withFirstName(VALUE.firstName), 1L),
+			arguments(new PeopleFilter().withLastName(VALUE.lastName), 1L),
+			arguments(new PeopleFilter().withDob(VALUE.dob), 1L),
+			arguments(new PeopleFilter().withStatusId(VALUE.statusId), 1L),
+			arguments(new PeopleFilter().withStatureId(VALUE.statureId), 1L),
+			arguments(new PeopleFilter().withSexId(VALUE.sexId), 1L),
+			arguments(new PeopleFilter().withHealthWorkerStatusId(VALUE.healthWorkerStatusId), 1L),
+			arguments(new PeopleFilter().withLatitude(VALUE.latitude), 1L),
+			arguments(new PeopleFilter().withLongitude(VALUE.longitude), 1L),
+			arguments(new PeopleFilter().withLocationName(VALUE.locationName), 1L),
+			arguments(new PeopleFilter().withAlertable(VALUE.alertable), 1L),
+			arguments(new PeopleFilter().withActive(VALUE.active), 1L),
+			arguments(new PeopleFilter().withName(v.name), 0L),
+			arguments(new PeopleFilter().withPhone(v.phone), 0L),
+			arguments(new PeopleFilter().withEmail(v.email), 0L),
+			arguments(new PeopleFilter().withFirstName(v.firstName), 0L),
+			arguments(new PeopleFilter().withLastName(v.lastName), 0L),
+			arguments(new PeopleFilter().withDob(v.dob), 0L),
+			arguments(new PeopleFilter().withStatusId(v.statusId), 0L),
+			arguments(new PeopleFilter().withStatureId(v.statureId), 0L),
+			arguments(new PeopleFilter().withSexId(v.sexId), 0L),
+			arguments(new PeopleFilter().withHealthWorkerStatusId(v.healthWorkerStatusId), 0L),
+			arguments(new PeopleFilter().withLatitude(v.latitude), 0L),
+			arguments(new PeopleFilter().withLongitude(v.longitude), 0L),
+			arguments(new PeopleFilter().withLocationName(v.locationName), 0L),
+			arguments(new PeopleFilter().withAlertable(v.alertable), 0L),
+			arguments(new PeopleFilter().withActive(v.active), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modif(final PeopleFilter filter, final long expected)
+	{
+		count(filter, expected);
+	}
+
 	@Test
 	public void modify()
 	{
-		count(new PeopleFilter().withId(VALUE.id), 1L);
-		count(new PeopleFilter().withName(VALUE.name), 1L);
-		count(new PeopleFilter().withPhone(VALUE.phone), 1L);
-		count(new PeopleFilter().withEmail(VALUE.email), 1L);
-		count(new PeopleFilter().withFirstName(VALUE.firstName), 1L);
-		count(new PeopleFilter().withLastName(VALUE.lastName), 1L);
-		count(new PeopleFilter().withDob(VALUE.dob), 1L);
-		count(new PeopleFilter().withStatusId(VALUE.statusId), 1L);
-		count(new PeopleFilter().withStatureId(VALUE.statureId), 1L);
-		count(new PeopleFilter().withSexId(VALUE.sexId), 1L);
-		count(new PeopleFilter().withHealthWorkerStatusId(VALUE.healthWorkerStatusId), 1L);
-		count(new PeopleFilter().withLatitude(VALUE.latitude), 1L);
-		count(new PeopleFilter().withLongitude(VALUE.longitude), 1L);
-		count(new PeopleFilter().withLocationName(VALUE.locationName), 1L);
-		count(new PeopleFilter().withAlertable(VALUE.alertable), 1L);
-		count(new PeopleFilter().withActive(VALUE.active), 1L);
-
 		var v = createValid();
-		count(new PeopleFilter().withName(v.name), 0L);
-		count(new PeopleFilter().withPhone(v.phone), 0L);
-		count(new PeopleFilter().withEmail(v.email), 0L);
-		count(new PeopleFilter().withFirstName(v.firstName), 0L);
-		count(new PeopleFilter().withLastName(v.lastName), 0L);
-		count(new PeopleFilter().withDob(v.dob), 0L);
-		count(new PeopleFilter().withStatusId(v.statusId), 0L);
-		count(new PeopleFilter().withStatureId(v.statureId), 0L);
-		count(new PeopleFilter().withSexId(v.sexId), 0L);
-		count(new PeopleFilter().withHealthWorkerStatusId(v.healthWorkerStatusId), 0L);
-		count(new PeopleFilter().withLatitude(v.latitude), 0L);
-		count(new PeopleFilter().withLongitude(v.longitude), 0L);
-		count(new PeopleFilter().withLocationName(v.locationName), 0L);
-		count(new PeopleFilter().withAlertable(v.alertable), 0L);
-		count(new PeopleFilter().withActive(v.active), 0L);
-
 		var value = dao.update(v.withId(VALUE.id));
 		Assertions.assertNotNull(value, "Exists");
 		check(v, value);
 	}
 
-	@Test
-	public void modify_count()
+	public static Stream<Arguments> modify_count()
 	{
-		count(new PeopleFilter().withId(VALUE.id), 1L);
-		count(new PeopleFilter().withName(VALUE.name), 0L);
-		count(new PeopleFilter().withPhone(VALUE.phone), 0L);
-		count(new PeopleFilter().withEmail(VALUE.email), 0L);
-		count(new PeopleFilter().withFirstName(VALUE.firstName), 0L);
-		count(new PeopleFilter().withLastName(VALUE.lastName), 0L);
-		count(new PeopleFilter().withDob(VALUE.dob), 0L);
-		count(new PeopleFilter().withStatusId(VALUE.statusId), 0L);
-		count(new PeopleFilter().withStatureId(VALUE.statureId), 0L);
-		count(new PeopleFilter().withSexId(VALUE.sexId), 0L);
-		count(new PeopleFilter().withHealthWorkerStatusId(VALUE.healthWorkerStatusId), 0L);
-		count(new PeopleFilter().withLatitude(VALUE.latitude), 0L);
-		count(new PeopleFilter().withLongitude(VALUE.longitude), 0L);
-		count(new PeopleFilter().withLocationName(VALUE.locationName), 0L);
-		count(new PeopleFilter().withAlertable(VALUE.alertable), 0L);
-		count(new PeopleFilter().withActive(VALUE.active), 0L);
-
 		var v = createValid();
-		count(new PeopleFilter().withName(v.name), 1L);
-		count(new PeopleFilter().withPhone(v.phone), 1L);
-		count(new PeopleFilter().withEmail(v.email), 1L);
-		count(new PeopleFilter().withFirstName(v.firstName), 1L);
-		count(new PeopleFilter().withLastName(v.lastName), 1L);
-		count(new PeopleFilter().withDob(v.dob), 1L);
-		count(new PeopleFilter().withStatusId(v.statusId), 1L);
-		count(new PeopleFilter().withStatureId(v.statureId), 1L);
-		count(new PeopleFilter().withSexId(v.sexId), 1L);
-		count(new PeopleFilter().withHealthWorkerStatusId(v.healthWorkerStatusId), 1L);
-		count(new PeopleFilter().withLatitude(v.latitude), 1L);
-		count(new PeopleFilter().withLongitude(v.longitude), 1L);
-		count(new PeopleFilter().withLocationName(v.locationName), 1L);
-		count(new PeopleFilter().withAlertable(v.alertable), 1L);
-		count(new PeopleFilter().withActive(v.active), 1L);
 
+		return Stream.of(
+			arguments(new PeopleFilter().withId(VALUE.id), 1L),
+			arguments(new PeopleFilter().withName(VALUE.name), 0L),
+			arguments(new PeopleFilter().withPhone(VALUE.phone), 0L),
+			arguments(new PeopleFilter().withEmail(VALUE.email), 0L),
+			arguments(new PeopleFilter().withFirstName(VALUE.firstName), 0L),
+			arguments(new PeopleFilter().withLastName(VALUE.lastName), 0L),
+			arguments(new PeopleFilter().withDob(VALUE.dob), 0L),
+			arguments(new PeopleFilter().withStatusId(VALUE.statusId), 0L),
+			arguments(new PeopleFilter().withStatureId(VALUE.statureId), 0L),
+			arguments(new PeopleFilter().withSexId(VALUE.sexId), 0L),
+			arguments(new PeopleFilter().withHealthWorkerStatusId(VALUE.healthWorkerStatusId), 0L),
+			arguments(new PeopleFilter().withLatitude(VALUE.latitude), 0L),
+			arguments(new PeopleFilter().withLongitude(VALUE.longitude), 0L),
+			arguments(new PeopleFilter().withLocationName(VALUE.locationName), 0L),
+			arguments(new PeopleFilter().withAlertable(VALUE.alertable), 0L),
+			arguments(new PeopleFilter().withActive(VALUE.active), 0L),
+			arguments(new PeopleFilter().withName(v.name), 1L),
+			arguments(new PeopleFilter().withPhone(v.phone), 1L),
+			arguments(new PeopleFilter().withEmail(v.email), 1L),
+			arguments(new PeopleFilter().withFirstName(v.firstName), 1L),
+			arguments(new PeopleFilter().withLastName(v.lastName), 1L),
+			arguments(new PeopleFilter().withDob(v.dob), 1L),
+			arguments(new PeopleFilter().withStatusId(v.statusId), 1L),
+			arguments(new PeopleFilter().withStatureId(v.statureId), 1L),
+			arguments(new PeopleFilter().withSexId(v.sexId), 1L),
+			arguments(new PeopleFilter().withHealthWorkerStatusId(v.healthWorkerStatusId), 1L),
+			arguments(new PeopleFilter().withLatitude(v.latitude), 1L),
+			arguments(new PeopleFilter().withLongitude(v.longitude), 1L),
+			arguments(new PeopleFilter().withLocationName(v.locationName), 1L),
+			arguments(new PeopleFilter().withAlertable(v.alertable), 1L),
+			arguments(new PeopleFilter().withActive(v.active), 1L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_count(final PeopleFilter filter, final long expected)
+	{
+		count(filter, expected);
+	}
+
+	@Test
+	public void modify_count_00()
+	{
 		VALUE = dao.getById(VALUE.id);
 	}
 
@@ -1154,26 +1177,32 @@ public class PeopleDAOTest
 		assertThrows(ObjectNotFoundException.class, () -> dao.findFieldWithException(VALUE.id));
 	}
 
-	/** Test removal after the search. */
-	@Test
-	public void testRemove_search()
+	public static Stream<Arguments> testRemove_search()
 	{
-		count(new PeopleFilter().withId(VALUE.id), 0L);
-
 		var v = createValid();
-		count(new PeopleFilter().withName(v.name), 0L);
-		count(new PeopleFilter().withPhone(v.phone), 0L);
-		count(new PeopleFilter().withEmail(v.email), 0L);
-		count(new PeopleFilter().withFirstName(v.firstName), 0L);
-		count(new PeopleFilter().withLastName(v.lastName), 0L);
-		count(new PeopleFilter().withDob(v.dob), 0L);
-		count(new PeopleFilter().withStatusId(v.statusId), 0L);
-		count(new PeopleFilter().withStatureId(v.statureId), 0L);
-		count(new PeopleFilter().withActive(v.active), 0L);
-		count(new PeopleFilter().withVisibilityHealthWorkerStatusId(Visibility.ME.id), 0L);
-		count(new PeopleFilter().withVisibilityConditions(Visibility.ALL.id), 0L);
-		count(new PeopleFilter().withVisibilityExposures(Visibility.ME.id), 0L);
-		count(new PeopleFilter().withVisibilitySymptoms(Visibility.ALL.id), 0L);
+
+		return Stream.of(
+			arguments(new PeopleFilter().withId(VALUE.id), 0L),
+			arguments(new PeopleFilter().withName(v.name), 0L),
+			arguments(new PeopleFilter().withPhone(v.phone), 0L),
+			arguments(new PeopleFilter().withEmail(v.email), 0L),
+			arguments(new PeopleFilter().withFirstName(v.firstName), 0L),
+			arguments(new PeopleFilter().withLastName(v.lastName), 0L),
+			arguments(new PeopleFilter().withDob(v.dob), 0L),
+			arguments(new PeopleFilter().withStatusId(v.statusId), 0L),
+			arguments(new PeopleFilter().withStatureId(v.statureId), 0L),
+			arguments(new PeopleFilter().withActive(v.active), 0L),
+			arguments(new PeopleFilter().withVisibilityHealthWorkerStatusId(Visibility.ME.id), 0L),
+			arguments(new PeopleFilter().withVisibilityConditions(Visibility.ALL.id), 0L),
+			arguments(new PeopleFilter().withVisibilityExposures(Visibility.ME.id), 0L),
+			arguments(new PeopleFilter().withVisibilitySymptoms(Visibility.ALL.id), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void testRemove_search(final PeopleFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	@Test

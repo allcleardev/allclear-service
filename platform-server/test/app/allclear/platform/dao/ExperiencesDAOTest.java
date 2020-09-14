@@ -221,24 +221,35 @@ public class ExperiencesDAOTest
 		assertThrows(ObjectNotFoundException.class, () -> dao.getByIdWithException(VALUE.id + 1000L));
 	}
 
+	public static Stream<Arguments> modif()
+	{
+		return Stream.of(
+			arguments(new ExperiencesFilter().withPersonId(PERSON.id), 1L),
+			arguments(new ExperiencesFilter().withFacilityId(FACILITY_1.id), 1L),
+			arguments(new ExperiencesFilter().withPositive(true), 1L),
+			arguments(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE), 1L),
+			arguments(new ExperiencesFilter().withIncludeTags(OVERLY_CROWDED), 1L),
+			arguments(new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED), 1L),
+			arguments(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L),
+			arguments(new ExperiencesFilter().withPersonId(PERSON_1.id), 0L),
+			arguments(new ExperiencesFilter().withFacilityId(FACILITY.id), 0L),
+			arguments(new ExperiencesFilter().withPositive(false), 0L),
+			arguments(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE), 0L),
+			arguments(new ExperiencesFilter().withExcludeTags(OVERLY_CROWDED), 0L),
+			arguments(new ExperiencesFilter().withExcludeTags(SOCIAL_DISTANCING_ENFORCED), 0L),
+			arguments(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modif(final ExperiencesFilter filter, final long expected)
+	{
+		count(filter, expected);
+	}
+
 	@Test
 	public void modify()
 	{
-		count(new ExperiencesFilter().withPersonId(PERSON.id), 1L);
-		count(new ExperiencesFilter().withFacilityId(FACILITY_1.id), 1L);
-		count(new ExperiencesFilter().withPositive(true), 1L);
-		count(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE), 1L);
-		count(new ExperiencesFilter().withIncludeTags(OVERLY_CROWDED), 1L);
-		count(new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED), 1L);
-		count(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L);
-		count(new ExperiencesFilter().withPersonId(PERSON_1.id), 0L);
-		count(new ExperiencesFilter().withFacilityId(FACILITY.id), 0L);
-		count(new ExperiencesFilter().withPositive(false), 0L);
-		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE), 0L);
-		count(new ExperiencesFilter().withExcludeTags(OVERLY_CROWDED), 0L);
-		count(new ExperiencesFilter().withExcludeTags(SOCIAL_DISTANCING_ENFORCED), 0L);
-		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L);
-
 		var value = dao.update(VALUE.withPersonId(PERSON_1.id).withFacilityId(FACILITY.id).withPositive(false).emptyTags());
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
@@ -259,23 +270,30 @@ public class ExperiencesDAOTest
 		check(dao.calcByFacility(FACILITY_1.id), 0L, 0L);
 	}
 
-	@Test
-	public void modify_count()
+	public static Stream<Arguments> modify_count()
 	{
-		count(new ExperiencesFilter().withPersonId(PERSON.id), 0L);
-		count(new ExperiencesFilter().withFacilityId(FACILITY_1.id), 0L);
-		count(new ExperiencesFilter().withPositive(true), 0L);
-		count(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE), 0L);
-		count(new ExperiencesFilter().withIncludeTags(OVERLY_CROWDED), 0L);
-		count(new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED), 0L);
-		count(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L);
-		count(new ExperiencesFilter().withPersonId(PERSON_1.id), 1L);
-		count(new ExperiencesFilter().withFacilityId(FACILITY.id), 1L);
-		count(new ExperiencesFilter().withPositive(false), 1L);
-		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE), 1L);
-		count(new ExperiencesFilter().withExcludeTags(OVERLY_CROWDED), 1L);
-		count(new ExperiencesFilter().withExcludeTags(SOCIAL_DISTANCING_ENFORCED), 1L);
-		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L);
+		return Stream.of(
+			arguments(new ExperiencesFilter().withPersonId(PERSON.id), 0L),
+			arguments(new ExperiencesFilter().withFacilityId(FACILITY_1.id), 0L),
+			arguments(new ExperiencesFilter().withPositive(true), 0L),
+			arguments(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE), 0L),
+			arguments(new ExperiencesFilter().withIncludeTags(OVERLY_CROWDED), 0L),
+			arguments(new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED), 0L),
+			arguments(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L),
+			arguments(new ExperiencesFilter().withPersonId(PERSON_1.id), 1L),
+			arguments(new ExperiencesFilter().withFacilityId(FACILITY.id), 1L),
+			arguments(new ExperiencesFilter().withPositive(false), 1L),
+			arguments(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE), 1L),
+			arguments(new ExperiencesFilter().withExcludeTags(OVERLY_CROWDED), 1L),
+			arguments(new ExperiencesFilter().withExcludeTags(SOCIAL_DISTANCING_ENFORCED), 1L),
+			arguments(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_count(final ExperiencesFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	public static Stream<SessionValue> modify_fail() { return Stream.of(null, CUSTOMER, EDITOR, SESSION, SESSION_1); }
@@ -525,6 +543,12 @@ public class ExperiencesDAOTest
 		Assertions.assertFalse(dao.remove(VALUE.id), "Already removed");
 	}
 
+	@Test
+	public void testRemove_check()
+	{
+		check(dao.calcByFacility(FACILITY.id), 0L, 0L);
+	}
+
 	/** Test removal after the search. */
 	@Test
 	public void testRemove_find()
@@ -532,16 +556,21 @@ public class ExperiencesDAOTest
 		assertThrows(ObjectNotFoundException.class, () -> dao.findWithException(VALUE.id));
 	}
 
-	/** Test removal after the search. */
-	@Test
-	public void testRemove_search()
+	public static Stream<Arguments> testRemove_search()
 	{
-		count(new ExperiencesFilter().withId(VALUE.id), 0L);
-		count(new ExperiencesFilter().withPersonId(PERSON_1.id), 0L);
-		count(new ExperiencesFilter().withFacilityId(FACILITY.id), 0L);
-		count(new ExperiencesFilter().withPositive(false), 0L);
-		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L);
-		check(dao.calcByFacility(FACILITY.id), 0L, 0L);
+		return Stream.of(
+			arguments(new ExperiencesFilter().withId(VALUE.id), 0L),
+			arguments(new ExperiencesFilter().withPersonId(PERSON_1.id), 0L),
+			arguments(new ExperiencesFilter().withFacilityId(FACILITY.id), 0L),
+			arguments(new ExperiencesFilter().withPositive(false), 0L),
+			arguments(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void testRemove_search(final ExperiencesFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	@Test

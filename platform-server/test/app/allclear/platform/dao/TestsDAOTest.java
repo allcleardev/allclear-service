@@ -97,7 +97,7 @@ public class TestsDAOTest
 	/** Creates a valid Tests value for the validation tests.
 	 *	@return never NULL.
 	*/
-	private TestsValue createValid()
+	private static TestsValue createValid()
 	{
 		return new TestsValue(PERSON_1.id, ANTIBODY.id, TAKEN_ON_1, FACILITY_1.id, true, "Some more information").withRemoteId("local_2").withReceivedAt(RECEIVED_AT_1);
 	}
@@ -304,28 +304,40 @@ public class TestsDAOTest
 		assertThat(dao.getByPerson(PERSON_1.id)).isEmpty();
 	}
 
+	public static Stream<Arguments> modif()
+	{
+		var v = createValid();
+
+		return Stream.of(
+			arguments(new TestsFilter().withPersonId(VALUE.personId), 1L),
+			arguments(new TestsFilter().withTypeId(VALUE.typeId), 1L),
+			arguments(new TestsFilter().withTakenOn(VALUE.takenOn), 1L),
+			arguments(new TestsFilter().withFacilityId(VALUE.facilityId), 1L),
+			arguments(new TestsFilter().withRemoteId("remote-1"), 1L),
+			arguments(new TestsFilter().withPositive(VALUE.positive), 1L),
+			arguments(new TestsFilter().withNotes(VALUE.notes), 1L),
+			arguments(new TestsFilter().withHasReceivedAt(false), 1L),
+			arguments(new TestsFilter().withPersonId(v.personId), 0L),
+			arguments(new TestsFilter().withTypeId(v.typeId), 0L),
+			arguments(new TestsFilter().withTakenOn(v.takenOn), 0L),
+			arguments(new TestsFilter().withFacilityId(v.facilityId), 0L),
+			arguments(new TestsFilter().withRemoteId("local_2"), 0L),
+			arguments(new TestsFilter().withPositive(v.positive), 0L),
+			arguments(new TestsFilter().withNotes(v.notes), 0L),
+			arguments(new TestsFilter().withHasReceivedAt(true), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modif(final TestsFilter filter, final long expected)
+	{
+		count(filter, expected);
+	}
+
 	@Test
 	public void modify()
 	{
-		var v = createValid();
-		count(new TestsFilter().withPersonId(VALUE.personId), 1L);
-		count(new TestsFilter().withTypeId(VALUE.typeId), 1L);
-		count(new TestsFilter().withTakenOn(VALUE.takenOn), 1L);
-		count(new TestsFilter().withFacilityId(VALUE.facilityId), 1L);
-		count(new TestsFilter().withRemoteId("remote-1"), 1L);
-		count(new TestsFilter().withPositive(VALUE.positive), 1L);
-		count(new TestsFilter().withNotes(VALUE.notes), 1L);
-		count(new TestsFilter().withHasReceivedAt(false), 1L);
-		count(new TestsFilter().withPersonId(v.personId), 0L);
-		count(new TestsFilter().withTypeId(v.typeId), 0L);
-		count(new TestsFilter().withTakenOn(v.takenOn), 0L);
-		count(new TestsFilter().withFacilityId(v.facilityId), 0L);
-		count(new TestsFilter().withRemoteId("local_2"), 0L);
-		count(new TestsFilter().withPositive(v.positive), 0L);
-		count(new TestsFilter().withNotes(v.notes), 0L);
-		count(new TestsFilter().withHasReceivedAt(true), 0L);
-
-		var value = dao.update(VALUE_1 = v.withId(VALUE.id));
+		var value = dao.update(VALUE_1 = createValid().withId(VALUE.id));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE_1, value);
 	}
@@ -337,35 +349,43 @@ public class TestsDAOTest
 		assertThrows(NotAuthorizedException.class, () -> dao.update(VALUE));	// Try to revert, but will fail.
 	}
 
-	@Test
-	public void modify_count()
+	public static Stream<Arguments> modify_count()
 	{
 		var v = createValid();
-		count(new TestsFilter().withPersonId(VALUE.personId), 0L);
-		count(new TestsFilter().withTypeId(VALUE.typeId), 0L);
-		count(new TestsFilter().withTakenOn(VALUE.takenOn), 0L);
-		count(new TestsFilter().withFacilityId(VALUE.facilityId), 0L);
-		count(new TestsFilter().withRemoteId("remote-1"), 0L);
-		count(new TestsFilter().withPositive(VALUE.positive), 0L);
-		count(new TestsFilter().withNotes(VALUE.notes), 0L);
-		count(new TestsFilter().withHasReceivedAt(false), 0L);
-		count(new TestsFilter().withReceivedAtFrom(hours(RECEIVED_AT, -1)).withReceivedAtTo(hours(RECEIVED_AT, 1)), 0L);
-		count(new TestsFilter().withPersonId(v.personId), 1L);
-		count(new TestsFilter().withTypeId(v.typeId), 1L);
-		count(new TestsFilter().withTakenOn(v.takenOn), 1L);
-		count(new TestsFilter().withFacilityId(v.facilityId), 1L);
-		count(new TestsFilter().withRemoteId("local_2"), 1L);
-		count(new TestsFilter().withPositive(v.positive), 1L);
-		count(new TestsFilter().withNotes(v.notes), 1L);
-		count(new TestsFilter().withHasReceivedAt(true), 1L);
-		count(new TestsFilter().withReceivedAtFrom(hours(RECEIVED_AT_1, -1)).withReceivedAtTo(hours(RECEIVED_AT_1, 1)), 1L);
 
-		VALUE = VALUE_1;
+		return Stream.of(
+			arguments(new TestsFilter().withPersonId(VALUE.personId), 0L),
+			arguments(new TestsFilter().withTypeId(VALUE.typeId), 0L),
+			arguments(new TestsFilter().withTakenOn(VALUE.takenOn), 0L),
+			arguments(new TestsFilter().withFacilityId(VALUE.facilityId), 0L),
+			arguments(new TestsFilter().withRemoteId("remote-1"), 0L),
+			arguments(new TestsFilter().withPositive(VALUE.positive), 0L),
+			arguments(new TestsFilter().withNotes(VALUE.notes), 0L),
+			arguments(new TestsFilter().withHasReceivedAt(false), 0L),
+			arguments(new TestsFilter().withReceivedAtFrom(hours(RECEIVED_AT, -1)).withReceivedAtTo(hours(RECEIVED_AT, 1)), 0L),
+			arguments(new TestsFilter().withPersonId(v.personId), 1L),
+			arguments(new TestsFilter().withTypeId(v.typeId), 1L),
+			arguments(new TestsFilter().withTakenOn(v.takenOn), 1L),
+			arguments(new TestsFilter().withFacilityId(v.facilityId), 1L),
+			arguments(new TestsFilter().withRemoteId("local_2"), 1L),
+			arguments(new TestsFilter().withPositive(v.positive), 1L),
+			arguments(new TestsFilter().withNotes(v.notes), 1L),
+			arguments(new TestsFilter().withHasReceivedAt(true), 1L),
+			arguments(new TestsFilter().withReceivedAtFrom(hours(RECEIVED_AT_1, -1)).withReceivedAtTo(hours(RECEIVED_AT_1, 1)), 1L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_count(final TestsFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	@Test
 	public void modify_find()
 	{
+		VALUE = VALUE_1;
+
 		var v = createValid();
 		var record = dao.findWithException(VALUE.id);
 		Assertions.assertNotNull(record, "Exists");
@@ -653,19 +673,26 @@ public class TestsDAOTest
 		assertThrows(ObjectNotFoundException.class, () -> dao.findWithException(VALUE.id));
 	}
 
-	/** Test removal after the search. */
-	@Test
-	public void testRemove_search()
+	public static Stream<Arguments> testRemove_search()
 	{
 		var v = createValid();
-		count(new TestsFilter().withId(VALUE.id), 0L);
-		count(new TestsFilter().withPersonId(v.personId), 0L);
-		count(new TestsFilter().withTypeId(v.typeId), 0L);
-		count(new TestsFilter().withTakenOn(v.takenOn), 0L);
-		count(new TestsFilter().withFacilityId(v.facilityId), 0L);
-		count(new TestsFilter().withRemoteId("local_2"), 0L);
-		count(new TestsFilter().withPositive(v.positive), 0L);
-		count(new TestsFilter().withNotes(v.notes), 0L);
+
+		return Stream.of(
+			arguments(new TestsFilter().withId(VALUE.id), 0L),
+			arguments(new TestsFilter().withPersonId(v.personId), 0L),
+			arguments(new TestsFilter().withTypeId(v.typeId), 0L),
+			arguments(new TestsFilter().withTakenOn(v.takenOn), 0L),
+			arguments(new TestsFilter().withFacilityId(v.facilityId), 0L),
+			arguments(new TestsFilter().withRemoteId("local_2"), 0L),
+			arguments(new TestsFilter().withPositive(v.positive), 0L),
+			arguments(new TestsFilter().withNotes(v.notes), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void testRemove_search(final TestsFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	@Test
