@@ -58,7 +58,7 @@ public class CustomerDAOTest
 	/** Creates a valid Customer value for the validation tests.
 	 *	@return never NULL.
 	*/
-	private CustomerValue createValid()
+	private static CustomerValue createValid()
 	{
 		return new CustomerValue("Molly Potter", 5, false);
 	}
@@ -163,33 +163,53 @@ public class CustomerDAOTest
 		assertThat(dao.getByName("Molly")).as("Failure").isEmpty();
 	}
 
+	public static Stream<Arguments> modif()
+	{
+		var valid = createValid();
+
+		return Stream.of(
+			arguments(new CustomerFilter().withName(VALUE.name), 1L),
+			arguments(new CustomerFilter().withLimit(VALUE.limit), 1L),
+			arguments(new CustomerFilter().withActive(VALUE.active), 1L),
+			arguments(new CustomerFilter().withName(valid.name), 0L),
+			arguments(new CustomerFilter().withLimit(valid.limit), 0L),
+			arguments(new CustomerFilter().withActive(valid.active), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modif(final CustomerFilter filter, final long expected)
+	{
+		count(filter, expected);
+	}
+
 	@Test
 	public void modify()
 	{
 		var valid = createValid();
-		count(new CustomerFilter().withName(VALUE.name), 1L);
-		count(new CustomerFilter().withLimit(VALUE.limit), 1L);
-		count(new CustomerFilter().withActive(VALUE.active), 1L);
-		count(new CustomerFilter().withName(valid.name), 0L);
-		count(new CustomerFilter().withLimit(valid.limit), 0L);
-		count(new CustomerFilter().withActive(valid.active), 0L);
-
 		var value = dao.update(VALID = valid.withId(VALUE.id));
 		Assertions.assertNotNull(value, "Exists");
 		check(valid, value);
 	}
 
-	@Test
-	public void modify_count()
+	public static Stream<Arguments> modify_count()
 	{
 		var valid = createValid();
 
-		count(new CustomerFilter().withName(VALUE.name), 0L);
-		count(new CustomerFilter().withLimit(VALUE.limit), 0L);
-		count(new CustomerFilter().withActive(VALUE.active), 0L);
-		count(new CustomerFilter().withName(valid.name), 1L);
-		count(new CustomerFilter().withLimit(valid.limit), 1L);
-		count(new CustomerFilter().withActive(valid.active), 1L);
+		return Stream.of(
+			arguments(new CustomerFilter().withName(VALUE.name), 0L),
+			arguments(new CustomerFilter().withLimit(VALUE.limit), 0L),
+			arguments(new CustomerFilter().withActive(VALUE.active), 0L),
+			arguments(new CustomerFilter().withName(valid.name), 1L),
+			arguments(new CustomerFilter().withLimit(valid.limit), 1L),
+			arguments(new CustomerFilter().withActive(valid.active), 1L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_count(final CustomerFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	@Test
@@ -357,16 +377,22 @@ public class CustomerDAOTest
 		assertThrows(ObjectNotFoundException.class, () -> dao.findWithException(VALUE.id));
 	}
 
-	/** Test removal after the search. */
-	@Test
-	public void testRemove_search()
+	public static Stream<Arguments> testRemove_search()
 	{
 		var valid = createValid();
 
-		count(new CustomerFilter().withId(VALUE.id), 0L);
-		count(new CustomerFilter().withName(valid.name), 0L);
-		count(new CustomerFilter().withLimit(valid.limit), 0L);
-		count(new CustomerFilter().withActive(valid.active), 0L);
+		return Stream.of(
+			arguments(new CustomerFilter().withId(VALUE.id), 0L),
+			arguments(new CustomerFilter().withName(valid.name), 0L),
+			arguments(new CustomerFilter().withLimit(valid.limit), 0L),
+			arguments(new CustomerFilter().withActive(valid.active), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void testRemove_search(final CustomerFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.

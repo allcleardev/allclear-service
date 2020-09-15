@@ -273,28 +273,46 @@ public class AdminDAOTest
 		assertThat(dao.getAlertablePhoneNumbers()).containsExactly("+18885551000");
 	}
 
+	public static Stream<Arguments> modif()
+	{
+		return Stream.of(
+			arguments(new AdminFilter().withFirstName("Dave"), 1L),
+			arguments(new AdminFilter().withPhone("+18885551000"), 1L),
+			arguments(new AdminFilter().withAlertable(true), 1L),
+			arguments(new AdminFilter().withFirstName("David"), 0L),
+			arguments(new AdminFilter().withAlertable(false), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modif(final AdminFilter filter, final long expected)
+	{
+		count(filter, expected);
+	}
+
 	@Test
 	public void modify()
 	{
-		count(new AdminFilter().withFirstName("Dave"), 1L);
-		count(new AdminFilter().withPhone("+18885551000"), 1L);
-		count(new AdminFilter().withAlertable(true), 1L);
-		count(new AdminFilter().withFirstName("David"), 0L);
-		count(new AdminFilter().withAlertable(false), 0L);
-
 		var value = dao.update(VALUE.withFirstName("David").withPhone(null).withAlertable(false));
 		Assertions.assertNotNull(value, "Exists");
 		check(VALUE, value);
 	}
 
-	@Test
-	public void modify_count()
+	public static Stream<Arguments> modify_count()
 	{
-		count(new AdminFilter().withFirstName("Dave"), 0L);
-		count(new AdminFilter().withAlertable(true), 0L);
-		count(new AdminFilter().withPhone("+18885551000"), 0L);
-		count(new AdminFilter().withFirstName("David"), 1L);
-		count(new AdminFilter().withAlertable(false), 1L);
+		return Stream.of(
+			arguments(new AdminFilter().withFirstName("Dave"), 0L),
+			arguments(new AdminFilter().withAlertable(true), 0L),
+			arguments(new AdminFilter().withPhone("+18885551000"), 0L),
+			arguments(new AdminFilter().withFirstName("David"), 1L),
+			arguments(new AdminFilter().withAlertable(false), 1L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_count(final AdminFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	@Test
