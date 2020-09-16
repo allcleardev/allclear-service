@@ -382,12 +382,23 @@ public class PeopleResourceTest
 		Assertions.assertEquals(VALUE.createdAt, o.updatedAt, "Check updatedAt");
 	}
 
+	public static Stream<Arguments> modif()
+	{
+		return Stream.of(
+			arguments(new PeopleFilter().withHasEmail(false), 1L),
+			arguments(new PeopleFilter().withHasEmail(true), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modif(final PeopleFilter filter, final long expected)
+	{
+		count(filter, expected);
+	}
+
 	@Test
 	public void modify()
 	{
-		count(new PeopleFilter().withHasEmail(false), 1L);
-		count(new PeopleFilter().withHasEmail(true), 0L);
-
 		var response = request().put(Entity.entity(VALUE.withEmail("min@allclear.app"), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
@@ -411,11 +422,18 @@ public class PeopleResourceTest
 		sessionDao.current(ADMIN);
 	}
 
-	@Test
-	public void modify_count()
+	public static Stream<Arguments> modify_count()
 	{
-		count(new PeopleFilter().withHasEmail(false), 0L);
-		count(new PeopleFilter().withHasEmail(true), 1L);
+		return Stream.of(
+			arguments(new PeopleFilter().withHasEmail(false), 0L),
+			arguments(new PeopleFilter().withHasEmail(true), 1L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_count(final PeopleFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	@Test
@@ -709,11 +727,18 @@ public class PeopleResourceTest
 		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, get(VALUE.id).getStatus(), "Status");
 	}
 
-	@Test
-	public void testRemove_search()
+	public static Stream<Arguments> testRemove_search()
 	{
-		count(new PeopleFilter().withId(VALUE.id), 0L);
-		count(new PeopleFilter().withHasEmail(true), 0L);
+		return Stream.of(
+			arguments(new PeopleFilter().withId(VALUE.id), 0L),
+			arguments(new PeopleFilter().withHasEmail(true), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void testRemove_search(final PeopleFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	@Test

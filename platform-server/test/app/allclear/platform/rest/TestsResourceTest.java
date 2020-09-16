@@ -142,15 +142,26 @@ public class TestsResourceTest
 		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, get(VALUE.id + 1000L).getStatus(), "Status");
 	}
 
+	public static Stream<Arguments> modif()
+	{
+		return Stream.of(
+			arguments(new TestsFilter().withPositive(true), 1L),
+			arguments(new TestsFilter().withHasReceivedAt(true), 1L),
+			arguments(new TestsFilter().withReceivedAtFrom(hours(RECEIVED_AT, -1)).withReceivedAtTo(hours(RECEIVED_AT, 1)), 1L),
+			arguments(new TestsFilter().withPositive(false), 0L),
+			arguments(new TestsFilter().withHasReceivedAt(false), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modif(final TestsFilter filter, final long expected)
+	{
+		count(filter, expected);
+	}
+
 	@Test
 	public void modify()
 	{
-		count(new TestsFilter().withPositive(true), 1L);
-		count(new TestsFilter().withHasReceivedAt(true), 1L);
-		count(new TestsFilter().withReceivedAtFrom(hours(RECEIVED_AT, -1)).withReceivedAtTo(hours(RECEIVED_AT, 1)), 1L);
-		count(new TestsFilter().withPositive(false), 0L);
-		count(new TestsFilter().withHasReceivedAt(false), 0L);
-
 		var now = new Date();
 		var response = request().put(Entity.entity(VALUE.withPositive(false).withReceivedAt(null), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
@@ -160,14 +171,21 @@ public class TestsResourceTest
 		check(VALUE.withUpdatedAt(now), value);
 	}
 
-	@Test
-	public void modify_count()
+	public static Stream<Arguments> modify_count()
 	{
-		count(new TestsFilter().withPositive(true), 0L);
-		count(new TestsFilter().withHasReceivedAt(true), 0L);
-		count(new TestsFilter().withReceivedAtFrom(hours(RECEIVED_AT, -1)).withReceivedAtTo(hours(RECEIVED_AT, 1)), 0L);
-		count(new TestsFilter().withPositive(false), 1L);
-		count(new TestsFilter().withHasReceivedAt(false), 1L);
+		return Stream.of(
+			arguments(new TestsFilter().withPositive(true), 0L),
+			arguments(new TestsFilter().withHasReceivedAt(true), 0L),
+			arguments(new TestsFilter().withReceivedAtFrom(hours(RECEIVED_AT, -1)).withReceivedAtTo(hours(RECEIVED_AT, 1)), 0L),
+			arguments(new TestsFilter().withPositive(false), 1L),
+			arguments(new TestsFilter().withHasReceivedAt(false), 1L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_count(final TestsFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	@Test
@@ -284,11 +302,18 @@ public class TestsResourceTest
 		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, get(VALUE.id).getStatus(), "Status");
 	}
 
-	@Test
-	public void testRemove_search()
+	public static Stream<Arguments> testRemove_search()
 	{
-		count(new TestsFilter().withId(VALUE.id), 0L);
-		count(new TestsFilter().withPositive(false), 0L);
+		return Stream.of(
+			arguments(new TestsFilter().withId(VALUE.id), 0L),
+			arguments(new TestsFilter().withPositive(false), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void testRemove_search(final TestsFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	/** Helper method - creates the base WebTarget. */

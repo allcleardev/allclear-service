@@ -167,23 +167,34 @@ public class PatientResourceTest
 		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, get(VALUE.id + 1000L).getStatus(), "Status");
 	}
 
+	public static Stream<Arguments> modif()
+	{
+		return Stream.of(
+			arguments(new PatientFilter().withFacilityId(FACILITY_1.id), 1L),
+			arguments(new PatientFilter().withPersonId(PATIENT.id), 1L),
+			arguments(new PatientFilter().withAlertable(true), 1L),
+			arguments(new PatientFilter().withHasEnrolledAt(false), 1L),
+			arguments(new PatientFilter().withHasRejectedAt(true), 1L),
+			arguments(new PatientFilter().withRejectedAtFrom(hourAgo(REJECTED_AT)).withRejectedAtTo(hourAhead(REJECTED_AT)), 1L),
+			arguments(new PatientFilter().withFacilityId(FACILITY.id), 0L),
+			arguments(new PatientFilter().withPersonId(PATIENT_1.id), 0L),
+			arguments(new PatientFilter().withAlertable(false), 0L),
+			arguments(new PatientFilter().withHasEnrolledAt(true), 0L),
+			arguments(new PatientFilter().withEnrolledAtFrom(hourAgo(ENROLLED_AT_1)).withEnrolledAtTo(hourAhead(ENROLLED_AT_1)), 0L),
+			arguments(new PatientFilter().withHasRejectedAt(false), 0L),
+			arguments(new PatientFilter().withRejectedAtFrom(hourAgo(REJECTED_AT_1)).withRejectedAtTo(hourAhead(REJECTED_AT_1)), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modif(final PatientFilter filter, final long expected)
+	{
+		count(filter, expected);
+	}
+
 	@Test
 	public void modify()
 	{
-		count(new PatientFilter().withFacilityId(FACILITY_1.id), 1L);
-		count(new PatientFilter().withPersonId(PATIENT.id), 1L);
-		count(new PatientFilter().withAlertable(true), 1L);
-		count(new PatientFilter().withHasEnrolledAt(false), 1L);
-		count(new PatientFilter().withHasRejectedAt(true), 1L);
-		count(new PatientFilter().withRejectedAtFrom(hourAgo(REJECTED_AT)).withRejectedAtTo(hourAhead(REJECTED_AT)), 1L);
-		count(new PatientFilter().withFacilityId(FACILITY.id), 0L);
-		count(new PatientFilter().withPersonId(PATIENT_1.id), 0L);
-		count(new PatientFilter().withAlertable(false), 0L);
-		count(new PatientFilter().withHasEnrolledAt(true), 0L);
-		count(new PatientFilter().withEnrolledAtFrom(hourAgo(ENROLLED_AT_1)).withEnrolledAtTo(hourAhead(ENROLLED_AT_1)), 0L);
-		count(new PatientFilter().withHasRejectedAt(false), 0L);
-		count(new PatientFilter().withRejectedAtFrom(hourAgo(REJECTED_AT_1)).withRejectedAtTo(hourAhead(REJECTED_AT_1)), 0L);
-
 		var response = request().put(Entity.entity(VALUE.withFacilityId(FACILITY.id).withPersonId(PATIENT_1.id).withAlertable(false).withEnrolledAt(ENROLLED_AT_1).withRejectedAt(null), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
@@ -192,23 +203,30 @@ public class PatientResourceTest
 		check(VALUE.withFacilityName(FACILITY.name).withPersonName(PATIENT_1.name).withUpdatedAt(new Date()), value);
 	}
 
-	@Test
-	public void modify_count()
+	public static Stream<Arguments> modify_count()
 	{
-		count(new PatientFilter().withFacilityId(FACILITY_1.id), 0L);
-		count(new PatientFilter().withPersonId(PATIENT.id), 0L);
-		count(new PatientFilter().withAlertable(true), 0L);
-		count(new PatientFilter().withHasEnrolledAt(false), 0L);
-		count(new PatientFilter().withHasRejectedAt(true), 0L);
-		count(new PatientFilter().withRejectedAtFrom(hourAgo(REJECTED_AT)).withRejectedAtTo(hourAhead(REJECTED_AT)), 0L);
-		count(new PatientFilter().withFacilityId(FACILITY.id), 1L);
-		count(new PatientFilter().withPersonId(PATIENT_1.id), 1L);
-		count(new PatientFilter().withAlertable(false), 1L);
-		count(new PatientFilter().withHasEnrolledAt(true), 1L);
-		count(new PatientFilter().withEnrolledAtFrom(hourAgo(ENROLLED_AT_1)).withEnrolledAtTo(hourAhead(ENROLLED_AT_1)), 1L);
-		count(new PatientFilter().withEnrolledAtFrom(hourAhead(ENROLLED_AT_1)).withEnrolledAtTo(hourAgo(ENROLLED_AT_1)), 0L);
-		count(new PatientFilter().withHasRejectedAt(false), 1L);
-		count(new PatientFilter().withRejectedAtFrom(hourAgo(REJECTED_AT)).withRejectedAtTo(hourAhead(REJECTED_AT)), 0L);
+		return Stream.of(
+			arguments(new PatientFilter().withFacilityId(FACILITY_1.id), 0L),
+			arguments(new PatientFilter().withPersonId(PATIENT.id), 0L),
+			arguments(new PatientFilter().withAlertable(true), 0L),
+			arguments(new PatientFilter().withHasEnrolledAt(false), 0L),
+			arguments(new PatientFilter().withHasRejectedAt(true), 0L),
+			arguments(new PatientFilter().withRejectedAtFrom(hourAgo(REJECTED_AT)).withRejectedAtTo(hourAhead(REJECTED_AT)), 0L),
+			arguments(new PatientFilter().withFacilityId(FACILITY.id), 1L),
+			arguments(new PatientFilter().withPersonId(PATIENT_1.id), 1L),
+			arguments(new PatientFilter().withAlertable(false), 1L),
+			arguments(new PatientFilter().withHasEnrolledAt(true), 1L),
+			arguments(new PatientFilter().withEnrolledAtFrom(hourAgo(ENROLLED_AT_1)).withEnrolledAtTo(hourAhead(ENROLLED_AT_1)), 1L),
+			arguments(new PatientFilter().withEnrolledAtFrom(hourAhead(ENROLLED_AT_1)).withEnrolledAtTo(hourAgo(ENROLLED_AT_1)), 0L),
+			arguments(new PatientFilter().withHasRejectedAt(false), 1L),
+			arguments(new PatientFilter().withRejectedAtFrom(hourAgo(REJECTED_AT)).withRejectedAtTo(hourAhead(REJECTED_AT)), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_count(final PatientFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	@ParameterizedTest
@@ -333,15 +351,22 @@ public class PatientResourceTest
 		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, get(VALUE.id).getStatus(), "Status");
 	}
 
-	@Test
-	public void testRemove_search()
+	public static Stream<Arguments> testRemove_search()
 	{
-		count(new PatientFilter().withId(VALUE.id), 0L);
-		count(new PatientFilter().withFacilityId(FACILITY.id), 0L);
-		count(new PatientFilter().withPersonId(PATIENT_1.id), 0L);
-		count(new PatientFilter().withAlertable(false), 0L);
-		count(new PatientFilter().withHasEnrolledAt(true), 0L);
-		count(new PatientFilter().withHasRejectedAt(false), 0L);
+		return Stream.of(
+			arguments(new PatientFilter().withId(VALUE.id), 0L),
+			arguments(new PatientFilter().withFacilityId(FACILITY.id), 0L),
+			arguments(new PatientFilter().withPersonId(PATIENT_1.id), 0L),
+			arguments(new PatientFilter().withAlertable(false), 0L),
+			arguments(new PatientFilter().withHasEnrolledAt(true), 0L),
+			arguments(new PatientFilter().withHasRejectedAt(false), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void testRemove_search(final PatientFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	/** Helper method - creates the base WebTarget. */

@@ -170,24 +170,35 @@ public class ExperiencesResourceTest
 		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, get(VALUE.id + 1000L).getStatus(), "Status");
 	}
 
+	public static Stream<Arguments> modif()
+	{
+		return Stream.of(
+			arguments(new ExperiencesFilter().withPersonId(PERSON_1.id), 1L),
+			arguments(new ExperiencesFilter().withFacilityId(FACILITY.id), 1L),
+			arguments(new ExperiencesFilter().withPositive(false), 1L),
+			arguments(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE), 1L),
+			arguments(new ExperiencesFilter().withExcludeTags(OVERLY_CROWDED), 1L),
+			arguments(new ExperiencesFilter().withExcludeTags(SOCIAL_DISTANCING_ENFORCED), 1L),
+			arguments(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L),
+			arguments(new ExperiencesFilter().withPersonId(PERSON.id), 0L),
+			arguments(new ExperiencesFilter().withFacilityId(FACILITY_1.id), 0L),
+			arguments(new ExperiencesFilter().withPositive(true), 0L),
+			arguments(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE), 0L),
+			arguments(new ExperiencesFilter().withIncludeTags(OVERLY_CROWDED), 0L),
+			arguments(new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED), 0L),
+			arguments(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modif(final ExperiencesFilter filter, final long expected)
+	{
+		count(filter, expected);
+	}
+
 	@Test
 	public void modify()
 	{
-		count(new ExperiencesFilter().withPersonId(PERSON_1.id), 1L);
-		count(new ExperiencesFilter().withFacilityId(FACILITY.id), 1L);
-		count(new ExperiencesFilter().withPositive(false), 1L);
-		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE), 1L);
-		count(new ExperiencesFilter().withExcludeTags(OVERLY_CROWDED), 1L);
-		count(new ExperiencesFilter().withExcludeTags(SOCIAL_DISTANCING_ENFORCED), 1L);
-		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L);
-		count(new ExperiencesFilter().withPersonId(PERSON.id), 0L);
-		count(new ExperiencesFilter().withFacilityId(FACILITY_1.id), 0L);
-		count(new ExperiencesFilter().withPositive(true), 0L);
-		count(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE), 0L);
-		count(new ExperiencesFilter().withIncludeTags(OVERLY_CROWDED), 0L);
-		count(new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED), 0L);
-		count(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L);
-
 		var response = request().put(Entity.entity(VALUE.withPersonId(PERSON.id).withFacilityId(FACILITY_1.id).withPositive(true).withTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED),
 			UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
@@ -197,23 +208,30 @@ public class ExperiencesResourceTest
 		check(VALUE.withPersonName(PERSON.name).withFacilityName(FACILITY_1.name).withUpdatedAt(new Date()), value);
 	}
 
-	@Test
-	public void modify_count()
+	public static Stream<Arguments> modify_count()
 	{
-		count(new ExperiencesFilter().withPersonId(PERSON_1.id), 0L);
-		count(new ExperiencesFilter().withFacilityId(FACILITY.id), 0L);
-		count(new ExperiencesFilter().withPositive(false), 0L);
-		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE), 0L);
-		count(new ExperiencesFilter().withExcludeTags(OVERLY_CROWDED), 0L);
-		count(new ExperiencesFilter().withExcludeTags(SOCIAL_DISTANCING_ENFORCED), 0L);
-		count(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L);
-		count(new ExperiencesFilter().withPersonId(PERSON.id), 1L);
-		count(new ExperiencesFilter().withFacilityId(FACILITY_1.id), 1L);
-		count(new ExperiencesFilter().withPositive(true), 1L);
-		count(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE), 1L);
-		count(new ExperiencesFilter().withIncludeTags(OVERLY_CROWDED), 1L);
-		count(new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED), 1L);
-		count(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L);
+		return Stream.of(
+			arguments(new ExperiencesFilter().withPersonId(PERSON_1.id), 0L),
+			arguments(new ExperiencesFilter().withFacilityId(FACILITY.id), 0L),
+			arguments(new ExperiencesFilter().withPositive(false), 0L),
+			arguments(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE), 0L),
+			arguments(new ExperiencesFilter().withExcludeTags(OVERLY_CROWDED), 0L),
+			arguments(new ExperiencesFilter().withExcludeTags(SOCIAL_DISTANCING_ENFORCED), 0L),
+			arguments(new ExperiencesFilter().withExcludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L),
+			arguments(new ExperiencesFilter().withPersonId(PERSON.id), 1L),
+			arguments(new ExperiencesFilter().withFacilityId(FACILITY_1.id), 1L),
+			arguments(new ExperiencesFilter().withPositive(true), 1L),
+			arguments(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE), 1L),
+			arguments(new ExperiencesFilter().withIncludeTags(OVERLY_CROWDED), 1L),
+			arguments(new ExperiencesFilter().withIncludeTags(SOCIAL_DISTANCING_ENFORCED), 1L),
+			arguments(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 1L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_count(final ExperiencesFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	@Test
@@ -364,14 +382,21 @@ public class ExperiencesResourceTest
 		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, get(VALUE.id).getStatus(), "Status");
 	}
 
-	@Test
-	public void testRemove_search()
+	public static Stream<Arguments> testRemove_search()
 	{
-		count(new ExperiencesFilter().withId(VALUE.id), 0L);
-		count(new ExperiencesFilter().withPersonId(PERSON.id), 0L);
-		count(new ExperiencesFilter().withFacilityId(FACILITY_1.id), 0L);
-		count(new ExperiencesFilter().withPositive(true), 0L);
-		count(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L);
+		return Stream.of(
+			arguments(new ExperiencesFilter().withId(VALUE.id), 0L),
+			arguments(new ExperiencesFilter().withPersonId(PERSON.id), 0L),
+			arguments(new ExperiencesFilter().withFacilityId(FACILITY_1.id), 0L),
+			arguments(new ExperiencesFilter().withPositive(true), 0L),
+			arguments(new ExperiencesFilter().withIncludeTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void testRemove_search(final ExperiencesFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	/** Helper method - creates the base WebTarget. */

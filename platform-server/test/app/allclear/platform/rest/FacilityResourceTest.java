@@ -374,32 +374,43 @@ public class FacilityResourceTest
 		check(VALUE, value);
 	}
 
+	public static Stream<Arguments> modif()
+	{
+		return Stream.of(
+			arguments(new FacilityFilter().withCity("Louisville"), 1L),
+			arguments(new FacilityFilter().withState("KY"), 1L),
+			arguments(new FacilityFilter().withHasCountyId(true), 1L),
+			arguments(new FacilityFilter().withCountyId("48167"), 1L),
+			arguments(new FacilityFilter().withHasCountyName(true), 1L),
+			arguments(new FacilityFilter().withCountyName("Galveston"), 1L),
+			arguments(new FacilityFilter().withCanDonatePlasma(true), 1L),
+			arguments(new FacilityFilter().withResultNotificationEnabled(true), 1L),
+			arguments(new FacilityFilter().include(DONT_KNOW), 1L),
+			arguments(new FacilityFilter().include(ANTIBODY), 1L),
+			arguments(new FacilityFilter().include(ANTIBODY, DONT_KNOW), 1L),
+			arguments(new FacilityFilter().exclude(NASAL_SWAB), 1L),
+			arguments(new FacilityFilter().withCity("New Orleans"), 0L),
+			arguments(new FacilityFilter().withState("LA"), 0L),
+			arguments(new FacilityFilter().withHasCountyId(false), 0L),
+			arguments(new FacilityFilter().withHasCountyName(false), 0L),
+			arguments(new FacilityFilter().withCanDonatePlasma(false), 0L),
+			arguments(new FacilityFilter().withResultNotificationEnabled(false), 0L),
+			arguments(new FacilityFilter().exclude(DONT_KNOW), 0L),
+			arguments(new FacilityFilter().exclude(ANTIBODY), 0L),
+			arguments(new FacilityFilter().exclude(ANTIBODY, DONT_KNOW), 0L),
+			arguments(new FacilityFilter().include(NASAL_SWAB), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modif(final FacilityFilter filter, final long expected)
+	{
+		count(filter, expected);
+	}
+
 	@Test
 	public void modify()
 	{
-		count(new FacilityFilter().withCity("Louisville"), 1L);
-		count(new FacilityFilter().withState("KY"), 1L);
-		count(new FacilityFilter().withHasCountyId(true), 1L);
-		count(new FacilityFilter().withCountyId("48167"), 1L);
-		count(new FacilityFilter().withHasCountyName(true), 1L);
-		count(new FacilityFilter().withCountyName("Galveston"), 1L);
-		count(new FacilityFilter().withCanDonatePlasma(true), 1L);
-		count(new FacilityFilter().withResultNotificationEnabled(true), 1L);
-		count(new FacilityFilter().include(DONT_KNOW), 1L);
-		count(new FacilityFilter().include(ANTIBODY), 1L);
-		count(new FacilityFilter().include(ANTIBODY, DONT_KNOW), 1L);
-		count(new FacilityFilter().exclude(NASAL_SWAB), 1L);
-		count(new FacilityFilter().withCity("New Orleans"), 0L);
-		count(new FacilityFilter().withState("LA"), 0L);
-		count(new FacilityFilter().withHasCountyId(false), 0L);
-		count(new FacilityFilter().withHasCountyName(false), 0L);
-		count(new FacilityFilter().withCanDonatePlasma(false), 0L);
-		count(new FacilityFilter().withResultNotificationEnabled(false), 0L);
-		count(new FacilityFilter().exclude(DONT_KNOW), 0L);
-		count(new FacilityFilter().exclude(ANTIBODY), 0L);
-		count(new FacilityFilter().exclude(ANTIBODY, DONT_KNOW), 0L);
-		count(new FacilityFilter().include(NASAL_SWAB), 0L);
-
 		var response = request().put(Entity.entity(VALUE.withCity("New Orleans").withState("LA").withCounty(null, null).withCanDonatePlasma(false).withResultNotificationEnabled(false).withTestTypes(NASAL_SWAB), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
@@ -410,31 +421,38 @@ public class FacilityResourceTest
 		auditorUpdates++;
 	}
 
-	@Test
-	public void modify_count()
+	public static Stream<Arguments> modify_count()
 	{
-		count(new FacilityFilter().withCity("Louisville"), 0L);
-		count(new FacilityFilter().withState("KY"), 0L);
-		count(new FacilityFilter().withHasCountyId(true), 0L);
-		count(new FacilityFilter().withCountyId("48167"), 0L);
-		count(new FacilityFilter().withHasCountyName(true), 0L);
-		count(new FacilityFilter().withCountyName("Galveston"), 0L);
-		count(new FacilityFilter().withCanDonatePlasma(true), 0L);
-		count(new FacilityFilter().withResultNotificationEnabled(true), 0L);
-		count(new FacilityFilter().include(DONT_KNOW), 0L);
-		count(new FacilityFilter().include(ANTIBODY), 0L);
-		count(new FacilityFilter().include(ANTIBODY, DONT_KNOW), 0L);
-		count(new FacilityFilter().exclude(NASAL_SWAB), 0L);
-		count(new FacilityFilter().withCity("New Orleans"), 1L);
-		count(new FacilityFilter().withState("LA"), 1L);
-		count(new FacilityFilter().withHasCountyId(false), 1L);
-		count(new FacilityFilter().withHasCountyName(false), 1L);
-		count(new FacilityFilter().withCanDonatePlasma(false), 1L);
-		count(new FacilityFilter().withResultNotificationEnabled(false), 1L);
-		count(new FacilityFilter().exclude(DONT_KNOW), 1L);
-		count(new FacilityFilter().exclude(ANTIBODY), 1L);
-		count(new FacilityFilter().exclude(ANTIBODY, DONT_KNOW), 1L);
-		count(new FacilityFilter().include(NASAL_SWAB), 1L);
+		return Stream.of(
+			arguments(new FacilityFilter().withCity("Louisville"), 0L),
+			arguments(new FacilityFilter().withState("KY"), 0L),
+			arguments(new FacilityFilter().withHasCountyId(true), 0L),
+			arguments(new FacilityFilter().withCountyId("48167"), 0L),
+			arguments(new FacilityFilter().withHasCountyName(true), 0L),
+			arguments(new FacilityFilter().withCountyName("Galveston"), 0L),
+			arguments(new FacilityFilter().withCanDonatePlasma(true), 0L),
+			arguments(new FacilityFilter().withResultNotificationEnabled(true), 0L),
+			arguments(new FacilityFilter().include(DONT_KNOW), 0L),
+			arguments(new FacilityFilter().include(ANTIBODY), 0L),
+			arguments(new FacilityFilter().include(ANTIBODY, DONT_KNOW), 0L),
+			arguments(new FacilityFilter().exclude(NASAL_SWAB), 0L),
+			arguments(new FacilityFilter().withCity("New Orleans"), 1L),
+			arguments(new FacilityFilter().withState("LA"), 1L),
+			arguments(new FacilityFilter().withHasCountyId(false), 1L),
+			arguments(new FacilityFilter().withHasCountyName(false), 1L),
+			arguments(new FacilityFilter().withCanDonatePlasma(false), 1L),
+			arguments(new FacilityFilter().withResultNotificationEnabled(false), 1L),
+			arguments(new FacilityFilter().exclude(DONT_KNOW), 1L),
+			arguments(new FacilityFilter().exclude(ANTIBODY), 1L),
+			arguments(new FacilityFilter().exclude(ANTIBODY, DONT_KNOW), 1L),
+			arguments(new FacilityFilter().include(NASAL_SWAB), 1L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_count(final FacilityFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	@Test
@@ -933,12 +951,19 @@ public class FacilityResourceTest
 		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, get(VALUE.id).getStatus(), "Status");
 	}
 
-	@Test
-	public void testRemove_search()
+	public static Stream<Arguments> testRemove_search()
 	{
-		count(new FacilityFilter().withId(VALUE.id), 0L);
-		count(new FacilityFilter().withCity("New Orleans"), 0L);
-		count(new FacilityFilter().withState("LA"), 0L);
+		return Stream.of(
+			arguments(new FacilityFilter().withId(VALUE.id), 0L),
+			arguments(new FacilityFilter().withCity("New Orleans"), 0L),
+			arguments(new FacilityFilter().withState("LA"), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void testRemove_search(final FacilityFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	@Test

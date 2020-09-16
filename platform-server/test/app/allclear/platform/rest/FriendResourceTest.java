@@ -170,12 +170,23 @@ public class FriendResourceTest
 		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, get(VALUE_1.getId()).getStatus(), "Status");
 	}
 
+	public static Stream<Arguments> modif()
+	{
+		return Stream.of(
+			arguments(new FriendFilter().withHasAcceptedAt(false), 1L),
+			arguments(new FriendFilter().withHasAcceptedAt(true), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modif(final FriendFilter filter, final long expected)
+	{
+		count(filter, expected);
+	}
+
 	@Test
 	public void modify()
 	{
-		count(new FriendFilter().withHasAcceptedAt(false), 1L);
-		count(new FriendFilter().withHasAcceptedAt(true), 0L);
-
 		var response = request().put(Entity.entity(VALUE.withAcceptedAt(new Date()), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
@@ -184,11 +195,18 @@ public class FriendResourceTest
 		check(VALUE, value);
 	}
 
-	@Test
-	public void modify_count()
+	public static Stream<Arguments> modify_count()
 	{
-		count(new FriendFilter().withHasAcceptedAt(false), 0L);
-		count(new FriendFilter().withHasAcceptedAt(true), 1L);
+		return Stream.of(
+			arguments(new FriendFilter().withHasAcceptedAt(false), 0L),
+			arguments(new FriendFilter().withHasAcceptedAt(true), 1L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_count(final FriendFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	@Test
@@ -338,12 +356,19 @@ public class FriendResourceTest
 		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, get(VALUE.getId()).getStatus(), "Status");
 	}
 
-	@Test
-	public void testRemove_search()
+	public static Stream<Arguments> testRemove_search()
 	{
-		count(new FriendFilter(), 0L);
-		count(new FriendFilter().withPersonId(VALUE.personId), 0L);
-		count(new FriendFilter().withInviteeId(VALUE.inviteeId), 0L);
+		return Stream.of(
+			arguments(new FriendFilter(), 0L),
+			arguments(new FriendFilter().withPersonId(VALUE.personId), 0L),
+			arguments(new FriendFilter().withInviteeId(VALUE.inviteeId), 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void testRemove_search(final FriendFilter filter, final long expected)
+	{
+		count(filter, expected);
 	}
 
 	private PeopleValue inv(final int i) { return INVITEES.get(i); }
