@@ -420,7 +420,12 @@ var FacilitiesHandler = new ListTemplate({
 
 		open: function(facilityId) { this.run({ url: this.RESOURCE + '?facilityId=' + facilityId, filter: { isAdd: false } }, undefined, 'get'); },
 
-		toValueAndPercent: function(v, t) { return this.toNumber(v) + ' (' + this.toPercent(v / t) + '%)'; },
+		toValueAndPercent: function(v, t, l) {
+			var o = this.toNumber(v) + ' (' + this.toPercent(v / t) + '%)';
+			if (l) o+= (' / ' + this.toDateTime(l));
+
+			return o;
+		},
 		onEditorPreGenerate: function(c) {
 			var v = c.value;
 			v.tags_ = {};
@@ -432,7 +437,7 @@ var FacilitiesHandler = new ListTemplate({
 				for (k in v.tags)
 				{
 					var o = v.tags[k];
-					v.tags_[o.name] = this.toValueAndPercent(o.count, v.total);
+					v.tags_[o.name] = this.toValueAndPercent(o.count, v.total, o.last);
 				}
 			}
 			else
