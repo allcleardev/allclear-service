@@ -875,7 +875,9 @@ public class ExperiencesDAOTest
 
 		var tagIds = Arrays.stream(tags).map(v -> v.id).collect(toSet());
 		Experience.LIST.forEach(v -> {
-			Assertions.assertEquals(tagIds.contains(v.id) ? 1L : 0L, response.tags.get(v.id).count, "Check tags." + v.name);
+			var t = response.tags.get(v.id);
+			Assertions.assertEquals(tagIds.contains(v.id) ? 1L : 0L, t.count, "Check tags." + v.name + ":count");
+			Assertions.assertEquals(tagIds.contains(v.id) ? VALUE.updatedAt : null, t.last, "Check tags." + v.name + ":last");
 		});
 	}
 }

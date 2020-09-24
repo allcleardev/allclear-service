@@ -3,6 +3,7 @@ package app.allclear.platform.model;
 import static java.util.stream.Collectors.toMap;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -27,16 +28,19 @@ public class ExperiencesCalcResponse implements Serializable
 
 		public final String name;
 		public final long count;
+		public final Date last;
 
 		public Tag(@JsonProperty("name") final String name,
-			@JsonProperty("count") final long count)
+			@JsonProperty("count") final long count,
+			@JsonProperty("last") final Date last)
 		{
+			this.last = last;
 			this.name = name;
 			this.count = count;
 		}
 	}
 
-	private static final Map<String, Tag> NO_TAGS = Experience.LIST.stream().collect(toMap(v -> v.id, v -> new Tag(v.name, 0L)));
+	private static final Map<String, Tag> NO_TAGS = Experience.LIST.stream().collect(toMap(v -> v.id, v -> new Tag(v.name, 0L, null)));
 
 	public final long total;
 	public final long positives;

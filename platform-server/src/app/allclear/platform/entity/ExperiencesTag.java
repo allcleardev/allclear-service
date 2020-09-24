@@ -29,7 +29,7 @@ import app.allclear.platform.type.Experience;
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE, region="experiences_tag")
 @NamedQueries({@NamedQuery(name="deleteExperiencesTagsById", query="DELETE FROM ExperiencesTag o WHERE o.experienceId = :id"),
 	@NamedQuery(name="findExperiencesTagsByIds", query="SELECT OBJECT(o) FROM ExperiencesTag o WHERE o.experienceId IN (:ids) ORDER BY o.experienceId, o.tagId")})
-@NamedNativeQueries({@NamedNativeQuery(name="countExperiencesTagsByFacility", query="SELECT o.tag_id AS name, COUNT(o.experience_id) AS total FROM experiences_tag o INNER JOIN experiences x ON o.experience_id = x.id WHERE x.facility_id = :facilityId GROUP BY o.tag_id", resultClass=CountByName.class)})
+@NamedNativeQueries({@NamedNativeQuery(name="countExperiencesTagsByFacility", query="SELECT o.tag_id AS name, COUNT(o.experience_id) AS total, MAX(x.updated_at) AS last FROM experiences_tag o INNER JOIN experiences x ON o.experience_id = x.id WHERE x.facility_id = :facilityId GROUP BY o.tag_id", resultClass=CountByNameAndDate.class)})
 public class ExperiencesTag implements Serializable
 {
 	private static final long serialVersionUID = 1L;

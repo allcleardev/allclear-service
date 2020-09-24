@@ -246,12 +246,12 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 			.collect(toMap(o -> o.id, o -> o.total));
 	}
 
-	Map<String, Long> calcTagsByFacility(final Long facilityId)
+	Map<String, CountByNameAndDate> calcTagsByFacility(final Long facilityId)
 	{
-		return namedQuery("countExperiencesTagsByFacility", CountByName.class)
+		return namedQuery("countExperiencesTagsByFacility", CountByNameAndDate.class)
 			.setParameter("facilityId", facilityId)
 			.stream()
-			.collect(toMap(o -> o.name, o -> o.total));
+			.collect(toMap(o -> o.name, o -> o));
 	}
 
 	/** Aggregates the Experiences facet data for a single Facility.
@@ -271,7 +271,10 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 
 		return new ExperiencesCalcResponse(positives.getOrDefault(true, 0L),
 			positives.getOrDefault(false, 0L),
-			Experience.LIST.stream().collect(toMap(v -> v.id, v -> new ExperiencesCalcResponse.Tag(v.name, tags.getOrDefault(v.id, 0L)))));
+			Experience.LIST.stream().collect(toMap(v -> v.id, v -> {
+				var t = tags.getOrDefault(v.id, CountByNameAndDate.EMPTY);
+				return new ExperiencesCalcResponse.Tag(v.name, t.total, t.last);
+			})));
 	}
 
 	/** Counts the number of experiences by the person for the specified facility today.
