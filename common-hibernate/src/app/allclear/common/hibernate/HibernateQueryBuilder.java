@@ -118,8 +118,7 @@ public class HibernateQueryBuilder<T> extends QueryBuilder<T>
 	 */
 	public <E> Query<E> bind(final Query<E> query, final Class<E> clazz)
 	{
-		for (Map.Entry<String, Object> param : parameters.entrySet())
-			query.setParameter(param.getKey(), param.getValue());
+		parameters.forEach((k, v) -> query.setParameter(k, v));
 
 		return query;
 	}

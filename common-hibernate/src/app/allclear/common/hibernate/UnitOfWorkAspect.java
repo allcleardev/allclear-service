@@ -51,25 +51,31 @@ public class UnitOfWorkAspect
 		sessionFactory = factory.prepare(unitOfWork.readOnly());
 
 		Session existingSession = null;
-		if(ManagedSessionContext.hasBind(sessionFactory))
+		if (ManagedSessionContext.hasBind(sessionFactory))
 			existingSession = sessionFactory.getCurrentSession();
 
-		if(existingSession != null) {
+		if (existingSession != null)
+		{
 			sessionCreated = false;
 			session = existingSession;
 			validateSession();
-		} else {
+		}
+		else
+		{
 			sessionCreated = true;
 			session = sessionFactory.openSession();
-			try {
+			try
+			{
 				configureSession();
 				ManagedSessionContext.bind(session);
 				beginTransaction(unitOfWork, session);
-			} catch (Throwable th) {
+			}
+			catch (final Throwable ex)
+			{
 				session.close();
 				session = null;
 				ManagedSessionContext.unbind(sessionFactory);
-				throw th;
+				throw ex;
 			}
 		}
 	}
@@ -101,7 +107,6 @@ public class UnitOfWorkAspect
 		try
 		{
 			if (sessionCreated && session != null) session.close();
-
 		}
 		finally
 		{
