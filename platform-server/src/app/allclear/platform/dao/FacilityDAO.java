@@ -41,13 +41,14 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	private static final String SELECT = "SELECT OBJECT(o) FROM Facility o";
 	private static final String COUNT = "SELECT COUNT(o.id) FROM Facility o";
 	private static final String COUNT_ = "SELECT COUNT(o.id) FROM facility o";
-	private static final String SELECT_ = "SELECT o.id, o.name, o.address, o.city, o.state, o.county_id, o.county_name, o.latitude, o.longitude, o.phone, o.appointment_phone, o.email, o.url, o.appointment_url, o.hours, o.type_id, o.drive_thru, o.appointment_required, o.accepts_third_party, o.referral_required, o.test_criteria_id, o.other_test_criteria, o.tests_per_day, o.government_id_required, o.minimum_age, o.doctor_referral_criteria, o.first_responder_friendly, o.telescreening_available, o.accepts_insurance, o.insurance_providers_accepted, o.free_or_low_cost, o.can_donate_plasma, o.result_notification_enabled, o.notes, o.active, o.activated_at, o.created_at, o.updated_at, ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:fromLongitude, :fromLatitude)) AS meters FROM facility o";
+	private static final String SELECT_ = "SELECT o.id, o.name, o.address, o.city, o.state, o.postal_code, o.county_id, o.county_name, o.latitude, o.longitude, o.phone, o.appointment_phone, o.email, o.url, o.appointment_url, o.hours, o.type_id, o.drive_thru, o.appointment_required, o.accepts_third_party, o.referral_required, o.test_criteria_id, o.other_test_criteria, o.tests_per_day, o.government_id_required, o.minimum_age, o.doctor_referral_criteria, o.first_responder_friendly, o.telescreening_available, o.accepts_insurance, o.insurance_providers_accepted, o.free_or_low_cost, o.can_donate_plasma, o.result_notification_enabled, o.notes, o.active, o.activated_at, o.created_at, o.updated_at, ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:fromLongitude, :fromLatitude)) AS meters FROM facility o";
 	private static final OrderByBuilder ORDER = new OrderByBuilder('o', 
 		"id", DESC,
 		"name", ASC,
 		"address", ASC,
 		"city", ASC,
 		"state", ASC,
+		"postalCode", ASC,
 		"countyId", ASC,
 		"countyName", ASC,
 		"latitude", DESC,
@@ -218,6 +219,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.ensureExistsAndLength("address", "Address", value.address, FacilityValue.MAX_LEN_ADDRESS)
 			.ensureExistsAndLength("city", "City", value.city, FacilityValue.MAX_LEN_CITY)
 			.ensureExistsAndLength("state", "State", value.state, FacilityValue.MAX_LEN_STATE)
+			.ensureLength("postalCode", "Postal Code", value.postalCode, FacilityValue.MAX_LEN_POSTAL_CODE)
 			.ensureLength("countyId", "County ID", value.countyId, FacilityValue.MAX_LEN_COUNTY_ID)
 			.ensureLength("countyName", "County Name", value.countyName, FacilityValue.MAX_LEN_COUNTY_NAME)
 			.ensureExistsAndLatitude("latitude", "Latitude", value.latitude)
@@ -508,6 +510,8 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.addContains("address", "o.address LIKE :address", filter.address)
 			.addContains("city", "o.city LIKE :city", filter.city)
 			.addContains("state", "o.state LIKE :state", filter.state)
+			.addContains("postalCode", "o.postalCode LIKE :postalCode", filter.postalCode)
+			.addNotNull("o.postalCode", filter.hasPostalCode)
 			.addStarts("countyId", "o.countyId LIKE :countyId", filter.countyId)
 			.addNotNull("o.countyId", filter.hasCountyId)
 			.addContains("countyName", "o.countyName LIKE :countyName", filter.countyName)
@@ -587,6 +591,8 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.addContains("address", "o.address LIKE :address", filter.address)
 			.addContains("city", "o.city LIKE :city", filter.city)
 			.addContains("state", "o.state LIKE :state", filter.state)
+			.addContains("postalCode", "o.postal_code LIKE :postalCode", filter.postalCode)
+			.addNotNull("o.postal_code", filter.hasPostalCode)
 			.addStarts("countyId", "o.county_id LIKE :countyId", filter.countyId)
 			.addNotNull("o.county_id", filter.hasCountyId)
 			.addContains("countyName", "o.county_name LIKE :countyName", filter.countyName)

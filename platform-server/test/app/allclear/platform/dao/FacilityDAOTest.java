@@ -110,7 +110,8 @@ public class FacilityDAOTest
 		return new FacilityValue("Eve", "909 Stuart St", "Atlanta", "GA", bg("-45"), bg("35"),
 			"888-555-2000", "888-555-2001", "eve@test.net", "http://www.eve.net", "http://www.eve.net/calendar", "10AM to 8PM",
 			URGENT_CARE.id, false, true, false, true, OTHER.id, "My other criteria", 2500, false, 16, "Doctor requires: something",
-			true, false, true, "These providers are accepted: Two", false, true, true, "Slow notations", false);
+			true, false, true, "These providers are accepted: Two", false, true, true, "Slow notations", false)
+				.withPostalCode("56789");
 	}
 
 	@Test
@@ -159,6 +160,12 @@ public class FacilityDAOTest
 	public void add_longState()
 	{
 		assertThrows(ValidationException.class, () -> dao.add(createValid().withState(StringUtils.repeat("A", FacilityValue.MAX_LEN_STATE + 1)), true));
+	}
+
+	@Test
+	public void add_longPostalCode()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withPostalCode(StringUtils.repeat("A", FacilityValue.MAX_LEN_POSTAL_CODE + 1)), true));
 	}
 
 	@Test
@@ -461,6 +468,7 @@ public class FacilityDAOTest
 
 		return Stream.of(
 			arguments(new FacilityFilter().withName(VALUE.name), 1L),
+			arguments(new FacilityFilter().withHasPostalCode(false), 1L),
 			arguments(new FacilityFilter().withHasCountyId(false), 1L),
 			arguments(new FacilityFilter().withHasCountyName(false), 1L),
 			arguments(new FacilityFilter().withCanDonatePlasma(false), 1L),
@@ -469,6 +477,8 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter().exclude(NASAL_SWAB), 1L),
 			arguments(new FacilityFilter().exclude(ANTIBODY), 1L),
 			arguments(new FacilityFilter().withName(v.name), 0L),
+			arguments(new FacilityFilter().withPostalCode(v.postalCode), 0L),
+			arguments(new FacilityFilter().withHasPostalCode(true), 0L),
 			arguments(new FacilityFilter().withHasCountyId(true), 0L),
 			arguments(new FacilityFilter().withCountyId("48167"), 0L),
 			arguments(new FacilityFilter().withHasCountyName(true), 0L),
@@ -507,6 +517,7 @@ public class FacilityDAOTest
 
 		return Stream.of(
 			arguments(new FacilityFilter().withName(VALUE_1.name), 0L),
+			arguments(new FacilityFilter().withHasPostalCode(false), 0L),
 			arguments(new FacilityFilter().withHasCountyId(false), 0L),
 			arguments(new FacilityFilter().withHasCountyName(false), 0L),
 			arguments(new FacilityFilter().withCanDonatePlasma(false), 0L),
@@ -515,6 +526,8 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter().exclude(NASAL_SWAB), 0L),
 			arguments(new FacilityFilter().exclude(ANTIBODY), 1L),
 			arguments(new FacilityFilter().withName(v.name), 1L),
+			arguments(new FacilityFilter().withPostalCode(v.postalCode), 1L),
+			arguments(new FacilityFilter().withHasPostalCode(true), 1L),
 			arguments(new FacilityFilter().withHasCountyId(true), 1L),
 			arguments(new FacilityFilter().withCountyId("48167"), 1L),
 			arguments(new FacilityFilter().withHasCountyName(true), 1L),
@@ -539,6 +552,7 @@ public class FacilityDAOTest
 		var record = dao.findWithException(VALUE.id);
 		Assertions.assertNotNull(record, "Exists");
 		Assertions.assertEquals("Eve", record.getName(), "Check name");
+		Assertions.assertEquals("56789", record.getPostalCode(), "Check postalCode");
 		Assertions.assertEquals("48167", record.getCountyId(), "Check countyId");
 		Assertions.assertEquals("Galveston", record.getCountyName(), "Check countyName");
 		Assertions.assertTrue(record.isCanDonatePlasma(), "Check canDonatePlasma");
@@ -582,6 +596,8 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter(1, 20).withAddress(VALUE.address), 1L),
 			arguments(new FacilityFilter(1, 20).withCity(VALUE.city), 1L),
 			arguments(new FacilityFilter(1, 20).withState(VALUE.state), 1L),
+			arguments(new FacilityFilter(1, 20).withPostalCode("56789"), 1L),
+			arguments(new FacilityFilter(1, 20).withHasPostalCode(true), 1L),
 			arguments(new FacilityFilter(1, 20).withCountyId(VALUE.countyId), 1L),
 			arguments(new FacilityFilter(1, 20).withHasCountyId(true), 1L),
 			arguments(new FacilityFilter(1, 20).withCountyName(VALUE.countyName), 1L),
@@ -658,6 +674,8 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter(1, 20).withAddress("invalid"), 0L),
 			arguments(new FacilityFilter(1, 20).withCity("invalid"), 0L),
 			arguments(new FacilityFilter(1, 20).withState("invalid"), 0L),
+			arguments(new FacilityFilter(1, 20).withPostalCode("98765"), 0L),
+			arguments(new FacilityFilter(1, 20).withHasPostalCode(false), 0L),
 			arguments(new FacilityFilter(1, 20).withCountyId("invalid"), 0L),
 			arguments(new FacilityFilter(1, 20).withHasCountyId(false), 0L),
 			arguments(new FacilityFilter(1, 20).withCountyName("invalid"), 0L),
@@ -810,6 +828,13 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter("state", "invalid"), "state", "ASC"),	// Invalid sort direction is converted to the default.
 			arguments(new FacilityFilter("state", "DESC"), "state", "DESC"),
 			arguments(new FacilityFilter("state", "desc"), "state", "DESC"),
+
+			arguments(new FacilityFilter("postalCode", null), "postalCode", "ASC"), // Missing sort direction is converted to the default.
+			arguments(new FacilityFilter("postalCode", "ASC"), "postalCode", "ASC"),
+			arguments(new FacilityFilter("postalCode", "asc"), "postalCode", "ASC"),
+			arguments(new FacilityFilter("postalCode", "invalid"), "postalCode", "ASC"),	// Invalid sort direction is converted to the default.
+			arguments(new FacilityFilter("postalCode", "DESC"), "postalCode", "DESC"),
+			arguments(new FacilityFilter("postalCode", "desc"), "postalCode", "DESC"),
 
 			arguments(new FacilityFilter("countyId", null), "countyId", "ASC"), // Missing sort direction is converted to the default.
 			arguments(new FacilityFilter("countyId", "ASC"), "countyId", "ASC"),
@@ -1373,6 +1398,7 @@ public class FacilityDAOTest
 		Assertions.assertEquals(expected.address, record.getAddress(), assertId + "Check address");
 		Assertions.assertEquals(expected.city, record.getCity(), assertId + "Check city");
 		Assertions.assertEquals(expected.state, record.getState(), assertId + "Check state");
+		Assertions.assertEquals(expected.postalCode, record.getPostalCode(), assertId + "Check postalCode");
 		Assertions.assertEquals(expected.countyId, record.getCountyId(), assertId + "Check countyId");
 		Assertions.assertEquals(expected.countyName, record.getCountyName(), assertId + "Check countyName");
 		assertThat(record.getLatitude()).as(assertId + "Check latitude").isEqualByComparingTo(expected.latitude);
@@ -1417,6 +1443,7 @@ public class FacilityDAOTest
 		Assertions.assertEquals(expected.address, value.address, assertId + "Check address");
 		Assertions.assertEquals(expected.city, value.city, assertId + "Check city");
 		Assertions.assertEquals(expected.state, value.state, assertId + "Check state");
+		Assertions.assertEquals(expected.postalCode, value.postalCode, assertId + "Check postalCode");
 		Assertions.assertEquals(expected.countyId, value.countyId, assertId + "Check countyId");
 		Assertions.assertEquals(expected.countyName, value.countyName, assertId + "Check countyName");
 		assertThat(value.latitude).as(assertId + "Check latitude").isEqualByComparingTo(expected.latitude);

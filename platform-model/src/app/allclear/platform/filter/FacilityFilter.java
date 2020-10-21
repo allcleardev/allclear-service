@@ -34,6 +34,8 @@ public class FacilityFilter extends QueryFilter
 	public String address = null;
 	public String city = null;
 	public String state = null;
+	public String postalCode = null;
+	public Boolean hasPostalCode = null;
 	public String countyId = null;
 	public Boolean hasCountyId = null;
 	public String countyName = null;
@@ -110,6 +112,8 @@ public class FacilityFilter extends QueryFilter
 	public FacilityFilter withAddress(final String newValue) { address = newValue; return this; }
 	public FacilityFilter withCity(final String newValue) { city = newValue; return this; }
 	public FacilityFilter withState(final String newValue) { state = newValue; return this; }
+	public FacilityFilter withPostalCode(final String newValue) { postalCode = newValue; return this; }
+	public FacilityFilter withHasPostalCode(final Boolean newValue) { hasPostalCode = newValue; return this; }
 	public FacilityFilter withCountyId(final String newValue) { countyId = newValue; return this; }
 	public FacilityFilter withHasCountyId(final Boolean newValue) { hasCountyId = newValue; return this; }
 	public FacilityFilter withCountyName(final String newValue) { countyName = newValue; return this; }
@@ -215,6 +219,7 @@ public class FacilityFilter extends QueryFilter
 		@param address represents the "address" field.
 		@param city represents the "city" field.
 		@param state represents the "state" field.
+		@param postalCode represents the "postal_code" field.
 		@param countyId represents the "county_id" field.
 		@param countyName represents the "county_name" field.
 		@param latitudeFrom represents the "latitude" field - lower boundary.
@@ -265,6 +270,7 @@ public class FacilityFilter extends QueryFilter
 		final String address,
 		final String city,
 		final String state,
+		final String postalCode,
 		final String countyId,
 		final String countyName,
 		final BigDecimal latitudeFrom,
@@ -313,6 +319,7 @@ public class FacilityFilter extends QueryFilter
 		this.address = address;
 		this.city = city;
 		this.state = state;
+		this.postalCode = postalCode;
 		this.countyId = countyId;
 		this.countyName = countyName;
 		this.latitudeFrom = latitudeFrom;
@@ -370,6 +377,7 @@ public class FacilityFilter extends QueryFilter
 		address = StringUtils.trimToNull(address);
 		city = StringUtils.trimToNull(city);
 		state = StringUtils.trimToNull(state);
+		postalCode = StringUtils.trimToNull(postalCode);
 		countyId = StringUtils.trimToNull(countyId);
 		countyName = StringUtils.trimToNull(countyName);
 		phone = StringUtils.trimToNull(phone);

@@ -245,6 +245,7 @@ var FacilitiesHandler = new ListTemplate({
 
 				if (!f.city.value && data.city) f.city.value = data.city;
 				if (!f.state.value && data.state) f.state.value = data.state;
+				if (!f.postalCode.value && data.postalCode) f.postalCode.value = data.postalCode;
 				if (!f.latitude.value && data.latitude) f.latitude.value = data.latitude;
 				if (!f.longitude.value && data.longitude) f.longitude.value = data.longitude;
 
@@ -290,6 +291,7 @@ var FacilitiesHandler = new ListTemplate({
 	          new EditField('address', 'Address', true, false, 128, 50),
 	          new EditField('city', 'City', true, false, 128, 50),
 	          new EditField('state', 'State', true, false, 128, 50),
+	          new EditField('postalCode', 'Postal Code', true, false, 16, 16),
 	          new EditField('latitude', 'Latitude', true, false, 9, 9),
 	          new EditField('longitude', 'Longitude', true, false, 10, 10),
 	          new EditField('countyId', 'County ID', false, false, 5, 5),
@@ -348,6 +350,8 @@ var FacilitiesHandler = new ListTemplate({
 		      new EditField('address', 'Address', false, false, 128, 50),
 		      new EditField('city', 'City', false, false, 128, 50),
 		      new EditField('state', 'State', false, false, 128, 50),
+		      new EditField('postalCode', 'Postal Code', false, false, 16, 16),
+		      new ListField('hasPostalCode', 'Has Postal Code', false, 'yesNoOptions', undefined, 'No Search'),
 		      new RangeField('latitude', 'Latitude', false, 9, 9),
 		      new RangeField('longitude', 'Longitude', false, 10, 10),
 		      new EditField('countyId', 'County ID', false, false, 5, 5),
@@ -585,6 +589,7 @@ var FacilitateHandler = new ListTemplate({
 				v.address = field;
 				if (data.city) v.city = data.city;
 				if (data.state) v.state = data.state;
+				if (data.postalCode) v.postalCode = data.postalCode;
 				if (data.latitude) v.latitude = data.latitude;
 				if (data.longitude) v.longitude = data.longitude;
 				if (v.latitude && v.longitude)

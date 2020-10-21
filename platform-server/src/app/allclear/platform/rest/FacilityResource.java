@@ -207,13 +207,14 @@ public class FacilityResource
 	FacilityValue populate(final FacilityValue value)
 	{
 		if ((null != value.address) &&
-		    ((null == value.city) || (null == value.state) || (null == value.latitude) || (null == value.longitude)))
+		    ((null == value.city) || (null == value.state) || (null == value.postalCode) || (null == value.latitude) || (null == value.longitude)))
 		{
 			var o = geocode(value.address);
 			if (null != o)
 			{
 				if (null == value.city) value.city = o.city().shortName;
 				if (null == value.state) value.state = o.state().longName;
+				if (null == value.postalCode) value.postalCode = o.postalCode().shortName;
 				if (null == value.latitude) value.latitude = o.geometry.location.lat;
 				if (null == value.longitude) value.longitude = o.geometry.location.lng;
 			}

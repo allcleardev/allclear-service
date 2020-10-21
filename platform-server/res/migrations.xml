@@ -687,4 +687,14 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.1.137_FACILITY_POSTAL_CODE" author="smalleyd">
+		<addColumn tableName="facility">
+			<column name="postal_code" type="VARCHAR(16)" remarks="Represents the postal code where the facility is located." />
+		</addColumn>
+
+		<rollback>
+			<dropColumn tableName="facility" columnName="postal_code" />
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

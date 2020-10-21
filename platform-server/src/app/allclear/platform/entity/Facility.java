@@ -71,6 +71,11 @@ public class Facility implements Serializable
 	public String state;
 	public void setState(final String newValue) { state = newValue; }
 
+	@Column(name="postal_code", columnDefinition="VARCHAR(16)", nullable=true)
+	public String getPostalCode() { return postalCode; }
+	public String postalCode;
+	public void setPostalCode(final String newValue) { postalCode = newValue; }
+
 	@Column(name="county_id", columnDefinition="CHAR(5)", nullable=true)
 	public String getCountyId() { return countyId; }
 	public String countyId;
@@ -255,6 +260,7 @@ public class Facility implements Serializable
 		this.address = value.address;
 		this.city = value.city;
 		this.state = value.state;
+		this.postalCode = value.postalCode;
 		this.countyId = value.countyId;
 		this.countyName = value.countyName;
 		this.latitude = value.latitude;
@@ -300,6 +306,7 @@ public class Facility implements Serializable
 			Objects.equals(address, v.address) &&
 			Objects.equals(city, v.city) &&
 			Objects.equals(state, v.state) &&
+			Objects.equals(postalCode, v.postalCode) &&
 			Objects.equals(countyId, v.countyId) &&
 			Objects.equals(countyName, v.countyName) &&
 			(0 == Objects.compare(latitude, v.latitude, (a, b) -> a.compareTo(b))) &&
@@ -343,6 +350,7 @@ public class Facility implements Serializable
 		setAddress(value.address);
 		setCity(value.city);
 		setState(value.state);
+		setPostalCode(value.postalCode);
 		setCountyId(value.countyId);
 		setCountyName(value.countyName);
 		setLatitude(value.latitude);
@@ -400,6 +408,7 @@ public class Facility implements Serializable
 			getAddress(),
 			getCity(),
 			getState(),
+			getPostalCode(),
 			getCountyId(),
 			getCountyName(),
 			getLatitude(),
