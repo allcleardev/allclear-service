@@ -480,7 +480,7 @@ var FacilitiesHandler = new ListTemplate({
 
 			s.innerHTML = 'Running ...';
 
-			this.post('facilities/search', { idFrom: v.currentId + 1, hasCountyId: false, sortOn: 'id', sortDir: 'ASC', pageSize: 250 }, data => {
+			this.post('facilities/search', { idFrom: v.currentId + 1, hasPostalCode: false, sortOn: 'id', sortDir: 'ASC', pageSize: 250 }, data => {
 				if (!data.records)
 				{
 					s.innerHTML = 'DONE';
@@ -491,6 +491,30 @@ var FacilitiesHandler = new ListTemplate({
 					var expected = data.records.length;
 					var lastId = data.records[expected - 1].id;
 					data.records.forEach(rec => {
+						if (rec.address)
+						{
+							me.get('maps/geocode', { location: rec.address }, b => {
+								if (b.postalCode)
+								{
+									count++;
+									rec.postalCode = b.postalCode;
+
+									me.put('facilities', rec, d => {
+										if (lastId == rec.id)
+										{
+											l.value = l.value + '\nGeocoded ' + count + ' / ' + expected + ', IDs: ' + data.records[0].id + ' - ' + v.currentId;
+											me.handleSubmit(c, f);
+										}
+									});	// Run the next one when on the last record.
+								}
+								else if (lastId == rec.id)	// Run the next one when on the last record.
+								{
+									l.value = l.value + '\nGeocoded ' + count + ' / ' + expected + ', IDs: ' + data.records[0].id + ' - ' + v.currentId;
+									me.handleSubmit(c, f);
+								}
+							});
+						}
+						/*
 						if (rec.latitude && rec.longitude)
 						{
 							me.get('maps/block', { latitude: rec.latitude, longitude: rec.longitude }, b => {
@@ -515,6 +539,7 @@ var FacilitiesHandler = new ListTemplate({
 								}
 							});
 						}
+						*/
 						else if (lastId == rec.id)	// Run the next one when on the last record.
 						{
 							l.value = l.value + '\nGeocoded ' + count + ' / ' + expected + ', IDs: ' + data.records[0].id + ' - ' + v.currentId;
