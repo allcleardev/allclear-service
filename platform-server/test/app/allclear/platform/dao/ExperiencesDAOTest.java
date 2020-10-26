@@ -82,11 +82,22 @@ public class ExperiencesDAOTest
 		FACILITY_1 = facilityDao.add(new FacilityValue(1), true);
 		SESSION = new SessionValue(false, PERSON = peopleDao.add(new PeopleValue("zero", "888-555-1000", true)));
 		SESSION_1 = new SessionValue(false, PERSON_1 = peopleDao.add(new PeopleValue("one", "888-555-1001", true)));
+	}
 
-		sessionDao.current(SESSION);
-		var value = dao.add(VALUE = new ExperiencesValue(FACILITY_1.id, true).withTags(GOOD_HYGIENE, SOCIAL_DISTANCING_ENFORCED, OVERLY_CROWDED));
-		Assertions.assertNotNull(value, "Exists");
-		check(VALUE.withTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), value);	// Replace tags with re-ordered as will be retrieved.
+	public static Stream<Arguments> add_counts()
+	{
+		return Stream.of(
+			arguments(PERSON.id, FACILITY.id, 0L, 0L),
+			arguments(PERSON.id, FACILITY_1.id, 0L, 0L),
+			arguments(PERSON_1.id, FACILITY.id, 0L, 0L),
+			arguments(PERSON_1.id, FACILITY_1.id, 0L, 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void add_counts(final String personId, final Long facilityId, final long first, final long second)
+	{
+		assertThat(dao.countTodayExperiencesByPerson(personId, facilityId)).containsSequence(first, second);
 	}
 
 	/** Creates a valid Experiences value for the validation tests.
@@ -95,6 +106,31 @@ public class ExperiencesDAOTest
 	private ExperiencesValue createValid()
 	{
 		return new ExperiencesValue(FACILITY.id, false);
+	}
+
+	@Test
+	public void add_d()
+	{
+		sessionDao.current(SESSION);
+		var value = dao.add(VALUE = new ExperiencesValue(FACILITY_1.id, true).withTags(GOOD_HYGIENE, SOCIAL_DISTANCING_ENFORCED, OVERLY_CROWDED));
+		Assertions.assertNotNull(value, "Exists");
+		check(VALUE.withTags(GOOD_HYGIENE, OVERLY_CROWDED, SOCIAL_DISTANCING_ENFORCED), value);	// Replace tags with re-ordered as will be retrieved.
+	}
+
+	public static Stream<Arguments> add_d_counts()
+	{
+		return Stream.of(
+			arguments(PERSON.id, FACILITY.id, 1L, 0L),
+			arguments(PERSON.id, FACILITY_1.id, 1L, 1L),
+			arguments(PERSON_1.id, FACILITY.id, 0L, 0L),
+			arguments(PERSON_1.id, FACILITY_1.id, 0L, 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void add_d_counts(final String personId, final Long facilityId, final long first, final long second)
+	{
+		assertThat(dao.countTodayExperiencesByPerson(personId, facilityId)).containsSequence(first, second);
 	}
 
 	@Test
@@ -294,6 +330,22 @@ public class ExperiencesDAOTest
 	public void modify_count(final ExperiencesFilter filter, final long expected)
 	{
 		count(filter, expected);
+	}
+
+	public static Stream<Arguments> modify_d_counts()
+	{
+		return Stream.of(
+			arguments(PERSON.id, FACILITY.id, 0L, 0L),
+			arguments(PERSON.id, FACILITY_1.id, 0L, 0L),
+			arguments(PERSON_1.id, FACILITY.id, 1L, 1L),
+			arguments(PERSON_1.id, FACILITY_1.id, 1L, 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_d_counts(final String personId, final Long facilityId, final long first, final long second)
+	{
+		assertThat(dao.countTodayExperiencesByPerson(personId, facilityId)).containsSequence(first, second);
 	}
 
 	public static Stream<SessionValue> modify_fail() { return Stream.of(null, CUSTOMER, EDITOR, SESSION, SESSION_1); }
@@ -587,6 +639,22 @@ public class ExperiencesDAOTest
 		check(dao.calcByFacility(FACILITY.id), 0L, 1L, POOR_HYGIENE, CONFUSING_APPOINTMENT_PROCESS);
 	}
 
+	public static Stream<Arguments> z_00_d_counts()
+	{
+		return Stream.of(
+			arguments(PERSON.id, FACILITY.id, 1L, 1L),
+			arguments(PERSON.id, FACILITY_1.id, 1L, 0L),
+			arguments(PERSON_1.id, FACILITY.id, 0L, 0L),
+			arguments(PERSON_1.id, FACILITY_1.id, 0L, 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_00_d_counts(final String personId, final Long facilityId, final long first, final long second)
+	{
+		assertThat(dao.countTodayExperiencesByPerson(personId, facilityId)).containsSequence(first, second);
+	}
+
 	@Test
 	public void z_00_get()
 	{
@@ -616,6 +684,13 @@ public class ExperiencesDAOTest
 
 	@Test
 	public void z_01_calc() { z_00_calc(); }
+
+	@ParameterizedTest
+	@MethodSource("z_00_d_counts")
+	public void z_01_d_counts(final String personId, final Long facilityId, final long first, final long second)
+	{
+		assertThat(dao.countTodayExperiencesByPerson(personId, facilityId)).containsSequence(first, second);
+	}
 
 	@Test
 	public void z_01_get() { z_00_get(); }

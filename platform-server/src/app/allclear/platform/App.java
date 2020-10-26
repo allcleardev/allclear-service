@@ -54,7 +54,7 @@ public class App extends Application<Config>
 	public static final String QUEUE_FACILITATE = "facilitate";
 	public static final String SESSION = "session-cache";
 
-	public static final Class<?>[] ENTITIES = new Class<?>[] { Conditions.class, CountByBoolean.class, CountByName.class, CountByNameAndDate.class, Created.class, Experiences.class, ExperiencesTag.class, Exposures.class, Facility.class, FacilityX.class, FacilityPeople.class, FacilityTestType.class, Friend.class, Friendship.class, Name.class, Named.class, Patient.class, People.class, PeopleFacility.class, PeopleField.class, Symptoms.class, SymptomsLog.class, Tests.class, Total.class };
+	public static final Class<?>[] ENTITIES = new Class<?>[] { Conditions.class, CountByBoolean.class, CountById.class, CountByName.class, CountByNameAndDate.class, Created.class, Experiences.class, ExperiencesTag.class, Exposures.class, Facility.class, FacilityX.class, FacilityPeople.class, FacilityTestType.class, Friend.class, Friendship.class, Name.class, Named.class, Patient.class, People.class, PeopleFacility.class, PeopleField.class, Symptoms.class, SymptomsLog.class, Tests.class, Total.class };
 
 	private final HibernateBundle<Config> transHibernateBundle = new HibernateBundle<>(People.class, ENTITIES) {
 		@Override public DataSourceFactory getDataSourceFactory(final Config conf) { return conf.trans; }

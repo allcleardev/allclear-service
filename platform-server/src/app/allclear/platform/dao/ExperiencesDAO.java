@@ -163,8 +163,16 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 		validator.check();
 
 		// Checks for an existing experience on adds.
-		if ((null == value.id) && (0L < countTodayExperiencesByPerson(value.personId, value.facilityId)))
-			validator.add("facilityId", "You have already provided an Experience for %s today.", facility.getName()).check();
+		if (null == value.id)	// https://trello.com/c/0xsggIvX/82-back-end-enforces-rate-limit-for-sharing-experiences
+		{
+			var counts = countTodayExperiencesByPerson(value.personId, value.facilityId);
+			if (4L < counts[0])
+				validator.add("personId", "You have already provided five Experiences today.");
+			if (0L < counts[1])
+				validator.add("facilityId", "You have already provided an Experience for %s today.", facility.getName());
+
+			validator.check();
+		}
 
 		value.denormalize(person.getName(), facility.getName());
 
@@ -281,9 +289,9 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 	 * 
 	 * @param personId
 	 * @param facilityId
-	 * @return zero if none found.
+	 * @return results array - position zero is the total count and position one is the total for the facility.
 	 */
-	public long countTodayExperiencesByPerson(final String personId, final Long facilityId)
+	public long[] countTodayExperiencesByPerson(final String personId, final Long facilityId)
 	{
 		return countRecentExperiencesByPerson(personId, facilityId, CalendarUtils.today().getTime());
 	}
@@ -293,15 +301,17 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 	 * @param personId
 	 * @param facilityId
 	 * @param createdAt
-	 * @return zero if none found.
+	 * @return results array - position zero is the total count and position one is the total for the facility.
 	 */
-	public long countRecentExperiencesByPerson(final String personId, final Long facilityId, final Date createdAt)
+	public long[] countRecentExperiencesByPerson(final String personId, final Long facilityId, final Date createdAt)
 	{
-		return namedQuery("countRecentExperiencesByPerson", Long.class)
+		var o = namedQuery("countRecentExperiencesByPerson", CountById.class)
 			.setParameter("personId", personId)
-			.setParameter("facilityId", facilityId)
 			.setParameter("createdAt", createdAt)
-			.uniqueResult();
+			.list();
+
+		return new long[] { o.stream().mapToLong(v -> v.total).sum(),	// Total
+			o.stream().filter(v -> facilityId.equals(v.id)).mapToLong(v -> v.total).findFirst().orElse(0L) };	// Just the facility total
 	}
 
 	/** Searches the Experiences entity based on the supplied filter.

@@ -29,8 +29,8 @@ import app.allclear.platform.value.ExperiencesValue;
 @DynamicUpdate
 @Table(name="experiences")
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE, region="experiences")
-@NamedQueries({@NamedQuery(name="countRecentExperiencesByPerson", query="SELECT COUNT(o.id) FROM Experiences o WHERE o.personId = :personId AND o.facilityId = :facilityId AND o.createdAt >= :createdAt")})
-@NamedNativeQueries({@NamedNativeQuery(name="countExperiencesPositivesByFacility", query="SELECT o.positive AS id, COUNT(o.id) AS total FROM experiences o WHERE o.facility_id = :facilityId GROUP BY o.positive", resultClass=CountByBoolean.class)})
+@NamedNativeQueries({@NamedNativeQuery(name="countExperiencesPositivesByFacility", query="SELECT o.positive AS id, COUNT(o.id) AS total FROM experiences o WHERE o.facility_id = :facilityId GROUP BY o.positive", resultClass=CountByBoolean.class),
+	@NamedNativeQuery(name="countRecentExperiencesByPerson", query="SELECT o.facility_id AS id, COUNT(o.id) AS total FROM experiences o WHERE o.person_id = :personId AND o.created_at >= :createdAt GROUP BY o.facility_id", resultClass=CountById.class)})
 public class Experiences implements Serializable
 {
 	private static final long serialVersionUID = 1L;
