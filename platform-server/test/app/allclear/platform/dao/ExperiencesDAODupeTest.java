@@ -27,8 +27,8 @@ import app.allclear.platform.value.*;
 *	Functional test for the data access object that handles access to the Experiences entity.
 *
 *	@author smalleyd
-*	@version 1.1.80
-*	@since June 2, 2020
+*	@version 1.1.139
+*	@since 10/26/2020
 *
 **********************************************************************************/
 
