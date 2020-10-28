@@ -23,9 +23,10 @@ public class TestType implements Serializable
 
 	public static final TestType ANTIBODY = new TestType("ii", "igM/igG Rapid Test", "Antibody Test");
 	public static final TestType NASAL_SWAB = new TestType("rp", "rt-PCR", "Nasal Swab Test");
+	public static final TestType RAPID_TEST = new TestType("rt", "Rapid Test", "Rapid Test");
 	public static final TestType DONT_KNOW = new TestType("dk", "Don't Know", "Don't Know");
 
-	public static final List<TestType> LIST = List.of(ANTIBODY, NASAL_SWAB, DONT_KNOW);
+	public static final List<TestType> LIST = List.of(ANTIBODY, NASAL_SWAB, RAPID_TEST, DONT_KNOW);
 	public static final Map<String, TestType> VALUES = LIST.stream().collect(Collectors.toUnmodifiableMap(v -> v.id, v -> v));
 	public static TestType get(final String id) { return VALUES.get(id); }
 	public static boolean exists(final String id) { return VALUES.containsKey(id); }
