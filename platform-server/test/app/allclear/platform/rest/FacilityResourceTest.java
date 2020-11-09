@@ -122,7 +122,11 @@ public class FacilityResourceTest
 		var now = new Date();
 		var response = request()
 			.post(Entity.entity(VALUE = new FacilityValue("Julius", "56 First Street", "Louisville", "KY", bg("-35"), bg("52.607"),
-				true, false, true, false, true, false, true, true, true, false).withPostalCode("54321").withCounty("48167", "Galveston").withTestTypes(ANTIBODY, DONT_KNOW), UTF8MediaType.APPLICATION_JSON_TYPE));
+				true, false, true, false, true, false, true, true, true, false).withPostalCode("54321").withCounty("48167", "Galveston").withTestTypes(ANTIBODY, DONT_KNOW)
+					.withReviewedAt(timestamp("2020-11-09T20:19:30-0000"))
+					.withReviewedBy("henry")
+					.withLockedTill(timestamp("2020-11-09T20:25:30-0000"))
+					.withLockedBy("margaret"), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var value = response.readEntity(FacilityValue.class);
@@ -376,6 +380,9 @@ public class FacilityResourceTest
 
 	public static Stream<Arguments> modif()
 	{
+		var from = seconds(VALUE.createdAt, -1);
+		var to = seconds(VALUE.createdAt, 1);
+
 		return Stream.of(
 			arguments(new FacilityFilter().withCity("Louisville"), 1L),
 			arguments(new FacilityFilter().withState("KY"), 1L),
@@ -387,10 +394,18 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter().withCountyName("Galveston"), 1L),
 			arguments(new FacilityFilter().withCanDonatePlasma(true), 1L),
 			arguments(new FacilityFilter().withResultNotificationEnabled(true), 1L),
+			arguments(new FacilityFilter().withReviewedAtFrom(timestamp("2020-11-09T20:19:29-0000")).withReviewedAtTo(timestamp("2020-11-09T20:19:31-0000")), 1L),
+			arguments(new FacilityFilter().withReviewedBy("henry"), 1L),
+			arguments(new FacilityFilter().withHasReviewedBy(true), 1L),
+			arguments(new FacilityFilter().withLockedTillFrom(timestamp("2020-11-09T20:25:29-0000")).withLockedTillTo(timestamp("2020-11-09T20:25:31-0000")), 1L),
+			arguments(new FacilityFilter().withHasLockedTill(true), 1L),
+			arguments(new FacilityFilter().withLockedBy("margaret"), 1L),
+			arguments(new FacilityFilter().withHasLockedBy(true), 1L),
 			arguments(new FacilityFilter().include(DONT_KNOW), 1L),
 			arguments(new FacilityFilter().include(ANTIBODY), 1L),
 			arguments(new FacilityFilter().include(ANTIBODY, DONT_KNOW), 1L),
 			arguments(new FacilityFilter().exclude(NASAL_SWAB), 1L),
+
 			arguments(new FacilityFilter().withCity("New Orleans"), 0L),
 			arguments(new FacilityFilter().withState("LA"), 0L),
 			arguments(new FacilityFilter().withHasPostalCode(false), 0L),
@@ -398,6 +413,10 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter().withHasCountyName(false), 0L),
 			arguments(new FacilityFilter().withCanDonatePlasma(false), 0L),
 			arguments(new FacilityFilter().withResultNotificationEnabled(false), 0L),
+			arguments(new FacilityFilter().withReviewedAtFrom(from).withReviewedAtTo(to), 0L),
+			arguments(new FacilityFilter().withHasReviewedBy(false), 0L),
+			arguments(new FacilityFilter().withHasLockedTill(false), 0L),
+			arguments(new FacilityFilter().withHasLockedBy(false), 0L),
 			arguments(new FacilityFilter().exclude(DONT_KNOW), 0L),
 			arguments(new FacilityFilter().exclude(ANTIBODY), 0L),
 			arguments(new FacilityFilter().exclude(ANTIBODY, DONT_KNOW), 0L),
@@ -414,7 +433,8 @@ public class FacilityResourceTest
 	@Test
 	public void modify()
 	{
-		var response = request().put(Entity.entity(VALUE.withCity("New Orleans").withState("LA").withPostalCode(null).withCounty(null, null).withCanDonatePlasma(false).withResultNotificationEnabled(false).withTestTypes(NASAL_SWAB), UTF8MediaType.APPLICATION_JSON_TYPE));
+		var response = request().put(Entity.entity(VALUE.withCity("New Orleans").withState("LA").withPostalCode(null).withCounty(null, null).withCanDonatePlasma(false).withResultNotificationEnabled(false).withTestTypes(NASAL_SWAB)
+			.withReviewedAt(VALUE.createdAt).withReviewedBy(null).withLockedTill(null).withLockedBy(null), UTF8MediaType.APPLICATION_JSON_TYPE));
 		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
 
 		var value = response.readEntity(FacilityValue.class);
@@ -426,6 +446,9 @@ public class FacilityResourceTest
 
 	public static Stream<Arguments> modify_count()
 	{
+		var from = seconds(VALUE.createdAt, -1);
+		var to = seconds(VALUE.createdAt, 1);
+
 		return Stream.of(
 			arguments(new FacilityFilter().withCity("Louisville"), 0L),
 			arguments(new FacilityFilter().withState("KY"), 0L),
@@ -437,10 +460,18 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter().withCountyName("Galveston"), 0L),
 			arguments(new FacilityFilter().withCanDonatePlasma(true), 0L),
 			arguments(new FacilityFilter().withResultNotificationEnabled(true), 0L),
+			arguments(new FacilityFilter().withReviewedAtFrom(timestamp("2020-11-09T20:19:29-0000")).withReviewedAtTo(timestamp("2020-11-09T20:19:31-0000")), 0L),
+			arguments(new FacilityFilter().withReviewedBy("henry"), 0L),
+			arguments(new FacilityFilter().withHasReviewedBy(true), 0L),
+			arguments(new FacilityFilter().withLockedTillFrom(timestamp("2020-11-09T20:25:29-0000")).withLockedTillTo(timestamp("2020-11-09T20:25:31-0000")), 0L),
+			arguments(new FacilityFilter().withHasLockedTill(true), 0L),
+			arguments(new FacilityFilter().withLockedBy("margaret"), 0L),
+			arguments(new FacilityFilter().withHasLockedBy(true), 0L),
 			arguments(new FacilityFilter().include(DONT_KNOW), 0L),
 			arguments(new FacilityFilter().include(ANTIBODY), 0L),
 			arguments(new FacilityFilter().include(ANTIBODY, DONT_KNOW), 0L),
 			arguments(new FacilityFilter().exclude(NASAL_SWAB), 0L),
+
 			arguments(new FacilityFilter().withCity("New Orleans"), 1L),
 			arguments(new FacilityFilter().withState("LA"), 1L),
 			arguments(new FacilityFilter().withPostalCode("07030"), 1L),
@@ -449,6 +480,10 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter().withHasCountyName(false), 1L),
 			arguments(new FacilityFilter().withCanDonatePlasma(false), 1L),
 			arguments(new FacilityFilter().withResultNotificationEnabled(false), 1L),
+			arguments(new FacilityFilter().withReviewedAtFrom(from).withReviewedAtTo(to), 1L),
+			arguments(new FacilityFilter().withHasReviewedBy(false), 1L),
+			arguments(new FacilityFilter().withHasLockedTill(false), 1L),
+			arguments(new FacilityFilter().withHasLockedBy(false), 1L),
 			arguments(new FacilityFilter().exclude(DONT_KNOW), 1L),
 			arguments(new FacilityFilter().exclude(ANTIBODY), 1L),
 			arguments(new FacilityFilter().exclude(ANTIBODY, DONT_KNOW), 1L),
@@ -474,6 +509,10 @@ public class FacilityResourceTest
 		Assertions.assertNull(value.countyName, "Check countyName");
 		Assertions.assertFalse(value.canDonatePlasma, "Check canDonatePlasma");
 		Assertions.assertFalse(value.resultNotificationEnabled, "Check resultNotificationEnabled");
+		assertThat(value.reviewedAt).as("Check reviewedAt").isCloseTo(VALUE.createdAt, 1000L);
+		Assertions.assertNull(value.reviewedBy, "Check reviewedBy");
+		Assertions.assertNull(value.lockedTill, "Check lockedTill");
+		Assertions.assertNull(value.lockedBy, "Check lockedBy");
 		assertThat(value.testTypes).as("Check testTypes").containsExactly(NASAL_SWAB.created());
 		check(VALUE, value);
 	}
@@ -574,6 +613,8 @@ public class FacilityResourceTest
 	{
 		var hourAgo = hourAgo();
 		var hourAhead = hourAhead();
+		var from = seconds(VALUE.createdAt, -1);
+		var to = seconds(VALUE.createdAt, 1);
 		var latUp = VALUE.latitude.add(bg("1"));
 		var latDown = VALUE.latitude.subtract(bg("1"));
 		var lngUp = VALUE.longitude.add(bg("1"));
@@ -627,6 +668,10 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter(1, 20).withCanDonatePlasma(VALUE.canDonatePlasma), 1L),
 			arguments(new FacilityFilter(1, 20).withResultNotificationEnabled(VALUE.resultNotificationEnabled), 1L),
 			arguments(new FacilityFilter(1, 20).withNotes(VALUE.notes), 1L),
+			arguments(new FacilityFilter(1, 20).withReviewedAtFrom(from).withReviewedAtTo(to), 1L),
+			arguments(new FacilityFilter(1, 20).withHasReviewedBy(false), 1L),
+			arguments(new FacilityFilter(1, 20).withHasLockedTill(false), 1L),
+			arguments(new FacilityFilter(1, 20).withHasLockedBy(false), 1L),
 			arguments(new FacilityFilter(1, 20).withActive(VALUE.active), 1L),
 			arguments(new FacilityFilter(1, 20).withHasActivatedAt(true), 1L),
 			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAgo), 1L),
@@ -691,6 +736,13 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter(1, 20).withCanDonatePlasma(!VALUE.canDonatePlasma), 0L),
 			arguments(new FacilityFilter(1, 20).withResultNotificationEnabled(!VALUE.resultNotificationEnabled), 0L),
 			arguments(new FacilityFilter(1, 20).withNotes("invalid"), 0L),
+			arguments(new FacilityFilter(1, 20).withReviewedAtFrom(timestamp("2020-11-09T20:19:29-0000")).withReviewedAtTo(timestamp("2020-11-09T20:19:31-0000")), 0L),
+			arguments(new FacilityFilter(1, 20).withReviewedBy("henry"), 0L),
+			arguments(new FacilityFilter(1, 20).withHasReviewedBy(true), 0L),
+			arguments(new FacilityFilter(1, 20).withLockedTillFrom(timestamp("2020-11-09T20:25:29-0000")).withLockedTillTo(timestamp("2020-11-09T20:25:31-0000")), 0L),
+			arguments(new FacilityFilter(1, 20).withHasLockedTill(true), 0L),
+			arguments(new FacilityFilter(1, 20).withLockedBy("margaret"), 0L),
+			arguments(new FacilityFilter(1, 20).withHasLockedBy(true), 0L),
 			arguments(new FacilityFilter(1, 20).withActive(!VALUE.active), 0L),
 			arguments(new FacilityFilter(1, 20).withHasActivatedAt(false), 0L),
 			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAhead), 0L),
@@ -1181,6 +1233,16 @@ public class FacilityResourceTest
 		Assertions.assertEquals(expected.canDonatePlasma, value.canDonatePlasma, assertId + "Check canDonatePlasma");
 		Assertions.assertEquals(expected.resultNotificationEnabled, value.resultNotificationEnabled, assertId + "Check resultNotificationEnabled");
 		Assertions.assertEquals(expected.notes, value.notes, assertId + "Check notes");
+		if (null == expected.reviewedAt)
+			Assertions.assertNull(value.reviewedAt, assertId + "Check reviewedAt");
+		else
+			assertThat(value.reviewedAt).as(assertId + "Check reviewedAt").isCloseTo(expected.reviewedAt, 500L);
+		Assertions.assertEquals(expected.reviewedBy, value.reviewedBy, assertId + "Check reviewedBy");
+		if (null == expected.lockedTill)
+			Assertions.assertNull(value.lockedTill, assertId + "Check lockedTill");
+		else
+			assertThat(value.lockedTill).as(assertId + "Check lockedTill").isCloseTo(expected.lockedTill, 500L);
+		Assertions.assertEquals(expected.lockedBy, value.lockedBy, assertId + "Check lockedBy");
 		Assertions.assertEquals(expected.active, value.active, assertId + "Check active");
 		if (null == expected.activatedAt)
 			Assertions.assertNull(value.activatedAt, assertId + "Check activatedAt");

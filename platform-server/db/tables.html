@@ -23,7 +23,7 @@
 <TR>
 <TD CLASS="header" COLSPAN="1">No.</TD><TD CLASS="header" COLSPAN="1">Table Name</TD><TD CLASS="header" COLSPAN="1">Comments</TD><TD CLASS="header" COLSPAN="1"># Records</TD></TR>
 <TR>
-<TD CLASS="detail">1</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOG">DATABASECHANGELOG</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">31</TD></TR>
+<TD CLASS="detail">1</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOG">DATABASECHANGELOG</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">32</TD></TR>
 <TR>
 <TD CLASS="detail">2</TD><TD CLASS="detail"><A HREF="#DATABASECHANGELOGLOCK">DATABASECHANGELOGLOCK</A></TD><TD CLASS="detail"></TD><TD CLASS="detail">1</TD></TR>
 <TR>
@@ -544,6 +544,14 @@
 <TD CLASS="detail">38</TD><TD CLASS="detail">county_name</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">128</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents a US county name.</TD></TR>
 <TR>
 <TD CLASS="detail">39</TD><TD CLASS="detail">postal_code</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">16</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the postal code where the facility is located.</TD></TR>
+<TR>
+<TD CLASS="detail">40</TD><TD CLASS="detail">reviewed_at</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">No</TD><TD CLASS="detail">Represents the date-time when the facility was last reviewed.</TD></TR>
+<TR>
+<TD CLASS="detail">41</TD><TD CLASS="detail">reviewed_by</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">128</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the login name of the user that last reviewed the facility.</TD></TR>
+<TR>
+<TD CLASS="detail">42</TD><TD CLASS="detail">locked_till</TD><TD CLASS="detail">DATETIME</TD><TD CLASS="detail">19</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the date-time when the facility can be released to be reviewed by another user.</TD></TR>
+<TR>
+<TD CLASS="detail">43</TD><TD CLASS="detail">locked_by</TD><TD CLASS="detail">VARCHAR</TD><TD CLASS="detail">128</TD><TD CLASS="detail">0</TD><TD CLASS="detail">Yes</TD><TD CLASS="detail">Represents the login name of the user that currently holds a lock on the facility.</TD></TR>
 </TABLE>
 <BR><TABLE CELLSPACING="0">
 <TR>

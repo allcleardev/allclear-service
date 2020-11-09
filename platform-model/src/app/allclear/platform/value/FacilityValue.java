@@ -47,6 +47,8 @@ public class FacilityValue implements Auditable, Serializable
 	public static final int MAX_LEN_DOCTOR_REFERRAL_CRITERIA = 65535;
 	public static final int MAX_LEN_INSURANCE_PROVIDERS_ACCEPTED = 65535;
 	public static final int MAX_LEN_NOTES = 65535;
+	public static final int MAX_LEN_REVIEWED_BY = 128;
+	public static final int MAX_LEN_LOCKED_BY = 128;
 
 	// Members
 	public Long id = null;
@@ -86,6 +88,10 @@ public class FacilityValue implements Auditable, Serializable
 	public boolean canDonatePlasma = false;
 	public boolean resultNotificationEnabled = false;	// ALLCLEAR-602: DLS on 7/5/2020.
 	public String notes = null;
+	public Date reviewedAt = null;
+	public String reviewedBy = null;
+	public Date lockedTill = null;
+	public String lockedBy = null;
 	public boolean active;
 	public Date activatedAt = null;	// ALLCLEAR-533: DLS on 5/12/2020.
 	public Date createdAt = null;
@@ -143,6 +149,10 @@ public class FacilityValue implements Auditable, Serializable
 	public FacilityValue withCanDonatePlasma(final boolean newValue) { canDonatePlasma = newValue; return this; }
 	public FacilityValue withResultNotificationEnabled(final boolean newValue) { resultNotificationEnabled = newValue; return this; }
 	public FacilityValue withNotes(final String newValue) { notes = newValue; return this; }
+	public FacilityValue withReviewedAt(final Date newValue) { reviewedAt = newValue; return this; }
+	public FacilityValue withReviewedBy(final String newValue) { reviewedBy = newValue; return this; }
+	public FacilityValue withLockedTill(final Date newValue) { lockedTill = newValue; return this; }
+	public FacilityValue withLockedBy(final String newValue) { lockedBy = newValue; return this; }
 	public FacilityValue withActive(final boolean newValue) { active = newValue; return this; }
 	public FacilityValue withActivatedAt(final Date newValue) { activatedAt = newValue; return this; }
 	public FacilityValue withCreatedAt(final Date newValue) { createdAt = newValue; return this; }
@@ -255,7 +265,7 @@ public class FacilityValue implements Auditable, Serializable
 		this(null, name, address, city, state, null, null, null, latitude, longitude, phone, appointmentPhone, email, url, appointmentUrl, hours, typeId, null,
 			driveThru, appointmentRequired, acceptsThirdParty, referralRequired, testCriteriaId, null, otherTestCriteria, testsPerDay,
 			governmentIdRequired, minimumAge, doctorReferralCriteria, firstResponderFriendly, telescreeningAvailable, acceptsInsurance,
-			insuranceProvidersAccepted, freeOrLowCost, canDonatePlasma, resultNotificationEnabled, notes, active, null, null, null);
+			insuranceProvidersAccepted, freeOrLowCost, canDonatePlasma, resultNotificationEnabled, notes, null, null, null, null, active, null, null, null);
 	}
 
 	public FacilityValue(final Long id,
@@ -295,6 +305,10 @@ public class FacilityValue implements Auditable, Serializable
 		final boolean canDonatePlasma,
 		final boolean resultNotificationEnabled,
 		final String notes,
+		final Date reviewedAt,
+		final String reviewedBy,
+		final Date lockedTill,
+		final String lockedBy,
 		final boolean active,
 		final Date activatedAt,
 		final Date createdAt,
@@ -337,6 +351,10 @@ public class FacilityValue implements Auditable, Serializable
 		this.canDonatePlasma = canDonatePlasma;
 		this.resultNotificationEnabled = resultNotificationEnabled;
 		this.notes = notes;
+		this.reviewedAt = reviewedAt;
+		this.reviewedBy = reviewedBy;
+		this.lockedTill = lockedTill;
+		this.lockedBy = lockedBy;
 		this.active = active;
 		this.activatedAt = activatedAt;
 		this.createdAt = createdAt;
@@ -365,6 +383,8 @@ public class FacilityValue implements Auditable, Serializable
 		doctorReferralCriteria = StringUtils.trimToNull(doctorReferralCriteria);
 		insuranceProvidersAccepted = StringUtils.trimToNull(insuranceProvidersAccepted);
 		notes = StringUtils.trimToNull(notes);
+		reviewedBy = StringUtils.trimToNull(reviewedBy);
+		lockedBy = StringUtils.trimToNull(lockedBy);
 	}
 
 	@Override
@@ -408,6 +428,10 @@ public class FacilityValue implements Auditable, Serializable
 			(canDonatePlasma == v.canDonatePlasma) &&
 			(resultNotificationEnabled == v.resultNotificationEnabled) &&
 			Objects.equals(notes, v.notes) &&
+			((reviewedAt == v.reviewedAt) || DateUtils.truncatedEquals(reviewedAt, v.reviewedAt, Calendar.SECOND)) &&
+			Objects.equals(reviewedBy, v.reviewedBy) &&
+			((lockedTill == v.lockedTill) || DateUtils.truncatedEquals(lockedTill, v.lockedTill, Calendar.SECOND)) &&
+			Objects.equals(lockedBy, v.lockedBy) &&
 			(active == v.active) &&
 			((activatedAt == v.activatedAt) || DateUtils.truncatedEquals(activatedAt, v.activatedAt, Calendar.SECOND)) &&
 			((createdAt == v.createdAt) || DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND)) &&

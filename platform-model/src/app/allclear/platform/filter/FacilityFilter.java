@@ -90,6 +90,15 @@ public class FacilityFilter extends QueryFilter
 	public Boolean resultNotificationEnabled = null;
 	public String notes = null;
 	public Boolean hasNotes = null;
+	public Date reviewedAtFrom = null;
+	public Date reviewedAtTo = null;
+	public String reviewedBy = null;
+	public Boolean hasReviewedBy = null;
+	public Boolean hasLockedTill = null;
+	public Date lockedTillFrom = null;
+	public Date lockedTillTo = null;
+	public String lockedBy = null;
+	public Boolean hasLockedBy = null;
 	public Boolean active = null;
 	public Boolean hasActivatedAt = null;
 	public Date activatedAtFrom = null;
@@ -168,6 +177,15 @@ public class FacilityFilter extends QueryFilter
 	public FacilityFilter withResultNotificationEnabled(final Boolean newValue) { resultNotificationEnabled = newValue; return this; }
 	public FacilityFilter withNotes(final String newValue) { notes = newValue; return this; }
 	public FacilityFilter withHasNotes(final Boolean newValue) { hasNotes = newValue; return this; }
+	public FacilityFilter withReviewedAtFrom(final Date newValue) { reviewedAtFrom = newValue; return this; }
+	public FacilityFilter withReviewedAtTo(final Date newValue) { reviewedAtTo = newValue; return this; }
+	public FacilityFilter withReviewedBy(final String newValue) { reviewedBy = newValue; return this; }
+	public FacilityFilter withHasReviewedBy(final Boolean newValue) { hasReviewedBy = newValue; return this; }
+	public FacilityFilter withHasLockedTill(final Boolean newValue) { hasLockedTill = newValue; return this; }
+	public FacilityFilter withLockedTillFrom(final Date newValue) { lockedTillFrom = newValue; return this; }
+	public FacilityFilter withLockedTillTo(final Date newValue) { lockedTillTo = newValue; return this; }
+	public FacilityFilter withLockedBy(final String newValue) { lockedBy = newValue; return this; }
+	public FacilityFilter withHasLockedBy(final Boolean newValue) { hasLockedBy = newValue; return this; }
 	public FacilityFilter withActive(final Boolean newValue) { active = newValue; return this; }
 	public FacilityFilter withHasActivatedAt(final Boolean newValue) { hasActivatedAt = newValue; return this; }
 	public FacilityFilter withActivatedAtFrom(final Date newValue) { activatedAtFrom = newValue; return this; }
@@ -255,6 +273,12 @@ public class FacilityFilter extends QueryFilter
 		@param canDonatePlasma represents the "can_donate_plasma" field.
 		@param resultNotificationEnabled represents the "result_notification_enabled" field.
 		@param notes represents the "notes" field.
+		@param reviewedAtFrom represents the "reviewed_at" field - lower boundary.
+		@param reviewedAtTo represents the "reviewed_at" field - upper boundary.
+		@param reviewedBy represents the "reviewed_by" field.
+		@param lockedTillFrom represents the "locked_till" field - lower boundary.
+		@param lockedTillTo represents the "locked_till" field - upper boundary.
+		@param lockedBy represents the "locked_by" field.
 		@param active represents the "active" field.
 		@param activatedAtFrom represents the "activated_at" field - lower boundary.
 		@param activatedAtTo represents the "activated_at" field - upper boundary.
@@ -306,6 +330,12 @@ public class FacilityFilter extends QueryFilter
 		final Boolean canDonatePlasma,
 		final Boolean resultNotificationEnabled,
 		final String notes,
+		final Date reviewedAtFrom,
+		final Date reviewedAtTo,
+		final String reviewedBy,
+		final Date lockedTillFrom,
+		final Date lockedTillTo,
+		final String lockedBy,
 		final Boolean active,
 		final Date activatedAtFrom,
 		final Date activatedAtTo,
@@ -355,6 +385,12 @@ public class FacilityFilter extends QueryFilter
 		this.canDonatePlasma = canDonatePlasma;
 		this.resultNotificationEnabled = resultNotificationEnabled;
 		this.notes = notes;
+		this.reviewedAtFrom = reviewedAtFrom;
+		this.reviewedAtTo = reviewedAtTo;
+		this.reviewedBy = reviewedBy;
+		this.lockedTillFrom = lockedTillFrom;
+		this.lockedTillTo = lockedTillTo;
+		this.lockedBy = lockedBy;
 		this.active = active;
 		this.activatedAtFrom = activatedAtFrom;
 		this.activatedAtTo = activatedAtTo;
@@ -393,6 +429,8 @@ public class FacilityFilter extends QueryFilter
 		doctorReferralCriteria = StringUtils.trimToNull(doctorReferralCriteria);
 		insuranceProvidersAccepted = StringUtils.trimToNull(insuranceProvidersAccepted);
 		notes = StringUtils.trimToNull(notes);
+		reviewedBy = StringUtils.trimToNull(reviewedBy);
+		lockedBy = StringUtils.trimToNull(lockedBy);
 
 		return this;
 	}

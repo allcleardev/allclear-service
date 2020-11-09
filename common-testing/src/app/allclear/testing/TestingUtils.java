@@ -221,7 +221,11 @@ public class TestingUtils
 	 * @return never NULL
 	 * @throws ParseException
 	 */
-	public static Date timestamp(String value) throws ParseException { return TIMESTAMP_FORMATTER.parse(value); }
+	public static Date timestamp(String value)
+	{
+		try { return TIMESTAMP_FORMATTER.parse(value); }
+		catch(final ParseException ex) { throw new RuntimeException(ex); }
+	}
 
 	/** Generates a date/time string from a date object based on the standard timestamp formatter.
 	 * 
@@ -238,4 +242,6 @@ public class TestingUtils
 	public static Date hourAhead() { return new Date(System.currentTimeMillis() + MILLISECONDS_HOUR); }
 	public static Date hourAgo(final Date value) { return hours(value, -1L); }
 	public static Date hourAhead(final Date value) { return hours(value, 1L); }
+	public static Date seconds(final Date value, final int i) { return seconds(value, (long) i); }
+	public static Date seconds(final Date value, final long i) { return new Date(value.getTime() + (i * 1000L)); }
 }

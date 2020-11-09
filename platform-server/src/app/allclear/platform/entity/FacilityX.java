@@ -64,6 +64,10 @@ public class FacilityX implements Serializable
 	@Column(name="can_donate_plasma", columnDefinition="BIT", nullable=false) public boolean canDonatePlasma;
 	@Column(name="result_notification_enabled", columnDefinition="BIT", nullable=false) public boolean resultNotificationEnabled;
 	@Column(name="notes", columnDefinition="TEXT", nullable=true) public String notes;
+	@Column(name="reviewed_at", columnDefinition="DATETIME", nullable=false) public Date reviewedAt;
+	@Column(name="reviewed_by", columnDefinition="VARCHAR(128)", nullable=true) public String reviewedBy;
+	@Column(name="locked_till", columnDefinition="DATETIME", nullable=true) public Date lockedTill;
+	@Column(name="locked_by", columnDefinition="VARCHAR(128)", nullable=true) public String lockedBy;
 	@Column(name="active", columnDefinition="BIT", nullable=false) public boolean active;
 	@Column(name="activated_at", columnDefinition="DATETIME", nullable=true) public Date activatedAt;
 	@Column(name="created_at", columnDefinition="DATETIME", nullable=false) public Date createdAt;
@@ -111,6 +115,10 @@ public class FacilityX implements Serializable
 			canDonatePlasma,
 			resultNotificationEnabled,
 			notes,
+			reviewedAt,
+			reviewedBy,
+			lockedTill,
+			lockedBy,
 			active,
 			activatedAt,
 			createdAt,

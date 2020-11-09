@@ -697,4 +697,24 @@
 		</rollback>
 	</changeSet>
 
+	<changeSet id="v1.1.141_FACILITY_REVIEW" author="smalleyd">
+		<addColumn tableName="facility">
+			<column name="reviewed_at" type="DATETIME" defaultValueDate="CURRENT_TIMESTAMP" remarks="Represents the date-time when the facility was last reviewed.">
+				<constraints nullable="false" />
+			</column>
+			<column name="reviewed_by" type="VARCHAR(128)" remarks="Represents the login name of the user that last reviewed the facility." />
+			<column name="locked_till" type="DATETIME" remarks="Represents the date-time when the facility can be released to be reviewed by another user." />
+			<column name="locked_by" type="VARCHAR(128)" remarks="Represents the login name of the user that currently holds a lock on the facility." />
+		</addColumn>
+
+		<sql>UPDATE facility SET reviewed_at = created_at</sql>
+
+		<rollback>
+			<dropColumn tableName="facility" columnName="locked_by"/>
+			<dropColumn tableName="facility" columnName="locked_till"/>
+			<dropColumn tableName="facility" columnName="reviewed_by"/>
+			<dropColumn tableName="facility" columnName="reviewed_at"/>
+		</rollback>
+	</changeSet>
+
 </databaseChangeLog>

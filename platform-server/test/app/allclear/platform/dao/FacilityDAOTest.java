@@ -111,7 +111,11 @@ public class FacilityDAOTest
 			"888-555-2000", "888-555-2001", "eve@test.net", "http://www.eve.net", "http://www.eve.net/calendar", "10AM to 8PM",
 			URGENT_CARE.id, false, true, false, true, OTHER.id, "My other criteria", 2500, false, 16, "Doctor requires: something",
 			true, false, true, "These providers are accepted: Two", false, true, true, "Slow notations", false)
-				.withPostalCode("56789");
+				.withPostalCode("56789")
+				.withReviewedAt(timestamp("2020-11-09T19:49:30-0000"))
+				.withReviewedBy("henry")
+				.withLockedTill(timestamp("2020-11-09T19:55:30-0000"))
+				.withLockedBy("margaret");
 	}
 
 	@Test
@@ -295,6 +299,18 @@ public class FacilityDAOTest
 	}
 
 	@Test
+	public void add_longReviewedBy()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withReviewedBy(StringUtils.repeat("A", FacilityValue.MAX_LEN_REVIEWED_BY + 1)), true));
+	}
+
+	@Test
+	public void add_longLockedBy()
+	{
+		assertThrows(ValidationException.class, () -> dao.add(createValid().withLockedBy(StringUtils.repeat("A", FacilityValue.MAX_LEN_LOCKED_BY + 1)), true));
+	}
+
+	@Test
 	public void add_invalidTestType()
 	{
 		assertThat(assertThrows(ValidationException.class, () -> dao.add(createValid().withTestTypes(List.of(new CreatedValue("$$"))), true)))
@@ -465,6 +481,8 @@ public class FacilityDAOTest
 	public static Stream<Arguments> modif()
 	{
 		var v = createValid();
+		var from = seconds(VALUE.createdAt, -1);
+		var to = seconds(VALUE.createdAt, 1);
 
 		return Stream.of(
 			arguments(new FacilityFilter().withName(VALUE.name), 1L),
@@ -473,9 +491,14 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter().withHasCountyName(false), 1L),
 			arguments(new FacilityFilter().withCanDonatePlasma(false), 1L),
 			arguments(new FacilityFilter().withResultNotificationEnabled(false), 1L),
+			arguments(new FacilityFilter().withReviewedAtFrom(from).withReviewedAtTo(to), 1L),
+			arguments(new FacilityFilter().withHasReviewedBy(false), 1L),
+			arguments(new FacilityFilter().withHasLockedTill(false), 1L),
+			arguments(new FacilityFilter().withHasLockedBy(false), 1L),
 			arguments(new FacilityFilter().withActive(VALUE.active), 1L),
 			arguments(new FacilityFilter().exclude(NASAL_SWAB), 1L),
 			arguments(new FacilityFilter().exclude(ANTIBODY), 1L),
+
 			arguments(new FacilityFilter().withName(v.name), 0L),
 			arguments(new FacilityFilter().withPostalCode(v.postalCode), 0L),
 			arguments(new FacilityFilter().withHasPostalCode(true), 0L),
@@ -485,6 +508,13 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter().withCountyName("Galveston"), 0L),
 			arguments(new FacilityFilter().withCanDonatePlasma(true), 0L),
 			arguments(new FacilityFilter().withResultNotificationEnabled(true), 0L),
+			arguments(new FacilityFilter().withReviewedAtFrom(timestamp("2020-11-09T19:49:29-0000")).withReviewedAtTo(timestamp("2020-11-09T19:49:31-0000")), 0L),
+			arguments(new FacilityFilter().withReviewedBy("henry"), 0L),
+			arguments(new FacilityFilter().withHasReviewedBy(true), 0L),
+			arguments(new FacilityFilter().withLockedTillFrom(timestamp("2020-11-09T19:55:29-0000")).withLockedTillTo(timestamp("2020-11-09T19:55:31-0000")), 0L),
+			arguments(new FacilityFilter().withHasLockedTill(true), 0L),
+			arguments(new FacilityFilter().withLockedBy("margaret"), 0L),
+			arguments(new FacilityFilter().withHasLockedBy(true), 0L),
 			arguments(new FacilityFilter().withActive(v.active), 0L),
 			arguments(new FacilityFilter().include(NASAL_SWAB), 0L),
 			arguments(new FacilityFilter().include(ANTIBODY), 0L));
@@ -514,6 +544,8 @@ public class FacilityDAOTest
 	public static Stream<Arguments> modify_count()
 	{
 		var v = createValid();
+		var from = seconds(VALUE.createdAt, -1);
+		var to = seconds(VALUE.createdAt, 1);
 
 		return Stream.of(
 			arguments(new FacilityFilter().withName(VALUE_1.name), 0L),
@@ -522,8 +554,13 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter().withHasCountyName(false), 0L),
 			arguments(new FacilityFilter().withCanDonatePlasma(false), 0L),
 			arguments(new FacilityFilter().withResultNotificationEnabled(false), 0L),
+			arguments(new FacilityFilter().withReviewedAtFrom(from).withReviewedAtTo(to), 0L),
+			arguments(new FacilityFilter().withHasReviewedBy(false), 0L),
+			arguments(new FacilityFilter().withHasLockedTill(false), 0L),
+			arguments(new FacilityFilter().withHasLockedBy(false), 0L),
 			arguments(new FacilityFilter().withActive(VALUE_1.active), 0L),
 			arguments(new FacilityFilter().exclude(NASAL_SWAB), 0L),
+
 			arguments(new FacilityFilter().exclude(ANTIBODY), 1L),
 			arguments(new FacilityFilter().withName(v.name), 1L),
 			arguments(new FacilityFilter().withPostalCode(v.postalCode), 1L),
@@ -534,6 +571,13 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter().withCountyName("Galveston"), 1L),
 			arguments(new FacilityFilter().withCanDonatePlasma(true), 1L),
 			arguments(new FacilityFilter().withResultNotificationEnabled(true), 1L),
+			arguments(new FacilityFilter().withReviewedAtFrom(timestamp("2020-11-09T19:49:29-0000")).withReviewedAtTo(timestamp("2020-11-09T19:49:31-0000")), 1L),
+			arguments(new FacilityFilter().withReviewedBy("henry"), 1L),
+			arguments(new FacilityFilter().withHasReviewedBy(true), 1L),
+			arguments(new FacilityFilter().withLockedTillFrom(timestamp("2020-11-09T19:55:29-0000")).withLockedTillTo(timestamp("2020-11-09T19:55:31-0000")), 1L),
+			arguments(new FacilityFilter().withHasLockedTill(true), 1L),
+			arguments(new FacilityFilter().withLockedBy("margaret"), 1L),
+			arguments(new FacilityFilter().withHasLockedBy(true), 1L),
 			arguments(new FacilityFilter().withActive(v.active), 1L),
 			arguments(new FacilityFilter().include(NASAL_SWAB), 1L),
 			arguments(new FacilityFilter().include(ANTIBODY), 0L));
@@ -557,6 +601,10 @@ public class FacilityDAOTest
 		Assertions.assertEquals("Galveston", record.getCountyName(), "Check countyName");
 		Assertions.assertTrue(record.isCanDonatePlasma(), "Check canDonatePlasma");
 		Assertions.assertTrue(record.isResultNotificationEnabled(), "Check resultNotificationEnabled");
+		Assertions.assertEquals(timestamp("2020-11-09T19:49:30-0000"), record.getReviewedAt(), "Check reviewedAt");
+		Assertions.assertEquals("henry", record.getReviewedBy(), "Check reviewedBy");
+		Assertions.assertEquals(timestamp("2020-11-09T19:55:30-0000"), record.getLockedTill(), "Check lockedTill");
+		Assertions.assertEquals("margaret", record.getLockedBy(), "Check lockedBy");
 		Assertions.assertFalse(record.isActive(), "Check active");
 		check(VALUE, record);
 	}
@@ -583,6 +631,8 @@ public class FacilityDAOTest
 	{
 		var hourAgo = hourAgo();
 		var hourAhead = hourAhead();
+		var from = seconds(VALUE.createdAt, -1);
+		var to = seconds(VALUE.createdAt, 1);
 		var latUp = VALUE.latitude.add(bg("1"));
 		var latDown = VALUE.latitude.subtract(bg("1"));
 		var lngUp = VALUE.longitude.add(bg("1"));
@@ -652,6 +702,13 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter(1, 20).withResultNotificationEnabled(VALUE.resultNotificationEnabled), 1L),
 			arguments(new FacilityFilter(1, 20).withNotes(VALUE.notes), 1L),
 			arguments(new FacilityFilter(1, 20).withHasNotes(true), 1L),
+			arguments(new FacilityFilter(1, 20).withReviewedAtFrom(timestamp("2020-11-09T19:49:29-0000")).withReviewedAtTo(timestamp("2020-11-09T19:49:31-0000")), 1L),
+			arguments(new FacilityFilter(1, 20).withReviewedBy("henry"), 1L),
+			arguments(new FacilityFilter(1, 20).withHasReviewedBy(true), 1L),
+			arguments(new FacilityFilter(1, 20).withLockedTillFrom(timestamp("2020-11-09T19:55:29-0000")).withLockedTillTo(timestamp("2020-11-09T19:55:31-0000")), 1L),
+			arguments(new FacilityFilter(1, 20).withHasLockedTill(true), 1L),
+			arguments(new FacilityFilter(1, 20).withLockedBy("margaret"), 1L),
+			arguments(new FacilityFilter(1, 20).withHasLockedBy(true), 1L),
 			arguments(new FacilityFilter(1, 20).withActive(VALUE.active), 1L),
 			arguments(new FacilityFilter(1, 20).withHasActivatedAt(true), 1L),
 			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAgo), 1L),
@@ -730,6 +787,10 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter(1, 20).withResultNotificationEnabled(!VALUE.resultNotificationEnabled), 0L),
 			arguments(new FacilityFilter(1, 20).withNotes("invalid"), 0L),
 			arguments(new FacilityFilter(1, 20).withHasNotes(false), 0L),
+			arguments(new FacilityFilter(1, 20).withReviewedAtFrom(from).withReviewedAtTo(to), 0L),
+			arguments(new FacilityFilter(1, 20).withHasReviewedBy(false), 0L),
+			arguments(new FacilityFilter(1, 20).withHasLockedTill(false), 0L),
+			arguments(new FacilityFilter(1, 20).withHasLockedBy(false), 0L),
 			arguments(new FacilityFilter(1, 20).withActive(!VALUE.active), 0L),
 			arguments(new FacilityFilter(1, 20).withHasActivatedAt(false), 0L),
 			arguments(new FacilityFilter(1, 20).withActivatedAtFrom(hourAhead), 0L),
@@ -1038,6 +1099,34 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter("notes", "invalid"), "notes", "ASC"),	// Invalid sort direction is converted to the default.
 			arguments(new FacilityFilter("notes", "DESC"), "notes", "DESC"),
 			arguments(new FacilityFilter("notes", "desc"), "notes", "DESC"),
+
+			arguments(new FacilityFilter("reviewedAt", null), "reviewedAt", "DESC"), // Missing sort direction is converted to the default.
+			arguments(new FacilityFilter("reviewedAt", "ASC"), "reviewedAt", "ASC"),
+			arguments(new FacilityFilter("reviewedAt", "asc"), "reviewedAt", "ASC"),
+			arguments(new FacilityFilter("reviewedAt", "invalid"), "reviewedAt", "DESC"),	// Invalid sort direction is converted to the default.
+			arguments(new FacilityFilter("reviewedAt", "DESC"), "reviewedAt", "DESC"),
+			arguments(new FacilityFilter("reviewedAt", "desc"), "reviewedAt", "DESC"),
+
+			arguments(new FacilityFilter("reviewedBy", null), "reviewedBy", "ASC"), // Missing sort direction is converted to the default.
+			arguments(new FacilityFilter("reviewedBy", "ASC"), "reviewedBy", "ASC"),
+			arguments(new FacilityFilter("reviewedBy", "asc"), "reviewedBy", "ASC"),
+			arguments(new FacilityFilter("reviewedBy", "invalid"), "reviewedBy", "ASC"),	// Invalid sort direction is converted to the default.
+			arguments(new FacilityFilter("reviewedBy", "DESC"), "reviewedBy", "DESC"),
+			arguments(new FacilityFilter("reviewedBy", "desc"), "reviewedBy", "DESC"),
+
+			arguments(new FacilityFilter("lockedTill", null), "lockedTill", "DESC"), // Missing sort direction is converted to the default.
+			arguments(new FacilityFilter("lockedTill", "ASC"), "lockedTill", "ASC"),
+			arguments(new FacilityFilter("lockedTill", "asc"), "lockedTill", "ASC"),
+			arguments(new FacilityFilter("lockedTill", "invalid"), "lockedTill", "DESC"),	// Invalid sort direction is converted to the default.
+			arguments(new FacilityFilter("lockedTill", "DESC"), "lockedTill", "DESC"),
+			arguments(new FacilityFilter("lockedTill", "desc"), "lockedTill", "DESC"),
+
+			arguments(new FacilityFilter("lockedBy", null), "lockedBy", "ASC"), // Missing sort direction is converted to the default.
+			arguments(new FacilityFilter("lockedBy", "ASC"), "lockedBy", "ASC"),
+			arguments(new FacilityFilter("lockedBy", "asc"), "lockedBy", "ASC"),
+			arguments(new FacilityFilter("lockedBy", "invalid"), "lockedBy", "ASC"),	// Invalid sort direction is converted to the default.
+			arguments(new FacilityFilter("lockedBy", "DESC"), "lockedBy", "DESC"),
+			arguments(new FacilityFilter("lockedBy", "desc"), "lockedBy", "DESC"),
 
 			arguments(new FacilityFilter("active", null), "active", "DESC"), // Missing sort direction is converted to the default.
 			arguments(new FacilityFilter("active", "ASC"), "active", "ASC"),
@@ -1428,6 +1517,10 @@ public class FacilityDAOTest
 		Assertions.assertEquals(expected.canDonatePlasma, record.isCanDonatePlasma(), assertId + "Check canDonatePlasma");
 		Assertions.assertEquals(expected.resultNotificationEnabled, record.isResultNotificationEnabled(), assertId + "Check resultNotificationEnabled");
 		Assertions.assertEquals(expected.notes, record.getNotes(), assertId + "Check notes");
+		Assertions.assertEquals(expected.reviewedAt, record.getReviewedAt(), assertId + "Check reviewedAt");
+		Assertions.assertEquals(expected.reviewedBy, record.getReviewedBy(), assertId + "Check reviewedBy");
+		Assertions.assertEquals(expected.lockedTill, record.getLockedTill(), assertId + "Check lockedTill");
+		Assertions.assertEquals(expected.lockedBy, record.getLockedBy(), assertId + "Check lockedBy");
 		Assertions.assertEquals(expected.active, record.isActive(), assertId + "Check active");
 		Assertions.assertEquals(expected.activatedAt, record.getActivatedAt(), assertId + "Check activatedAt");
 		Assertions.assertEquals(expected.createdAt, record.getCreatedAt(), assertId + "Check createdAt");
@@ -1475,6 +1568,10 @@ public class FacilityDAOTest
 		Assertions.assertEquals(expected.canDonatePlasma, value.canDonatePlasma, assertId + "Check canDonatePlasma");
 		Assertions.assertEquals(expected.resultNotificationEnabled, value.resultNotificationEnabled, assertId + "Check resultNotificationEnabled");
 		Assertions.assertEquals(expected.notes, value.notes, assertId + "Check notes");
+		Assertions.assertEquals(expected.reviewedAt, value.reviewedAt, assertId + "Check reviewedAt");
+		Assertions.assertEquals(expected.reviewedBy, value.reviewedBy, assertId + "Check reviewedBy");
+		Assertions.assertEquals(expected.lockedTill, value.lockedTill, assertId + "Check lockedTill");
+		Assertions.assertEquals(expected.lockedBy, value.lockedBy, assertId + "Check lockedBy");
 		Assertions.assertEquals(expected.active, value.active, assertId + "Check active");
 		Assertions.assertEquals(expected.activatedAt, value.activatedAt, assertId + "Check activatedAt");
 		Assertions.assertEquals(expected.createdAt, value.createdAt, assertId + "Check createdAt");

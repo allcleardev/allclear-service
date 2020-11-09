@@ -221,6 +221,26 @@ public class Facility implements Serializable
 	public String notes;
 	public void setNotes(final String newValue) { notes = newValue; }
 
+	@Column(name="reviewed_at", columnDefinition="DATETIME", nullable=false)
+	public Date getReviewedAt() { return reviewedAt; }
+	public Date reviewedAt;
+	public void setReviewedAt(final Date newValue) { reviewedAt = newValue; }
+
+	@Column(name="reviewed_by", columnDefinition="VARCHAR(128)", nullable=true)
+	public String getReviewedBy() { return reviewedBy; }
+	public String reviewedBy;
+	public void setReviewedBy(final String newValue) { reviewedBy = newValue; }
+
+	@Column(name="locked_till", columnDefinition="DATETIME", nullable=true)
+	public Date getLockedTill() { return lockedTill; }
+	public Date lockedTill;
+	public void setLockedTill(final Date newValue) { lockedTill = newValue; }
+
+	@Column(name="locked_by", columnDefinition="VARCHAR(128)", nullable=true)
+	public String getLockedBy() { return lockedBy; }
+	public String lockedBy;
+	public void setLockedBy(final String newValue) { lockedBy = newValue; }
+
 	@Column(name="active", columnDefinition="BIT", nullable=false)
 	public boolean isActive() { return active; }
 	public boolean active;
@@ -254,7 +274,7 @@ public class Facility implements Serializable
 
 	public Facility() {}
 
-	public Facility(final FacilityValue value)
+	public Facility(final FacilityValue value, final boolean admin)
 	{
 		this.name = value.name;
 		this.address = value.address;
@@ -293,6 +313,16 @@ public class Facility implements Serializable
 		this.active = value.active;
 		this.createdAt = this.updatedAt = value.createdAt = value.updatedAt = new Date();
 		this.activatedAt = value.activatedAt = (value.active ? value.createdAt : null);
+
+		if (admin && (null != value.reviewedAt))
+		{
+			this.reviewedAt = value.reviewedAt;
+			this.reviewedBy = value.reviewedBy;
+			this.lockedTill = value.lockedTill;
+			this.lockedBy = value.lockedBy;
+		}
+		else
+			this.reviewedAt = value.reviewedAt = value.createdAt;
 	}
 
 	@Override
@@ -336,6 +366,10 @@ public class Facility implements Serializable
 			(canDonatePlasma == v.canDonatePlasma) &&
 			(resultNotificationEnabled = v.resultNotificationEnabled) && 
 			Objects.equals(notes, v.notes) &&
+			DateUtils.truncatedEquals(reviewedAt, v.reviewedAt, Calendar.SECOND) &&
+			Objects.equals(reviewedBy, v.reviewedBy) &&
+			DateUtils.truncatedEquals(lockedTill, v.lockedTill, Calendar.SECOND) &&
+			Objects.equals(lockedBy, v.lockedBy) &&
 			(active == v.active) &&
 			((activatedAt == v.activatedAt) || DateUtils.truncatedEquals(activatedAt, v.activatedAt, Calendar.SECOND)) &&
 			DateUtils.truncatedEquals(createdAt, v.createdAt, Calendar.SECOND) &&
@@ -396,6 +430,21 @@ public class Facility implements Serializable
 			value.activatedAt = getActivatedAt();
 		}
 
+		if (admin && (null != value.reviewedAt))
+		{
+			setReviewedAt(value.reviewedAt);
+			setReviewedBy(value.reviewedBy);
+			setLockedTill(value.lockedTill);
+			setLockedBy(value.lockedBy);
+		}
+		else
+		{
+			value.reviewedAt = getReviewedAt();
+			value.reviewedBy = getReviewedBy();
+			value.lockedTill = getLockedTill();
+			value.lockedBy = getLockedBy();
+		}
+
 		return this;
 	}
 
@@ -440,6 +489,10 @@ public class Facility implements Serializable
 			isCanDonatePlasma(),
 			isResultNotificationEnabled(),
 			getNotes(),
+			getReviewedAt(),
+			getReviewedBy(),
+			getLockedTill(),
+			getLockedBy(),
 			isActive(),
 			getActivatedAt(),
 			getCreatedAt(),

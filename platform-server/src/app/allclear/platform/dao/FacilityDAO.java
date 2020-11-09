@@ -41,7 +41,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	private static final String SELECT = "SELECT OBJECT(o) FROM Facility o";
 	private static final String COUNT = "SELECT COUNT(o.id) FROM Facility o";
 	private static final String COUNT_ = "SELECT COUNT(o.id) FROM facility o";
-	private static final String SELECT_ = "SELECT o.id, o.name, o.address, o.city, o.state, o.postal_code, o.county_id, o.county_name, o.latitude, o.longitude, o.phone, o.appointment_phone, o.email, o.url, o.appointment_url, o.hours, o.type_id, o.drive_thru, o.appointment_required, o.accepts_third_party, o.referral_required, o.test_criteria_id, o.other_test_criteria, o.tests_per_day, o.government_id_required, o.minimum_age, o.doctor_referral_criteria, o.first_responder_friendly, o.telescreening_available, o.accepts_insurance, o.insurance_providers_accepted, o.free_or_low_cost, o.can_donate_plasma, o.result_notification_enabled, o.notes, o.active, o.activated_at, o.created_at, o.updated_at, ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:fromLongitude, :fromLatitude)) AS meters FROM facility o";
+	private static final String SELECT_ = "SELECT o.id, o.name, o.address, o.city, o.state, o.postal_code, o.county_id, o.county_name, o.latitude, o.longitude, o.phone, o.appointment_phone, o.email, o.url, o.appointment_url, o.hours, o.type_id, o.drive_thru, o.appointment_required, o.accepts_third_party, o.referral_required, o.test_criteria_id, o.other_test_criteria, o.tests_per_day, o.government_id_required, o.minimum_age, o.doctor_referral_criteria, o.first_responder_friendly, o.telescreening_available, o.accepts_insurance, o.insurance_providers_accepted, o.free_or_low_cost, o.can_donate_plasma, o.result_notification_enabled, o.notes, o.reviewed_at, o.reviewed_by, o.locked_till, o.locked_by, o.active, o.activated_at, o.created_at, o.updated_at, ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:fromLongitude, :fromLatitude)) AS meters FROM facility o";
 	private static final OrderByBuilder ORDER = new OrderByBuilder('o', 
 		"id", DESC,
 		"name", ASC,
@@ -78,6 +78,10 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		"canDonatePlasma", DESC,
 		"resultNotificationEnabled", DESC,
 		"notes", ASC,
+		"reviewedAt", DESC,
+		"reviewedBy", ASC,
+		"lockedTill", DESC,
+		"lockedBy", ASC,
 		"active", DESC,
 		"activatedAt", DESC,
 		"createdAt", DESC,
@@ -145,7 +149,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 					.withActive(false);	// Editors can only add inactive facilities.
 			}
 	
-			record = persist(new Facility(value));
+			record = persist(new Facility(value, admin));
 
 			var rec = record;	// Needs to be effectively final to be used in lambdas below.
 			add(s, value.testTypes, v -> new FacilityTestType(rec, v));
@@ -236,6 +240,8 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.ensureLength("doctorReferralCriteria", "Doctor Referral Criteria", value.doctorReferralCriteria, FacilityValue.MAX_LEN_DOCTOR_REFERRAL_CRITERIA)
 			.ensureLength("insuranceProvidersAccepted", "Insurance Providers Accepted", value.insuranceProvidersAccepted, FacilityValue.MAX_LEN_INSURANCE_PROVIDERS_ACCEPTED)
 			.ensureLength("notes", "Notes", value.notes, FacilityValue.MAX_LEN_NOTES)
+			.ensureLength("reviewedBy", "Reviewed By", value.reviewedBy, FacilityValue.MAX_LEN_REVIEWED_BY)
+			.ensureLength("lockedBy", "Locked By", value.lockedBy, FacilityValue.MAX_LEN_LOCKED_BY)
 			.check();
 
 		// Validation foreign keys.
@@ -566,6 +572,15 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.add("resultNotificationEnabled", "o.resultNotificationEnabled = :resultNotificationEnabled", filter.resultNotificationEnabled)
 			.addContains("notes", "o.notes LIKE :notes", filter.notes)
 			.addNotNull("o.notes", filter.hasNotes)
+			.add("reviewedAtFrom", "o.reviewedAt >= :reviewedAtFrom", filter.reviewedAtFrom)
+			.add("reviewedAtTo", "o.reviewedAt <= :reviewedAtTo", filter.reviewedAtTo)
+			.addContains("reviewedBy", "o.reviewedBy LIKE :reviewedBy", filter.reviewedBy)
+			.addNotNull("o.reviewedBy", filter.hasReviewedBy)
+			.addNotNull("o.lockedTill", filter.hasLockedTill)
+			.add("lockedTillFrom", "o.lockedTill >= :lockedTillFrom", filter.lockedTillFrom)
+			.add("lockedTillTo", "o.lockedTill <= :lockedTillTo", filter.lockedTillTo)
+			.addContains("lockedBy", "o.lockedBy LIKE :lockedBy", filter.lockedBy)
+			.addNotNull("o.lockedBy", filter.hasLockedBy)
 			.add("active", "o.active = :active", filter.active)
 			.addNotNull("o.activatedAt", filter.hasActivatedAt)
 			.add("activatedAtFrom", "o.activatedAt >= :activatedAtFrom", filter.activatedAtFrom)
@@ -647,6 +662,15 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.add("resultNotificationEnabled", "o.result_notification_enabled = :resultNotificationEnabled", filter.resultNotificationEnabled)
 			.addContains("notes", "o.notes LIKE :notes", filter.notes)
 			.addNotNull("o.notes", filter.hasNotes)
+			.add("reviewedAtFrom", "o.reviewed_at >= :reviewedAtFrom", filter.reviewedAtFrom)
+			.add("reviewedAtTo", "o.reviewed_at <= :reviewedAtTo", filter.reviewedAtTo)
+			.addContains("reviewedBy", "o.reviewed_by LIKE :reviewedBy", filter.reviewedBy)
+			.addNotNull("o.reviewed_by", filter.hasReviewedBy)
+			.addNotNull("o.locked_till", filter.hasLockedTill)
+			.add("lockedTillFrom", "o.locked_till >= :lockedTillFrom", filter.lockedTillFrom)
+			.add("lockedTillTo", "o.locked_till <= :lockedTillTo", filter.lockedTillTo)
+			.addContains("lockedBy", "o.locked_by LIKE :lockedBy", filter.lockedBy)
+			.addNotNull("o.locked_by", filter.hasLockedBy)
 			.add("active", "o.active = :active", filter.active)
 			.addNotNull("o.activated_at", filter.hasActivatedAt)
 			.add("activatedAtFrom", "o.activated_at >= :activatedAtFrom", filter.activatedAtFrom)
