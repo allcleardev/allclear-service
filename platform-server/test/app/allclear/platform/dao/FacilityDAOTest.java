@@ -74,6 +74,9 @@ public class FacilityDAOTest
 	private static int auditorAdds = 0;
 	private static int auditorUpdates = 0;
 	private static int auditorRemoves = 0;
+	private static int auditorLocks = 0;
+	private static int auditorReleases = 0;
+	private static int auditorReviews = 0;
 
 	@BeforeEach
 	public void beforeEach()
@@ -81,6 +84,9 @@ public class FacilityDAOTest
 		Assertions.assertEquals(auditorAdds, auditor.adds, "Check auditorAdds");
 		Assertions.assertEquals(auditorUpdates, auditor.updates, "Check auditorUpdates");
 		Assertions.assertEquals(auditorRemoves, auditor.removes, "Check auditorRemoves");
+		Assertions.assertEquals(auditorLocks, auditor.locks, "Check auditorLocks");
+		Assertions.assertEquals(auditorReleases, auditor.releases, "Check auditorReleases");
+		Assertions.assertEquals(auditorReviews, auditor.reviews, "Check auditorReviews");
 	}
 
 	@Test

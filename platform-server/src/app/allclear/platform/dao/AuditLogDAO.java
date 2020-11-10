@@ -83,6 +83,9 @@ public class AuditLogDAO extends AbstractDAO<AuditLog> implements Auditor
 	@Override public AuditLogValue add(final Auditable value) { return insert(value, "add"); }
 	@Override public AuditLogValue update(final Auditable value) { return insert(value, "update"); }
 	@Override public AuditLogValue remove(final Auditable value) { return insert(value, "remove"); }
+	@Override public AuditLogValue lock(final Auditable value) { return insert(value, "lock"); }
+	@Override public AuditLogValue release(final Auditable value) { return insert(value, "release"); }
+	@Override public AuditLogValue review(final Auditable value) { return insert(value, "review"); }
 	public AuditLogValue insert(final Auditable value, final String action)
 	{
 		var s = sessionDao.current();

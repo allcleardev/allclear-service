@@ -155,6 +155,24 @@ public class FacilityResource
 		return dao.update(populate(value), sessionDao.checkEditor().canAdmin());
 	}
 
+	@PUT
+	@Path("/lock") @Timed @UnitOfWork
+	@ApiOperation(value="lock", notes="Locks the next Facility for review by the current user.", response=FacilityValue.class)
+	public FacilityValue lock(@HeaderParam(Headers.HEADER_SESSION) final String sessionId)
+	{
+		return dao.lock(sessionDao.checkEditor().id);
+	}
+
+	@PUT
+	@Path("/review") @Timed @UnitOfWork
+	@ApiOperation(value="review", notes="Update the suppplied Facility and mark it reviewed.", response=FacilityValue.class)
+	public FacilityValue release(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final FacilityValue value)
+	{
+		var o = sessionDao.checkEditor();
+		return dao.review(value, o.id, o.canAdmin());
+	}
+
 	@DELETE
 	@Path("/{id}") @Timed @UnitOfWork
 	@ApiOperation(value="remove", notes="Removes/deactivates a single Facility by its primary key.", response=OperationResponse.class)
@@ -164,6 +182,16 @@ public class FacilityResource
 		sessionDao.checkAdmin();
 
 		return new OperationResponse(dao.remove(id));
+	}
+
+	@DELETE
+	@Path("/{id}/lock") @Timed @UnitOfWork
+	@ApiOperation(value="release", notes="Release the lock on the specified Facility by the current user.", response=OperationResponse.class)
+	public OperationResponse release(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@PathParam("id") final Long id)
+	{
+		var o = sessionDao.checkEditor();
+		return new OperationResponse(dao.release(id, o.id, o.canAdmin()));
 	}
 
 	@POST

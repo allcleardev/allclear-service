@@ -17,6 +17,7 @@ import app.allclear.common.errors.*;
 import app.allclear.common.hibernate.AbstractDAO;
 import app.allclear.common.hibernate.NativeQueryBuilder;
 import app.allclear.common.time.StopWatch;
+import app.allclear.common.value.Constants;
 import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.filter.FacilityFilter;
@@ -276,6 +277,83 @@ public class FacilityDAO extends AbstractDAO<Facility>
 		auditor.remove(value);
 
 		return true;
+	}
+
+	/** Find the next reviewable Facility that is either not locked by anyone or is presently locked by the current user.
+	 * 
+	 * @param user current user
+	 * @return NULL if no facilities are available for review.
+	 */
+	public FacilityValue lock(final String user)
+	{
+		// Get the oldest lock that the current user holds. The user must resolve/release before going on.
+		var o = namedQuery("findLockedFacility").setParameter("lockedBy", user).setMaxResults(1).uniqueResult();
+		if (null != o) return o.toValueX();
+
+		o = namedQuery("findReviewableFacility").setParameter("reviewedAt", Constants.reviewedFrom()).setMaxResults(1).uniqueResult();
+		if (null == o) return null;
+
+		var v = o.lock(user, Constants.lockedTill()).toValueX();
+
+		auditor.lock(v);
+
+		return v;
+	}
+
+	/** Release the lock on the specified facility.
+	 * 
+	 * @param id
+	 * @param user current user
+	 * @param admin
+	 * @return TRUE if the facility is found and released.
+	 * @throws NotAuthorizedException
+	 * @throws ObjectNotFoundException
+	 */
+	public boolean release(final Long id, final String user, final boolean admin) throws NotAuthorizedException, ObjectNotFoundException
+	{
+		var o = findWithException(id);
+		if (!o.locked()) return false;
+
+		if (!admin && !user.equals(o.getLockedBy()))
+			throw new NotAuthorizedException("The User, " + user + ", cannot release the lock on " + o + ".");
+
+		auditor.release(o.release().toValueX());
+
+		return true;
+	}
+
+	/** Update and mark reviewed the specified facility.
+	 * 
+	 * @param value
+	 * @param user current user
+	 * @param admin
+	 * @return the supplied value.
+	 * @throws NotAuthorizedException
+	 * @throws ObjectNotFoundException
+	 * @throws ValidationException
+	 */
+	public FacilityValue review(final FacilityValue value, final String user, final boolean admin) throws NotAuthorizedException, ObjectNotFoundException, ValidationException
+	{
+		var validator = new Validator();
+		var cmrs = _validate(value, validator);
+		var record = (Facility) cmrs[0];
+		if (null == record)
+		{
+			validator.ensureExists("id", "ID", value.id).check();
+			record = findWithException(value.id);
+		}
+
+		record.review(value, admin, user);
+
+		var rec = record;	// Needs to be effectively final to be used in lambdas below.
+		var s = currentSession();
+		update(s, record, record.getTestTypes(), value.testTypes, v -> new FacilityTestType(rec, v), "deleteFacilityTestTypes");
+		if (admin)
+			update(s, record, record.getPeople(), value.people, v -> new FacilityPeople(rec, person(s, v.id, validator), v), "deleteFacilityPeople");
+
+		auditor.review(value.withId(record.getId()));
+
+		return value;
 	}
 
 	/** Verifies that a facility with the specified ID exists.

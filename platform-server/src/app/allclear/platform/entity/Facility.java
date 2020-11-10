@@ -36,7 +36,9 @@ import app.allclear.platform.value.FacilityValue;
 @Cache(usage=CacheConcurrencyStrategy.READ_WRITE, region="facility")
 @NamedQueries({@NamedQuery(name="existFacilityById", query="SELECT o.id FROM Facility o WHERE o.id = :id"),
 	@NamedQuery(name="findActiveFacilitiesByName", query="SELECT OBJECT(o) FROM Facility o WHERE o.name LIKE :name AND o.active = TRUE ORDER BY o.name"),
-	@NamedQuery(name="findFacility", query="SELECT OBJECT(o) FROM Facility o WHERE o.name = :name")})
+	@NamedQuery(name="findFacility", query="SELECT OBJECT(o) FROM Facility o WHERE o.name = :name"),
+	@NamedQuery(name="findLockedFacility", query="SELECT OBJECT(o) FROM Facility o WHERE o.lockedBy = :lockedBy ORDER BY o.lockedTill ASC"),
+	@NamedQuery(name="findReviewableFacility", query="SELECT OBJECT(o) FROM Facility o WHERE o.reviewedAt < :reviewedAt AND ((o.lockedTill IS NULL) OR (o.lockedTill <= CURRENT_TIMESTAMP)) AND o.active = TRUE ORDER BY o.reviewedAt ASC")})
 @NamedNativeQueries({@NamedNativeQuery(name="getFacilityCitiesByState", query="SELECT o.city AS name, COUNT(o.city) AS total FROM facility o WHERE o.state = :state AND o.active = TRUE GROUP BY o.city ORDER BY o.city", resultClass=CountByName.class),
 	@NamedNativeQuery(name="getFacilityCounties", query="SELECT o.county_id AS name, COUNT(o.county_id) AS total FROM facility o WHERE o.active = TRUE AND o.county_id IS NOT NULL GROUP BY o.county_id ORDER BY o.county_id", resultClass=CountByName.class),
 	@NamedNativeQuery(name="getFacilityNamesByIds", query="SELECT o.id, o.name FROM facility o WHERE o.id IN (:ids)", resultClass=Name.class),
@@ -241,6 +243,24 @@ public class Facility implements Serializable
 	public String lockedBy;
 	public void setLockedBy(final String newValue) { lockedBy = newValue; }
 
+	public boolean locked() { return (null != lockedBy) || (null != lockedTill); }	// As long as one of the values is set, then they must be cleared to release. DLS on 11/9/2020.
+
+	public Facility lock(final String lockedBy, final Date lockedTill)
+	{
+		setLockedBy(lockedBy);
+		setLockedTill(lockedTill);
+
+		return this;
+	}
+
+	public Facility release()
+	{
+		setLockedBy(null);
+		setLockedTill(null);
+
+		return this;
+	}
+
 	@Column(name="active", columnDefinition="BIT", nullable=false)
 	public boolean isActive() { return active; }
 	public boolean active;
@@ -380,6 +400,40 @@ public class Facility implements Serializable
 
 	public Facility update(final FacilityValue value, final boolean admin)
 	{
+		update_(value, admin);
+
+		if (admin && (null != value.reviewedAt))
+		{
+			setReviewedAt(value.reviewedAt);
+			setReviewedBy(value.reviewedBy);
+			setLockedTill(value.lockedTill);
+			setLockedBy(value.lockedBy);
+		}
+		else
+		{
+			value.reviewedAt = getReviewedAt();
+			value.reviewedBy = getReviewedBy();
+			value.lockedTill = getLockedTill();
+			value.lockedBy = getLockedBy();
+		}
+
+		return this;
+	}
+
+	public Facility review(final FacilityValue value, final boolean admin, final String user)
+	{
+		update_(value, admin);
+
+		setReviewedAt(value.reviewedAt = value.updatedAt);
+		setReviewedBy(value.reviewedBy = user);
+		setLockedTill(value.lockedTill = null);	// Clear lock
+		setLockedBy(value.lockedBy = null);
+
+		return this;
+	}
+
+	private void update_(final FacilityValue value, final boolean admin)
+	{
 		setName(value.name);
 		setAddress(value.address);
 		setCity(value.city);
@@ -429,23 +483,6 @@ public class Facility implements Serializable
 			value.active = isActive();
 			value.activatedAt = getActivatedAt();
 		}
-
-		if (admin && (null != value.reviewedAt))
-		{
-			setReviewedAt(value.reviewedAt);
-			setReviewedBy(value.reviewedBy);
-			setLockedTill(value.lockedTill);
-			setLockedBy(value.lockedBy);
-		}
-		else
-		{
-			value.reviewedAt = getReviewedAt();
-			value.reviewedBy = getReviewedBy();
-			value.lockedTill = getLockedTill();
-			value.lockedBy = getLockedBy();
-		}
-
-		return this;
 	}
 
 	@Transient
