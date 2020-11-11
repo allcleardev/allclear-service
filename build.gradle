@@ -5,7 +5,7 @@ subprojects {
   apply plugin: 'java'
   apply plugin: 'eclipse'
   group = 'io.allclear'
-  version = '1.1.140'
+  version = '1.1.141'
 
   sourceCompatibility = 1.11
   targetCompatibility = 1.11
