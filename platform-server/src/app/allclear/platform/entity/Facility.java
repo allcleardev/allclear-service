@@ -237,6 +237,7 @@ public class Facility implements Serializable
 	public Date getLockedTill() { return lockedTill; }
 	public Date lockedTill;
 	public void setLockedTill(final Date newValue) { lockedTill = newValue; }
+	public Facility lockedTill(final Date newValue) { setLockedTill(newValue); return this; }
 
 	@Column(name="locked_by", columnDefinition="VARCHAR(128)", nullable=true)
 	public String getLockedBy() { return lockedBy; }

@@ -288,7 +288,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	{
 		// Get the oldest lock that the current user holds. The user must resolve/release before going on.
 		var o = namedQuery("findLockedFacility").setParameter("lockedBy", user).setMaxResults(1).uniqueResult();
-		if (null != o) return o.toValueX();
+		if (null != o) return o.lockedTill(Constants.lockedTill()).toValueX();	// Extend lock
 
 		o = namedQuery("findReviewableFacility").setParameter("reviewedAt", Constants.reviewedFrom()).setMaxResults(1).uniqueResult();
 		if (null == o) return null;

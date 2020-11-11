@@ -1527,6 +1527,7 @@ public class FacilityDAOTest
 		var v = dao.lock("dundee");	// Already has a reservation.
 		Assertions.assertNotNull(v);
 		Assertions.assertEquals("Test Center 0", v.name, "Check name");
+		assertThat(v.lockedTill).as("Check lockedTill").isAfter(VALUE.lockedTill).isCloseTo(Constants.lockedTill(), 500L);	// Lock is extended.
 	}
 
 	@Test
