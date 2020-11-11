@@ -224,7 +224,8 @@ var FacilitiesHandler = new ListTemplate({
 	ROW_ACTIONS: [ new RowAction('openChangeRequests', 'Change Requests'),
 	               new RowAction('openExperiences', 'Experiences'),
 	               new RowAction('calcRatings', 'Calc Ratings'),
-	               new RowAction('openPatients', 'Patients') ],
+	               new RowAction('openPatients', 'Patients'),
+	               new RowAction('release', 'Release', 'lockedBy') ],
 
 	geocode: function(c, e) { this.GEOCODE.open(); },
 	review: function(c, e) { FacilitiesReviewer.open(); },
@@ -232,6 +233,7 @@ var FacilitiesHandler = new ListTemplate({
 	openExperiences: (c, e) => ExperiencesHandler.filter({ facilityId: e.myRecord.id }, undefined, { facilityName: true }),
 	calcRatings: function(c, e) { this.CALC_RATINGS.open(e.myRecord.id); },
 	openPatients: (c, e) => PatientsHandler.filter({ facilityId: e.myRecord.id }, undefined, { facilityName: true }),
+	release: function(c, e) { this.remove('facilities', e.myRecord.id + '/lock'); },
 
 	onListPostLoad: c => c.defaultValue = { active: FACILITY_ACTIVE_DEFAULT },
 	onEditorPostLoad: function(c) {
@@ -589,8 +591,14 @@ var FacilitiesReviewer = new EditTemplate({
 	RESOURCE: 'facilities/review',
 
 	EDIT_METHOD: 'put',
+	CAPTION_CANCEL: 'Release',
 
 	open: function() { this.run({ url: 'facilities/lock', filter: { isAdd: false } }, undefined, 'get'); },
+
+	// Release lock before closing.
+	handleCancel: function(c) {
+		this.remove('facilities', c.value.id + '/lock', data => c.body.closeMe());
+	},
 
 	FIELDS: FacilitiesHandler.FIELDS.map(v => {
 		if (['reviewedBy', 'lockedBy'].includes(v.id))
@@ -599,7 +607,7 @@ var FacilitiesReviewer = new EditTemplate({
 			return new TextField(v.id, v.caption, 'toDateTime');
 
 		return v;
-	});
+	})
 });
 
 var FacilitateHandler = new ListTemplate({
