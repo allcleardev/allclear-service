@@ -166,7 +166,7 @@ public class FacilityResource
 	@PUT
 	@Path("/review") @Timed @UnitOfWork
 	@ApiOperation(value="review", notes="Update the suppplied Facility and mark it reviewed.", response=FacilityValue.class)
-	public FacilityValue release(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+	public FacilityValue review(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
 		final FacilityValue value)
 	{
 		var o = sessionDao.checkEditor();
