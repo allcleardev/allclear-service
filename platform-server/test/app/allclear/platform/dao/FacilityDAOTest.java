@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.stream.Stream;
 import javax.persistence.PersistenceException;
 
+import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,8 +26,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
 import app.allclear.junit.hibernate.*;
+import app.allclear.common.errors.NotAuthorizedException;
 import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
+import app.allclear.common.value.Constants;
 import app.allclear.common.value.CreatedValue;
 import app.allclear.platform.App;
 import app.allclear.platform.entity.CountByName;
@@ -58,6 +61,7 @@ public class FacilityDAOTest
 	private static final TestAuditor auditor = new TestAuditor();
 	private static FacilityValue VALUE = null;
 	private static FacilityValue VALUE_1 = null;
+	private static FacilityValue VALUE_2 = null;
 	private static PeopleValue PERSON = null;
 	private static PeopleValue PERSON_1 = null;
 
@@ -118,9 +122,9 @@ public class FacilityDAOTest
 			URGENT_CARE.id, false, true, false, true, OTHER.id, "My other criteria", 2500, false, 16, "Doctor requires: something",
 			true, false, true, "These providers are accepted: Two", false, true, true, "Slow notations", false)
 				.withPostalCode("56789")
-				.withReviewedAt(timestamp("2020-11-09T19:49:30-0000"))
+				.withReviewedAt(timestamp("2020-11-05T19:49:30-0000"))
 				.withReviewedBy("henry")
-				.withLockedTill(timestamp("2020-11-09T19:55:30-0000"))
+				.withLockedTill(timestamp("2020-11-05T19:55:30-0000"))
 				.withLockedBy("margaret");
 	}
 
@@ -484,6 +488,12 @@ public class FacilityDAOTest
 		assertThat(dao.getDistinctStates()).containsExactly(new CountByName("FL", 1L));
 	}
 
+	@Test
+	public void lock()
+	{
+		Assertions.assertNull(dao.lock("margaret"));	// Not reviewable yet.
+	}
+
 	public static Stream<Arguments> modif()
 	{
 		var v = createValid();
@@ -514,10 +524,10 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter().withCountyName("Galveston"), 0L),
 			arguments(new FacilityFilter().withCanDonatePlasma(true), 0L),
 			arguments(new FacilityFilter().withResultNotificationEnabled(true), 0L),
-			arguments(new FacilityFilter().withReviewedAtFrom(timestamp("2020-11-09T19:49:29-0000")).withReviewedAtTo(timestamp("2020-11-09T19:49:31-0000")), 0L),
+			arguments(new FacilityFilter().withReviewedAtFrom(timestamp("2020-11-05T19:49:29-0000")).withReviewedAtTo(timestamp("2020-11-05T19:49:31-0000")), 0L),
 			arguments(new FacilityFilter().withReviewedBy("henry"), 0L),
 			arguments(new FacilityFilter().withHasReviewedBy(true), 0L),
-			arguments(new FacilityFilter().withLockedTillFrom(timestamp("2020-11-09T19:55:29-0000")).withLockedTillTo(timestamp("2020-11-09T19:55:31-0000")), 0L),
+			arguments(new FacilityFilter().withLockedTillFrom(timestamp("2020-11-05T19:55:29-0000")).withLockedTillTo(timestamp("2020-11-05T19:55:31-0000")), 0L),
 			arguments(new FacilityFilter().withHasLockedTill(true), 0L),
 			arguments(new FacilityFilter().withLockedBy("margaret"), 0L),
 			arguments(new FacilityFilter().withHasLockedBy(true), 0L),
@@ -577,10 +587,10 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter().withCountyName("Galveston"), 1L),
 			arguments(new FacilityFilter().withCanDonatePlasma(true), 1L),
 			arguments(new FacilityFilter().withResultNotificationEnabled(true), 1L),
-			arguments(new FacilityFilter().withReviewedAtFrom(timestamp("2020-11-09T19:49:29-0000")).withReviewedAtTo(timestamp("2020-11-09T19:49:31-0000")), 1L),
+			arguments(new FacilityFilter().withReviewedAtFrom(timestamp("2020-11-05T19:49:29-0000")).withReviewedAtTo(timestamp("2020-11-05T19:49:31-0000")), 1L),
 			arguments(new FacilityFilter().withReviewedBy("henry"), 1L),
 			arguments(new FacilityFilter().withHasReviewedBy(true), 1L),
-			arguments(new FacilityFilter().withLockedTillFrom(timestamp("2020-11-09T19:55:29-0000")).withLockedTillTo(timestamp("2020-11-09T19:55:31-0000")), 1L),
+			arguments(new FacilityFilter().withLockedTillFrom(timestamp("2020-11-05T19:55:29-0000")).withLockedTillTo(timestamp("2020-11-05T19:55:31-0000")), 1L),
 			arguments(new FacilityFilter().withHasLockedTill(true), 1L),
 			arguments(new FacilityFilter().withLockedBy("margaret"), 1L),
 			arguments(new FacilityFilter().withHasLockedBy(true), 1L),
@@ -607,9 +617,9 @@ public class FacilityDAOTest
 		Assertions.assertEquals("Galveston", record.getCountyName(), "Check countyName");
 		Assertions.assertTrue(record.isCanDonatePlasma(), "Check canDonatePlasma");
 		Assertions.assertTrue(record.isResultNotificationEnabled(), "Check resultNotificationEnabled");
-		Assertions.assertEquals(timestamp("2020-11-09T19:49:30-0000"), record.getReviewedAt(), "Check reviewedAt");
+		Assertions.assertEquals(timestamp("2020-11-05T19:49:30-0000"), record.getReviewedAt(), "Check reviewedAt");
 		Assertions.assertEquals("henry", record.getReviewedBy(), "Check reviewedBy");
-		Assertions.assertEquals(timestamp("2020-11-09T19:55:30-0000"), record.getLockedTill(), "Check lockedTill");
+		Assertions.assertEquals(timestamp("2020-11-05T19:55:30-0000"), record.getLockedTill(), "Check lockedTill");
 		Assertions.assertEquals("margaret", record.getLockedBy(), "Check lockedBy");
 		Assertions.assertFalse(record.isActive(), "Check active");
 		check(VALUE, record);
@@ -708,10 +718,10 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter(1, 20).withResultNotificationEnabled(VALUE.resultNotificationEnabled), 1L),
 			arguments(new FacilityFilter(1, 20).withNotes(VALUE.notes), 1L),
 			arguments(new FacilityFilter(1, 20).withHasNotes(true), 1L),
-			arguments(new FacilityFilter(1, 20).withReviewedAtFrom(timestamp("2020-11-09T19:49:29-0000")).withReviewedAtTo(timestamp("2020-11-09T19:49:31-0000")), 1L),
+			arguments(new FacilityFilter(1, 20).withReviewedAtFrom(timestamp("2020-11-05T19:49:29-0000")).withReviewedAtTo(timestamp("2020-11-05T19:49:31-0000")), 1L),
 			arguments(new FacilityFilter(1, 20).withReviewedBy("henry"), 1L),
 			arguments(new FacilityFilter(1, 20).withHasReviewedBy(true), 1L),
-			arguments(new FacilityFilter(1, 20).withLockedTillFrom(timestamp("2020-11-09T19:55:29-0000")).withLockedTillTo(timestamp("2020-11-09T19:55:31-0000")), 1L),
+			arguments(new FacilityFilter(1, 20).withLockedTillFrom(timestamp("2020-11-05T19:55:29-0000")).withLockedTillTo(timestamp("2020-11-05T19:55:31-0000")), 1L),
 			arguments(new FacilityFilter(1, 20).withHasLockedTill(true), 1L),
 			arguments(new FacilityFilter(1, 20).withLockedBy("margaret"), 1L),
 			arguments(new FacilityFilter(1, 20).withHasLockedBy(true), 1L),
@@ -1473,6 +1483,286 @@ public class FacilityDAOTest
 	{
 		z_11_modify_as_admin_getDistinctCounties();	// No change
 	}
+
+	@Test
+	public void z_19_clear()
+	{
+		Assertions.assertEquals(4, clear());
+	}
+
+	@Test
+	public void z_20_add()
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			var o = new FacilityValue(i);
+			if (0 == (i % 2)) o.reviewedAt = utc(2020, 10, i);
+
+			dao.add(o, true);
+		}
+
+		auditorAdds+= 10;
+	}
+
+	@Test
+	public void z_20_lock_00()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 0L);
+
+		Assertions.assertNotNull(VALUE = dao.lock("dundee"), "Exists");
+		Assertions.assertEquals("Test Center 0", VALUE.name, "Check name");
+		assertThat(VALUE.reviewedAt).as("Check reviewedAt").isCloseTo(utc(2020, 10, 0), 100L);
+		Assertions.assertNull(VALUE.reviewedBy, "Check reviewedBy");
+		assertThat(VALUE.lockedTill).as("Check lockedTill").isCloseTo(Constants.lockedTill(), 500L);
+		Assertions.assertEquals("dundee", VALUE.lockedBy, "Check lockedBy");
+
+		auditorLocks++;
+	}
+
+	@Test
+	public void z_20_lock_01()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 1L);
+
+		var v = dao.lock("dundee");	// Already has a reservation.
+		Assertions.assertNotNull(v);
+		Assertions.assertEquals("Test Center 0", v.name, "Check name");
+	}
+
+	@Test
+	public void z_20_lock_02()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 1L);
+
+		Assertions.assertNotNull(VALUE_1 = dao.lock("peggy"), "Exists");
+		Assertions.assertEquals("Test Center 2", VALUE_1.name, "Check name");
+		assertThat(VALUE_1.reviewedAt).as("Check reviewedAt").isCloseTo(utc(2020, 10, 2), 100L);
+		Assertions.assertNull(VALUE_1.reviewedBy, "Check reviewedBy");
+		assertThat(VALUE_1.lockedTill).as("Check lockedTill").isCloseTo(Constants.lockedTill(), 500L);
+		Assertions.assertEquals("peggy", VALUE_1.lockedBy, "Check lockedBy");
+
+		auditorLocks++;
+	}
+
+	@Test
+	public void z_20_lock_02_release_00()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 2L);
+
+		assertThat(assertThrows(NotAuthorizedException.class, () -> dao.release(VALUE_1.id, "dundee", false)))
+			.hasMessage("The User, dundee, cannot release the lock on { id: 8, name: Test Center 2 }.");
+	}
+
+	@Test
+	public void z_20_lock_02_release_01()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 2L);
+
+		Assertions.assertFalse(dao.release(VALUE_1.id + 1L, "dundee", false));
+	}
+
+	@Test
+	public void z_20_lock_02_release_02()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 2L);
+
+		Assertions.assertTrue(dao.release(VALUE_1.id, "dundee", true));
+
+		auditorReleases++;
+	}
+
+	@Test
+	public void z_20_lock_03()
+	{
+		z_20_lock_02();
+	}
+
+	@Test
+	public void z_20_lock_03_release()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 2L);
+		count(new FacilityFilter().withHasReviewedBy(true), 0L);
+
+		Assertions.assertTrue(dao.release(VALUE_1.id, "peggy", false));
+
+		auditorReleases++;
+	}
+
+	@Test
+	public void z_20_lock_04()
+	{
+		z_20_lock_02();
+	}
+
+	@Test
+	public void z_20_review_00_missing_name()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.review(cloned().withName(null), "dundee", false)))
+			.hasMessage("Name is not set.");
+	}
+
+	@Test
+	public void z_20_review_00_missing_id()
+	{
+		assertThat(assertThrows(ValidationException.class, () -> dao.review(cloned().withId(null).withName("Different"), "dundee", false)))
+			.hasMessage("ID is not set.");
+	}
+
+	@Test
+	public void z_20_review_00_invalid_user()
+	{
+		assertThat(assertThrows(NotAuthorizedException.class, () -> dao.review(cloned().withId(null), "roger", false)))
+			.hasMessage("The User, roger, does not hold a the lock on { id: 6, name: Test Center 0 }.");
+	}
+
+	@Test
+	public void z_20_review_01()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 2L);
+		count(new FacilityFilter().withHasReviewedBy(true), 0L);
+
+		var v = dao.review(cloned().withId(null), "roger", true);
+		Assertions.assertNotNull(v, "Exists");
+		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
+		assertThat(v.reviewedAt).as("Check reviewedAt").isNotNull().isAfter(VALUE.reviewedAt).isCloseTo(new Date(), 500L);
+		Assertions.assertEquals("roger", v.reviewedBy, "Check reviewedBy");
+		Assertions.assertNull(v.lockedTill, "Check lockedTill");
+		Assertions.assertNull(v.lockedBy, "Check lockedBy");
+
+		auditorReviews++;
+	}
+
+	@Test
+	public void z_20_review_02()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 1L);
+		count(new FacilityFilter().withHasReviewedBy(true), 1L);
+
+		var v = dao.review(VALUE_1, "peggy", false);
+		Assertions.assertNotNull(v, "Exists");
+		Assertions.assertEquals(VALUE_1.id, v.id, "Check ID");
+		assertThat(v.reviewedAt).as("Check reviewedAt").isNotNull().isAfter(VALUE.reviewedAt).isCloseTo(new Date(), 500L);
+		Assertions.assertEquals("peggy", v.reviewedBy, "Check reviewedBy");
+		Assertions.assertNull(v.lockedTill, "Check lockedTill");
+		Assertions.assertNull(v.lockedBy, "Check lockedBy");
+
+		auditorReviews++;
+	}
+
+	@Test
+	public void z_21_lock_00()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 0L);
+		count(new FacilityFilter().withHasReviewedBy(true), 2L);
+
+		Assertions.assertNotNull(VALUE = dao.lock("jeremy0"));
+		Assertions.assertEquals("Test Center 4", VALUE.name, "Check name");
+
+		auditorLocks++;
+	}
+
+	@Test
+	public void z_21_lock_01()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 1L);
+		count(new FacilityFilter().withHasReviewedBy(true), 2L);
+
+		Assertions.assertNotNull(VALUE_1 = dao.lock("jeremy1"));
+		Assertions.assertEquals("Test Center 6", VALUE_1.name, "Check name");
+
+		auditorLocks++;
+	}
+
+	@Test
+	public void z_21_lock_02()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 2L);
+		count(new FacilityFilter().withHasReviewedBy(true), 2L);
+
+		Assertions.assertNotNull(VALUE_2 = dao.lock("jeremy2"));
+		Assertions.assertEquals("Test Center 8", VALUE_2.name, "Check name");
+
+		auditorLocks++;
+	}
+
+	@Test
+	public void z_21_lock_03()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 3L);
+		count(new FacilityFilter().withHasReviewedBy(true), 2L);
+
+		Assertions.assertNull(dao.lock("jeremy3"));	// No more to reserve/lock.
+	}
+
+	@Test
+	public void z_21_review_00()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 3L);
+		count(new FacilityFilter().withHasReviewedBy(true), 2L);
+
+		var v = dao.review(VALUE_2.withName("Review 0"), "jeremy2", false);
+		Assertions.assertNotNull(v, "Exists");
+		Assertions.assertEquals("Review 0", v.name, "Check name");
+		assertThat(v.reviewedAt).as("Check reviewedAt").isNotNull().isCloseTo(new Date(), 500L);
+		Assertions.assertEquals("jeremy2", v.reviewedBy, "Check reviewedBy");
+		Assertions.assertNull(v.lockedTill, "Check lockedTill");
+		Assertions.assertNull(v.lockedBy, "Check lockedBy");
+
+		auditorReviews++;
+	}
+
+	@Test
+	public void z_21_review_01()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 2L);
+		count(new FacilityFilter().withHasReviewedBy(true), 3L);
+
+		var v = dao.review(VALUE_1.withName("Review 1"), "jeremy1", false);
+		Assertions.assertNotNull(v, "Exists");
+		Assertions.assertEquals("Review 1", v.name, "Check name");
+		assertThat(v.reviewedAt).as("Check reviewedAt").isNotNull().isCloseTo(new Date(), 500L);
+		Assertions.assertEquals("jeremy1", v.reviewedBy, "Check reviewedBy");
+		Assertions.assertNull(v.lockedTill, "Check lockedTill");
+		Assertions.assertNull(v.lockedBy, "Check lockedBy");
+
+		auditorReviews++;
+	}
+
+	@Test
+	public void z_21_review_02()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 1L);
+		count(new FacilityFilter().withHasReviewedBy(true), 4L);
+
+		var v = dao.review(VALUE.withName("Review 2"), "jeremy0", false);
+		Assertions.assertNotNull(v, "Exists");
+		Assertions.assertEquals("Review 2", v.name, "Check name");
+		assertThat(v.reviewedAt).as("Check reviewedAt").isNotNull().isCloseTo(new Date(), 500L);
+		Assertions.assertEquals("jeremy0", v.reviewedBy, "Check reviewedBy");
+		Assertions.assertNull(v.lockedTill, "Check lockedTill");
+		Assertions.assertNull(v.lockedBy, "Check lockedBy");
+
+		auditorReviews++;
+	}
+
+	@Test
+	public void z_22_lock()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 0L);
+		count(new FacilityFilter().withHasReviewedBy(true), 5L);
+
+		Assertions.assertNull(dao.lock("cindy"));
+	}
+
+	@Test
+	public void z_29_clear()
+	{
+		Assertions.assertEquals(10, clear());
+	}
+
+	private FacilityValue cloned() { return SerializationUtils.clone(VALUE); }
+
+	private int clear() { return transRule.getSession().createQuery("DELETE FROM Facility o").executeUpdate(); }
 
 	/** Helper method - calls the DAO count call and compares the expected total value.
 	 *

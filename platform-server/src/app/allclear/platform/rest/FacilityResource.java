@@ -122,6 +122,14 @@ public class FacilityResource
 	public List<CountByName> getDistinctCounties() { return dao.getDistinctCounties(); }
 
 	@GET
+	@Path("/lock") @Timed @UnitOfWork	// NOT read-only: needs to set the locks fields. DLS on 11/11/2020.
+	@ApiOperation(value="lock", notes="Locks the next Facility for review by the current user.", response=FacilityValue.class)
+	public FacilityValue lock(@HeaderParam(Headers.HEADER_SESSION) final String sessionId)
+	{
+		return dao.lock(sessionDao.checkEditor().id);
+	}
+
+	@GET
 	@Path("/name") @Timed @UnitOfWork(readOnly=true, transactional=false)
 	@ApiOperation(value="get", notes="Gets a single Facility by its name.", response=FacilityValue.class)
 	public FacilityValue get(@QueryParam("name") final String name) throws ObjectNotFoundException
@@ -153,14 +161,6 @@ public class FacilityResource
 		final FacilityValue value) throws ValidationException
 	{
 		return dao.update(populate(value), sessionDao.checkEditor().canAdmin());
-	}
-
-	@PUT
-	@Path("/lock") @Timed @UnitOfWork
-	@ApiOperation(value="lock", notes="Locks the next Facility for review by the current user.", response=FacilityValue.class)
-	public FacilityValue lock(@HeaderParam(Headers.HEADER_SESSION) final String sessionId)
-	{
-		return dao.lock(sessionDao.checkEditor().id);
 	}
 
 	@PUT

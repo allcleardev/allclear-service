@@ -336,22 +336,25 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	{
 		var validator = new Validator();
 		var cmrs = _validate(value, validator);
-		var record = (Facility) cmrs[0];
-		if (null == record)
+		var o = (Facility) cmrs[0];
+		if (null == o)
 		{
 			validator.ensureExists("id", "ID", value.id).check();
-			record = findWithException(value.id);
+			o = findWithException(value.id);
 		}
 
-		record.review(value, admin, user);
+		if (!admin && !user.equals(o.getLockedBy()))
+			throw new NotAuthorizedException("The User, " + user + ", does not hold a the lock on " + o + ".");
 
-		var rec = record;	// Needs to be effectively final to be used in lambdas below.
+		o.review(value, admin, user);
+
+		var rec = o;	// Needs to be effectively final to be used in lambdas below.
 		var s = currentSession();
-		update(s, record, record.getTestTypes(), value.testTypes, v -> new FacilityTestType(rec, v), "deleteFacilityTestTypes");
+		update(s, o, o.getTestTypes(), value.testTypes, v -> new FacilityTestType(rec, v), "deleteFacilityTestTypes");
 		if (admin)
-			update(s, record, record.getPeople(), value.people, v -> new FacilityPeople(rec, person(s, v.id, validator), v), "deleteFacilityPeople");
+			update(s, o, o.getPeople(), value.people, v -> new FacilityPeople(rec, person(s, v.id, validator), v), "deleteFacilityPeople");
 
-		auditor.review(value.withId(record.getId()));
+		auditor.review(value.withId(o.getId()));
 
 		return value;
 	}

@@ -28,6 +28,7 @@ import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.*;
 import app.allclear.common.mediatype.UTF8MediaType;
 import app.allclear.common.redis.FakeRedisClient;
+import app.allclear.common.value.Constants;
 import app.allclear.common.value.OperationResponse;
 import app.allclear.google.client.MapClient;
 import app.allclear.google.model.GeocodeResponse;
@@ -67,6 +68,7 @@ public class FacilityResourceTest
 	private static SessionValue ADMIN = null;
 	private static CustomerValue CUSTOMER = null;
 	private static SessionValue EDITOR = null;
+	private static SessionValue EDITOR_1 = null;
 	private static SessionValue PERSON = null;
 	private static SessionValue PERSON_UNRESTRICTED = null;
 
@@ -123,6 +125,7 @@ public class FacilityResourceTest
 	{
 		CUSTOMER = new CustomerValue("customer");
 		EDITOR = sessionDao.add(new AdminValue("editor", false, true), false);
+		EDITOR_1 = sessionDao.add(new AdminValue("editor1", false, true), false);
 		sessionDao.current(ADMIN = sessionDao.add(new AdminValue("admin"), false));
 
 		var now = new Date();
@@ -1181,6 +1184,181 @@ public class FacilityResourceTest
 
 		search(new FacilityFilter().withName("byEditor"), 1L);
 	}
+
+	@Test
+	public void z_19_clear()
+	{
+		Assertions.assertEquals(2, clear());
+	}
+
+	@Test
+	public void z_20_add()
+	{
+		for (int i = 0; i < 10; i++)
+		{
+			var o = new FacilityValue(i);
+			if (1 == (i % 2)) o.reviewedAt = utc(2020, 10, 10 - i);
+
+			dao.add(o, true);
+		}
+
+		auditorAdds+= 10;
+	}
+
+	public static Stream<SessionValue> z_20_lock_fail() { return Stream.of(PERSON, null); }
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_20_lock_fail(final SessionValue s)
+	{
+		if (null != s) sessionDao.current(s);
+		else sessionDao.clear();
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request("lock").get().getStatus());
+	}
+
+	public static Stream<Arguments> z_20_lock_success()
+	{
+		VALUE = VALUE_1 = null;
+
+		return Stream.of(
+			arguments(EDITOR, 9, 0L),
+			arguments(EDITOR_1, 7, 1L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_20_lock_success(final SessionValue s, final int i, final long count)
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), count);
+		count(new FacilityFilter().withHasReviewedBy(true), 0L);
+
+		sessionDao.current(s);
+
+		var response = request("lock").get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var v = response.readEntity(FacilityValue.class);
+		Assertions.assertNotNull(v, "Exists");
+		Assertions.assertEquals("Test Center " + i, v.name, "Check name");
+		assertThat(v.reviewedAt).as("Check reviewedAt").isCloseTo(utc(2020, 10, 10 - i), 100L);
+		Assertions.assertNull(v.reviewedBy, "Check reviewedBy");
+		assertThat(v.lockedTill).as("Check lockedTill").isCloseTo(Constants.lockedTill(), 500L);
+		Assertions.assertEquals(s.admin.id, v.lockedBy, "Check lockedBy");
+
+		if (null == VALUE) VALUE = v;
+		else VALUE_1 = v;
+
+		auditorLocks++;
+	}
+
+	public static Stream<Arguments> z_20_release_fail()
+	{
+		return Stream.of(
+			arguments(PERSON, VALUE),
+			arguments(null, VALUE),
+			arguments(EDITOR_1, VALUE),
+			arguments(EDITOR, VALUE_1));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_20_release_fail(final SessionValue s, final FacilityValue v)
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 2L);
+		count(new FacilityFilter().withHasReviewedBy(true), 0L);
+
+		if (null != s) sessionDao.current(s);
+		else sessionDao.clear();
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request(v.id + "/lock").delete().getStatus());
+	}
+
+	public static Stream<Arguments> z_20_release_success()
+	{
+		return Stream.of(
+			arguments(ADMIN, VALUE, true, 2L),
+			arguments(EDITOR, VALUE, false, 1L),
+			arguments(EDITOR_1, VALUE_1, true, 1L),
+			arguments(ADMIN, VALUE_1, false, 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_20_release_success(final SessionValue s, final FacilityValue v, final boolean flag, final long count)
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), count);
+		count(new FacilityFilter().withHasReviewedBy(true), 0L);
+
+		sessionDao.current(s);
+
+		var response = request(v.id + "/lock").delete();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var o = response.readEntity(OperationResponse.class);
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals(flag, o.operation);
+
+		if (flag) auditorReleases++;
+	}
+
+	@ParameterizedTest
+	@MethodSource("z_20_lock_success")
+	public void z_21_lock_success(final SessionValue s, final int i, final long count)
+	{
+		z_20_lock_success(s, i, count);
+	}
+
+	@ParameterizedTest
+	@MethodSource("z_20_release_fail")
+	public void z_21_review_fail(final SessionValue s, final FacilityValue v)
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 2L);
+		count(new FacilityFilter().withHasReviewedBy(true), 0L);
+
+		if (null != s) sessionDao.current(s);
+		else sessionDao.clear();
+
+		Assertions.assertEquals(HTTP_STATUS_NOT_AUTHORIZED, request("review").put(Entity.json(v)).getStatus());
+	}
+
+	public static Stream<Arguments> z_21_review_success()
+	{
+		return Stream.of(
+			arguments(ADMIN, VALUE, HTTP_STATUS_OK, 2L),
+			arguments(EDITOR, VALUE, HTTP_STATUS_NOT_AUTHORIZED, 1L),
+			arguments(EDITOR_1, VALUE_1, HTTP_STATUS_OK, 1L),
+			arguments(ADMIN, VALUE_1, HTTP_STATUS_OK, 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_21_review_success(final SessionValue s, final FacilityValue v, final int status, final long count)
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), count);
+		count(new FacilityFilter().withHasReviewedBy(true), 2L - count);
+
+		sessionDao.current(s);
+
+		var response = request("review").put(Entity.json(v));
+		Assertions.assertEquals(status, response.getStatus(), "Status");
+
+		if (HTTP_STATUS_OK != status) return;
+
+		var o = response.readEntity(FacilityValue.class);
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals(v.id, o.id, "Check ID");
+
+		auditorReviews++;
+	}
+
+	@Test
+	public void z_29_clear()
+	{
+		Assertions.assertEquals(10, clear());
+	}
+
+	private int clear() { return transRule.getSession().createQuery("DELETE FROM Facility o").executeUpdate(); }
 
 	/** Helper method - creates the base WebTarget. */
 	private WebTarget target() { return RULE.client().target(TARGET); }

@@ -544,4 +544,12 @@ public class Facility implements Serializable
 	{
 		return (CollectionUtils.isEmpty(values)) ? null : values.stream().map(o -> o.toValue()).collect(toList());
 	}
+
+	@Override
+	public String toString()
+	{
+		return new StringBuilder("{ id: ").append(id)
+			.append(", name: ").append(name)
+			.append(" }").toString();
+	}
 }
