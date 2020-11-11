@@ -218,7 +218,8 @@ var FacilitiesHandler = new ListTemplate({
 	CAN_REMOVE: true,
 	EDIT_METHOD: 'put',
 
-	ACTIONS: [ new RowAction('geocode', 'Geocode') ],
+	ACTIONS: [ new RowAction('geocode', 'Geocode'),
+	           new RowAction('review', 'Review') ],
 
 	ROW_ACTIONS: [ new RowAction('openChangeRequests', 'Change Requests'),
 	               new RowAction('openExperiences', 'Experiences'),
@@ -226,6 +227,7 @@ var FacilitiesHandler = new ListTemplate({
 	               new RowAction('openPatients', 'Patients') ],
 
 	geocode: function(c, e) { this.GEOCODE.open(); },
+	review: function(c, e) { FacilitiesReviewer.open(); },
 	openChangeRequests: (c, e) => FacilitateHandler.filter({ entityId: e.myRecord.id }, undefined, { entityId: true }),
 	openExperiences: (c, e) => ExperiencesHandler.filter({ facilityId: e.myRecord.id }, undefined, { facilityName: true }),
 	calcRatings: function(c, e) { this.CALC_RATINGS.open(e.myRecord.id); },
@@ -413,6 +415,8 @@ var FacilitiesHandler = new ListTemplate({
 		      new ListField('hasReviewedBy', 'Has Reviewed By', false, 'yesNoOptions', undefined, 'No Search'),
 		      new DatesField('lockedTill', 'Locked Till'),
 		      new ListField('hasLockedTill', 'Has Locked Till', false, 'yesNoOptions', undefined, 'No Search'),
+		      new EditField('lockedBy', 'Locked By', false, false, 128, 50),
+		      new ListField('hasLockedBy', 'Has Locked By', false, 'yesNoOptions', undefined, 'No Search'),
 		      new ListField('active', 'Active?', false, 'yesNoOptions', undefined, 'No Search'),
 		      new ListField('hasActivatedAt', 'Has Activated At', false, 'yesNoOptions', undefined, 'No Search'),
 		      new DatesField('activatedAt', 'Activated At'),
@@ -576,6 +580,19 @@ var FacilitiesHandler = new ListTemplate({
 		PLURAL: 'Facilities',
 		RESOURCE: 'facilities'
 	}
+});
+
+var FacilitiesReviewer = EditTemplate({
+	NAME: 'facility',
+	SINGULAR: 'Review',
+	PLURAL: 'Reviews',
+	RESOURCE: 'facilities/review',
+
+	EDIT_METHOD: 'put',
+
+	open: function() { this.run({ url: 'facilities/lock', filter: { isAdd: false } }, undefined, 'get'); },
+
+	FIELDS: FacilitiesHandler.FIELDS
 });
 
 var FacilitateHandler = new ListTemplate({
