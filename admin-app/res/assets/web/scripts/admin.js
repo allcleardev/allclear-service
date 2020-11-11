@@ -592,7 +592,14 @@ var FacilitiesReviewer = new EditTemplate({
 
 	open: function() { this.run({ url: 'facilities/lock', filter: { isAdd: false } }, undefined, 'get'); },
 
-	FIELDS: FacilitiesHandler.FIELDS
+	FIELDS: FacilitiesHandler.FIELDS.map(v => {
+		if (['reviewedBy', 'lockedBy'].includes(v.id))
+			return new TextField(v.id, v.caption);
+		else if (['reviewedAt', 'lockedTill'].includes(v.id))
+			return new TextField(v.id, v.caption, 'toDateTime');
+
+		return v;
+	});
 });
 
 var FacilitateHandler = new ListTemplate({
