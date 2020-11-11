@@ -233,7 +233,9 @@ var FacilitiesHandler = new ListTemplate({
 	openExperiences: (c, e) => ExperiencesHandler.filter({ facilityId: e.myRecord.id }, undefined, { facilityName: true }),
 	calcRatings: function(c, e) { this.CALC_RATINGS.open(e.myRecord.id); },
 	openPatients: (c, e) => PatientsHandler.filter({ facilityId: e.myRecord.id }, undefined, { facilityName: true }),
-	release: function(c, e) { this.remove('facilities', e.myRecord.id + '/lock'); },
+	release: function(c, e) {
+		this.remove('facilities', e.myRecord.id + '/lock', o => window.alert(o.message ? o.message : 'Released successfully.'));
+	},
 
 	onListPostLoad: c => c.defaultValue = { active: FACILITY_ACTIVE_DEFAULT },
 	onEditorPostLoad: function(c) {
