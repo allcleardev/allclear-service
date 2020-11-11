@@ -582,7 +582,7 @@ var FacilitiesHandler = new ListTemplate({
 	}
 });
 
-var FacilitiesReviewer = EditTemplate({
+var FacilitiesReviewer = new EditTemplate({
 	NAME: 'facility',
 	SINGULAR: 'Review',
 	PLURAL: 'Reviews',
