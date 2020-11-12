@@ -602,6 +602,16 @@ var FacilitiesReviewer = new EditTemplate({
 		this.remove('facilities', c.value.id + '/lock', data => c.body.closeMe());
 	},
 
+	onEditorPostLoad: function(c) {
+		var v = c.value;
+		var f = c.form;
+
+		f.elements['name'].parentElement.appendChild(this.createLink('&rarr;', 'https://www.google.com?query=' + v.name, 'nextToFormElement'));
+
+		if (v.url)
+			f.elements['url'].parentElement.appendChild(this.createLink('&rarr;', v.url, 'nextToFormElement'));
+	},
+
 	FIELDS: FacilitiesHandler.FIELDS.map(v => {
 		if (['reviewedBy', 'lockedBy'].includes(v.id))
 			return new TextField(v.id, v.caption);
