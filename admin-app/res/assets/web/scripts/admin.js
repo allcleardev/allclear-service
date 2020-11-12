@@ -606,10 +606,10 @@ var FacilitiesReviewer = new EditTemplate({
 		var v = c.value;
 		var f = c.form;
 
-		f.elements['name'].parentElement.appendChild(this.createLink('&rarr;', 'https://www.google.com?query=' + v.name, 'nextToFormElement'));
+		f.elements['name'].parentElement.appendChild(this.createLink('&rarr;', 'https://www.google.com?query=' + v.name, 'nextToFormElement', '_new'));
 
 		if (v.url)
-			f.elements['url'].parentElement.appendChild(this.createLink('&rarr;', v.url, 'nextToFormElement'));
+			f.elements['url'].parentElement.appendChild(this.createLink('&rarr;', v.url, 'nextToFormElement', '_new'));
 	},
 
 	FIELDS: FacilitiesHandler.FIELDS.map(v => {

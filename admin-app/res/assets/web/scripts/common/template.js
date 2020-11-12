@@ -437,7 +437,7 @@ Template.prototype.createAnchor = Template.createAnchor = function(caption, acti
 	return o;
 }
 
-Template.prototype.createLink = Template.createLink = function(caption, href, css)
+Template.prototype.createLink = Template.createLink = function(caption, href, css, target)
 {
 	var o = document.createElement('a');
 	o.href = href;
@@ -448,8 +448,8 @@ Template.prototype.createLink = Template.createLink = function(caption, href, cs
 	else
 		o.appendChild(caption);
 
-	if (css)
-		o.className = css;
+	if (css) o.className = css;
+	if (target) o.target = target;
 
 	return o;
 }
