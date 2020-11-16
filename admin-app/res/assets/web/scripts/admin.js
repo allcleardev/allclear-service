@@ -782,9 +782,12 @@ var PatientsHandler = new ListTemplate({
 	CAN_REMOVE: true,
 	EDIT_METHOD: 'put',
 
+	openFacility: (c, e) => FacilitiesHandler.EDITOR.doEdit(e.myRecord.facilityId),
+	openPerson: (c, e) => PeopleHandler.EDITOR.doEdit(e.myRecord.personId),
+
 	COLUMNS: [ new IdColumn('id', 'ID', true),
-	           new TextColumn('facilityName', 'Facility'),
-	           new TextColumn('personName', 'Person'),
+	           new TextColumn('facilityName', 'Facility', undefined, false, false, 'openFacility'),
+	           new TextColumn('personName', 'Person', undefined, false, false, 'openPerson'),
 	           new TextColumn('alertable', 'Alertable?'),
 	           new TextColumn('enrolledAt', 'Enrolled At', 'toDateTime'),
 	           new TextColumn('rejectedAt', 'Rejected At', 'toDateTime'),
