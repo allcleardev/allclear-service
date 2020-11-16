@@ -225,7 +225,7 @@ var FacilitiesHandler = new ListTemplate({
 	               new RowAction('openExperiences', 'Experiences'),
 	               new RowAction('calcRatings', 'Calc Ratings'),
 	               new RowAction('openPatients', 'Patients'),
-	               new RowAction('reviewThis', 'Review', null, 'lockedBy')
+	               new RowAction('reviewThis', 'Review', null, 'lockedBy'),
 	               new RowAction('release', 'Release', 'lockedBy') ],
 
 	geocode: function(c, e) { this.GEOCODE.open(); },
