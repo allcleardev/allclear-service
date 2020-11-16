@@ -54,7 +54,7 @@ public class AuditLogDAOTest
 	@AfterAll
 	public static void down() throws Exception
 	{
-		Assertions.assertEquals(6, dao.clear(AUDITABLE.tableName(), "-1"));
+		Assertions.assertEquals(7, dao.clear(AUDITABLE.tableName(), "-1"));
 	}
 
 	@Test
@@ -70,9 +70,21 @@ public class AuditLogDAOTest
 	}
 
 	@Test
-	public void lock()
+	public void extend()
 	{
 		count(new AuditLogFilter().withId("-1"), 1L);
+
+		sessionDao.current(EDITOR);
+		var value = VALUE = dao.extend(AUDITABLE.withName("Being Extended"));
+		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertEquals("extend", value.action, "Check action");
+		check(VALUE, value);
+	}
+
+	@Test
+	public void lock()
+	{
+		count(new AuditLogFilter().withId("-1"), 2L);
 
 		sessionDao.current(ADMIN);
 		var value = VALUE = dao.lock(AUDITABLE.withName("Being Locked"));
@@ -84,7 +96,7 @@ public class AuditLogDAOTest
 	@Test
 	public void modify()
 	{
-		count(new AuditLogFilter().withId("-1"), 2L);
+		count(new AuditLogFilter().withId("-1"), 3L);
 
 		sessionDao.current(EDITOR);
 		var value = VALUE = dao.update(AUDITABLE.withName("Being Modified"));
@@ -96,7 +108,7 @@ public class AuditLogDAOTest
 	@Test
 	public void release()
 	{
-		count(new AuditLogFilter().withId("-1"), 3L);
+		count(new AuditLogFilter().withId("-1"), 4L);
 
 		sessionDao.current(EDITOR);
 		var value = VALUE = dao.release(AUDITABLE.withName("Being Released"));
@@ -108,7 +120,7 @@ public class AuditLogDAOTest
 	@Test
 	public void remove()
 	{
-		count(new AuditLogFilter().withId("-1"), 4L);
+		count(new AuditLogFilter().withId("-1"), 5L);
 
 		sessionDao.current(SUPER);
 		var value = VALUE = dao.remove(AUDITABLE.withName("Being Removed"));
@@ -120,7 +132,7 @@ public class AuditLogDAOTest
 	@Test
 	public void review()
 	{
-		count(new AuditLogFilter().withId("-1"), 5L);
+		count(new AuditLogFilter().withId("-1"), 6L);
 
 		sessionDao.current(SUPER);
 		var value = VALUE = dao.review(AUDITABLE.withName("Being Reviewed"));
@@ -135,24 +147,25 @@ public class AuditLogDAOTest
 		var hourAhead = hourAhead();
 
 		return Stream.of(
-			arguments(new AuditLogFilter(1, 20).withId("-1"), 6L),
+			arguments(new AuditLogFilter(1, 20).withId("-1"), 7L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withActionAt(VALUE.actionAt), 1L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withActorType("Admin"), 2L),
-			arguments(new AuditLogFilter(1, 20).withId("-1").withActorType("Editor"), 2L),
+			arguments(new AuditLogFilter(1, 20).withId("-1").withActorType("Editor"), 3L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withActorType("Super"), 2L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withActionBy("linda"), 2L),
-			arguments(new AuditLogFilter(1, 20).withId("-1").withActionBy("maureen"), 2L),
+			arguments(new AuditLogFilter(1, 20).withId("-1").withActionBy("maureen"), 3L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withActionBy("allen"), 2L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withAction("add"), 1L),
+			arguments(new AuditLogFilter(1, 20).withId("-1").withAction("extend"), 1L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withAction("lock"), 1L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withAction("update"), 1L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withAction("release"), 1L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withAction("remove"), 1L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withAction("review"), 1L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withPayload(VALUE.payload), 1L),
-			arguments(new AuditLogFilter(1, 20).withId("-1").withTimestampFrom(hourAgo), 6L),
-			arguments(new AuditLogFilter(1, 20).withId("-1").withTimestampTo(hourAhead), 6L),
-			arguments(new AuditLogFilter(1, 20).withId("-1").withTimestampFrom(hourAgo).withTimestampTo(hourAhead), 6L),
+			arguments(new AuditLogFilter(1, 20).withId("-1").withTimestampFrom(hourAgo), 7L),
+			arguments(new AuditLogFilter(1, 20).withId("-1").withTimestampTo(hourAhead), 7L),
+			arguments(new AuditLogFilter(1, 20).withId("-1").withTimestampFrom(hourAgo).withTimestampTo(hourAhead), 7L),
 
 			// Negative tests
 			arguments(new AuditLogFilter(1, 20).withId("-2"), 0L),

@@ -71,6 +71,7 @@ public class FacilityResourceTest
 	private static SessionValue EDITOR_1 = null;
 	private static SessionValue PERSON = null;
 	private static SessionValue PERSON_UNRESTRICTED = null;
+	private static final List<Long> IDS = new LinkedList<>();
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
 		.addResource(new AuthorizationExceptionMapper())
@@ -103,6 +104,7 @@ public class FacilityResourceTest
 	private static int auditorAdds = 0;
 	private static int auditorUpdates = 0;
 	private static int auditorRemoves = 0;
+	private static int auditorExtends = 0;
 	private static int auditorLocks = 0;
 	private static int auditorReleases = 0;
 	private static int auditorReviews = 0;
@@ -115,6 +117,7 @@ public class FacilityResourceTest
 		Assertions.assertEquals(auditorAdds, auditor.adds, "Check auditorAdds");
 		Assertions.assertEquals(auditorUpdates, auditor.updates, "Check auditorUpdates");
 		Assertions.assertEquals(auditorRemoves, auditor.removes, "Check auditorRemoves");
+		Assertions.assertEquals(auditorExtends, auditor.extensions, "Check auditorExtends");
 		Assertions.assertEquals(auditorLocks, auditor.locks, "Check auditorLocks");
 		Assertions.assertEquals(auditorReleases, auditor.releases, "Check auditorReleases");
 		Assertions.assertEquals(auditorReviews, auditor.reviews, "Check auditorReviews");
@@ -1194,12 +1197,14 @@ public class FacilityResourceTest
 	@Test
 	public void z_20_add()
 	{
+		IDS.clear();
+
 		for (int i = 0; i < 10; i++)
 		{
 			var o = new FacilityValue(i);
 			if (1 == (i % 2)) o.reviewedAt = utc(2020, 10, 10 - i);
 
-			dao.add(o, true);
+			IDS.add(dao.add(o, true).id);
 		}
 
 		auditorAdds+= 10;
@@ -1350,6 +1355,67 @@ public class FacilityResourceTest
 		Assertions.assertEquals(v.id, o.id, "Check ID");
 
 		auditorReviews++;
+	}
+
+	public static Stream<Arguments> z_22_lockById()
+	{
+		return Stream.of(
+			arguments(EDITOR, IDS.get(4), true, 0L),
+			arguments(EDITOR, IDS.get(4), false, 1L),
+			arguments(ADMIN, IDS.get(4), true, 1L),
+			arguments(EDITOR_1, IDS.get(8), true, 1L),
+			arguments(EDITOR_1, IDS.get(8), false, 2L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_22_lockById(final SessionValue s, final Long id, final boolean lock, final long locked)
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), locked);
+		count(new FacilityFilter().withHasReviewedBy(true), 2L);
+
+		sessionDao.current(s);
+
+		var response = request(id + "/lock").get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var o = response.readEntity(FacilityValue.class);
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals(id, o.id, "Check ID");
+		Assertions.assertNull(o.reviewedBy, "Check reviewedBy");
+		assertThat(o.lockedTill).as("Check lockedTill").isCloseTo(Constants.lockedTill(), 500L);
+		Assertions.assertEquals(s.admin.id, o.lockedBy, "Check lockedBy");
+
+		if (lock)
+			auditorLocks++;
+		else
+			auditorExtends++;
+	}
+
+	public static Stream<Arguments> z_22_lockById_fail()
+	{
+		return Stream.of(
+			arguments(EDITOR, IDS.get(4), HTTP_STATUS_NOT_AUTHORIZED),
+			arguments(null, IDS.get(4), HTTP_STATUS_NOT_AUTHORIZED),
+			arguments(PERSON, IDS.get(4), HTTP_STATUS_NOT_AUTHORIZED),
+			arguments(null, IDS.get(6), HTTP_STATUS_NOT_AUTHORIZED),
+			arguments(PERSON, IDS.get(6), HTTP_STATUS_NOT_AUTHORIZED),
+			arguments(EDITOR, IDS.get(8), HTTP_STATUS_NOT_AUTHORIZED),
+			arguments(EDITOR_1, 100000L, HTTP_STATUS_NOT_FOUND));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_22_lockById_fail(final SessionValue s, final Long id, final int status)
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 2L);
+		count(new FacilityFilter().withHasReviewedBy(true), 2L);
+
+		if (null != s) sessionDao.current(s);
+		else sessionDao.clear();
+
+		var response = request(id + "/lock").get();
+		Assertions.assertEquals(status, response.getStatus(), "Status");
 	}
 
 	@Test

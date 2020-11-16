@@ -10,8 +10,7 @@ import static app.allclear.platform.type.TestCriteria.*;
 import static app.allclear.platform.type.TestType.*;
 
 import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 import javax.persistence.PersistenceException;
 
@@ -64,6 +63,7 @@ public class FacilityDAOTest
 	private static FacilityValue VALUE_2 = null;
 	private static PeopleValue PERSON = null;
 	private static PeopleValue PERSON_1 = null;
+	private static final List<Long> IDS = new LinkedList<>();
 
 	private static BigDecimal bg(final String value) { return new BigDecimal(value); }
 
@@ -78,6 +78,7 @@ public class FacilityDAOTest
 	private static int auditorAdds = 0;
 	private static int auditorUpdates = 0;
 	private static int auditorRemoves = 0;
+	private static int auditorExtends = 0;
 	private static int auditorLocks = 0;
 	private static int auditorReleases = 0;
 	private static int auditorReviews = 0;
@@ -88,6 +89,7 @@ public class FacilityDAOTest
 		Assertions.assertEquals(auditorAdds, auditor.adds, "Check auditorAdds");
 		Assertions.assertEquals(auditorUpdates, auditor.updates, "Check auditorUpdates");
 		Assertions.assertEquals(auditorRemoves, auditor.removes, "Check auditorRemoves");
+		Assertions.assertEquals(auditorExtends, auditor.extensions, "Check auditorExtends");
 		Assertions.assertEquals(auditorLocks, auditor.locks, "Check auditorLocks");
 		Assertions.assertEquals(auditorReleases, auditor.releases, "Check auditorReleases");
 		Assertions.assertEquals(auditorReviews, auditor.reviews, "Check auditorReviews");
@@ -1493,12 +1495,14 @@ public class FacilityDAOTest
 	@Test
 	public void z_20_add()
 	{
+		IDS.clear();
+
 		for (int i = 0; i < 10; i++)
 		{
 			var o = new FacilityValue(i);
 			if (0 == (i % 2)) o.reviewedAt = utc(2020, 10, i);
 
-			dao.add(o, true);
+			IDS.add(dao.add(o, true).id);
 		}
 
 		auditorAdds+= 10;
@@ -1528,6 +1532,8 @@ public class FacilityDAOTest
 		Assertions.assertNotNull(v);
 		Assertions.assertEquals("Test Center 0", v.name, "Check name");
 		assertThat(v.lockedTill).as("Check lockedTill").isAfter(VALUE.lockedTill).isCloseTo(Constants.lockedTill(), 500L);	// Lock is extended.
+
+		auditorExtends++;
 	}
 
 	@Test
@@ -1753,6 +1759,61 @@ public class FacilityDAOTest
 		count(new FacilityFilter().withHasReviewedBy(true), 5L);
 
 		Assertions.assertNull(dao.lock("cindy"));
+	}
+
+	@Test
+	public void z_25_lockById_00()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 0L);
+		count(new FacilityFilter().withHasReviewedBy(true), 5L);
+
+		VALUE = dao.lock(IDS.get(1), "cindy", false);
+		Assertions.assertNotNull(VALUE, "Exists");
+		Assertions.assertNull(VALUE.reviewedBy, "Check reviewedBy");
+		assertThat(VALUE.lockedTill).as("Check lockedTill").isCloseTo(Constants.lockedTill(), 500L);
+		Assertions.assertEquals("cindy", VALUE.lockedBy, "Check lockedBy");
+
+		auditorLocks++;
+	}
+
+	@Test
+	public void z_25_lockById_01()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 1L);
+		count(new FacilityFilter().withHasReviewedBy(true), 5L);
+
+		assertThat(assertThrows(NotAuthorizedException.class, () -> dao.lock(IDS.get(1), "beverly", false)))
+			.hasMessage("The User, beverly, cannot extend the lock on { id: 7, name: Test Center 1 }.");
+	}
+
+	@Test
+	public void z_25_lockById_02()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 1L);
+		count(new FacilityFilter().withHasReviewedBy(true), 5L);
+
+		VALUE = dao.lock(IDS.get(1), "cindy", false);
+		Assertions.assertNotNull(VALUE, "Exists");
+		Assertions.assertNull(VALUE.reviewedBy, "Check reviewedBy");
+		assertThat(VALUE.lockedTill).as("Check lockedTill").isCloseTo(Constants.lockedTill(), 500L);
+		Assertions.assertEquals("cindy", VALUE.lockedBy, "Check lockedBy");
+
+		auditorExtends++;
+	}
+
+	@Test
+	public void z_25_lockById_03()
+	{
+		count(new FacilityFilter().withHasLockedBy(true).withHasLockedTill(true), 1L);
+		count(new FacilityFilter().withHasReviewedBy(true), 5L);
+
+		VALUE = dao.lock(IDS.get(1), "beverly", true);	// Admin can take any lock.
+		Assertions.assertNotNull(VALUE, "Exists");
+		Assertions.assertNull(VALUE.reviewedBy, "Check reviewedBy");
+		assertThat(VALUE.lockedTill).as("Check lockedTill").isCloseTo(Constants.lockedTill(), 500L);
+		Assertions.assertEquals("beverly", VALUE.lockedBy, "Check lockedBy");
+
+		auditorLocks++;
 	}
 
 	@Test

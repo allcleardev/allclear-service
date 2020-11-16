@@ -16,14 +16,16 @@ public class TestAuditor implements Auditor
 	public int adds = 0;
 	public int updates = 0;
 	public int removes = 0;
+	public int extensions = 0;
 	public int locks = 0;
 	public int releases = 0;
 	public int reviews = 0;
 
-	@Override public AuditLogValue add(Auditable value) { adds++; return null; }
-	@Override public AuditLogValue update(Auditable value) { updates++; return null; }
-	@Override public AuditLogValue remove(Auditable value) { removes++; return null; }
+	@Override public AuditLogValue add(final Auditable value) { adds++; return null; }
+	@Override public AuditLogValue update(final Auditable value) { updates++; return null; }
+	@Override public AuditLogValue remove(final Auditable value) { removes++; return null; }
+	@Override public AuditLogValue extend(final Auditable value) { extensions++; return null; }
 	@Override public AuditLogValue lock(Auditable value) { locks++; return null; }
-	@Override public AuditLogValue release(Auditable value) { releases++; return null; }
-	@Override public AuditLogValue review(Auditable value) { reviews++; return null; }
+	@Override public AuditLogValue release(final Auditable value) { releases++; return null; }
+	@Override public AuditLogValue review(final Auditable value) { reviews++; return null; }
 }

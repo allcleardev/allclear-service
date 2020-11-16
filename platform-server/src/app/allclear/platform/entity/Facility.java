@@ -245,6 +245,7 @@ public class Facility implements Serializable
 	public void setLockedBy(final String newValue) { lockedBy = newValue; }
 
 	public boolean locked() { return (null != lockedBy) || (null != lockedTill); }	// As long as one of the values is set, then they must be cleared to release. DLS on 11/9/2020.
+	public boolean lockedX() { return ((null != lockedBy) && (null != lockedTill) && lockedTill.after(new Date())); }
 
 	public Facility lock(final String lockedBy, final Date lockedTill)
 	{

@@ -130,6 +130,16 @@ public class FacilityResource
 	}
 
 	@GET
+	@Path("/{id}/lock") @Timed @UnitOfWork	// NOT read-only: needs to set the locks fields. DLS on 11/16/2020.
+	@ApiOperation(value="lock", notes="Locks the specified Facility for review by the current user.", response=FacilityValue.class)
+	public FacilityValue lock(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@PathParam("id") final Long id)
+	{
+		var o = sessionDao.checkEditor();
+		return dao.lock(id, o.id, o.canAdmin());
+	}
+
+	@GET
 	@Path("/name") @Timed @UnitOfWork(readOnly=true, transactional=false)
 	@ApiOperation(value="get", notes="Gets a single Facility by its name.", response=FacilityValue.class)
 	public FacilityValue get(@QueryParam("name") final String name) throws ObjectNotFoundException

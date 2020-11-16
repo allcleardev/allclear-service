@@ -19,6 +19,7 @@ public interface Auditor
 	public AuditLogValue update(final Auditable value);
 	public AuditLogValue remove(final Auditable value);
 
+	public AuditLogValue extend(final Auditable value);
 	public AuditLogValue lock(final Auditable value);
 	public AuditLogValue release(final Auditable value);
 	public AuditLogValue review(final Auditable value);

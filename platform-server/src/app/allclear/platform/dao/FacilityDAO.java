@@ -288,14 +288,48 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	{
 		// Get the oldest lock that the current user holds. The user must resolve/release before going on.
 		var o = namedQuery("findLockedFacility").setParameter("lockedBy", user).setMaxResults(1).uniqueResult();
-		if (null != o) return o.lockedTill(Constants.lockedTill()).toValueX();	// Extend lock
+		if (null != o)	// Extend lock
+		{
+			var v = o.lockedTill(Constants.lockedTill()).toValueX();
+			auditor.extend(v);
+			return v;
+		}
 
 		o = namedQuery("findReviewableFacility").setParameter("reviewedAt", Constants.reviewedFrom()).setMaxResults(1).uniqueResult();
 		if (null == o) return null;
 
 		var v = o.lock(user, Constants.lockedTill()).toValueX();
-
 		auditor.lock(v);
+		return v;
+	}
+
+	/** Locks the specified Facility for the supplied user if not already locked by another user.
+	 * 
+	 * @param id
+	 * @param user
+	 * @param admin
+	 * @return never NULL
+	 * @throws NotAuthorizedException if not the owner of the existing lock
+	 * @throws ObjectNotFoundException
+	 */
+	public FacilityValue lock(final Long id, final String user, final boolean admin) throws NotAuthorizedException, ObjectNotFoundException
+	{
+		var o = findWithException(id);
+		if (!o.lockedX())
+		{
+			var v = o.lock(user, Constants.lockedTill()).toValueX();
+			auditor.lock(v);
+
+			return v;
+		}
+
+		var sameUser = user.equals(o.getLockedBy());
+		if (!admin && !sameUser)
+			throw new NotAuthorizedException("The User, " + user + ", cannot extend the lock on " + o + ".");
+
+		var v = o.lock(user, Constants.lockedTill()).toValueX();	// Extend lock. Could also be different user.
+		if (sameUser) auditor.extend(v);
+		else auditor.lock(v);
 
 		return v;
 	}
@@ -306,7 +340,7 @@ public class FacilityDAO extends AbstractDAO<Facility>
 	 * @param user current user
 	 * @param admin
 	 * @return TRUE if the facility is found and released.
-	 * @throws NotAuthorizedException
+	 * @throws NotAuthorizedException if not the owner of the lock.
 	 * @throws ObjectNotFoundException
 	 */
 	public boolean release(final Long id, final String user, final boolean admin) throws NotAuthorizedException, ObjectNotFoundException

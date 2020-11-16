@@ -82,7 +82,7 @@ public class AuditLogResourceTest
 	@AfterAll
 	public static void down() throws Exception
 	{
-		Assertions.assertEquals(6, dao.clear(AUDITABLE.tableName(), "-1"));
+		Assertions.assertEquals(7, dao.clear(AUDITABLE.tableName(), "-1"));
 	}
 
 	@Test
@@ -98,9 +98,21 @@ public class AuditLogResourceTest
 	}
 
 	@Test
-	public void lock()
+	public void extend()
 	{
 		count("-1", 1);
+
+		sessionDao.current(SUPER);
+		var value = VALUE = dao.extend(AUDITABLE.withName("Being Extended"));
+		Assertions.assertNotNull(value, "Exists");
+		Assertions.assertEquals("extend", value.action, "Check action");
+		check(VALUE, value);
+	}
+
+	@Test
+	public void lock()
+	{
+		count("-1", 2);
 
 		sessionDao.current(ADMIN);
 		var value = VALUE = dao.lock(AUDITABLE.withName("Being Locked"));
@@ -112,7 +124,7 @@ public class AuditLogResourceTest
 	@Test
 	public void modify()
 	{
-		count("-1", 2);
+		count("-1", 3);
 
 		sessionDao.current(EDITOR);
 		var value = VALUE = dao.update(AUDITABLE.withName("Being Modified"));
@@ -124,7 +136,7 @@ public class AuditLogResourceTest
 	@Test
 	public void release()
 	{
-		count("-1", 3);
+		count("-1", 4);
 
 		sessionDao.current(EDITOR);
 		var value = VALUE = dao.release(AUDITABLE.withName("Being Released"));
@@ -136,7 +148,7 @@ public class AuditLogResourceTest
 	@Test
 	public void remove()
 	{
-		count("-1", 4);
+		count("-1", 5);
 
 		sessionDao.current(SUPER);
 		var value = VALUE = dao.remove(AUDITABLE.withName("Being Removed"));
@@ -148,7 +160,7 @@ public class AuditLogResourceTest
 	@Test
 	public void review()
 	{
-		count("-1", 5);
+		count("-1", 6);
 
 		sessionDao.current(SUPER);
 		var value = VALUE = dao.review(AUDITABLE.withName("Being Reviewed"));
@@ -163,24 +175,25 @@ public class AuditLogResourceTest
 		var hourAhead = hourAhead();
 
 		return Stream.of(
-			arguments(new AuditLogFilter(1, 20).withId("-1"), 6L),
+			arguments(new AuditLogFilter(1, 20).withId("-1"), 7L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withActionAt(VALUE.actionAt), 1L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withActorType("Admin"), 2L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withActorType("Editor"), 2L),
-			arguments(new AuditLogFilter(1, 20).withId("-1").withActorType("Super"), 2L),
+			arguments(new AuditLogFilter(1, 20).withId("-1").withActorType("Super"), 3L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withActionBy("linda"), 2L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withActionBy("maureen"), 2L),
-			arguments(new AuditLogFilter(1, 20).withId("-1").withActionBy("allen"), 2L),
+			arguments(new AuditLogFilter(1, 20).withId("-1").withActionBy("allen"), 3L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withAction("add"), 1L),
+			arguments(new AuditLogFilter(1, 20).withId("-1").withAction("extend"), 1L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withAction("lock"), 1L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withAction("update"), 1L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withAction("release"), 1L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withAction("remove"), 1L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withAction("review"), 1L),
 			arguments(new AuditLogFilter(1, 20).withId("-1").withPayload(VALUE.payload), 1L),
-			arguments(new AuditLogFilter(1, 20).withId("-1").withTimestampFrom(hourAgo), 6L),
-			arguments(new AuditLogFilter(1, 20).withId("-1").withTimestampTo(hourAhead), 6L),
-			arguments(new AuditLogFilter(1, 20).withId("-1").withTimestampFrom(hourAgo).withTimestampTo(hourAhead), 6L),
+			arguments(new AuditLogFilter(1, 20).withId("-1").withTimestampFrom(hourAgo), 7L),
+			arguments(new AuditLogFilter(1, 20).withId("-1").withTimestampTo(hourAhead), 7L),
+			arguments(new AuditLogFilter(1, 20).withId("-1").withTimestampFrom(hourAgo).withTimestampTo(hourAhead), 7L),
 
 			// Negative tests
 			arguments(new AuditLogFilter(1, 20).withId("-2"), 0L),
