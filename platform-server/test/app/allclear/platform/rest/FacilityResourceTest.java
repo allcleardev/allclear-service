@@ -417,6 +417,7 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter().include(ANTIBODY), 1L),
 			arguments(new FacilityFilter().include(ANTIBODY, DONT_KNOW), 1L),
 			arguments(new FacilityFilter().exclude(NASAL_SWAB), 1L),
+			arguments(new FacilityFilter().withReviewable(true), 1L),	// Old lock
 
 			arguments(new FacilityFilter().withCity("New Orleans"), 0L),
 			arguments(new FacilityFilter().withState("LA"), 0L),
@@ -432,7 +433,8 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter().exclude(DONT_KNOW), 0L),
 			arguments(new FacilityFilter().exclude(ANTIBODY), 0L),
 			arguments(new FacilityFilter().exclude(ANTIBODY, DONT_KNOW), 0L),
-			arguments(new FacilityFilter().include(NASAL_SWAB), 0L));
+			arguments(new FacilityFilter().include(NASAL_SWAB), 0L),
+			arguments(new FacilityFilter().withReviewable(false), 1L));
 	}
 
 	@ParameterizedTest
@@ -483,6 +485,7 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter().include(ANTIBODY), 0L),
 			arguments(new FacilityFilter().include(ANTIBODY, DONT_KNOW), 0L),
 			arguments(new FacilityFilter().exclude(NASAL_SWAB), 0L),
+			arguments(new FacilityFilter().withReviewable(true), 0L),
 
 			arguments(new FacilityFilter().withCity("New Orleans"), 1L),
 			arguments(new FacilityFilter().withState("LA"), 1L),
@@ -499,7 +502,8 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter().exclude(DONT_KNOW), 1L),
 			arguments(new FacilityFilter().exclude(ANTIBODY), 1L),
 			arguments(new FacilityFilter().exclude(ANTIBODY, DONT_KNOW), 1L),
-			arguments(new FacilityFilter().include(NASAL_SWAB), 1L));
+			arguments(new FacilityFilter().include(NASAL_SWAB), 1L),
+			arguments(new FacilityFilter().withReviewable(false), 1L));
 	}
 
 	@ParameterizedTest
@@ -699,6 +703,7 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter(1, 20).exclude(ANTIBODY), 1L),
 			arguments(new FacilityFilter(1, 20).exclude(ANTIBODY, DONT_KNOW), 1L),
 			arguments(new FacilityFilter(1, 20).exclude(DONT_KNOW), 1L),
+			arguments(new FacilityFilter(1, 20).withReviewable(false), 1L),
 
 			// Negative tests
 			arguments(new FacilityFilter(1, 20).withId(VALUE.id + 1000L), 0L),
@@ -769,7 +774,8 @@ public class FacilityResourceTest
 			arguments(new FacilityFilter(1, 20).exclude(NASAL_SWAB), 0L),
 			arguments(new FacilityFilter(1, 20).include(ANTIBODY), 0L),
 			arguments(new FacilityFilter(1, 20).include(ANTIBODY, DONT_KNOW), 0L),
-			arguments(new FacilityFilter(1, 20).include(DONT_KNOW), 0L));
+			arguments(new FacilityFilter(1, 20).include(DONT_KNOW), 0L),
+			arguments(new FacilityFilter().withReviewable(true), 0L));
 	}
 
 	@ParameterizedTest

@@ -112,6 +112,7 @@ public class FacilityFilter extends QueryFilter
 	public List<String> people;	// ALLCLEAR-582: DLS on 7/6/2020.
 	public List<String> includeTestTypes;	// ALLCLEAR-463: DLS on 5/9/2020.
 	public List<String> excludeTestTypes;	// ALLCLEAR-463: DLS on 5/9/2020.
+	public boolean reviewable = false;
 
 	// Mutators
 	public FacilityFilter withId(final Long newValue) { id = newValue; return this; }
@@ -201,6 +202,7 @@ public class FacilityFilter extends QueryFilter
 	public FacilityFilter include(final TestType... newValues) { return withIncludeTestTypes(Arrays.stream(newValues).map(o -> o.id).collect(Collectors.toList())); }
 	public FacilityFilter withExcludeTestTypes(final List<String> newValues) { excludeTestTypes = newValues; return this; }
 	public FacilityFilter exclude(final TestType... newValues) { return withExcludeTestTypes(Arrays.stream(newValues).map(o -> o.id).collect(Collectors.toList())); }
+	public FacilityFilter withReviewable(final boolean newValue) { reviewable = newValue; return this; }
 
 	/**************************************************************************
 	*

@@ -706,7 +706,8 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.add("updatedAtTo", "o.updatedAt <= :updatedAtTo", filter.updatedAtTo)
 			.addIn("people", "EXISTS (SELECT 1 FROM FacilityPeople pp WHERE pp.facilityId = o.id AND pp.personId IN {})", admin ? filter.people : null)
 			.addIn("includeTestTypes", "EXISTS (SELECT 1 FROM FacilityTestType tt WHERE tt.facilityId = o.id AND tt.testTypeId IN {})", filter.includeTestTypes)
-			.addIn("excludeTestTypes", "NOT EXISTS (SELECT 1 FROM FacilityTestType tt WHERE tt.facilityId = o.id AND tt.testTypeId IN {})", filter.excludeTestTypes);
+			.addIn("excludeTestTypes", "NOT EXISTS (SELECT 1 FROM FacilityTestType tt WHERE tt.facilityId = o.id AND tt.testTypeId IN {})", filter.excludeTestTypes)
+			.add("reviewable", "o.reviewedAt < :reviewable AND ((o.lockedTill IS NULL) OR (o.lockedTill <= CURRENT_TIMESTAMP))", filter.reviewable ? Constants.reviewedFrom() : null);
 	}
 
 	/** Helper method - creates the a native SQL query. */
@@ -797,7 +798,8 @@ public class FacilityDAO extends AbstractDAO<Facility>
 			.addIn("people", "EXISTS (SELECT 1 FROM facility_people pp WHERE pp.facility_id = o.id AND pp.person_id IN {})", admin ? filter.people : null)
 			.addIn("includeTestTypes", "EXISTS (SELECT 1 FROM facility_test_type tt WHERE tt.facility_id = o.id AND tt.test_type_id IN {})", filter.includeTestTypes)
 			.addIn("excludeTestTypes", "NOT EXISTS (SELECT 1 FROM facility_test_type tt WHERE tt.facility_id = o.id AND tt.test_type_id IN {})", filter.excludeTestTypes)
-			.add("fromMeters", "ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:fromLongitude, :fromLatitude)) <= :fromMeters", filter.from.meters());
+			.add("fromMeters", "ST_DISTANCE_SPHERE(POINT(o.longitude, o.latitude), POINT(:fromLongitude, :fromLatitude)) <= :fromMeters", filter.from.meters())
+			.add("reviewable", "o.reviewed_at < :reviewable AND ((o.locked_till IS NULL) OR (o.locked_till <= CURRENT_TIMESTAMP))", filter.reviewable ? Constants.reviewedFrom() : null);
 
 		o.parameters.put("fromLatitude", filter.from.latitude);
 		o.parameters.put("fromLongitude", filter.from.longitude);

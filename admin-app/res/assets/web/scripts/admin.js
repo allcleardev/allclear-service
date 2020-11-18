@@ -427,6 +427,7 @@ var FacilitiesHandler = new ListTemplate({
 		      new ListField('hasActivatedAt', 'Has Activated At', false, 'yesNoOptions', undefined, 'No Search'),
 		      new DatesField('activatedAt', 'Activated At'),
 		      new TagField('people', 'Associates', false, fillPeopleDropdownList),
+		      new BoolField('reviewable', 'Reviewable', false, 'Check to only retrieve unlocked facilities ready for review.'),
 		      new DatesField('createdAt', 'Created At'),
 		      new DatesField('updatedAt', 'Updated At'),
 	          new ListField('pageSize', 'Page Size', false, 'pageSizes', 'Number of records on the page') ],

@@ -516,6 +516,7 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter().withActive(VALUE.active), 1L),
 			arguments(new FacilityFilter().exclude(NASAL_SWAB), 1L),
 			arguments(new FacilityFilter().exclude(ANTIBODY), 1L),
+			arguments(new FacilityFilter().withReviewable(false), 1L),
 
 			arguments(new FacilityFilter().withName(v.name), 0L),
 			arguments(new FacilityFilter().withPostalCode(v.postalCode), 0L),
@@ -535,7 +536,8 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter().withHasLockedBy(true), 0L),
 			arguments(new FacilityFilter().withActive(v.active), 0L),
 			arguments(new FacilityFilter().include(NASAL_SWAB), 0L),
-			arguments(new FacilityFilter().include(ANTIBODY), 0L));
+			arguments(new FacilityFilter().include(ANTIBODY), 0L),
+			arguments(new FacilityFilter().withReviewable(true), 0L));
 	}
 
 	@ParameterizedTest
@@ -578,6 +580,7 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter().withHasLockedBy(false), 0L),
 			arguments(new FacilityFilter().withActive(VALUE_1.active), 0L),
 			arguments(new FacilityFilter().exclude(NASAL_SWAB), 0L),
+			arguments(new FacilityFilter().withReviewable(false), 1L),	// No restrictions.
 
 			arguments(new FacilityFilter().exclude(ANTIBODY), 1L),
 			arguments(new FacilityFilter().withName(v.name), 1L),
@@ -598,7 +601,8 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter().withHasLockedBy(true), 1L),
 			arguments(new FacilityFilter().withActive(v.active), 1L),
 			arguments(new FacilityFilter().include(NASAL_SWAB), 1L),
-			arguments(new FacilityFilter().include(ANTIBODY), 0L));
+			arguments(new FacilityFilter().include(ANTIBODY), 0L),
+			arguments(new FacilityFilter().withReviewable(true), 1L));
 	}
 
 	@ParameterizedTest
@@ -740,6 +744,7 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter(1, 20).withUpdatedAtFrom(hourAgo).withUpdatedAtTo(hourAhead), 1L),
 			arguments(new FacilityFilter(1, 20).include(NASAL_SWAB), 1L),
 			arguments(new FacilityFilter(1, 20).exclude(ANTIBODY), 1L),
+			arguments(new FacilityFilter(1, 20).withReviewable(true), 1L),
 
 			// Negative tests
 			arguments(new FacilityFilter(1, 20).withId(VALUE.id + 1000L), 0L),
@@ -821,7 +826,8 @@ public class FacilityDAOTest
 			arguments(new FacilityFilter(1, 20).withUpdatedAtTo(hourAgo), 0L),
 			arguments(new FacilityFilter(1, 20).withUpdatedAtFrom(hourAhead).withUpdatedAtTo(hourAgo), 0L),
 			arguments(new FacilityFilter(1, 20).exclude(NASAL_SWAB), 0L),
-			arguments(new FacilityFilter(1, 20).include(ANTIBODY), 0L));
+			arguments(new FacilityFilter(1, 20).include(ANTIBODY), 0L),
+			arguments(new FacilityFilter(1, 20).withReviewable(false), 1L));
 	}
 
 	@ParameterizedTest
