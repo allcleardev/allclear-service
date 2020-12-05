@@ -34,6 +34,7 @@ import app.allclear.platform.ConfigTest;
 import app.allclear.platform.dao.*;
 import app.allclear.platform.filter.ExperiencesFilter;
 import app.allclear.platform.model.ExperiencesCalcResponse;
+import app.allclear.platform.model.ExperiencesLimitResponse;
 import app.allclear.platform.type.Experience;
 import app.allclear.platform.value.*;
 
@@ -68,6 +69,7 @@ public class ExperiencesResourceTest
 	private static SessionValue SESSION_1 = null;
 
 	public final ResourceExtension RULE = ResourceExtension.builder()
+		.addResource(new AuthorizationExceptionMapper())
 		.addResource(new NotFoundExceptionMapper())
 		.addResource(new ValidationExceptionMapper())
 		.addResource(new ExperiencesResource(dao)).build();
@@ -168,6 +170,60 @@ public class ExperiencesResourceTest
 	public void getWithException()
 	{
 		Assertions.assertEquals(HTTP_STATUS_NOT_FOUND, get(VALUE.id + 1000L).getStatus(), "Status");
+	}
+
+	public static Stream<Arguments> limit()
+	{
+		return Stream.of(
+			arguments(SESSION, FACILITY.id, 0L),
+			arguments(SESSION, FACILITY_1.id, 0L),
+			arguments(SESSION_1, FACILITY_1.id, 1L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void limit(final SessionValue s, final Long facilityId, final long expected)
+	{
+		sessionDao.current(s);
+
+		var response = request(target().path("limit").queryParam("facilityId", facilityId)).get();
+		Assertions.assertEquals(HTTP_STATUS_OK, response.getStatus(), "Status");
+
+		var o = response.readEntity(ExperiencesLimitResponse.class);
+		Assertions.assertNotNull(o, "Exists");
+		Assertions.assertEquals(expected, o.total, "Check total");
+		Assertions.assertEquals(0L, o.byFacility, "Check byFacility");
+	}
+
+	public static Stream<Arguments> limit_fail()
+	{
+		return Stream.of(
+			arguments(null, FACILITY.id, HTTP_STATUS_NOT_AUTHORIZED, null),
+			arguments(ADMIN, FACILITY.id, HTTP_STATUS_NOT_AUTHORIZED, null),
+			arguments(ADMIN, FACILITY_1.id, HTTP_STATUS_NOT_AUTHORIZED, null),
+			arguments(SESSION_1, null, HTTP_STATUS_VALIDATION_EXCEPTION, "Facility is not set."),
+			arguments(SESSION_1, FACILITY.id + 1000L, HTTP_STATUS_VALIDATION_EXCEPTION, "The Facility ID, 1001, is invalid."),
+			arguments(SESSION_1, FACILITY.id, HTTP_STATUS_VALIDATION_EXCEPTION, "You have already provided an Experience for Test Center 0 today."));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void limit_fail(final SessionValue s, final Long facilityId, final int status, final String message)
+	{
+		sessionDao.current(s);
+
+		var request = target().path("limit");
+		if (null != facilityId) request = request.queryParam("facilityId", facilityId);
+
+		var response = request(request).get();
+		Assertions.assertEquals(status, response.getStatus(), "Status");
+
+		if (HTTP_STATUS_VALIDATION_EXCEPTION == response.getStatus())
+		{
+			var o = response.readEntity(ErrorInfo.class);
+			Assertions.assertNotNull(o, "Exists");
+			Assertions.assertEquals(message, o.message, "Check message");
+		}
 	}
 
 	public static Stream<Arguments> modif()

@@ -14,8 +14,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.*;
 
 import io.dropwizard.testing.junit5.DropwizardExtensionsSupport;
 
@@ -82,6 +81,8 @@ public class ExperiencesDAOTest
 		FACILITY_1 = facilityDao.add(new FacilityValue(1), true);
 		SESSION = new SessionValue(false, PERSON = peopleDao.add(new PeopleValue("zero", "888-555-1000", true)));
 		SESSION_1 = new SessionValue(false, PERSON_1 = peopleDao.add(new PeopleValue("one", "888-555-1001", true)));
+
+		for (int i = 2; i < 10; i++) facilityDao.add(new FacilityValue(i), true);
 	}
 
 	public static Stream<Arguments> add_counts()
@@ -98,6 +99,26 @@ public class ExperiencesDAOTest
 	public void add_counts(final String personId, final Long facilityId, final long first, final long second)
 	{
 		assertThat(dao.countTodayExperiencesByPerson(personId, facilityId)).containsSequence(first, second);
+	}
+
+	public static Stream<Arguments> add_counts_limit()
+	{
+		return Stream.of(
+			arguments(SESSION, FACILITY),
+			arguments(SESSION_1, FACILITY),
+			arguments(SESSION, FACILITY_1),
+			arguments(SESSION_1, FACILITY_1));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void add_counts_limit(final SessionValue s, final FacilityValue facility)
+	{
+		sessionDao.current(s);
+
+		var o = dao.limit(facility.id);
+		Assertions.assertEquals(0L, o.total, "Check total");
+		Assertions.assertEquals(0L, o.byFacility, "Check byFacility");
 	}
 
 	/** Creates a valid Experiences value for the validation tests.
@@ -257,6 +278,47 @@ public class ExperiencesDAOTest
 		assertThrows(ObjectNotFoundException.class, () -> dao.getByIdWithException(VALUE.id + 1000L));
 	}
 
+	public static Stream<Arguments> limit()
+	{
+		return Stream.of(
+			arguments(SESSION, FACILITY, 1L),
+			arguments(SESSION_1, FACILITY, 0L),
+			// arguments(SESSION, FACILITY_1, 1L),	// throws exception due to limit reached.
+			arguments(SESSION_1, FACILITY_1, 0L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void limit(final SessionValue s, final FacilityValue facility, final long expected)
+	{
+		sessionDao.current(s);
+
+		var o = dao.limit(facility.id);
+		Assertions.assertEquals(expected, o.total, "Check total");
+		Assertions.assertEquals(0L, o.byFacility, "Check byFacility");
+	}
+
+	public static Stream<Arguments> limit_fail()
+	{
+		return Stream.of(
+			arguments(null, FACILITY_1.id, NotAuthorizedException.class, "Must be a Person session."),
+			arguments(ADMIN, FACILITY_1.id, NotAuthorizedException.class, "Must be a Person session."),
+			arguments(CUSTOMER, FACILITY_1.id, NotAuthorizedException.class, "Must be a Person session."),
+			arguments(EDITOR, FACILITY_1.id, NotAuthorizedException.class, "Must be a Person session."),
+			arguments(SESSION, null, ValidationException.class, "Facility is not set."),
+			arguments(SESSION, FACILITY_1.id, ValidationException.class, "You have already provided an Experience for Test Center 1 today."),
+			arguments(SESSION, FACILITY_1.id + 1000L, ValidationException.class, "The Facility ID, 1002, is invalid."));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void limit_fail(final SessionValue s, final Long facilityId, final Class<? extends Throwable> ex, final String message)
+	{
+		sessionDao.current(s);
+
+		assertThat(assertThrows(ex, () -> dao.limit(facilityId))).hasMessage(message);
+	}
+
 	public static Stream<Arguments> modif()
 	{
 		return Stream.of(
@@ -385,6 +447,35 @@ public class ExperiencesDAOTest
 	{
 		sessionDao.current(s);
 		assertThrows(NotAuthorizedException.class, () -> dao.findWithException(VALUE.id));
+	}
+
+	public static Stream<Arguments> modify_limit()
+	{
+		return Stream.of(
+			arguments(SESSION, FACILITY, 0L),
+			// arguments(SESSION_1, FACILITY, 0L),	// throws exception due to limit reached.
+			arguments(SESSION, FACILITY_1, 0L),
+			arguments(SESSION_1, FACILITY_1, 1L));
+	}
+
+	@ParameterizedTest
+	@MethodSource
+	public void modify_limit(final SessionValue s, final FacilityValue facility, final long expected)
+	{
+		sessionDao.current(s);
+
+		var o = dao.limit(facility.id);
+		Assertions.assertEquals(expected, o.total, "Check total");
+		Assertions.assertEquals(0L, o.byFacility, "Check byFacility");
+	}
+
+	@Test
+	@MethodSource
+	public void modify_limit_fail()
+	{
+		sessionDao.current(SESSION_1);
+
+		assertThat(assertThrows(ValidationException.class, () -> dao.limit(FACILITY.id))).hasMessage("You have already provided an Experience for Test Center 0 today.");
 	}
 
 	public static Stream<SessionValue> remove_fail() { return Stream.of(null, CUSTOMER, EDITOR, SESSION, SESSION_1); }
@@ -903,6 +994,63 @@ public class ExperiencesDAOTest
 	public void z_10_dupe_next_day_check(final ExperiencesFilter filter, final long expected)
 	{
 		count(filter, expected);
+	}
+
+	public static Stream<SessionValue> z_11_add() { return Stream.of(SESSION, SESSION_1); }
+
+	@ParameterizedTest
+	@MethodSource
+	public void z_11_add(final SessionValue s)
+	{
+		sessionDao.current(s);
+
+		for (long i = 2L; i <= 5L; i++)
+			dao.add(new ExperiencesValue(FACILITY.id + i, false));
+	}
+
+	@Test
+	public void z_11_add_fail()
+	{
+		sessionDao.current(SESSION);
+
+		assertThat(assertThrows(ValidationException.class, () -> dao.add(new ExperiencesValue(FACILITY.id + 6L, false)))).hasMessage("You have already provided five Experiences today.");
+	}
+
+	@ParameterizedTest(name="facilityId={0}, total={1}, byFacility={2}")
+	@CsvSource({"1,4,0", "2,4,0", "7,4,0", "8,4,0", "9,4,0", "10,4,0"})
+	public void z_11_add_limit(final Long facilityId, final long total, final long byFacility)
+	{
+		sessionDao.current(SESSION_1);
+
+		var o = dao.limit(facilityId);
+		Assertions.assertEquals(total, o.total, "Check total");
+		Assertions.assertEquals(byFacility, o.byFacility, "Check byFacility");
+	}
+
+	@ParameterizedTest(name="firstSession={0}, facilityId={1}")
+	@CsvSource({"true,1", "true,2", "false,3", "true,3", "false,4", "true,4", "false,5", "true,5", "false,6", "true,6", "true,7", "true,8", "true,9", "true,10"})
+	public void z_11_add_limit_fail(final boolean first, final Long facilityId)
+	{
+		sessionDao.current(first ? SESSION : SESSION_1);
+
+		assertThrows(ValidationException.class, () -> dao.limit(facilityId));
+	}
+
+	@Test
+	public void z_11_add_success()
+	{
+		sessionDao.current(SESSION_1);
+
+		dao.add(new ExperiencesValue(FACILITY.id + 6L, false));
+	}
+
+	@ParameterizedTest(name="facilityId={0}")
+	@CsvSource({"1", "2", "7", "8", "9", "10"})
+	public void z_11_add_success_limit(final Long facilityId)
+	{
+		sessionDao.current(SESSION_1);
+
+		assertThrows(ValidationException.class, () -> dao.limit(facilityId));
 	}
 
 	/** Helper method - calls the DAO count call and compares the expected total value.

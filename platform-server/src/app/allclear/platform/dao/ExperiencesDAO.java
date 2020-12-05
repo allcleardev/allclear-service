@@ -16,6 +16,7 @@ import app.allclear.common.time.CalendarUtils;
 import app.allclear.platform.entity.*;
 import app.allclear.platform.filter.ExperiencesFilter;
 import app.allclear.platform.model.ExperiencesCalcResponse;
+import app.allclear.platform.model.ExperiencesLimitResponse;
 import app.allclear.platform.type.Experience;
 import app.allclear.platform.value.ExperiencesValue;
 
@@ -164,19 +165,42 @@ public class ExperiencesDAO extends AbstractDAO<Experiences>
 
 		// Checks for an existing experience on adds.
 		if (null == value.id)	// https://trello.com/c/0xsggIvX/82-back-end-enforces-rate-limit-for-sharing-experiences
-		{
-			var counts = countTodayExperiencesByPerson(value.personId, value.facilityId);
-			if (4L < counts[0])
-				validator.add("personId", "You have already provided five Experiences today.");
-			if (0L < counts[1])
-				validator.add("facilityId", "You have already provided an Experience for %s today.", facility.getName());
-
-			validator.check();
-		}
+			limit(validator, value.personId, facility);
 
 		value.denormalize(person.getName(), facility.getName());
 
 		return new Object[] { null, person, facility };
+	}
+
+	/** Has the current user reached the their limit on reported experiences for the day.
+	 * 
+	 * @param facilityId
+	 * @return the Experiences totals
+	 * @throws ValidationException
+	 */
+	public ExperiencesLimitResponse limit(final Long facilityId) throws ValidationException
+	{
+		var person = sessionDao.checkPerson();
+		var validator = new Validator().ensureExists("facilityId", "Facility", facilityId)
+			.check();
+		var facility = currentSession().get(Facility.class, facilityId);
+		if (null == facility)
+			validator.add("facilityId", "The Facility ID, %d, is invalid.", facilityId).check();
+
+		return limit(validator, person.id, facility);
+	}
+
+	ExperiencesLimitResponse limit(final Validator validator, final String personId, final Facility facility) throws ValidationException
+	{
+		var counts = countTodayExperiencesByPerson(personId, facility.getId());
+		if (4L < counts[0])
+			validator.add("personId", "You have already provided five Experiences today.");
+		if (0L < counts[1])
+			validator.add("facilityId", "You have already provided an Experience for %s today.", facility.getName());
+
+		validator.check();
+
+		return new ExperiencesLimitResponse(counts);
 	}
 
 	/** Removes a single Experiences value.

@@ -14,6 +14,7 @@ import app.allclear.common.value.OperationResponse;
 import app.allclear.platform.dao.ExperiencesDAO;
 import app.allclear.platform.filter.ExperiencesFilter;
 import app.allclear.platform.model.ExperiencesCalcResponse;
+import app.allclear.platform.model.ExperiencesLimitResponse;
 import app.allclear.platform.value.ExperiencesValue;
 
 /**********************************************************************************
@@ -57,6 +58,14 @@ public class ExperiencesResource
 	public ExperiencesCalcResponse calc(@QueryParam("facilityId") final Long facilityId) throws ValidationException
 	{
 		return dao.calcByFacility(facilityId);
+	}
+
+	@GET
+	@Path("/limit") @Timed @UnitOfWork(readOnly=true, transactional=false)
+	@ApiOperation(value="limit", notes="Checks the specified facility for potential rate limits reached by the current user. Throws exception if one of the limits has been reached.", response=ExperiencesLimitResponse.class)
+	public ExperiencesLimitResponse limit(@QueryParam("facilityId") final Long facilityId) throws ValidationException
+	{
+		return dao.limit(facilityId);
 	}
 
 	@POST
