@@ -10,6 +10,7 @@ import app.allclear.common.dao.QueryResults;
 import app.allclear.common.errors.ObjectNotFoundException;
 import app.allclear.common.errors.ValidationException;
 import app.allclear.common.mediatype.UTF8MediaType;
+import app.allclear.common.resources.Headers;
 import app.allclear.common.value.OperationResponse;
 import app.allclear.platform.dao.ExperiencesDAO;
 import app.allclear.platform.filter.ExperiencesFilter;
@@ -47,7 +48,8 @@ public class ExperiencesResource
 	@GET
 	@Path("/{id}") @Timed @UnitOfWork(readOnly=true, transactional=false)
 	@ApiOperation(value="get", notes="Gets a single Experiences by its primary key.", response=ExperiencesValue.class)
-	public ExperiencesValue get(@PathParam("id") final Long id) throws ObjectNotFoundException, ValidationException
+	public ExperiencesValue get(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@PathParam("id") final Long id) throws ObjectNotFoundException, ValidationException
 	{
 		return dao.getByIdWithException(id);
 	}
@@ -55,7 +57,8 @@ public class ExperiencesResource
 	@GET
 	@Path("/calc") @Timed @UnitOfWork(readOnly=true, transactional=false)
 	@ApiOperation(value="calcByFacility", notes="Aggregates Experiences facets for the specified facility.", response=ExperiencesCalcResponse.class)
-	public ExperiencesCalcResponse calc(@QueryParam("facilityId") final Long facilityId) throws ValidationException
+	public ExperiencesCalcResponse calc(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@QueryParam("facilityId") final Long facilityId) throws ValidationException
 	{
 		return dao.calcByFacility(facilityId);
 	}
@@ -63,7 +66,8 @@ public class ExperiencesResource
 	@GET
 	@Path("/limit") @Timed @UnitOfWork(readOnly=true, transactional=false)
 	@ApiOperation(value="limit", notes="Checks the specified facility for potential rate limits reached by the current user. Throws exception if one of the limits has been reached.", response=ExperiencesLimitResponse.class)
-	public ExperiencesLimitResponse limit(@QueryParam("facilityId") final Long facilityId) throws ValidationException
+	public ExperiencesLimitResponse limit(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@QueryParam("facilityId") final Long facilityId) throws ValidationException
 	{
 		return dao.limit(facilityId);
 	}
@@ -71,7 +75,8 @@ public class ExperiencesResource
 	@POST
 	@Timed @UnitOfWork
 	@ApiOperation(value="add", notes="Adds a single Experiences. Returns the supplied Experiences value with the auto generated identifier populated.", response=ExperiencesValue.class)
-	public ExperiencesValue add(final ExperiencesValue value) throws ValidationException
+	public ExperiencesValue add(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final ExperiencesValue value) throws ValidationException
 	{
 		return dao.add(value);
 	}
@@ -79,7 +84,8 @@ public class ExperiencesResource
 	@PUT
 	@Timed @UnitOfWork
 	@ApiOperation(value="set", notes="Updates an existing single Experiences. Returns the supplied Experiences value with the auto generated identifier populated.", response=ExperiencesValue.class)
-	public ExperiencesValue set(final ExperiencesValue value) throws ObjectNotFoundException, ValidationException
+	public ExperiencesValue set(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final ExperiencesValue value) throws ObjectNotFoundException, ValidationException
 	{
 		return dao.update(value);
 	}
@@ -87,7 +93,8 @@ public class ExperiencesResource
 	@DELETE
 	@Path("/{id}") @Timed @UnitOfWork
 	@ApiOperation(value="remove", notes="Removes/deactivates a single Experiences by its primary key.", response=OperationResponse.class)
-	public OperationResponse remove(@PathParam("id") final Long id) throws ValidationException
+	public OperationResponse remove(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		@PathParam("id") final Long id) throws ValidationException
 	{
 		return new OperationResponse(dao.remove(id));
 	}
@@ -95,7 +102,8 @@ public class ExperiencesResource
 	@POST
 	@Path("/search") @Timed @UnitOfWork(readOnly=true, transactional=false)
 	@ApiOperation(value="search", notes="Searches the Experiencess based on the supplied filter.", response=QueryResults.class)
-	public QueryResults<ExperiencesValue, ExperiencesFilter> search(final ExperiencesFilter filter) throws ValidationException
+	public QueryResults<ExperiencesValue, ExperiencesFilter> search(@HeaderParam(Headers.HEADER_SESSION) final String sessionId,
+		final ExperiencesFilter filter) throws ValidationException
 	{
 		return dao.search(filter);
 	}
