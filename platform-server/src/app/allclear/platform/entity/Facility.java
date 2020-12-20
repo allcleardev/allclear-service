@@ -482,7 +482,8 @@ public class Facility implements Serializable
 		else
 		{
 			value.resultNotificationEnabled = isResultNotificationEnabled();
-			value.active = isActive();
+			if (!value.active && isActive()) setActive(value.active);	// Allow Editors to deactivate facilities per Matt & BK. DLS on 12/20/2020.
+			else value.active = isActive();
 			value.activatedAt = getActivatedAt();
 		}
 	}

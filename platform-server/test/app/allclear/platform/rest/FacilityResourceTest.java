@@ -1165,7 +1165,7 @@ public class FacilityResourceTest
 		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
 		Assertions.assertTrue(v.resultNotificationEnabled, "Check resultNotificationEnabled");
 		Assertions.assertFalse(VALUE.resultNotificationEnabled, "Check resultNotificationEnabled");	// Sent in as FALSE.
-		Assertions.assertTrue(v.active, "Check active");
+		Assertions.assertFalse(v.active, "Check active");	// Editors can now deactivate Facilities. DLS on 12/20/2020. 
 		Assertions.assertFalse(VALUE.active, "Check active");	// Sent in as FALSE.
 		assertThat(v.activatedAt).as("Check activatedAt").isNotNull().isBefore(v.updatedAt).isAfter(v.createdAt);
 
@@ -1182,16 +1182,27 @@ public class FacilityResourceTest
 		var v = getX(VALUE.id);
 		Assertions.assertEquals("byEditor", v.name, "Check name");
 		Assertions.assertTrue(v.resultNotificationEnabled, "Check resultNotificationEnabled");
-		Assertions.assertTrue(v.active, "Check active");
+		Assertions.assertFalse(v.active, "Check active");
 		assertThat(v.activatedAt).as("Check activatedAt").isNotNull().isBefore(v.updatedAt).isAfter(v.createdAt);
 	}
 
-	@Test
-	public void z_12_modify_as_person_search()
+	public static Stream<Arguments> z_12_modify_search()
 	{
-		sessionDao.current(PERSON);
+		return Stream.of(
+			arguments(ADMIN, 1L),
+			arguments(new SessionValue(CUSTOMER), 0L),
+			arguments(EDITOR, 1L),
+			arguments(PERSON, 0L),
+			arguments(PERSON_UNRESTRICTED, 0L));
+	}
 
-		search(new FacilityFilter().withName("byEditor"), 1L);
+	@ParameterizedTest
+	@MethodSource
+	public void z_12_modify_search(final SessionValue s, final long expected)
+	{
+		sessionDao.current(s);
+
+		search(new FacilityFilter().withName("byEditor"), expected);
 	}
 
 	@Test

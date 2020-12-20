@@ -1458,14 +1458,14 @@ public class FacilityDAOTest
 	}
 
 	@Test
-	public void z_12_modify_as_editor()
+	public void z_12_deactivate_as_editor()
 	{
 		var v = dao.update(VALUE.withResultNotificationEnabled(false).withActive(false).emptyTestTypes(), false);
 		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
 		Assertions.assertTrue(v.resultNotificationEnabled, "Check resultNotificationEnabled");
 		Assertions.assertTrue(VALUE.resultNotificationEnabled, "Check resultNotificationEnabled");
-		Assertions.assertTrue(v.active, "Check active");
-		Assertions.assertTrue(VALUE.active, "Check active");
+		Assertions.assertFalse(v.active, "Check active");	// Editors can now deactivate Facilities. DLS on 12/20/2020.
+		Assertions.assertFalse(VALUE.active, "Check active");
 		assertThat(v.activatedAt).as("Check activatedAt").isNotNull().isAfter(v.createdAt).isBefore(v.updatedAt).isCloseTo(new Date(), 500L);
 		assertThat(v.testTypes).as("Check testTypes").isEmpty();
 
@@ -1473,12 +1473,12 @@ public class FacilityDAOTest
 	}
 
 	@Test
-	public void z_12_modify_as_editor_check()
+	public void z_12_deactivate_as_editor_check()
 	{
 		var v = dao.getById(VALUE.id, true);
 		Assertions.assertEquals("byEditor", v.name, "Check name");
 		Assertions.assertTrue(v.resultNotificationEnabled, "Check resultNotificationEnabled");
-		Assertions.assertTrue(v.active, "Check active");
+		Assertions.assertFalse(v.active, "Check active");
 		assertThat(v.activatedAt).as("Check activatedAt").isNotNull().isAfter(v.createdAt).isBefore(v.updatedAt).isCloseTo(new Date(), 1000L);
 		Assertions.assertNull(v.testTypes, "Check testTypes");
 
@@ -1487,9 +1487,33 @@ public class FacilityDAOTest
 	}
 
 	@Test
-	public void z_12_modify_as_editor_getDistinctCounties()
+	public void z_12_deactivate_as_editor_getDistinctCounties()
 	{
-		z_11_modify_as_admin_getDistinctCounties();	// No change
+		assertThat(dao.getDistinctCounties()).containsExactly(new CountByName("11111", 1L), new CountByName("22222", 1L));
+	}
+
+	@Test
+	public void z_12_reactivate_as_editor()
+	{
+		var v = dao.update(VALUE.withActive(true), false);
+		Assertions.assertEquals(VALUE.id, v.id, "Check ID");
+		Assertions.assertFalse(v.active, "Check active");	// Editors canNOT now activate Facilities. DLS on 12/20/2020.
+		Assertions.assertFalse(VALUE.active, "Check active");
+		assertThat(v.activatedAt).as("Check activatedAt").isNotNull().isAfter(v.createdAt).isBefore(v.updatedAt).isCloseTo(new Date(), 500L);
+
+		auditorUpdates++;
+	}
+
+	@Test
+	public void z_12_reactivate_as_editor_check()
+	{
+		z_12_deactivate_as_editor_check();	// No change
+	}
+
+	@Test
+	public void z_12_reactivate_as_editor_getDistinctCounties()
+	{
+		z_12_deactivate_as_editor_getDistinctCounties();	// No change
 	}
 
 	@Test
